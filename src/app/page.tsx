@@ -926,6 +926,7 @@ export default function Home() {
                 <li><a href="#features">Features</a></li>
                 <li><a href="#pricing">Pricing</a></li>
                 <li><a href="#faq">FAQ</a></li>
+                <li><a href="/comparison-chart">Comparison Chart</a></li>
                 <li><a href="/login">Login</a></li>
               </ul>
             </div>

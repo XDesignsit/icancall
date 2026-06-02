@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ICanCall — Competitor Comparison Chart</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+      background: #ffffff;
+      color: #1a1a1a;
+      padding: 48px 32px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .page-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #888;
+      margin-bottom: 8px;
+    }
+
+    .page-title {
+      font-size: 28px;
+      font-weight: 600;
+      color: #1a1a1a;
+      margin-bottom: 6px;
+    }
+
+    .page-subtitle {
+      font-size: 15px;
+      color: #666;
+      margin-bottom: 36px;
+      line-height: 1.6;
+    }
+
+    .table-wrap {
+      width: 100%;
+      overflow-x: auto;
+      border-radius: 12px;
+      border: 1px solid #e5e7eb;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+      font-size: 13.5px;
+    }
+
+    col.col-feature { width: 28%; }
+    col.col-you     { width: 18%; }
+    col.col-comp    { width: 18%; }
+
+    /* ── HEADER ── */
+    thead tr th {
+      padding: 16px 18px;
+      text-align: center;
+      font-weight: 600;
+      font-size: 13px;
+      border-bottom: 2px solid #e5e7eb;
+      vertical-align: bottom;
+    }
+
+    thead tr th:first-child {
+      text-align: left;
+    }
+
+    .th-you {
+      background: #EBF4FF;
+      color: #1A73C8;
+      position: relative;
+    }
+
+    .th-you::after {
+      content: "★ Best Choice";
+      display: block;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      color: #1A73C8;
+      background: #1A73C8;
+      color: #fff;
+      padding: 2px 8px;
+      border-radius: 20px;
+      margin: 6px auto 0;
+      width: fit-content;
+    }
+
+    .th-comp {
+      color: #555;
+      background: #fafafa;
+    }
+
+    .brand-name {
+      font-size: 15px;
+      font-weight: 600;
+      display: block;
+      margin-bottom: 3px;
+    }
+
+    .brand-price {
+      font-size: 11px;
+      font-weight: 400;
+      display: block;
+      opacity: 0.75;
+    }
+
+    /* ── SECTION DIVIDER ROWS ── */
+    .section-row td {
+      background: #f3f4f6;
+      font-size: 10.5px;
+      font-weight: 700;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: #888;
+      padding: 8px 18px;
+      border-top: 1px solid #e5e7eb;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    /* ── DATA ROWS ── */
+    tbody tr td {
+      padding: 12px 18px;
+      border-bottom: 0.5px solid #f0f0f0;
+      vertical-align: middle;
+      color: #555;
+      line-height: 1.4;
+    }
+
+    tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    tbody tr td:first-child {
+      font-weight: 500;
+      color: #1a1a1a;
+      font-size: 13.5px;
+    }
+
+    tbody tr td:nth-child(2) {
+      background: #f0f7ff;
+      text-align: center;
+    }
+
+    tbody tr td:nth-child(3),
+    tbody tr td:nth-child(4),
+    tbody tr td:nth-child(5) {
+      text-align: center;
+    }
+
+    tbody tr:hover td {
+      background: #fafafa;
+    }
+
+    tbody tr:hover td:nth-child(2) {
+      background: #e8f2ff;
+    }
+
+    /* ── CELL CONTENT ── */
+    .yes  { color: #16a34a; font-size: 17px; font-weight: 700; }
+    .no   { color: #dc2626; font-size: 17px; font-weight: 700; }
+    .partial { color: #d97706; font-size: 12px; font-weight: 600; }
+    .note { font-size: 10.5px; color: #999; display: block; margin-top: 3px; line-height: 1.4; }
+    .price-you { color: #16a34a; font-weight: 700; font-size: 14px; }
+
+    /* ── LEGEND ── */
+    .legend {
+      display: flex;
+      gap: 24px;
+      flex-wrap: wrap;
+      font-size: 12px;
+      color: #666;
+      margin-top: 20px;
+      padding-top: 16px;
+      border-top: 1px solid #e5e7eb;
+      align-items: center;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* ── FOOTER ── */
+    .footer {
+      margin-top: 40px;
+      padding-top: 20px;
+      border-top: 1px solid #e5e7eb;
+      font-size: 11px;
+      color: #aaa;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .footer strong { color: #888; }
+
+    /* ── PRINT ── */
+    @media print {
+      body { padding: 20px; }
+      .table-wrap { border: 1px solid #ccc; }
+    }
+  </style>
+</head>
+<body>
+
+  <p class="page-label">Landing Page Asset — Who It's For Section</p>
+  <h1 class="page-title">See How We Compare</h1>
+  <p class="page-subtitle">ICanCall is the only safety phone routing service built for kids, seniors, and the special needs community — with no device required and no long-term contracts.</p>
+
+  <div class="table-wrap">
+    <table>
+      <colgroup>
+        <col class="col-feature">
+        <col class="col-you">
+        <col class="col-comp">
+        <col class="col-comp">
+        <col class="col-comp">
+      </colgroup>
+      <thead>
+        <tr>
+          <th></th>
+          <th class="th-you">
+            <span class="brand-name">ICanCall</span>
+            <span class="brand-price">from $12.99/mo</span>
+          </th>
+          <th class="th-comp">
+            <span class="brand-name">teleCalm</span>
+            <span class="brand-price">~$29–$39/mo</span>
+          </th>
+          <th class="th-comp">
+            <span class="brand-name">RAZ Memory Phone</span>
+            <span class="brand-price">$369 device + $20/mo</span>
+          </th>
+          <th class="th-comp">
+            <span class="brand-name">Senior Safety Phone</span>
+            <span class="brand-price">Free app (iPhone req.)</span>
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+
+        <!-- SECTION: ACCESSIBILITY & SETUP -->
+        <tr class="section-row"><td colspan="5">Accessibility &amp; Setup</td></tr>
+
+        <tr>
+          <td>Works on any phone — no device needed</td>
+          <td><span class="yes">✓</span></td>
+          <td><span class="no">✗</span><span class="note">Requires landline setup</span></td>
+          <td><span class="no">✗</span><span class="note">Requires $369 device</span></td>
+          <td><span class="no">✗</span><span class="note">Requires iPhone</span></td>
+        </tr>
+        <tr>
+          <td>No app required for the caller</td>
+          <td><span class="yes">✓</span></td>
+          <td><span class="yes">✓</span></td>
+          <td><span class="no">✗</span><span class="note">Proprietary device only</span></td>
+          <td><span class="no">✗</span><span class="note">iPhone app required</span></td>
+        </tr>
+        <tr>
+          <td>Setup in under 5 minutes</td>
+          <td><span class="yes">✓</span></td>
+          <td><span class="partial">~ Partial</span><span class="note">Phone line setup required</span></td>
+          <td><span class="no">✗</span><span class="note">Device + carrier setup</span></td>
+          <td><span class="partial">~ Partial</span><span class="note">App + account required</span></td>
+        </tr>
+        <tr>
+          <td>No hardware purchase required</td>
+          <td><span class="yes">✓</span></td>
+          <td><span class="yes">✓</span></td>
+          <td><span class="no">✗</span><span class="note">$369 device required</span></td>
+          <td><span class="yes">✓</span></td>
+        </tr>
+
+        <!-- SECTION: CALL ROUTING -->
+        <tr class="section-row"><td colspan="5">Call Routing &amp; Contact Management</td></tr>
+
+        <tr>
+          <td>Caller-controlled routing menu</td>
+          <td><span class="yes">✓</span></td>
+          <td><span class="no">✗</span><span class="note">Caregiver controls all routing</span></td>
+          <td><span class="no">✗</span><span class="note">Direct dial only</span></td>
+          <td><span class="no">✗</span><span class="note">Direct dial only</span></td>
+        </tr>
+        <tr>
+          <td>Up to 6 routable contacts</td>
+          <td><span class="yes">✓</span></td>
+          <td><span class="partial">~ Partial</span><span class="note">Approved contact list</span></td>
+          <td><span class="yes">✓</span><span class="note">6 photo contacts</span></td>
+          <td><span class="partial">~ Partial</span><span class="note">Up to 5 contacts</span></td>
+        </tr>
+        <tr>
+          <td>Single memorable number</td>
+          <td><span class="yes">✓</span></td>
+          <td><span class="yes">✓</span></td>
+          <td><span class="no">✗</span><span class="note">Device-based, not number-based</span></td>
+          <td><span class="no">✗</span><span class="note">Uses existing phone number</span></td>
+        </tr>
+        <tr>
+          <td>Add-on numbers available</td>
+          <td><span class="yes">✓</span><span class="note">$3.99/mo per number</span></td>
+          <td><span class="no">✗</span></td>
+          <td><span class="no">✗</span></td>
+          <td><span class="no">✗</span></td>
+        </tr>
+
+        <!-- SECTION: CAREGIVER TOOLS -->
+        <tr class="section-row"><td colspan="5">Caregiver Tools &amp; Oversight</td></tr>
+
+        <tr>
+          <td>Real-time call alerts &amp; notifications</td>
+          <td><span class="yes">✓</span></td>
+          <td><span class="yes">✓</span></td>
+          <td><span class="yes">✓</span></td>
+          <td><span class="no">✗</span></td>
+        </tr>
+        <tr>
+          <td>Full call log &amp; history</td>
+          <td><span class="yes">✓</span></td>
+          <td><span class="yes">✓</span></td>
+          <td><span class="partial">~ Partial</span></td>
+          <td><span class="no">✗</span></td>
+        </tr>
+        <tr>
+          <td>Remote contact management</td>
+          <td><span class="yes">✓</span></td>
+          <td><span class="yes">✓</span></td>
+          <td><span class="yes">✓</span></td>
+          <td><span class="yes">✓</span></td>
+        </tr>
+        <tr>
+          <td>Secure caregiver dashboard</td>
+          <td><span class="yes">✓</span></td>
+          <td><span class="yes">✓</span></td>
+          <td><span class="partial">~ Partial</span></td>
+          <td><span class="no">✗</span></td>
+        </tr>
+
+        <!-- SECTION: AUDIENCE -->
+        <tr class="section-row"><td colspan="5">Audience &amp; Inclusivity</td></tr>
+
+        <tr>
+          <td>Designed for children</td>
+          <td><span class="yes">✓</span></td>
+          <td><span class="no">✗</span><span class="note">Seniors only</span></td>
+          <td><span class="no">✗</span><span class="note">Seniors / cognitive impairment</span></td>
+          <td><span class="no">✗</span><span class="note">Seniors only</span></td>
+        </tr>
+        <tr>
+          <td>Designed for seniors</td>
+          <td><span class="yes">✓</span></td>
+          <td><span class="yes">✓</span></td>
+          <td><span class="yes">✓</span></td>
+          <td><span class="yes">✓</span></td>
+        </tr>
+        <tr>
+          <td>Designed for special needs community</td>
+          <td><span class="yes">✓</span></td>
+          <td><span class="partial">~ Partial</span></td>
+          <td><span class="partial">~ Partial</span><span class="note">Cognitive impairment focus</span></td>
+          <td><span class="no">✗</span></td>
+        </tr>
+        <tr>
+          <td>Bilingual greeting options</td>
+          <td><span class="yes">✓</span></td>
+          <td><span class="no">✗</span></td>
+          <td><span class="no">✗</span></td>
+          <td><span class="no">✗</span></td>
+        </tr>
+        <tr>
+          <td>User empowerment — caller chooses who answers</td>
+          <td><span class="yes">✓</span></td>
+          <td><span class="no">✗</span><span class="note">Caregiver-controlled restriction</span></td>
+          <td><span class="no">✗</span></td>
+          <td><span class="no">✗</span></td>
+        </tr>
+
+        <!-- SECTION: PRICING -->
+        <tr class="section-row"><td colspan="5">Pricing &amp; Commitment</td></tr>
+
+        <tr>
+          <td>No hardware cost</td>
+          <td><span class="yes">✓</span></td>
+          <td><span class="yes">✓</span></td>
+          <td><span class="no">✗</span><span class="note">$369 upfront</span></td>
+          <td><span class="yes">✓</span></td>
+        </tr>
+        <tr>
+          <td>No long-term contract</td>
+          <td><span class="yes">✓</span></td>
+          <td><span class="partial">~ Check terms</span></td>
+          <td><span class="partial">~ Check terms</span></td>
+          <td><span class="yes">✓</span></td>
+        </tr>
+        <tr>
+          <td>Monthly entry-level price</td>
+          <td><span class="price-you">$12.99/mo</span></td>
+          <td>$29–$39/mo</td>
+          <td>$20/mo + $369 device</td>
+          <td>Free (iPhone required)</td>
+        </tr>
+
+      </tbody>
+    </table>
+  </div>
+
+  <div class="legend">
+    <strong style="color:#555; font-size:12px;">Key:</strong>
+    <span class="legend-item"><span class="yes" style="font-size:14px;">✓</span> Included</span>
+    <span class="legend-item"><span class="no" style="font-size:14px;">✗</span> Not available</span>
+    <span class="legend-item"><span class="partial">~ Partial</span> Limited or conditional</span>
+  </div>
+
+  <div class="footer">
+    <span><strong>ICanCall</strong> — Competitive Comparison Chart — Landing Page Asset</span>
+    <span>icancall.com — Confidential 2026</span>
+  </div>
+
+</body>
+</html>
