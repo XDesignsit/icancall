@@ -1064,7 +1064,7 @@ export default function SuperAdminApp() {
                               onClick={() => {
                                 if (typeof window !== "undefined") {
                                   localStorage.setItem("isLoggedIn", "true");
-                                  localStorage.setItem("impersonatingUser", JSON.stringify({ email: acc.email, name: acc.owner }));
+                                  localStorage.setItem("impersonatingUser", JSON.stringify(acc));
                                   window.location.href = "/dashboard";
                                 }
                               }}

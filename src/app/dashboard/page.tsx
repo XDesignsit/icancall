@@ -1889,6 +1889,84 @@ const LINE_SCOPED = {
   account: false,
 };
 
+const SEED_CONTACT_DATA = [
+  { first: "John", rel: "Son" },
+  { first: "Sarah", rel: "Daughter" },
+  { first: "Michael", rel: "Brother" },
+  { first: "Emma", rel: "Sister" },
+  { first: "David", rel: "Caregiver" },
+  { first: "Dr. Amanda Chen", rel: "Primary Physician" },
+  { first: "Neighbor Mark", rel: "Neighbor" },
+  { first: "Elena", rel: "Niece" },
+  { first: "Thomas", rel: "Nephew" },
+];
+
+function generateDynamicLines(accountData: any): Line[] {
+  if (!accountData || !accountData.lines) return [];
+  const ownerLastName = accountData.owner.split(" ").slice(-1)[0] || "";
+  const areaCode = accountData.area || "415";
+
+  return accountData.lines.map((ln: any, idx: number) => {
+    const slug = ln.label.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+    const count = typeof ln.contacts === "number" ? ln.contacts : 3;
+
+    const contacts: Contact[] = Array.from({ length: count }).map((_, cIdx) => {
+      const seed = SEED_CONTACT_DATA[cIdx % SEED_CONTACT_DATA.length];
+      const name = seed.rel === "Son" || seed.rel === "Daughter" || seed.rel === "Brother" || seed.rel === "Sister" || seed.rel === "Niece" || seed.rel === "Nephew"
+        ? `${seed.first} ${ownerLastName}`
+        : seed.first;
+      const indexStr = String(cIdx + 10).slice(-2);
+      return {
+        id: `c-${slug}-${cIdx}`,
+        name,
+        rel: seed.rel,
+        phone: `(${areaCode}) 555-01${indexStr}`,
+        color: AVATAR_COLORS[cIdx % AVATAR_COLORS.length],
+        available: cIdx !== 2,
+      };
+    });
+
+    return {
+      id: slug,
+      label: ln.label,
+      person: ln.person,
+      number: ln.number,
+      color: AVATAR_COLORS[idx % AVATAR_COLORS.length],
+      mode: ln.mode || "cascade",
+      minutesUsed: ln.minutesUsed || 0,
+      contacts,
+    };
+  });
+}
+
+function generateDynamicLogs(linesList: Line[]): Record<string, CallLogEntry[]> {
+  const result: Record<string, CallLogEntry[]> = {};
+  const statusOptions: Array<"connected" | "missed" | "voicemail"> = ["connected", "connected", "voicemail", "missed"];
+  const callerNames = ["Grandkid Leo", "Sunrise Pharmacy", "Utility Dept", "Dr. Anita Patel", "Mom (Eleanor)"];
+
+  linesList.forEach((ln) => {
+    const contacts = ln.contacts;
+    const logs: CallLogEntry[] = Array.from({ length: 5 }).map((_, lIdx) => {
+      const status = statusOptions[lIdx % statusOptions.length];
+      const contact = contacts[lIdx % contacts.length];
+      const caller = contact ? `${contact.name} (mobile)` : callerNames[lIdx % callerNames.length];
+      const when = lIdx === 0 ? "Today · 2:48 PM" : lIdx === 1 ? "Today · 11:02 AM" : lIdx === 2 ? "Yesterday · 7:14 PM" : lIdx === 3 ? "Yesterday · 9:30 AM" : "Mon · 3:20 PM";
+      return {
+        id: lIdx + 1,
+        status,
+        caller,
+        routed: status === "connected" ? (contact ? contact.name : ln.label) : "No one available",
+        rel: status === "connected" ? (contact ? contact.rel : "Carrier") : "Voicemail left",
+        dur: status === "connected" ? `${lIdx + 2}:${(lIdx * 12).toString().padStart(2, "0")}` : "—",
+        when,
+      };
+    });
+    result[ln.id] = logs;
+  });
+
+  return result;
+}
+
 export default function DashboardApp() {
   const [lines, setLines] = useState<Line[]>([
     {
@@ -1980,7 +2058,7 @@ export default function DashboardApp() {
   ]);
 
   const [activeLineId, setActiveLineId] = useState("mom");
-  const [log] = useState<Record<string, CallLogEntry[]>>({
+  const [log, setLog] = useState<Record<string, CallLogEntry[]>>({
     mom: [
       {
         id: 1,
@@ -2124,14 +2202,24 @@ export default function DashboardApp() {
       if (imp) {
         try {
           const userObj = JSON.parse(imp);
-          setImpersonatingUser(userObj);
+          setImpersonatingUser({ name: userObj.owner, email: userObj.email });
           setAccount((prev) => ({
             ...prev,
-            name: userObj.name,
-            preferred: userObj.name.split(" ")[0],
+            name: userObj.owner,
+            preferred: userObj.owner.split(" ")[0],
             email: userObj.email,
             notifyEmail: userObj.email,
           }));
+
+          if (userObj.lines && userObj.lines.length > 0) {
+            const generatedLines = generateDynamicLines(userObj);
+            setLines(generatedLines);
+            if (generatedLines[0]) {
+              setActiveLineId(generatedLines[0].id);
+            }
+            const generatedLogs = generateDynamicLogs(generatedLines);
+            setLog(generatedLogs);
+          }
         } catch (e) {
           console.error(e);
         }
