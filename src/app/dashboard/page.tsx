@@ -2096,6 +2096,11 @@ export default function DashboardApp() {
 
   useEffect(() => {
     if (typeof window !== "undefined") {
+      if (localStorage.getItem("isLoggedIn") !== "true") {
+        window.location.href = "/login";
+        return;
+      }
+
       const params = new URLSearchParams(window.location.search);
       const viewParam = params.get("view");
       const recordingUrl = params.get("recordingUrl");
@@ -2116,6 +2121,7 @@ export default function DashboardApp() {
       }
     }
   }, []);
+
   const [acctTab, setAcctTab] = useState("profile");
   const [account, setAccount] = useState<Account>({
     name: "Maria Delgado",
@@ -2154,6 +2160,9 @@ export default function DashboardApp() {
 
   const signOut = () => {
     showToast("Signing out…");
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("isLoggedIn");
+    }
     setTimeout(() => {
       window.location.href = "/";
     }, 750);

@@ -414,7 +414,7 @@ export default function Home() {
             <a href="#faq">FAQ</a>
           </nav>
           <div className="header-cta">
-            <a className="btn btn-text" href="/dashboard" style={{ marginRight: 6 }}>Login</a>
+            <a className="btn btn-text" href="/login" style={{ marginRight: 6 }}>Login</a>
             <a className="btn btn-ghost" href="#how">See how it works</a>
             <a className="btn btn-primary" href="#pricing">Select a Plan</a>
           </div>
@@ -926,7 +926,7 @@ export default function Home() {
                 <li><a href="#features">Features</a></li>
                 <li><a href="#pricing">Pricing</a></li>
                 <li><a href="#faq">FAQ</a></li>
-                <li><a href="/dashboard">Login</a></li>
+                <li><a href="/login">Login</a></li>
               </ul>
             </div>
             <div>
