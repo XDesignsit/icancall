@@ -472,16 +472,208 @@ function Icon({ name, style }: { name: keyof typeof ICONS; style?: React.CSSProp
   );
 }
 
+const GRADIENTS = [
+  "linear-gradient(150deg, var(--violet), var(--blue))",
+  "linear-gradient(150deg, var(--blue), var(--teal-deep))",
+  "linear-gradient(150deg, var(--green), var(--teal-deep))",
+  "linear-gradient(150deg, var(--amber), var(--rose))",
+  "linear-gradient(150deg, var(--violet), var(--rose))",
+  "linear-gradient(150deg, var(--blue-deep), var(--violet))",
+];
+
+interface AdminProfile {
+  name: string;
+  role: string;
+  initials: string;
+  avatarUrl: string;
+  avatarBg: string;
+}
+
+function ProfileModal({
+  profile,
+  onClose,
+  onSave,
+}: {
+  profile: AdminProfile;
+  onClose: () => void;
+  onSave: (newProfile: AdminProfile) => void;
+}) {
+  const [name, setName] = useState(profile.name);
+  const [role, setRole] = useState(profile.role);
+  const [initials, setInitials] = useState(profile.initials);
+  const [avatarUrl, setAvatarUrl] = useState(profile.avatarUrl);
+  const [avatarBg, setAvatarBg] = useState(profile.avatarBg);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 2 * 1024 * 1024) {
+        alert("Image must be smaller than 2MB.");
+        return;
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setAvatarUrl(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  return (
+    <div className="overlay" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
+      <div className="modal" style={{ maxWidth: 440 }}>
+        <div className="modal-head">
+          <h3>Profile Settings</h3>
+          <button className="x" onClick={onClose} aria-label="Close">
+            <span style={{ fontSize: "1.2rem", lineHeight: 1 }}>×</span>
+          </button>
+        </div>
+        <div className="modal-body" style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+          {/* Avatar Preview */}
+          <div style={{ display: "flex", alignItems: "center", gap: 16, paddingBottom: 16, borderBottom: "1px solid var(--line)" }}>
+            {avatarUrl ? (
+              <img
+                src={avatarUrl}
+                alt="Avatar preview"
+                style={{ width: 64, height: 64, borderRadius: "50%", objectFit: "cover" }}
+              />
+            ) : (
+              <div
+                style={{
+                  width: 64,
+                  height: 64,
+                  borderRadius: "50%",
+                  display: "grid",
+                  placeItems: "center",
+                  color: "#fff",
+                  fontWeight: 700,
+                  fontSize: "1.4rem",
+                  background: avatarBg,
+                }}
+              >
+                {initials || "?"}
+              </div>
+            )}
+            <div>
+              <label style={{ display: "block", fontSize: "0.82rem", fontWeight: 600, color: "var(--ink-soft)", marginBottom: 6 }}>
+                Profile Photo
+              </label>
+              <div style={{ display: "flex", gap: 8 }}>
+                <label className="btn btn-soft btn-sm" style={{ cursor: "pointer", fontSize: "0.78rem" }}>
+                  Upload image
+                  <input type="file" accept="image/*" style={{ display: "none" }} onChange={handleFileChange} />
+                </label>
+                {avatarUrl && (
+                  <button className="btn btn-danger-ghost btn-sm" style={{ fontSize: "0.78rem" }} onClick={() => setAvatarUrl("")}>
+                    Remove
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <div className="field">
+            <label>Full Name</label>
+            <input type="text" value={name} onChange={(e) => {
+              setName(e.target.value);
+              const parts = e.target.value.trim().split(" ");
+              if (parts.length >= 2) {
+                setInitials((parts[0][0] + parts[1][0]).toUpperCase());
+              } else if (parts.length === 1 && parts[0]) {
+                setInitials(parts[0].slice(0, 2).toUpperCase());
+              }
+            }} placeholder="e.g. Alex Delgado" maxLength={30} />
+          </div>
+
+          <div className="field">
+            <label>Title / Role</label>
+            <input type="text" value={role} onChange={(e) => setRole(e.target.value)} placeholder="e.g. System Engineer" maxLength={35} />
+          </div>
+
+          <div className="field">
+            <label>Initials</label>
+            <input type="text" value={initials} onChange={(e) => setInitials(e.target.value.toUpperCase().slice(0, 2))} placeholder="AD" maxLength={2} style={{ textTransform: "uppercase" }} />
+          </div>
+
+          {!avatarUrl && (
+            <div className="field">
+              <label>Avatar Color Gradient</label>
+              <div className="swatch-row">
+                {GRADIENTS.map((gradient, idx) => (
+                  <span
+                    key={idx}
+                    className={`swatch ${avatarBg === gradient ? "sel" : ""}`}
+                    style={{
+                      background: gradient,
+                      width: 32,
+                      height: 32,
+                      borderRadius: 8,
+                      cursor: "pointer",
+                      border: avatarBg === gradient ? "2px solid var(--ink)" : "1px solid var(--line)"
+                    }}
+                    onClick={() => setAvatarBg(gradient)}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+        <div className="modal-foot">
+          <button className="btn btn-ghost" onClick={onClose}>
+            Cancel
+          </button>
+          <button
+            className="btn btn-primary"
+            onClick={() => {
+              if (!name.trim()) {
+                alert("Please enter a name.");
+                return;
+              }
+              onSave({
+                name: name.trim(),
+                role: role.trim() || "Super Admin",
+                initials: initials.trim() || "SA",
+                avatarUrl,
+                avatarBg,
+              });
+            }}
+          >
+            Save changes
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function SuperAdminApp() {
   const [view, setView] = useState("overview");
   const [searchQuery, setSearchQuery] = useState("");
   const [toast, setToast] = useState<string | null>(null);
+
+  const [profile, setProfile] = useState({
+    name: "Alex Delgado",
+    role: "System Engineer",
+    initials: "AD",
+    avatarUrl: "",
+    avatarBg: "linear-gradient(150deg, var(--violet), var(--blue))",
+  });
+  const [showProfileModal, setShowProfileModal] = useState(false);
 
   // Redirect unauthenticated admin sessions to login
   useEffect(() => {
     if (typeof window !== "undefined") {
       if (localStorage.getItem("isAdminLoggedIn") !== "true") {
         window.location.href = "/login";
+      } else {
+        const saved = localStorage.getItem("adminProfile");
+        if (saved) {
+          try {
+            setProfile(JSON.parse(saved));
+          } catch (e) {
+            console.error(e);
+          }
+        }
       }
     }
   }, []);
@@ -562,14 +754,59 @@ export default function SuperAdminApp() {
         </nav>
 
         <div className="sidebar-foot" style={{ marginTop: "auto", display: "flex", flexDirection: "column", gap: 10 }}>
-          <div className="admin-footchip" style={{ display: "flex", alignItems: "center", gap: 11, background: "oklch(1 0 0 / 0.07)", border: "1px solid oklch(1 0 0 / 0.1)", borderRadius: "var(--r-md)", padding: "11px 12px" }}>
-            <div className="ava" style={{ width: 38, height: 38, borderRadius: "50%", display: "grid", placeItems: "center", color: "#fff", fontWeight: 700, background: "linear-gradient(150deg, var(--violet), var(--blue))" }}>
-              AD
-            </div>
+          <div
+            className="admin-footchip clickable"
+            onClick={() => setShowProfileModal(true)}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 11,
+              background: "oklch(1 0 0 / 0.07)",
+              border: "1px solid oklch(1 0 0 / 0.1)",
+              borderRadius: "var(--r-md)",
+              padding: "11px 12px",
+              cursor: "pointer",
+              transition: "background 0.15s, border-color 0.15s"
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = "oklch(1 0 0 / 0.12)";
+              e.currentTarget.style.borderColor = "oklch(1 0 0 / 0.2)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = "oklch(1 0 0 / 0.07)";
+              e.currentTarget.style.borderColor = "oklch(1 0 0 / 0.1)";
+            }}
+          >
+            {profile.avatarUrl ? (
+              <img
+                src={profile.avatarUrl}
+                alt={profile.name}
+                style={{ width: 38, height: 38, borderRadius: "50%", objectFit: "cover", flex: "none" }}
+              />
+            ) : (
+              <div
+                className="ava"
+                style={{
+                  width: 38,
+                  height: 38,
+                  borderRadius: "50%",
+                  display: "grid",
+                  placeItems: "center",
+                  color: "#fff",
+                  fontWeight: 700,
+                  fontSize: "0.85rem",
+                  background: profile.avatarBg,
+                  flex: "none"
+                }}
+              >
+                {profile.initials}
+              </div>
+            )}
             <div className="who" style={{ flex: 1, minWidth: 0 }}>
-              <b style={{ fontSize: "0.86rem", color: "#fff", display: "block" }}>Alex Delgado</b>
-              <span style={{ fontSize: "0.74rem", color: "oklch(0.7 0.02 225)" }}>System Engineer</span>
+              <b style={{ fontSize: "0.86rem", color: "#fff", display: "block", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{profile.name}</b>
+              <span style={{ fontSize: "0.74rem", color: "oklch(0.7 0.02 225)", display: "block", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{profile.role}</span>
             </div>
+            <span style={{ color: "oklch(0.7 0.02 225)", fontSize: "0.8rem", marginLeft: "auto", display: "flex" }}>✎</span>
           </div>
           <button
             onClick={handleSignOut}
@@ -1038,6 +1275,19 @@ export default function SuperAdminApp() {
           </div>
         </div>
       </main>
+
+      {showProfileModal && (
+        <ProfileModal
+          profile={profile}
+          onClose={() => setShowProfileModal(false)}
+          onSave={(newProfile) => {
+            setProfile(newProfile);
+            localStorage.setItem("adminProfile", JSON.stringify(newProfile));
+            setShowProfileModal(false);
+            showToast("Profile settings updated!");
+          }}
+        />
+      )}
     </div>
   );
 }
