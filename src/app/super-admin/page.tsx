@@ -94,6 +94,29 @@ const FEATURES = {
   ],
 };
 
+const MAILEROO = {
+  totalSent: 2845,
+  deliverySuccess: 99.42,
+  bounceRate: 0.18,
+  spamRate: 0.04,
+  avgLatency: "1.4s",
+  smtpQueueStatus: "Optimal",
+  categories: [
+    { name: "Voicemail Alerts", count: 1565, pct: 55, color: "var(--violet)" },
+    { name: "Welcome & Billing", count: 995, pct: 35, color: "var(--blue)" },
+    { name: "System Security Alerts", count: 285, pct: 10, color: "var(--teal)" },
+  ],
+  logs: [
+    { id: "mr-9943", email: "maria.delgado@gmail.com", category: "Voicemail Alert", timestamp: "Today · 2:48 PM", msgId: "msg_vm_78a1c9df", status: "delivered" },
+    { id: "mr-9942", email: "james.d@delgadofamily.org", category: "Voicemail Alert", timestamp: "Today · 11:02 AM", msgId: "msg_vm_43f82b12", status: "delivered" },
+    { id: "mr-9941", email: "alex.d@icancall.co", category: "System Security Alert", timestamp: "Today · 9:14 AM", msgId: "msg_sec_10bc93ef", status: "delivered" },
+    { id: "mr-9940", email: "support@icancall.co", category: "Welcome & Billing", timestamp: "Yesterday · 4:32 PM", msgId: "msg_bill_88da1230", status: "delivered" },
+    { id: "mr-9939", email: "robert.hale@yahoo.com", category: "Voicemail Alert", timestamp: "Yesterday · 2:10 PM", msgId: "msg_vm_c982a174", status: "delivered" },
+    { id: "mr-9938", email: "bad-email-address-test@domain.com", category: "System Security Alert", timestamp: "May 30 · 11:45 AM", msgId: "msg_sec_d88f9c10", status: "bounced" },
+    { id: "mr-9937", email: "mom-eleanor@delgadofamily.org", category: "Welcome & Billing", timestamp: "May 29 · 3:00 PM", msgId: "msg_bill_f043e911", status: "delivered" },
+  ]
+};
+
 const HEALTH = {
   uptime: 99.98,
   connectRate: 94.2,
@@ -725,6 +748,7 @@ export default function SuperAdminApp() {
             { id: "accounts", label: "Subscriber Base", icon: "users" },
             { id: "revenue", label: "Revenue & Ledger", icon: "revenue" },
             { id: "twilio", label: "Twilio Telemetry", icon: "cloud" },
+            { id: "maileroo", label: "Maileroo Delivery", icon: "mail" },
             { id: "health", label: "System Health", icon: "health" },
           ].map((item) => (
             <button
@@ -850,6 +874,7 @@ export default function SuperAdminApp() {
               {view === "accounts" && "Subscriber Directory"}
               {view === "revenue" && "Financial Metrics"}
               {view === "twilio" && "Twilio Carrier Cost Engine"}
+              {view === "maileroo" && "Maileroo Delivery Hub"}
               {view === "health" && "Core Reliability Control"}
             </h1>
             <p style={{ fontSize: "0.85rem", color: "var(--ink-faint)" }}>
@@ -857,6 +882,7 @@ export default function SuperAdminApp() {
               {view === "accounts" && "Active family numbers configuration registers"}
               {view === "revenue" && "Subscription transactions & monthly recurring revenue movement"}
               {view === "twilio" && "Telephony metered billing and prepaid balance control"}
+              {view === "maileroo" && "SMTP queue logs, bounce analytics, and template statistics"}
               {view === "health" && "Uptime statistics, latency, and incident reports"}
             </p>
           </div>
@@ -1267,6 +1293,125 @@ export default function SuperAdminApp() {
                         ))}
                       </tbody>
                     </table>
+                  </div>
+                </div>
+              </>
+            )}
+
+            {/* VIEW: MAILEROO */}
+            {view === "maileroo" && (
+              <>
+                {/* KPI metrics row */}
+                <div className="stat-grid section-gap" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16, marginBottom: 22 }}>
+                  <div className="stat" style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-lg)", padding: "18px 20px" }}>
+                    <div className="ic" style={{ background: "var(--tint)", color: "var(--blue-deep)", width: 38, height: 38, borderRadius: 11, display: "grid", placeItems: "center", marginBottom: 14 }}>
+                      <Icon name="mail" style={{ width: 19, height: 19 }} />
+                    </div>
+                    <div className="val" style={{ fontSize: "1.9rem", fontWeight: 700 }}>{MAILEROO.totalSent}</div>
+                    <div className="lbl" style={{ fontSize: "0.82rem", color: "var(--ink-faint)", marginTop: 5 }}>Total Sent (30d)</div>
+                  </div>
+
+                  <div className="stat" style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-lg)", padding: "18px 20px" }}>
+                    <div className="ic" style={{ background: "oklch(0.95 0.05 158)", color: "oklch(0.45 0.13 158)", width: 38, height: 38, borderRadius: 11, display: "grid", placeItems: "center", marginBottom: 14 }}>
+                      <Icon name="check" style={{ width: 19, height: 19 }} />
+                    </div>
+                    <div className="val" style={{ fontSize: "1.9rem", fontWeight: 700 }}>{MAILEROO.deliverySuccess}%</div>
+                    <div className="lbl" style={{ fontSize: "0.82rem", color: "var(--ink-faint)", marginTop: 5 }}>Delivery Success</div>
+                  </div>
+
+                  <div className="stat" style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-lg)", padding: "18px 20px" }}>
+                    <div className="ic" style={{ background: "oklch(0.96 0.05 22)", color: "var(--rose)", width: 38, height: 38, borderRadius: 11, display: "grid", placeItems: "center", marginBottom: 14 }}>
+                      <Icon name="alert" style={{ width: 19, height: 19 }} />
+                    </div>
+                    <div className="val" style={{ fontSize: "1.9rem", fontWeight: 700 }}>{MAILEROO.bounceRate}%</div>
+                    <div className="lbl" style={{ fontSize: "0.82rem", color: "var(--ink-faint)", marginTop: 5 }}>Bounce Rate</div>
+                  </div>
+
+                  <div className="stat" style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-lg)", padding: "18px 20px" }}>
+                    <div className="ic" style={{ background: "oklch(0.96 0.04 285)", color: "var(--violet)", width: 38, height: 38, borderRadius: 11, display: "grid", placeItems: "center", marginBottom: 14 }}>
+                      <Icon name="health" style={{ width: 19, height: 19 }} />
+                    </div>
+                    <div className="val" style={{ fontSize: "1.9rem", fontWeight: 700 }}>{MAILEROO.avgLatency}</div>
+                    <div className="lbl" style={{ fontSize: "0.82rem", color: "var(--ink-faint)", marginTop: 5 }}>Avg. Dispatch Latency</div>
+                  </div>
+                </div>
+
+                <div style={{ display: "grid", gridTemplateColumns: "1.6fr 1fr", gap: 22 }}>
+                  {/* Left: Queue Table */}
+                  <div className="card">
+                    <div className="card-head">
+                      <div>
+                        <h2>SMTP Delivery Queue Logs</h2>
+                        <p>Real-time Maileroo API message statuses</p>
+                      </div>
+                      <span className="badge badge-green">SMTP: {MAILEROO.smtpQueueStatus}</span>
+                    </div>
+                    <div className="card-pad" style={{ padding: 0 }}>
+                      <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left", fontSize: "0.9rem" }}>
+                        <thead>
+                          <tr style={{ background: "var(--surface-2)", borderBottom: "1px solid var(--line)" }}>
+                            <th style={{ padding: "12px 16px" }}>Recipient</th>
+                            <th style={{ padding: "12px 16px" }}>Category</th>
+                            <th style={{ padding: "12px 16px" }}>Message ID</th>
+                            <th style={{ padding: "12px 16px", textAlign: "right" }}>Status</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {MAILEROO.logs.map((log) => (
+                            <tr key={log.id} style={{ borderBottom: "1px solid var(--line-soft)" }}>
+                              <td style={{ padding: "12px 16px" }}>
+                                <b style={{ display: "block", color: "var(--ink)", fontSize: "0.88rem" }}>{log.email}</b>
+                                <span style={{ fontSize: "0.76rem", color: "var(--ink-faint)" }}>{log.timestamp}</span>
+                              </td>
+                              <td style={{ padding: "12px 16px", fontSize: "0.84rem", color: "var(--ink-soft)" }}>{log.category}</td>
+                              <td style={{ padding: "12px 16px", fontFamily: "var(--mono)", fontSize: "0.78rem", color: "var(--ink-faint)" }}>{log.msgId}</td>
+                              <td style={{ padding: "12px 16px", textAlign: "right" }}>
+                                <span
+                                  className={`badge ${log.status === "delivered" ? "badge-green" : "badge-rose"}`}
+                                  style={{ textTransform: "capitalize" }}
+                                >
+                                  {log.status}
+                                </span>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+
+                  {/* Right: Templates/Categories Breakdown */}
+                  <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+                    <div className="card card-pad" style={{ display: "flex", flexDirection: "column", gap: 18 }}>
+                      <div>
+                        <h2 style={{ fontSize: "1.08rem", fontWeight: 700 }}>Dispatch Distribution</h2>
+                        <p style={{ fontSize: "0.84rem", color: "var(--ink-faint)", marginTop: 2 }}>Outbound volume segmented by transactional template</p>
+                      </div>
+
+                      <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+                        {MAILEROO.categories.map((cat) => (
+                          <div key={cat.name} style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: "0.86rem" }}>
+                              <b style={{ color: "var(--ink-soft)" }}>{cat.name}</b>
+                              <span style={{ fontWeight: 600 }}>{cat.count} ({cat.pct}%)</span>
+                            </div>
+                            <div style={{ height: 8, background: "var(--tint)", borderRadius: 99, overflow: "hidden" }}>
+                              <div style={{ width: `${cat.pct}%`, height: "100%", background: cat.color, borderRadius: 99 }} />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="card card-pad" style={{ display: "flex", gap: 14, alignItems: "center", background: "var(--surface-2)" }}>
+                      <div style={{ width: 44, height: 44, borderRadius: 12, background: "var(--tint)", color: "var(--blue-deep)", display: "grid", placeItems: "center", flex: "none" }}>
+                        <Icon name="shield" style={{ width: 22, height: 22 }} />
+                      </div>
+                      <div>
+                        <b style={{ display: "block", fontSize: "0.92rem" }}>SPF & DKIM Verified</b>
+                        <span style={{ fontSize: "0.8rem", color: "var(--ink-faint)" }}>Maileroo DNS alignment check: 100% compliant</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </>
