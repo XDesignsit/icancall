@@ -452,7 +452,7 @@ h3 { font-size: clamp(1.25rem, 2vw, 1.6rem); }
 
 /* Footer */
 .footer { padding-block: 60px 40px; border-top: 1px solid var(--line); background: var(--surface); }
-.footer-grid { display: grid; grid-template-columns: 1.4fr repeat(3, 1fr); gap: 40px; }
+.footer-grid { display: grid; grid-template-columns: 1.4fr repeat(4, 1fr); gap: 40px; }
 .footer .brand { margin-bottom: 16px; }
 .footer .blurb { color: var(--ink-soft); font-size: 0.92rem; max-width: 30ch; }
 .footer h5 { font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--ink-faint); margin-bottom: 16px; font-weight: 700; }

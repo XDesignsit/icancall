@@ -930,6 +930,14 @@ export default function Home() {
               </ul>
             </div>
             <div>
+              <h5>Who</h5>
+              <ul>
+                <li><a href="/parents">Parents</a></li>
+                <li><a href="/caregivers">Caregivers</a></li>
+                <li><a href="/seniors">Seniors</a></li>
+              </ul>
+            </div>
+            <div>
               <h5>Company</h5>
               <ul>
                 <li><a href="#">About</a></li>
