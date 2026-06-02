@@ -48,7 +48,7 @@ interface Line {
   person: string;
   number: string;
   color: string;
-  mode: "menu" | "cascade";
+  mode: "menu" | "cascade" | "schedule";
   minutesUsed: number;
   contacts: Contact[];
   schedule?: CoverageSlot[];
