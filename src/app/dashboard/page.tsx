@@ -1903,7 +1903,8 @@ const SEED_CONTACT_DATA = [
 
 function generateDynamicLines(accountData: any): Line[] {
   if (!accountData || !accountData.lines) return [];
-  const ownerLastName = accountData.owner.split(" ").slice(-1)[0] || "";
+  const ownerName = accountData.owner || accountData.name || "";
+  const ownerLastName = ownerName ? (ownerName.split(" ").slice(-1)[0] || "") : "";
   const areaCode = accountData.area || "415";
 
   return accountData.lines.map((ln: any, idx: number) => {
@@ -2202,13 +2203,15 @@ export default function DashboardApp() {
       if (imp) {
         try {
           const userObj = JSON.parse(imp);
-          setImpersonatingUser({ name: userObj.owner, email: userObj.email });
+          const ownerName = userObj.owner || userObj.name || "Test User";
+          const ownerEmail = userObj.email || "";
+          setImpersonatingUser({ name: ownerName, email: ownerEmail });
           setAccount((prev) => ({
             ...prev,
-            name: userObj.owner,
-            preferred: userObj.owner.split(" ")[0],
-            email: userObj.email,
-            notifyEmail: userObj.email,
+            name: ownerName,
+            preferred: ownerName.split(" ")[0] || ownerName,
+            email: ownerEmail,
+            notifyEmail: ownerEmail,
           }));
 
           if (userObj.lines && userObj.lines.length > 0) {
