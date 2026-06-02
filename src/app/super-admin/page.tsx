@@ -477,6 +477,7 @@ const ICONS = {
   up: <path d="m6 14 6-6 6 6" />,
   down: <path d="m6 10 6 6 6-6" />,
   checkCircle: <><circle cx="12" cy="12" r="9" /><path d="m9 12 2 2 4-4" /></>,
+  mail: <><rect x="3" y="5" width="18" height="14" rx="2" /><path d="m3.5 7 8.5 6 8.5-6" /></>,
 };
 
 function Icon({ name, style }: { name: keyof typeof ICONS; style?: React.CSSProperties }) {
