@@ -589,7 +589,9 @@ function ContactsView({
         <div>
           <p className="hint">
             These are the people <b>{line.person.split(" · ")[0]}</b> can reach on {line.number}.
-            {line.mode === "menu"
+            {line.mode === "schedule"
+              ? " Calls are routed to the caregiver active on the time-of-day schedule."
+              : line.mode === "menu"
               ? " Callers pick from a menu in the order below."
               : " iCanCall rings them top to bottom until someone answers."}
           </p>
@@ -690,11 +692,13 @@ function TestCall({ line }: { line: Line }) {
     setRunning(false);
     setScreen({
       cls: "",
-      av: line.mode === "menu" ? "☰" : "—",
+      av: line.mode === "schedule" ? "🕒" : line.mode === "menu" ? "☰" : "—",
       avColor: null,
-      name: line.mode === "menu" ? "Caller menu" : "Ready to test",
+      name: line.mode === "schedule" ? "Time schedule" : line.mode === "menu" ? "Caller menu" : "Ready to test",
       state:
-        line.mode === "menu"
+        line.mode === "schedule"
+          ? "Run a test call to simulate active hour routing"
+          : line.mode === "menu"
           ? "Run a test call to hear the options"
           : "Run a test call to preview routing",
       ring: false,
@@ -814,11 +818,108 @@ function TestCall({ line }: { line: Line }) {
     }
   }
 
+  async function runSchedule() {
+    setDots(0);
+    setActiveDots({});
+    setScreen({ cls: "", av: "•", avColor: null, name: "Connecting…", state: "Checking the schedule", ring: false });
+    await sleep(900);
+    if (cancelled.current) return;
+
+    const now = new Date();
+    const currentHour = now.getHours() + now.getMinutes() / 60;
+    
+    const schedule = line.schedule || [
+      {
+        id: "slot1",
+        name: "Nurse Dawn",
+        description: "Overnight support",
+        startHour: 0,
+        endHour: 7,
+        color: "oklch(0.44 0.105 240)",
+      },
+      {
+        id: "slot2",
+        name: line.contacts[0]?.name || "Caregiver",
+        description: "Daytime coverage",
+        startHour: 7,
+        endHour: 15,
+        color: line.contacts[0]?.color || "oklch(0.62 0.10 198)",
+      },
+      {
+        id: "slot3",
+        name: line.contacts[1]?.name || "Primary Caregiver",
+        description: "Afternoon primary",
+        startHour: 15,
+        endHour: 21,
+        color: line.contacts[1]?.color || "oklch(0.58 0.115 232)",
+      },
+      {
+        id: "slot4",
+        name: line.contacts[2]?.name || "Evening contact",
+        description: "Evening shift",
+        startHour: 21,
+        endHour: 24,
+        color: line.contacts[2]?.color || "oklch(0.55 0.11 280)",
+      },
+    ];
+    
+    const activeSlot = schedule.find(s => currentHour >= s.startHour && currentHour < s.endHour);
+    
+    if (!activeSlot) {
+      setScreen({
+        cls: "voicemail",
+        av: "✉",
+        avColor: null,
+        name: "No Coverage",
+        state: "No caregiver on shift — sent to voicemail",
+        ring: false,
+      });
+      return;
+    }
+
+    const contact = line.contacts.find(c => c.name === activeSlot.name);
+    
+    setScreen({
+      cls: "ring-state",
+      av: initials(activeSlot.name),
+      avColor: activeSlot.color,
+      name: activeSlot.name,
+      state: `Ringing active caregiver (${activeSlot.description})…`,
+      ring: true,
+    });
+    
+    await sleep(1800);
+    if (cancelled.current) return;
+
+    const available = contact ? contact.available : true;
+
+    if (available) {
+      setScreen({
+        cls: "connected",
+        av: initials(activeSlot.name),
+        avColor: activeSlot.color,
+        name: activeSlot.name,
+        state: "✓ Connected — shift active",
+        ring: false,
+      });
+    } else {
+      setScreen({
+        cls: "voicemail",
+        av: "✉",
+        avColor: null,
+        name: `${activeSlot.name} is busy`,
+        state: "Sent to voicemail — alerted",
+        ring: false,
+      });
+    }
+  }
+
   async function run() {
     if (running || !contacts.length) return;
     cancelled.current = false;
     setRunning(true);
     if (line.mode === "menu") await runMenu();
+    else if (line.mode === "schedule") await runSchedule();
     else await runCascade();
     if (!cancelled.current) {
       await sleep(2200);
@@ -888,7 +989,11 @@ function TestCall({ line }: { line: Line }) {
               marginBottom: 6,
             }}
           >
-            {line.mode === "menu" ? "MENU ORDER" : "CASCADE ORDER"}
+            {line.mode === "schedule"
+              ? "SCHEDULED CONTACTS"
+              : line.mode === "menu"
+              ? "MENU ORDER"
+              : "CASCADE ORDER"}
           </div>
           {contacts.map((c, i) => (
             <div className="preview-row" key={c.id}>
@@ -1102,10 +1207,16 @@ function RoutingView({
     { value: "oklch(0.58 0.12 145)", name: "Green" },
   ];
 
-  const setMode = (mode: "cascade" | "menu") => {
+  const setMode = (mode: "cascade" | "menu" | "schedule") => {
     if (mode === line.mode) return;
     setLine((prev) => prev.map((l) => (l.id === line.id ? { ...l, mode } : l)));
-    showToast(mode === "menu" ? "Switched to Caller Menu" : "Switched to Call Cascade");
+    showToast(
+      mode === "schedule"
+        ? "Switched to Time-of-Day Routing"
+        : mode === "menu"
+        ? "Switched to Caller Menu"
+        : "Switched to Call Cascade"
+    );
   };
 
   return (
@@ -1120,7 +1231,7 @@ function RoutingView({
           </div>
         </div>
         <div className="card-pad">
-          <div className="mode-cards" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+          <div className="mode-cards" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 16 }}>
             <div
               className={`mode-card ${line.mode === "cascade" ? "sel" : ""}`}
               style={{
@@ -1159,26 +1270,45 @@ function RoutingView({
                 the right person depends on the situation.
               </p>
             </div>
+            <div
+              className={`mode-card ${line.mode === "schedule" ? "sel" : ""}`}
+              style={{
+                cursor: "pointer",
+                padding: 20,
+                border: line.mode === "schedule" ? "2.5px solid var(--accent)" : "1px solid var(--line)",
+                borderRadius: "var(--r-md)",
+              }}
+              onClick={() => setMode("schedule")}
+            >
+              <div className="ic" style={{ marginBottom: 12 }}>
+                <Icon name="clock" style={{ width: 24, height: 24 }} />
+              </div>
+              <h4>Time-of-day routing</h4>
+              <p style={{ fontSize: "0.86rem", color: "var(--ink-soft)", marginTop: 6 }}>
+                Route calls dynamically depending on the hour of the day (e.g. caregivers on shift, overnight nurse, or daytime care clinic).
+              </p>
+            </div>
           </div>
         </div>
       </div>
 
       {/* Around-the-clock coverage timeline */}
-      <div className="card section-gap">
-        <div className="card-head">
-          <div>
-            <h2>Around-the-clock coverage</h2>
-            <p>
-              Route incoming calls dynamically based on the time of day. Assign slots to your contacts to ensure 24/7 coverage.
-            </p>
+      {line.mode === "schedule" && (
+        <div className="card section-gap">
+          <div className="card-head">
+            <div>
+              <h2>Around-the-clock coverage</h2>
+              <p>
+                Route incoming calls dynamically based on the time of day. Assign slots to your contacts to ensure 24/7 coverage.
+              </p>
+            </div>
+            {activeSlot && (
+              <Badge kind="green">
+                Active: {activeSlot.name}
+              </Badge>
+            )}
           </div>
-          {activeSlot && (
-            <Badge kind="green">
-              Active: {activeSlot.name}
-            </Badge>
-          )}
-        </div>
-        <div className="card-pad">
+          <div className="card-pad">
           {/* Timeline visualization */}
           <div style={{ background: "var(--tint)", padding: 20, borderRadius: "var(--r-md)", border: "1px solid var(--line)", position: "relative" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
@@ -1600,6 +1730,7 @@ function RoutingView({
           )}
         </div>
       </div>
+      )}
 
       <div className="card">
         <div className="card-head">
@@ -1610,7 +1741,13 @@ function RoutingView({
               experience.
             </p>
           </div>
-          <Badge kind="blue">{line.mode === "menu" ? "Caller menu" : "Call cascade"}</Badge>
+          <Badge kind="blue">
+            {line.mode === "schedule"
+              ? "Time-of-day routing"
+              : line.mode === "menu"
+              ? "Caller menu"
+              : "Call cascade"}
+          </Badge>
         </div>
         <div className="card-pad">
           <TestCall line={line} />
