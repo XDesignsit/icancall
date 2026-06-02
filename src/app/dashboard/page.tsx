@@ -2087,6 +2087,35 @@ export default function DashboardApp() {
   });
 
   const [view, setView] = useState("overview");
+  const [activeVoicemail, setActiveVoicemail] = useState<{
+    recordingUrl: string;
+    transcription: string;
+    caller: string;
+    duration: string;
+  } | null>(null);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const viewParam = params.get("view");
+      const recordingUrl = params.get("recordingUrl");
+      const transcription = params.get("transcription");
+      const caller = params.get("caller");
+      const duration = params.get("duration");
+
+      if (viewParam) {
+        setView(viewParam);
+      }
+      if (recordingUrl) {
+        setActiveVoicemail({
+          recordingUrl,
+          transcription: transcription || "No transcript available.",
+          caller: caller || "Unknown Caller",
+          duration: duration || "0:30",
+        });
+      }
+    }
+  }, []);
   const [acctTab, setAcctTab] = useState("profile");
   const [account, setAccount] = useState<Account>({
     name: "Maria Delgado",
@@ -2278,6 +2307,29 @@ export default function DashboardApp() {
         </div>
 
         <div className="content">
+          {activeVoicemail && (
+            <div className="card" style={{ border: '2px solid oklch(0.60 0.13 220)', background: 'oklch(0.96 0.03 220 / 0.3)', marginBottom: 24 }}>
+              <div className="card-pad" style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div>
+                    <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'oklch(0.45 0.16 220)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Voicemail Player</span>
+                    <h2 style={{ fontSize: '1.2rem', margin: '4px 0 0 0', color: 'var(--ink)' }}>From: {activeVoicemail.caller} &bull; Duration: {activeVoicemail.duration}</h2>
+                  </div>
+                  <button className="btn btn-ghost btn-sm" onClick={() => setActiveVoicemail(null)}>Close Player</button>
+                </div>
+                
+                <div style={{ background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 'var(--r-md)', padding: '12px 16px' }}>
+                  <p style={{ fontStyle: 'italic', margin: 0, color: 'var(--ink)', fontSize: '0.92rem', lineHeight: 1.5 }}>"{activeVoicemail.transcription}"</p>
+                </div>
+
+                <div>
+                  <audio controls src={activeVoicemail.recordingUrl} style={{ width: '100%', height: 40 }} autoPlay>
+                    Your browser does not support the audio element.
+                  </audio>
+                </div>
+              </div>
+            </div>
+          )}
           {view === "overview" && (
             <OverviewView
               lines={lines}

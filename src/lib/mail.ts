@@ -117,7 +117,10 @@ export async function sendVoicemailAlertEmail(
   transcription?: string
 ) {
   const subject = `New voicemail from ${callerName} (${duration})`;
-  const text = `You received a new voicemail from ${callerName}!\n\nDuration: ${duration}\nRecording: ${recordingLink}\n\nTranscript:\n"${transcription || 'No transcription available.'}"`;
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+  const dashboardLink = `${appUrl}/dashboard?view=log&recordingUrl=${encodeURIComponent(recordingLink)}&transcription=${encodeURIComponent(transcription || '')}&caller=${encodeURIComponent(callerName)}&duration=${encodeURIComponent(duration)}`;
+
+  const text = `You received a new voicemail from ${callerName}!\n\nDuration: ${duration}\nListen in Dashboard: ${dashboardLink}\n\nTranscript:\n"${transcription || 'No transcription available.'}"`;
 
   const html = `
     <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 580px; margin: 0 auto; padding: 32px 24px; background: #ffffff; border: 1px solid #f1f5f9; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
@@ -143,7 +146,7 @@ export async function sendVoicemailAlertEmail(
       </div>
 
       <div style="display: flex; gap: 12px; margin-bottom: 24px;">
-        <a href="${recordingLink}" style="flex: 1; text-align: center; padding: 12px; background-color: #2563eb; color: #ffffff; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 0.95rem; display: block; box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);">Listen to Recording</a>
+        <a href="${dashboardLink}" style="flex: 1; text-align: center; padding: 12px; background-color: #2563eb; color: #ffffff; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 0.95rem; display: block; box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);">Listen in Dashboard</a>
       </div>
 
       <hr style="border: 0; border-top: 1px solid #f1f5f9; margin: 32px 0 20px 0;" />
@@ -153,6 +156,7 @@ export async function sendVoicemailAlertEmail(
 
   return sendEmail({ to, subject, text, html });
 }
+
 
 /**
  * Sends a high-fidelity Welcome & Signup Confirmation email with billing details
