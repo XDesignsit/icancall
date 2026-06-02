@@ -705,7 +705,9 @@ export default function SuperAdminApp() {
   const handleSignOut = () => {
     if (typeof window !== "undefined") {
       localStorage.removeItem("isAdminLoggedIn");
-      window.location.href = "/login";
+      localStorage.removeItem("isLoggedIn");
+      localStorage.removeItem("impersonatingUser");
+      window.location.href = "/";
     }
   };
 

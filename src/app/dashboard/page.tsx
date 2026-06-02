@@ -3048,6 +3048,8 @@ export default function DashboardApp() {
     showToast("Signing out…");
     if (typeof window !== "undefined") {
       localStorage.removeItem("isLoggedIn");
+      localStorage.removeItem("isAdminLoggedIn");
+      localStorage.removeItem("impersonatingUser");
     }
     setTimeout(() => {
       window.location.href = "/";
