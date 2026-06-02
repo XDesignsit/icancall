@@ -1011,12 +1011,17 @@ function TestCall({ line }: { line: Line }) {
           ))}
         </div>
         <button
-          className="btn btn-primary btn-sm"
-          style={{ width: "100%" }}
+          className="btn btn-primary"
+          style={{
+            width: "100%",
+            padding: "10px 16px",
+            fontSize: "0.88rem",
+            borderRadius: "var(--r-md)",
+          }}
           onClick={run}
           disabled={running || !contacts.length}
         >
-          <Icon name="phone" /> {running ? "Calling…" : "Run a test call"}
+          <Icon name="phone" style={{ width: 16, height: 16 }} /> {running ? "Calling…" : "Run a test call"}
         </button>
       </div>
     </div>
