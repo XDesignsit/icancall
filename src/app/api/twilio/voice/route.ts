@@ -2,8 +2,22 @@ import { NextResponse } from 'next/server';
 
 export async function POST(request: Request) {
   try {
-    const formData = await request.formData();
-    const digits = formData.get('Digits') || new URL(request.url).searchParams.get('Digits');
+    let digits = null;
+    if (request.method === 'POST') {
+      try {
+        const contentType = request.headers.get('content-type') || '';
+        if (contentType.includes('form-data') || contentType.includes('x-www-form-urlencoded')) {
+          const formData = await request.formData();
+          digits = formData.get('Digits');
+        }
+      } catch (err) {
+        console.warn('Could not parse form data:', err);
+      }
+    }
+
+    if (!digits) {
+      digits = new URL(request.url).searchParams.get('Digits');
+    }
 
     let twiml = '<?xml version="1.0" encoding="UTF-8"?>\n<Response>';
 
