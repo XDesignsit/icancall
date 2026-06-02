@@ -302,7 +302,7 @@ function Shell({ layout, stepIndex, hideChrome, children }: { layout: string; st
       <div className="content">
         <div className="content-top">
           <BrandMark />
-          <div className="signin">Already have an account? <Link href="/onboarding">Sign in</Link></div>
+          <div className="signin">Already have an account? <Link href="/dashboard">Sign in</Link></div>
         </div>
         {!hideChrome && <HSteps stepIndex={stepIndex} />}
         <div className="content-body">{children}</div>
