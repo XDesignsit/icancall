@@ -1011,7 +1011,7 @@ function TestCall({ line }: { line: Line }) {
           ))}
         </div>
         <button
-          className="btn btn-primary"
+          className="btn btn-primary btn-sm"
           style={{ width: "100%" }}
           onClick={run}
           disabled={running || !contacts.length}
