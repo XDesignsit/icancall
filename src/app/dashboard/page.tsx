@@ -2094,11 +2094,47 @@ export default function DashboardApp() {
     duration: string;
   } | null>(null);
 
+  const [impersonatingUser, setImpersonatingUser] = useState<{ email: string; name: string } | null>(null);
+  const [acctTab, setAcctTab] = useState("profile");
+  const [account, setAccount] = useState<Account>({
+    name: "Maria Delgado",
+    preferred: "Maria",
+    role: "Primary caregiver",
+    email: "maria.delgado@email.com",
+    notifyEmail: "maria.delgado@email.com",
+    phone: "(415) 555-0192",
+    address: "482 Linden Ave, Oakland, CA 94607",
+    timezone: "Pacific (PT)",
+    language: "English",
+    twoFactor: true,
+    card: { brand: "Visa", last4: "4242", exp: "08 / 27" },
+    billingAddr: "482 Linden Ave, Oakland, CA 94607",
+    addons: { extraNumbers: 1, minuteBlocks: 2, usedMin: 41, rolloverMin: 18 },
+  });
+
   useEffect(() => {
     if (typeof window !== "undefined") {
       if (localStorage.getItem("isLoggedIn") !== "true") {
         window.location.href = "/login";
         return;
+      }
+
+      // Check if session is impersonated
+      const imp = localStorage.getItem("impersonatingUser");
+      if (imp) {
+        try {
+          const userObj = JSON.parse(imp);
+          setImpersonatingUser(userObj);
+          setAccount((prev) => ({
+            ...prev,
+            name: userObj.name,
+            preferred: userObj.name.split(" ")[0],
+            email: userObj.email,
+            notifyEmail: userObj.email,
+          }));
+        } catch (e) {
+          console.error(e);
+        }
       }
 
       const params = new URLSearchParams(window.location.search);
@@ -2122,22 +2158,17 @@ export default function DashboardApp() {
     }
   }, []);
 
-  const [acctTab, setAcctTab] = useState("profile");
-  const [account, setAccount] = useState<Account>({
-    name: "Maria Delgado",
-    preferred: "Maria",
-    role: "Primary caregiver",
-    email: "maria.delgado@email.com",
-    notifyEmail: "maria.delgado@email.com",
-    phone: "(415) 555-0192",
-    address: "482 Linden Ave, Oakland, CA 94607",
-    timezone: "Pacific (PT)",
-    language: "English",
-    twoFactor: true,
-    card: { brand: "Visa", last4: "4242", exp: "08 / 27" },
-    billingAddr: "482 Linden Ave, Oakland, CA 94607",
-    addons: { extraNumbers: 1, minuteBlocks: 2, usedMin: 41, rolloverMin: 18 },
-  });
+  const handleStopImpersonating = () => {
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("impersonatingUser");
+      if (localStorage.getItem("isAdminLoggedIn") === "true") {
+        window.location.href = "/super-admin";
+      } else {
+        localStorage.removeItem("isLoggedIn");
+        window.location.href = "/login";
+      }
+    }
+  };
 
   const [toast, setToast] = useState<string | null>(null);
   const [switchOpen, setSwitchOpen] = useState(false);
@@ -2171,7 +2202,32 @@ export default function DashboardApp() {
   const [t1, t2] = TITLES[view as keyof typeof TITLES] || ["Dashboard", "iCanCall Routing Panel"];
 
   return (
-    <div className="dash">
+    <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
+      {impersonatingUser && (
+        <div style={{ background: "oklch(0.35 0.08 28)", color: "#fff", padding: "10px 24px", display: "flex", alignItems: "center", justifyContent: "space-between", fontSize: "0.88rem", zIndex: 1000, boxShadow: "0 2px 8px rgba(0,0,0,0.15)", flex: "none" }}>
+          <div>
+            ⚠️ Impersonation Mode: Active session for <strong>{impersonatingUser.name}</strong> ({impersonatingUser.email})
+          </div>
+          <button 
+            onClick={handleStopImpersonating}
+            className="btn btn-sm"
+            style={{ 
+              background: "oklch(0.58 0.115 232)", 
+              color: "#fff",
+              fontSize: "0.78rem", 
+              padding: "5px 12px", 
+              boxShadow: "none",
+              border: "none",
+              cursor: "pointer",
+              borderRadius: "6px",
+              fontWeight: 600
+            }}
+          >
+            Exit Impersonation
+          </button>
+        </div>
+      )}
+      <div className="dash" style={{ flex: 1 }}>
       <aside className={`sidebar ${sideOpen ? "open" : ""}`}>
         <div className="brand">
           <span className="mark">
@@ -2371,6 +2427,7 @@ export default function DashboardApp() {
       </div>
 
       <Toast msg={toast} />
+      </div>
     </div>
   );
 }

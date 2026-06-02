@@ -1020,6 +1020,7 @@ export default function SuperAdminApp() {
                         <th style={{ padding: "14px 20px" }}>MRR Value</th>
                         <th style={{ padding: "14px 20px" }}>Join Date</th>
                         <th style={{ padding: "14px 20px" }}>Status</th>
+                        <th style={{ padding: "14px 20px", textAlign: "right" }}>Actions</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -1057,6 +1058,21 @@ export default function SuperAdminApp() {
                             >
                               {acc.status}
                             </span>
+                          </td>
+                          <td style={{ padding: "14px 20px", textAlign: "right" }}>
+                            <button
+                              onClick={() => {
+                                if (typeof window !== "undefined") {
+                                  localStorage.setItem("isLoggedIn", "true");
+                                  localStorage.setItem("impersonatingUser", JSON.stringify({ email: acc.email, name: acc.owner }));
+                                  window.location.href = "/dashboard";
+                                }
+                              }}
+                              className="btn btn-soft btn-sm"
+                              style={{ padding: "6px 12px", fontSize: "0.8rem", fontWeight: 600 }}
+                            >
+                              Impersonate
+                            </button>
                           </td>
                         </tr>
                       ))}
