@@ -33,6 +33,15 @@ interface Contact {
   available: boolean;
 }
 
+interface CoverageSlot {
+  id: string;
+  name: string;
+  description: string;
+  startHour: number;
+  endHour: number;
+  color: string;
+}
+
 interface Line {
   id: string;
   label: string;
@@ -42,6 +51,7 @@ interface Line {
   mode: "menu" | "cascade";
   minutesUsed: number;
   contacts: Contact[];
+  schedule?: CoverageSlot[];
   settings?: {
     greeting?: string;
     bilingual?: boolean;
@@ -918,6 +928,180 @@ function RoutingView({
   setLine: React.Dispatch<React.SetStateAction<Line[]>>;
   showToast: (msg: string) => void;
 }) {
+  const [localSchedule, setLocalSchedule] = useState<CoverageSlot[]>([]);
+  const [currentTime, setCurrentTime] = useState(new Date());
+
+  // Slot editor state
+  const [editingSlotId, setEditingSlotId] = useState<string | null>(null);
+  const [slotName, setSlotName] = useState("");
+  const [customName, setCustomName] = useState("");
+  const [slotDesc, setSlotDesc] = useState("");
+  const [slotStart, setSlotStart] = useState(0);
+  const [slotEnd, setSlotEnd] = useState(4);
+  const [slotColor, setSlotColor] = useState("oklch(0.58 0.115 232)");
+
+  // Add slot state
+  const [showAddForm, setShowAddForm] = useState(false);
+
+  useEffect(() => {
+    setLocalSchedule(line.schedule || [
+      {
+        id: "slot1",
+        name: "Nurse Dawn",
+        description: "Overnight support",
+        startHour: 0,
+        endHour: 7,
+        color: "oklch(0.44 0.105 240)",
+      },
+      {
+        id: "slot2",
+        name: line.contacts[0]?.name || "Caregiver",
+        description: "Daytime coverage",
+        startHour: 7,
+        endHour: 15,
+        color: line.contacts[0]?.color || "oklch(0.62 0.10 198)",
+      },
+      {
+        id: "slot3",
+        name: line.contacts[1]?.name || "Primary Caregiver",
+        description: "Afternoon primary",
+        startHour: 15,
+        endHour: 21,
+        color: line.contacts[1]?.color || "oklch(0.58 0.115 232)",
+      },
+      {
+        id: "slot4",
+        name: line.contacts[2]?.name || "Evening contact",
+        description: "Evening shift",
+        startHour: 21,
+        endHour: 24,
+        color: line.contacts[2]?.color || "oklch(0.55 0.11 280)",
+      },
+    ]);
+  }, [line.id, line.contacts]);
+
+  useEffect(() => {
+    const timer = setInterval(() => setCurrentTime(new Date()), 60000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const currentHour = currentTime.getHours() + currentTime.getMinutes() / 60;
+  const activeSlot = localSchedule.find(
+    (slot) => currentHour >= slot.startHour && currentHour < slot.endHour
+  );
+
+  const saveSchedule = (newSchedule: CoverageSlot[]) => {
+    setLocalSchedule(newSchedule);
+    setLine((prev) =>
+      prev.map((l) => (l.id === line.id ? { ...l, schedule: newSchedule } : l))
+    );
+    showToast("Coverage schedule updated successfully");
+  };
+
+  const startEditing = (slot: CoverageSlot) => {
+    setEditingSlotId(slot.id);
+    const isPreset = line.contacts.some((c) => c.name === slot.name) || slot.name === "Nurse Dawn";
+    if (isPreset) {
+      setSlotName(slot.name);
+      setCustomName("");
+    } else {
+      setSlotName("Custom");
+      setCustomName(slot.name);
+    }
+    setSlotDesc(slot.description);
+    setSlotStart(slot.startHour);
+    setSlotEnd(slot.endHour);
+    setSlotColor(slot.color);
+  };
+
+  const cancelEditing = () => {
+    setEditingSlotId(null);
+  };
+
+  const saveSlot = (slotId: string) => {
+    const finalName = slotName === "Custom" ? (customName || "Custom Slot") : slotName;
+    const newSchedule = localSchedule.map((s) =>
+      s.id === slotId
+        ? {
+            ...s,
+            name: finalName,
+            description: slotDesc,
+            startHour: slotStart,
+            endHour: slotEnd,
+            color: slotColor,
+          }
+        : s
+    );
+    saveSchedule(newSchedule);
+    setEditingSlotId(null);
+  };
+
+  const deleteSlot = (slotId: string) => {
+    const newSchedule = localSchedule.filter((s) => s.id !== slotId);
+    saveSchedule(newSchedule);
+  };
+
+  const addNewSlot = () => {
+    const finalName = slotName === "Custom" ? (customName || "New Slot") : slotName;
+    const newSlot: CoverageSlot = {
+      id: `slot-new-${Date.now()}`,
+      name: finalName,
+      description: slotDesc || "Coverage slot",
+      startHour: slotStart,
+      endHour: slotEnd,
+      color: slotColor,
+    };
+    const newSchedule = [...localSchedule, newSlot];
+    saveSchedule(newSchedule);
+    setShowAddForm(false);
+  };
+
+  const sortedSlots = [...localSchedule].sort((a, b) => a.startHour - b.startHour);
+  const totalHours = localSchedule.reduce((sum, slot) => sum + (slot.endHour - slot.startHour), 0);
+
+  let hasOverlap = false;
+  let hasGap = false;
+  let gapsList: { start: number; end: number }[] = [];
+
+  if (localSchedule.length === 0) {
+    hasGap = true;
+    gapsList.push({ start: 0, end: 24 });
+  } else {
+    if (sortedSlots[0].startHour > 0) {
+      hasGap = true;
+      gapsList.push({ start: 0, end: sortedSlots[0].startHour });
+    }
+    for (let i = 0; i < sortedSlots.length - 1; i++) {
+      const current = sortedSlots[i];
+      const next = sortedSlots[i + 1];
+      if (current.endHour < next.startHour) {
+        hasGap = true;
+        gapsList.push({ start: current.endHour, end: next.startHour });
+      } else if (current.endHour > next.startHour) {
+        hasOverlap = true;
+      }
+    }
+    if (sortedSlots[sortedSlots.length - 1].endHour < 24) {
+      hasGap = true;
+      gapsList.push({ start: sortedSlots[sortedSlots.length - 1].endHour, end: 24 });
+    }
+  }
+
+  const formatHour = (h: number) => {
+    if (h === 0 || h === 24) return "12 AM";
+    if (h === 12) return "12 PM";
+    return h > 12 ? `${h - 12} PM` : `${h} AM`;
+  };
+
+  const PRESET_COLORS = [
+    { value: "oklch(0.58 0.115 232)", name: "Amber" },
+    { value: "oklch(0.62 0.10 198)", name: "Teal" },
+    { value: "oklch(0.44 0.105 240)", name: "Blue" },
+    { value: "oklch(0.55 0.11 280)", name: "Purple" },
+    { value: "oklch(0.60 0.12 30)", name: "Coral" },
+    { value: "oklch(0.58 0.12 145)", name: "Green" },
+  ];
+
   const setMode = (mode: "cascade" | "menu") => {
     if (mode === line.mode) return;
     setLine((prev) => prev.map((l) => (l.id === line.id ? { ...l, mode } : l)));
@@ -976,6 +1160,444 @@ function RoutingView({
               </p>
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* Around-the-clock coverage timeline */}
+      <div className="card section-gap">
+        <div className="card-head">
+          <div>
+            <h2>Around-the-clock coverage</h2>
+            <p>
+              Route incoming calls dynamically based on the time of day. Assign slots to your contacts to ensure 24/7 coverage.
+            </p>
+          </div>
+          {activeSlot && (
+            <Badge kind="green">
+              Active: {activeSlot.name}
+            </Badge>
+          )}
+        </div>
+        <div className="card-pad">
+          {/* Timeline visualization */}
+          <div style={{ background: "var(--tint)", padding: 20, borderRadius: "var(--r-md)", border: "1px solid var(--line)", position: "relative" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+              <span style={{ fontSize: "0.86rem", fontWeight: 600 }}>24-Hour Coverage Timeline</span>
+              <span className="demo-status" style={{ fontSize: "0.78rem", padding: "4px 10px", borderRadius: 999 }}>
+                <span className="live" style={{ background: activeSlot ? "var(--green)" : "var(--ink-faint)" }}></span>
+                Current Time: {formatHour(Math.floor(currentHour))}:{String(Math.floor((currentHour % 1) * 60)).padStart(2, '0')}
+              </span>
+            </div>
+            
+            {/* Visual Timeline Track */}
+            <div style={{ height: 48, display: "flex", borderRadius: 8, overflow: "hidden", position: "relative", background: "oklch(0.9 0.01 220)" }}>
+              {sortedSlots.map((slot) => {
+                const duration = slot.endHour - slot.startHour;
+                const pct = (duration / 24) * 100;
+                return (
+                  <div
+                    key={slot.id}
+                    style={{
+                      width: `${pct}%`,
+                      background: slot.color,
+                      height: "100%",
+                      display: "flex",
+                      flexDirection: "column",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      color: "#fff",
+                      textShadow: "0 1px 2px rgba(0,0,0,0.25)",
+                      fontSize: "0.8rem",
+                      overflow: "hidden",
+                      whiteSpace: "nowrap",
+                      paddingInline: 4,
+                      borderRight: "1px solid rgba(255,255,255,0.15)",
+                    }}
+                    title={`${slot.name} (${formatHour(slot.startHour)} - ${formatHour(slot.endHour)})`}
+                  >
+                    <b style={{ display: "block" }}>{slot.name}</b>
+                    <span style={{ fontSize: "0.66rem", opacity: 0.85 }}>{formatHour(slot.startHour)} - {formatHour(slot.endHour)}</span>
+                  </div>
+                );
+              })}
+              
+              {/* Pulsating Indicator for current time */}
+              <div
+                style={{
+                  position: "absolute",
+                  left: `${(currentHour / 24) * 100}%`,
+                  top: 0,
+                  bottom: 0,
+                  width: 3,
+                  background: "oklch(0.60 0.12 30)",
+                  boxShadow: "0 0 10px 2px oklch(0.60 0.12 30)",
+                  zIndex: 10,
+                }}
+              />
+            </div>
+            
+            {/* Timeline Hour Marks */}
+            <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.74rem", color: "var(--ink-faint)", marginTop: 8, paddingInline: 4 }}>
+              <span>12 AM</span>
+              <span>6 AM</span>
+              <span>12 PM</span>
+              <span>6 PM</span>
+              <span>12 AM</span>
+            </div>
+          </div>
+
+          {/* Validation Alert / Status */}
+          {(hasGap || hasOverlap) && (
+            <div style={{ marginTop: 16, padding: "12px 16px", borderRadius: "var(--r-sm)", background: hasOverlap ? "oklch(0.96 0.04 25)" : "oklch(0.96 0.05 75)", color: hasOverlap ? "oklch(0.5 0.13 20)" : "oklch(0.5 0.13 60)", fontSize: "0.86rem", display: "flex", alignItems: "center", gap: 8 }}>
+              <span>⚠️</span>
+              <div>
+                {hasOverlap && <div><b>Overlapping Coverage:</b> Two or more slots cover the same hours. Please adjust times to prevent conflict.</div>}
+                {hasGap && (
+                  <div>
+                    <b>Uncovered Gaps:</b> Callers will hit voicemail during uncovered hours:{" "}
+                    {gapsList.map((g, idx) => (
+                      <span key={idx}>
+                        {idx > 0 && ", "}
+                        {formatHour(g.start)} to {formatHour(g.end)}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Slots List and Editor */}
+          <div style={{ marginTop: 24 }}>
+            <h3 style={{ fontSize: "1.1rem", marginBottom: 12 }}>Manage Time Slots</h3>
+            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              {sortedSlots.map((slot) => {
+                const isEditing = editingSlotId === slot.id;
+                return (
+                  <div
+                    key={slot.id}
+                    style={{
+                      border: "1px solid var(--line)",
+                      borderRadius: "var(--r-md)",
+                      background: "var(--surface)",
+                      padding: 16,
+                    }}
+                  >
+                    {!isEditing ? (
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                          <span style={{ width: 14, height: 14, borderRadius: "50%", background: slot.color }}></span>
+                          <div>
+                            <h4 style={{ fontSize: "0.96rem", fontWeight: 600 }}>{slot.name}</h4>
+                            <p style={{ fontSize: "0.8rem", color: "var(--ink-soft)" }}>
+                              {slot.description} · {formatHour(slot.startHour)} to {formatHour(slot.endHour)}
+                            </p>
+                          </div>
+                        </div>
+                        <div style={{ display: "flex", gap: 8 }}>
+                          <button
+                            onClick={() => startEditing(slot)}
+                            className="btn btn-soft btn-sm"
+                            style={{ padding: "6px 12px", fontSize: "0.78rem" }}
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => deleteSlot(slot.id)}
+                            className="btn btn-soft btn-sm"
+                            style={{ padding: "6px 12px", fontSize: "0.78rem", color: "oklch(0.55 0.18 25)" }}
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      // Inline edit form
+                      <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                        <div style={{ display: "grid", gridTemplateColumns: "1.2fr 1fr 1fr 1fr", gap: 12 }}>
+                          {/* Name Select Dropdown */}
+                          <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                            <label style={{ fontSize: "0.74rem", color: "var(--ink-faint)", fontWeight: 600 }}>ASSIGN TO</label>
+                            <select
+                              value={slotName}
+                              onChange={(e) => {
+                                setSlotName(e.target.value);
+                                // Suggest description based on relationship if available
+                                const contact = line.contacts.find((c) => c.name === e.target.value);
+                                if (contact && contact.rel) {
+                                  setSlotDesc(contact.rel);
+                                }
+                              }}
+                              style={{ padding: 8, borderRadius: "var(--r-sm)", border: "1px solid var(--line)", background: "var(--surface)", color: "var(--ink)" }}
+                            >
+                              <option value="Nurse Dawn">Nurse Dawn</option>
+                              {line.contacts.map((c) => (
+                                <option key={c.id} value={c.name}>
+                                  {c.name} ({c.rel})
+                                </option>
+                              ))}
+                              <option value="Custom">Custom...</option>
+                            </select>
+                          </div>
+                          
+                          {/* Custom Name text input if "Custom" selected */}
+                          {slotName === "Custom" && (
+                            <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                              <label style={{ fontSize: "0.74rem", color: "var(--ink-faint)", fontWeight: 600 }}>CUSTOM NAME</label>
+                              <input
+                                type="text"
+                                placeholder="Enter name"
+                                value={customName}
+                                onChange={(e) => setCustomName(e.target.value)}
+                                style={{ padding: 8, borderRadius: "var(--r-sm)", border: "1px solid var(--line)", background: "var(--surface)", color: "var(--ink)" }}
+                              />
+                            </div>
+                          )}
+                          
+                          {/* Description input */}
+                          <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                            <label style={{ fontSize: "0.74rem", color: "var(--ink-faint)", fontWeight: 600 }}>DESCRIPTION</label>
+                            <input
+                              type="text"
+                              value={slotDesc}
+                              onChange={(e) => setSlotDesc(e.target.value)}
+                              style={{ padding: 8, borderRadius: "var(--r-sm)", border: "1px solid var(--line)", background: "var(--surface)", color: "var(--ink)" }}
+                            />
+                          </div>
+                          
+                          {/* Start hour dropdown */}
+                          <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                            <label style={{ fontSize: "0.74rem", color: "var(--ink-faint)", fontWeight: 600 }}>START HOUR</label>
+                            <select
+                              value={slotStart}
+                              onChange={(e) => setSlotStart(Number(e.target.value))}
+                              style={{ padding: 8, borderRadius: "var(--r-sm)", border: "1px solid var(--line)", background: "var(--surface)", color: "var(--ink)" }}
+                            >
+                              {Array.from({ length: 25 }).map((_, h) => (
+                                <option key={h} value={h} disabled={h >= slotEnd}>
+                                  {formatHour(h)}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+                          
+                          {/* End hour dropdown */}
+                          <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                            <label style={{ fontSize: "0.74rem", color: "var(--ink-faint)", fontWeight: 600 }}>END HOUR</label>
+                            <select
+                              value={slotEnd}
+                              onChange={(e) => setSlotEnd(Number(e.target.value))}
+                              style={{ padding: 8, borderRadius: "var(--r-sm)", border: "1px solid var(--line)", background: "var(--surface)", color: "var(--ink)" }}
+                            >
+                              {Array.from({ length: 25 }).map((_, h) => (
+                                <option key={h} value={h} disabled={h <= slotStart}>
+                                  {formatHour(h)}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+                        </div>
+
+                        {/* Color Picker Swatches */}
+                        <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                          <label style={{ fontSize: "0.74rem", color: "var(--ink-faint)", fontWeight: 600 }}>SWATCH COLOR</label>
+                          <div style={{ display: "flex", gap: 8 }}>
+                            {PRESET_COLORS.map((c) => (
+                              <button
+                                key={c.value}
+                                type="button"
+                                onClick={() => setSlotColor(c.value)}
+                                style={{
+                                  width: 24,
+                                  height: 24,
+                                  borderRadius: "50%",
+                                  background: c.value,
+                                  border: slotColor === c.value ? "2.5px solid var(--ink)" : "1px solid var(--line)",
+                                  cursor: "pointer",
+                                }}
+                                title={c.name}
+                              />
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Save & Cancel buttons */}
+                        <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", marginTop: 8 }}>
+                          <button
+                            onClick={cancelEditing}
+                            className="btn btn-ghost btn-sm"
+                            style={{ padding: "6px 12px", fontSize: "0.78rem" }}
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            onClick={() => saveSlot(slot.id)}
+                            className="btn btn-primary btn-sm"
+                            style={{ padding: "6px 12px", fontSize: "0.78rem" }}
+                          >
+                            Save
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Add a New Segment form */}
+          {!showAddForm ? (
+            <button
+              onClick={() => {
+                setShowAddForm(true);
+                // Pre-fill values
+                setSlotName("Custom");
+                setCustomName("");
+                setSlotDesc("");
+                setSlotStart(0);
+                setSlotEnd(4);
+                setSlotColor(PRESET_COLORS[0].value);
+              }}
+              className="btn btn-soft"
+              style={{ marginTop: 18, width: "100%", padding: 12, border: "1px dashed var(--line)" }}
+            >
+              + Add Coverage Time Slot
+            </button>
+          ) : (
+            <div
+              style={{
+                marginTop: 18,
+                padding: 16,
+                borderRadius: "var(--r-md)",
+                border: "1px dashed var(--line)",
+                background: "var(--tint)",
+                display: "flex",
+                flexDirection: "column",
+                gap: 12,
+              }}
+            >
+              <h4 style={{ fontSize: "0.96rem", fontWeight: 600 }}>New Time Slot</h4>
+              <div style={{ display: "grid", gridTemplateColumns: "1.2fr 1fr 1fr 1fr", gap: 12 }}>
+                {/* Assign dropdown */}
+                <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                  <label style={{ fontSize: "0.74rem", color: "var(--ink-faint)", fontWeight: 600 }}>ASSIGN TO</label>
+                  <select
+                    value={slotName}
+                    onChange={(e) => {
+                      setSlotName(e.target.value);
+                      const contact = line.contacts.find((c) => c.name === e.target.value);
+                      if (contact && contact.rel) {
+                        setSlotDesc(contact.rel);
+                      }
+                    }}
+                    style={{ padding: 8, borderRadius: "var(--r-sm)", border: "1px solid var(--line)", background: "var(--surface)", color: "var(--ink)" }}
+                  >
+                    <option value="Nurse Dawn">Nurse Dawn</option>
+                    {line.contacts.map((c) => (
+                      <option key={c.id} value={c.name}>
+                        {c.name} ({c.rel})
+                      </option>
+                    ))}
+                    <option value="Custom">Custom...</option>
+                  </select>
+                </div>
+                
+                {slotName === "Custom" && (
+                  <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                    <label style={{ fontSize: "0.74rem", color: "var(--ink-faint)", fontWeight: 600 }}>CUSTOM NAME</label>
+                    <input
+                      type="text"
+                      placeholder="Enter name"
+                      value={customName}
+                      onChange={(e) => setCustomName(e.target.value)}
+                      style={{ padding: 8, borderRadius: "var(--r-sm)", border: "1px solid var(--line)", background: "var(--surface)", color: "var(--ink)" }}
+                    />
+                  </div>
+                )}
+                
+                <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                  <label style={{ fontSize: "0.74rem", color: "var(--ink-faint)", fontWeight: 600 }}>DESCRIPTION</label>
+                  <input
+                    type="text"
+                    value={slotDesc}
+                    onChange={(e) => setSlotDesc(e.target.value)}
+                    style={{ padding: 8, borderRadius: "var(--r-sm)", border: "1px solid var(--line)", background: "var(--surface)", color: "var(--ink)" }}
+                  />
+                </div>
+                
+                <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                  <label style={{ fontSize: "0.74rem", color: "var(--ink-faint)", fontWeight: 600 }}>START HOUR</label>
+                  <select
+                    value={slotStart}
+                    onChange={(e) => setSlotStart(Number(e.target.value))}
+                    style={{ padding: 8, borderRadius: "var(--r-sm)", border: "1px solid var(--line)", background: "var(--surface)", color: "var(--ink)" }}
+                  >
+                    {Array.from({ length: 25 }).map((_, h) => (
+                      <option key={h} value={h} disabled={h >= slotEnd}>
+                        {formatHour(h)}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                
+                <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                  <label style={{ fontSize: "0.74rem", color: "var(--ink-faint)", fontWeight: 600 }}>END HOUR</label>
+                  <select
+                    value={slotEnd}
+                    onChange={(e) => setSlotEnd(Number(e.target.value))}
+                    style={{ padding: 8, borderRadius: "var(--r-sm)", border: "1px solid var(--line)", background: "var(--surface)", color: "var(--ink)" }}
+                  >
+                    {Array.from({ length: 25 }).map((_, h) => (
+                      <option key={h} value={h} disabled={h <= slotStart}>
+                        {formatHour(h)}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {/* Swatch color selection */}
+              <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                <label style={{ fontSize: "0.74rem", color: "var(--ink-faint)", fontWeight: 600 }}>SWATCH COLOR</label>
+                <div style={{ display: "flex", gap: 8 }}>
+                  {PRESET_COLORS.map((c) => (
+                    <button
+                      key={c.value}
+                      type="button"
+                      onClick={() => setSlotColor(c.value)}
+                      style={{
+                        width: 24,
+                        height: 24,
+                        borderRadius: "50%",
+                        background: c.value,
+                        border: slotColor === c.value ? "2.5px solid var(--ink)" : "1px solid var(--line)",
+                        cursor: "pointer",
+                      }}
+                      title={c.name}
+                    />
+                  ))}
+                </div>
+              </div>
+
+              <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", marginTop: 8 }}>
+                <button
+                  onClick={() => setShowAddForm(false)}
+                  className="btn btn-ghost btn-sm"
+                  style={{ padding: "6px 12px", fontSize: "0.78rem" }}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={addNewSlot}
+                  className="btn btn-primary btn-sm"
+                  style={{ padding: "6px 12px", fontSize: "0.78rem" }}
+                >
+                  Add Slot
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
