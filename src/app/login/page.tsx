@@ -12,7 +12,9 @@ export default function LoginPage() {
   // If already logged in, redirect to dashboard automatically
   useEffect(() => {
     if (typeof window !== "undefined") {
-      if (localStorage.getItem("isLoggedIn") === "true") {
+      if (localStorage.getItem("isAdminLoggedIn") === "true") {
+        window.location.href = "/super-admin";
+      } else if (localStorage.getItem("isLoggedIn") === "true") {
         window.location.href = "/dashboard";
       }
     }
@@ -37,8 +39,13 @@ export default function LoginPage() {
       }
 
       // Save session simulation
-      localStorage.setItem("isLoggedIn", "true");
-      window.location.href = "/dashboard";
+      if (email === "admin@icancall.co") {
+        localStorage.setItem("isAdminLoggedIn", "true");
+        window.location.href = "/super-admin";
+      } else {
+        localStorage.setItem("isLoggedIn", "true");
+        window.location.href = "/dashboard";
+      }
     }, 800);
   };
 
@@ -231,6 +238,37 @@ export default function LoginPage() {
           </svg>
           {isLoading ? "Connecting..." : "Continue with Google"}
         </button>
+
+        <div style={{
+          marginTop: 24,
+          padding: "12px 14px",
+          borderRadius: 10,
+          background: "oklch(0.98 0.005 220)",
+          border: "1px dashed oklch(0.85 0.01 220)",
+          fontSize: "0.8rem",
+          lineHeight: "1.4",
+          color: "oklch(0.4 0.01 220)"
+        }}>
+          <strong>Demo Accounts (Click to auto-fill):</strong>
+          <div style={{ marginTop: 8, display: "flex", flexDirection: "column", gap: 6 }}>
+            <div 
+              style={{ cursor: "pointer", display: "inline-block", color: "oklch(0.4 0.01 220)" }} 
+              onClick={() => { setEmail("support@icancall.co"); setPassword("••••••••"); }}
+              onMouseEnter={(e) => e.currentTarget.style.color = "oklch(0.58 0.115 232)"}
+              onMouseLeave={(e) => e.currentTarget.style.color = "oklch(0.4 0.01 220)"}
+            >
+              • Customer: <code>support@icancall.co</code>
+            </div>
+            <div 
+              style={{ cursor: "pointer", display: "inline-block", color: "oklch(0.4 0.01 220)" }} 
+              onClick={() => { setEmail("admin@icancall.co"); setPassword("••••••••"); }}
+              onMouseEnter={(e) => e.currentTarget.style.color = "oklch(0.58 0.115 232)"}
+              onMouseLeave={(e) => e.currentTarget.style.color = "oklch(0.4 0.01 220)"}
+            >
+              • Super Admin: <code>admin@icancall.co</code>
+            </div>
+          </div>
+        </div>
 
         <div style={{ textAlign: "center", marginTop: 24, fontSize: "0.84rem", color: "oklch(0.46 0.022 245)" }}>
           Don't have an account?{" "}

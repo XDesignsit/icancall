@@ -477,6 +477,22 @@ export default function SuperAdminApp() {
   const [searchQuery, setSearchQuery] = useState("");
   const [toast, setToast] = useState<string | null>(null);
 
+  // Redirect unauthenticated admin sessions to login
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      if (localStorage.getItem("isAdminLoggedIn") !== "true") {
+        window.location.href = "/login";
+      }
+    }
+  }, []);
+
+  const handleSignOut = () => {
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("isAdminLoggedIn");
+      window.location.href = "/login";
+    }
+  };
+
   const showToast = (msg: string) => {
     setToast(msg);
     setTimeout(() => setToast(null), 2500);
@@ -545,7 +561,7 @@ export default function SuperAdminApp() {
           ))}
         </nav>
 
-        <div className="sidebar-foot" style={{ marginTop: "auto" }}>
+        <div className="sidebar-foot" style={{ marginTop: "auto", display: "flex", flexDirection: "column", gap: 10 }}>
           <div className="admin-footchip" style={{ display: "flex", alignItems: "center", gap: 11, background: "oklch(1 0 0 / 0.07)", border: "1px solid oklch(1 0 0 / 0.1)", borderRadius: "var(--r-md)", padding: "11px 12px" }}>
             <div className="ava" style={{ width: 38, height: 38, borderRadius: "50%", display: "grid", placeItems: "center", color: "#fff", fontWeight: 700, background: "linear-gradient(150deg, var(--violet), var(--blue))" }}>
               AD
@@ -555,6 +571,36 @@ export default function SuperAdminApp() {
               <span style={{ fontSize: "0.74rem", color: "oklch(0.7 0.02 225)" }}>System Engineer</span>
             </div>
           </div>
+          <button
+            onClick={handleSignOut}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              width: "100%",
+              padding: "10px 12px",
+              borderRadius: "var(--r-md)",
+              border: "none",
+              background: "none",
+              color: "oklch(0.85 0.02 225)",
+              fontSize: "0.9rem",
+              fontWeight: 500,
+              cursor: "pointer",
+              textAlign: "left",
+              transition: "background 0.15s, color 0.15s"
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = "oklch(1 0 0 / 0.05)";
+              e.currentTarget.style.color = "#fff";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = "none";
+              e.currentTarget.style.color = "oklch(0.85 0.02 225)";
+            }}
+          >
+            <Icon name="logout" style={{ width: 18, height: 18, stroke: "currentColor" }} />
+            Sign out
+          </button>
         </div>
       </aside>
 
