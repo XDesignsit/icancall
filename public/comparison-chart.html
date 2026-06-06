@@ -330,15 +330,19 @@
         <span>i<b>Can</b>Call</span>
       </a>
       <nav class="nav">
-        <a href="/#how">How it works</a>
-        <a href="/#features">Features</a>
-        <a href="/#usecases">Who it's for</a>
-        <a href="/#pricing">Pricing</a>
-        <a href="/#faq">FAQ</a>
+        <a href="/#how" id="navLinkHow">How it works</a>
+        <a href="/#features" id="navLinkFeatures">Features</a>
+        <a href="/#usecases" id="navLinkWho">Who it's for</a>
+        <a href="/#pricing" id="navLinkPricing">Pricing</a>
+        <a href="/#faq" id="navLinkFaq">FAQ</a>
       </nav>
-      <div class="header-cta">
-        <a class="btn btn-ghost" href="/#how">See how it works</a>
-        <a class="btn btn-primary" href="/#pricing">Select a Plan</a>
+      <div class="header-cta" style="display: flex; align-items: center; gap: 12px;">
+        <select id="langSelect" class="lang-select" style="background: transparent; border: 1px solid var(--line); color: var(--ink-soft); padding: 6px 10px; border-radius: 20px; font-size: 0.86rem; font-weight: 600; cursor: pointer; outline: none; font-family: var(--font);">
+          <option value="en">EN</option>
+          <option value="es">ES</option>
+        </select>
+        <a class="btn btn-ghost" href="/#how" id="navHowWorks">See how it works</a>
+        <a class="btn btn-primary" href="/#pricing" id="navSelectPlan">Select a Plan</a>
       </div>
     </div>
   </header>
@@ -348,9 +352,9 @@
     <section class="section">
       <div class="wrap">
         <div class="section-head reveal in">
-          <span class="eyebrow">Competitor comparison</span>
-          <h2>See How We Compare</h2>
-          <p class="lead">iCanCall is the only safety phone routing service built for kids, seniors, and the special needs community — with no device required and no long-term contracts.</p>
+          <span class="eyebrow" id="pageEyebrow">Competitor comparison</span>
+          <h2 id="pageTitle">See How We Compare</h2>
+          <p class="lead" id="pageLead">iCanCall is the only safety phone routing service built for kids, seniors, and the special needs community — with no device required and no long-term contracts.</p>
         </div>
 
         <div class="table-wrap reveal in">
@@ -366,20 +370,20 @@
               <tr>
                 <th></th>
                 <th class="th-you">
-                  <span class="brand-name">iCanCall</span>
-                  <span class="brand-price">from $12.99/mo</span>
+                  <span class="brand-name" id="thYouName">iCanCall</span>
+                  <span class="brand-price" id="thYouPrice">from $12.99/mo</span>
                 </th>
                 <th class="th-comp">
                   <span class="brand-name">teleCalm</span>
-                  <span class="brand-price">~$29–$39/mo</span>
+                  <span class="brand-price" id="thComp1Price">~$29–$39/mo</span>
                 </th>
                 <th class="th-comp">
                   <span class="brand-name">RAZ Memory Phone</span>
-                  <span class="brand-price">$369 device + $20/mo</span>
+                  <span class="brand-price" id="thComp2Price">$369 device + $20/mo</span>
                 </th>
                 <th class="th-comp">
                   <span class="brand-name">Senior Safety Phone</span>
-                  <span class="brand-price">Free app (iPhone req.)</span>
+                  <span class="brand-price" id="thComp3Price">Free app (iPhone req.)</span>
                 </th>
               </tr>
             </thead>
@@ -562,13 +566,13 @@
     <section class="section cta-band" id="cta">
       <div class="wrap">
         <div class="cta-card reveal in">
-          <h2>Ready to secure your family?</h2>
-          <p>Give your loved ones the safety and simplicity of iCanCall today. Set up in under 5 minutes.</p>
+          <h2 id="ctaTitle">Ready to secure your family?</h2>
+          <p id="ctaDesc">Give your loved ones the safety and simplicity of iCanCall today. Set up in under 5 minutes.</p>
           <div class="actions">
-            <a class="btn btn-primary btn-lg" href="/onboarding">Get Started Now</a>
-            <a class="btn btn-ghost btn-lg" href="/" style="color: #fff; border-color: oklch(1 0 0 / 0.5)">Back to Homepage</a>
+            <a class="btn btn-primary btn-lg" href="/onboarding"><span id="ctaBtnPrimary">Get Started Now</span></a>
+            <a class="btn btn-ghost btn-lg" href="/" style="color: #fff; border-color: oklch(1 0 0 / 0.5)"><span id="ctaBtnGhost">Back to Homepage</span></a>
           </div>
-          <p class="fine">Set up in minutes · No setup fees · Cancel anytime</p>
+          <p class="fine" id="ctaFine">Set up in minutes · No setup fees · Cancel anytime</p>
         </div>
       </div>
     </section>
@@ -585,50 +589,305 @@
             </span>
             <span>i<b>Can</b>Call</span>
           </a>
-          <p class="blurb">One memorable number that always connects to the people who matter most. Safety on autopilot.</p>
+          <p class="blurb"><span id="footerBlurb">One memorable number that always connects to the people who matter most. Safety on autopilot.</span></p>
         </div>
         <div>
-          <h5>Product</h5>
+          <h5 id="footerProduct">Product</h5>
           <ul>
-            <li><a href="/#how">How it works</a></li>
-            <li><a href="/#features">Features</a></li>
-            <li><a href="/#pricing">Pricing</a></li>
-            <li><a href="/#faq">FAQ</a></li>
-            <li><a href="/login">Login</a></li>
+            <li><a href="/#how" id="navLinkHow">How it works</a></li>
+            <li><a href="/#features" id="navLinkFeatures">Features</a></li>
+            <li><a href="/#pricing" id="navLinkPricing">Pricing</a></li>
+            <li><a href="/#faq" id="navLinkFaq">FAQ</a></li>
+            <li><a href="/login" id="footerLogin">Login</a></li>
           </ul>
         </div>
         <div>
-          <h5>Who</h5>
+          <h5 id="footerWho">Who</h5>
           <ul>
-            <li><a href="/parents">Parents</a></li>
-            <li><a href="/caregivers">Caregivers</a></li>
-            <li><a href="/seniors">Seniors</a></li>
+            <li><a href="/parents" id="footerParents">Parents</a></li>
+            <li><a href="/caregivers" id="footerCaregivers">Caregivers</a></li>
+            <li><a href="/seniors" id="footerSeniors">Seniors</a></li>
           </ul>
         </div>
         <div>
-          <h5>Company</h5>
+          <h5 id="footerCompany">Company</h5>
           <ul>
-            <li><a href="#">About</a></li>
-            <li><a href="#">Careers</a></li>
-            <li><a href="#">Stories</a></li>
-            <li><a href="#">Contact</a></li>
+            <li><a href="#" id="footerAbout">About</a></li>
+            <li><a href="#" id="footerCareers">Careers</a></li>
+            <li><a href="#" id="footerStories">Stories</a></li>
+            <li><a href="#" id="footerContact">Contact</a></li>
           </ul>
         </div>
         <div>
-          <h5>Trust</h5>
+          <h5 id="footerTrust">Trust</h5>
           <ul>
-            <li><a href="#">Privacy</a></li>
-            <li><a href="#">Security</a></li>
-            <li><a href="#">Terms</a></li>
+            <li><a href="#" id="footerPrivacy">Privacy</a></li>
+            <li><a href="#" id="footerSecurity">Security</a></li>
+            <li><a href="#" id="footerTerms">Terms</a></li>
           </ul>
         </div>
       </div>
       <div class="footer-bottom">
-        <span>&copy; 2026 iCanCall, Inc. All rights reserved.</span>
-        <span>Made for the moments that matter.</span>
+        <span id="footerCopyright">&copy; 2026 iCanCall, Inc. All rights reserved.</span>
+        <span id="footerMoments">Made for the moments that matter.</span>
       </div>
     </div>
   </footer>
 
+
+  <!-- ============== TRANSLATION SYSTEM ============== -->
+  <script>
+    const TRANSLATIONS = {
+      en: {
+        navHow: "How it works",
+        navFeatures: "Features",
+        navWho: "Who it's for",
+        navPricing: "Pricing",
+        navFaq: "FAQ",
+        navHowWorksBtn: "See how it works",
+        navSelectPlanBtn: "Select a Plan",
+        pageEyebrow: "Competitor comparison",
+        pageTitle: "See How We Compare",
+        pageLead: "iCanCall is the only safety phone routing service built for kids, seniors, and the special needs community — with no device required and no long-term contracts.",
+        thYouName: "iCanCall",
+        thYouPrice: "from $12.99/mo",
+        thComp1Price: "~$29–$39/mo",
+        thComp2Price: "$369 device + $20/mo",
+        thComp3Price: "Free app (iPhone req.)",
+        ctaTitle: "Ready to secure your family?",
+        ctaDesc: "Give your loved ones the safety and simplicity of iCanCall today. Set up in under 5 minutes.",
+        ctaBtnPrimary: "Get Started Now",
+        ctaBtnGhost: "Back to Homepage",
+        ctaFine: "Set up in minutes · No setup fees · Cancel anytime",
+        footerBlurb: "One memorable number that always connects to the people who matter most. Safety on autopilot.",
+        footerProduct: "Product",
+        footerWho: "Who",
+        footerCompany: "Company",
+        footerTrust: "Trust",
+        footerParents: "Parents",
+        footerCaregivers: "Caregivers",
+        footerSeniors: "Seniors",
+        footerHow: "How it works",
+        footerFeatures: "Features",
+        footerPricing: "Pricing",
+        footerFaq: "FAQ",
+        footerLogin: "Login",
+        footerComparisonChart: "Comparison Chart",
+        footerAbout: "About",
+        footerCareers: "Careers",
+        footerStories: "Stories",
+        footerContact: "Contact",
+        footerPrivacy: "Privacy",
+        footerSecurity: "Security",
+        footerTerms: "Terms",
+        footerCopyright: "© 2026 iCanCall, Inc. All rights reserved.",
+        footerMoments: "Made for the moments that matter."
+      },
+      es: {
+        navHow: "Cómo funciona",
+        navFeatures: "Funciones",
+        navWho: "Para quién es",
+        navPricing: "Precios",
+        navFaq: "Preguntas",
+        navHowWorksBtn: "Ver cómo funciona",
+        navSelectPlanBtn: "Elegir un Plan",
+        pageEyebrow: "Tabla comparativa",
+        pageTitle: "Vea cómo nos comparamos",
+        pageLead: "iCanCall es el único servicio de desvío de seguridad telefónica creado para niños, personas mayores y personas con necesidades especiales, sin necesidad de dispositivos y sin contratos a largo plazo.",
+        thYouName: "iCanCall",
+        thYouPrice: "desde $12.99/mes",
+        thComp1Price: "~$29–$39/mes",
+        thComp2Price: "$369 dispositivo + $20/mes",
+        thComp3Price: "App gratuita (req. iPhone)",
+        ctaTitle: "¿Listo para proteger a su familia?",
+        ctaDesc: "Brinde a sus seres queridos la seguridad y simplicidad de iCanCall hoy. Se configura en menos de 5 minutos.",
+        ctaBtnPrimary: "Comenzar Ahora",
+        ctaBtnGhost: "Volver al Inicio",
+        ctaFine: "Configuración en minutos · Sin tarifas ocultas · Cancele cuando quiera",
+        footerBlurb: "Un número memorable que siempre conecta con las personas más importantes. Seguridad en piloto automático.",
+        footerProduct: "Producto",
+        footerWho: "Quiénes",
+        footerCompany: "Compañía",
+        footerTrust: "Confianza",
+        footerParents: "Padres",
+        footerCaregivers: "Cuidadores",
+        footerSeniors: "Adultos Mayores",
+        footerHow: "Cómo funciona",
+        footerFeatures: "Funciones",
+        footerPricing: "Precios",
+        footerFaq: "FAQ",
+        footerLogin: "Iniciar Sesión",
+        footerComparisonChart: "Tabla Comparativa",
+        footerAbout: "Sobre Nosotros",
+        footerCareers: "Empleos",
+        footerStories: "Historias",
+        footerContact: "Contacto",
+        footerPrivacy: "Privacidad",
+        footerSecurity: "Seguridad",
+        footerTerms: "Condiciones",
+        footerCopyright: "© 2026 iCanCall, Inc. Todos los derechos reservados.",
+        footerMoments: "Hecho para los momentos que importan."
+      }
+    };
+
+    function translatePage(lang) {
+      const t = TRANSLATIONS[lang];
+      if (!t) return;
+      
+      // Update DOM elements
+      document.getElementById("navLinkHow").textContent = t.navHow;
+      document.getElementById("navLinkFeatures").textContent = t.navFeatures;
+      document.getElementById("navLinkWho").textContent = t.navWho;
+      document.getElementById("navLinkPricing").textContent = t.navPricing;
+      document.getElementById("navLinkFaq").textContent = t.navFaq;
+      
+      document.getElementById("navHowWorks").textContent = t.navHowWorksBtn;
+      document.getElementById("navSelectPlan").textContent = t.navSelectPlanBtn;
+      
+      document.getElementById("pageEyebrow").textContent = t.pageEyebrow;
+      document.getElementById("pageTitle").textContent = t.pageTitle;
+      document.getElementById("pageLead").textContent = t.pageLead;
+      
+      document.getElementById("thYouName").textContent = t.thYouName;
+      document.getElementById("thYouPrice").textContent = t.thYouPrice;
+      document.getElementById("thComp1Price").textContent = t.thComp1Price;
+      document.getElementById("thComp2Price").textContent = t.thComp2Price;
+      document.getElementById("thComp3Price").textContent = t.thComp3Price;
+      
+      document.getElementById("ctaTitle").textContent = t.ctaTitle;
+      document.getElementById("ctaDesc").textContent = t.ctaDesc;
+      document.getElementById("ctaBtnPrimary").textContent = t.ctaBtnPrimary;
+      document.getElementById("ctaBtnGhost").textContent = t.ctaBtnGhost;
+      document.getElementById("ctaFine").textContent = t.ctaFine;
+      
+      document.getElementById("footerBlurb").textContent = t.footerBlurb;
+      document.getElementById("footerProduct").textContent = t.footerProduct;
+      document.getElementById("footerWho").textContent = t.footerWho;
+      document.getElementById("footerCompany").textContent = t.footerCompany;
+      document.getElementById("footerTrust").textContent = t.footerTrust;
+      
+      document.getElementById("footerParents").textContent = t.footerParents;
+      document.getElementById("footerCaregivers").textContent = t.footerCaregivers;
+      document.getElementById("footerSeniors").textContent = t.footerSeniors;
+      document.getElementById("footerHow").textContent = t.footerHow;
+      document.getElementById("footerFeatures").textContent = t.footerFeatures;
+      document.getElementById("footerPricing").textContent = t.footerPricing;
+      document.getElementById("footerFaq").textContent = t.footerFaq;
+      document.getElementById("footerLogin").textContent = t.footerLogin;
+      document.getElementById("footerComparisonChart").textContent = t.footerComparisonChart;
+      
+      document.getElementById("footerAbout").textContent = t.footerAbout;
+      document.getElementById("footerCareers").textContent = t.footerCareers;
+      document.getElementById("footerStories").textContent = t.footerStories;
+      document.getElementById("footerContact").textContent = t.footerContact;
+      
+      document.getElementById("footerPrivacy").textContent = t.footerPrivacy;
+      document.getElementById("footerSecurity").textContent = t.footerSecurity;
+      document.getElementById("footerTerms").textContent = t.footerTerms;
+      
+      document.getElementById("footerCopyright").textContent = t.footerCopyright;
+      document.getElementById("footerMoments").textContent = t.footerMoments;
+
+      // Translate table text content specifically (like ✓, ✗, notes)
+      if (lang === "es") {
+        document.querySelectorAll(".section-row td").forEach(td => {
+          if (td.textContent.includes("Accessibility & Setup")) td.textContent = "Accesibilidad y Configuración";
+          if (td.textContent.includes("Call Routing & Contact Management")) td.textContent = "Enrutamiento y Contactos";
+          if (td.textContent.includes("Caregiver Tools & Oversight")) td.textContent = "Herramientas de Cuidadores";
+          if (td.textContent.includes("Audience & Inclusivity")) td.textContent = "Público y Facilidad de Uso";
+          if (td.textContent.includes("Pricing & Commitment")) td.textContent = "Precios y Compromiso";
+        });
+        document.querySelectorAll("tbody td").forEach(td => {
+          if (td.textContent.includes("Works on any phone — no device needed")) td.innerHTML = "Funciona en cualquier teléfono — sin dispositivo";
+          if (td.textContent.includes("No app required for the caller")) td.innerHTML = "Sin aplicaciones para quien llama";
+          if (td.textContent.includes("Setup in under 5 minutes")) td.innerHTML = "Configuración en menos de 5 minutos";
+          if (td.textContent.includes("No hardware purchase required")) td.innerHTML = "Sin compra de hardware";
+          if (td.textContent.includes("Caller-controlled routing menu")) td.innerHTML = "Menú controlado por quien llama";
+          if (td.textContent.includes("Up to 6 routable contacts")) td.innerHTML = "Hasta 6 contactos de apoyo";
+          if (td.textContent.includes("Single memorable number")) td.innerHTML = "Un único número memorable";
+          if (td.textContent.includes("Add-on numbers available")) td.innerHTML = "Números adicionales disponibles";
+          if (td.textContent.includes("Real-time call alerts & notifications")) td.innerHTML = "Alertas y avisos en tiempo real";
+          if (td.textContent.includes("Full call log & history")) td.innerHTML = "Historial completo de llamadas";
+          if (td.textContent.includes("Remote contact management")) td.innerHTML = "Gestión remota de contactos";
+          if (td.textContent.includes("Secure caregiver dashboard")) td.innerHTML = "Panel de control seguro";
+          if (td.textContent.includes("Designed for children")) td.innerHTML = "Diseñado para niños";
+          if (td.textContent.includes("Designed for seniors")) td.innerHTML = "Diseñado para personas mayores";
+          if (td.textContent.includes("Designed for special needs community")) td.innerHTML = "Para necesidades especiales";
+          if (td.textContent.includes("Bilingual greeting options")) td.innerHTML = "Saludos en dos idiomas";
+          if (td.textContent.includes("User empowerment — caller chooses who answers")) td.innerHTML = "El que llama elige quién responde";
+          if (td.textContent.includes("No hardware cost")) td.innerHTML = "Sin costos de hardware";
+          if (td.textContent.includes("No long-term contract")) td.innerHTML = "Sin contratos de permanencia";
+          if (td.textContent.includes("Monthly entry-level price")) td.innerHTML = "Precio mensual de entrada";
+        });
+        document.querySelectorAll(".note").forEach(span => {
+          if (span.textContent.includes("Requires landline setup")) span.textContent = "Requiere teléfono fijo";
+          if (span.textContent.includes("Requires $369 device")) span.textContent = "Requiere aparato de $369";
+          if (span.textContent.includes("Requires iPhone")) span.textContent = "Requiere iPhone";
+          if (span.textContent.includes("Proprietary device only")) span.textContent = "Solo aparato propietario";
+          if (span.textContent.includes("iPhone app required")) span.textContent = "Requiere app de iPhone";
+          if (span.textContent.includes("Phone line setup required")) span.textContent = "Requiere línea de teléfono";
+          if (span.textContent.includes("Device + carrier setup")) span.textContent = "Aparato + línea celular";
+          if (span.textContent.includes("App + account required")) span.textContent = "Requiere app y cuenta";
+          if (span.textContent.includes("Caregiver controls all routing")) span.textContent = "Cuidadores controlan desvío";
+          if (span.textContent.includes("Direct dial only")) span.textContent = "Marcado directo únicamente";
+          if (span.textContent.includes("Approved contact list")) span.textContent = "Lista aprobada únicamente";
+          if (span.textContent.includes("6 photo contacts")) span.textContent = "6 contactos con foto";
+          if (span.textContent.includes("Up to 5 contacts")) span.textContent = "Hasta 5 contactos";
+          if (span.textContent.includes("Device-based, not number-based")) span.textContent = "Basado en aparato, no número";
+          if (span.textContent.includes("Uses existing phone number")) span.textContent = "Usa número existente";
+          if (span.textContent.includes("$3.99/mo per number")) span.textContent = "$3.99/mes por número";
+          if (span.textContent.includes("Seniors only")) span.textContent = "Personas mayores únicamente";
+          if (span.textContent.includes("Seniors / cognitive impairment")) span.textContent = "Personas mayores / demencia";
+          if (span.textContent.includes("Cognitive impairment focus")) span.textContent = "Enfoque en demencia";
+          if (span.textContent.includes("Caregiver-controlled restriction")) span.textContent = "Restringido por cuidadores";
+          if (span.textContent.includes("$369 upfront")) span.textContent = "$369 iniciales";
+          if (span.textContent.includes("Check terms")) span.textContent = "Ver términos";
+        });
+        document.querySelectorAll(".price-you").forEach(span => {
+          if (span.textContent.includes("$12.99/mo")) span.textContent = "$12.99/mes";
+        });
+        document.querySelectorAll(".legend-item").forEach(span => {
+          if (span.textContent.includes("Included")) span.innerHTML = '<span class="yes" style="font-size:16px;">✓</span> Incluido';
+          if (span.textContent.includes("Not available")) span.innerHTML = '<span class="no" style="font-size:16px;">✗</span> No disponible';
+          if (span.textContent.includes("Limited or conditional")) span.innerHTML = '<span class="partial">~ Parcial</span> Limitado o condicional';
+        });
+        document.querySelector(".legend strong").textContent = "Clave:";
+      } else {
+        // Just reload the page to restore English default, or restore DOM
+        window.location.reload();
+      }
+    }
+
+    const langSelect = document.getElementById("langSelect");
+
+    // Load saved preference
+    const savedLang = localStorage.getItem("lang") || "en";
+    langSelect.value = savedLang;
+    if (savedLang === "es") {
+      translatePage("es");
+    }
+
+    langSelect.addEventListener("change", function(e) {
+      const val = e.target.value;
+      localStorage.setItem("lang", val);
+      // Notify other tabs
+      window.dispatchEvent(new Event("storage"));
+      if (val === "es") {
+        translatePage("es");
+      } else {
+        translatePage("en");
+      }
+    });
+
+    // Handle cross-tab storage sync
+    window.addEventListener("storage", function() {
+      const activeLang = localStorage.getItem("lang") || "en";
+      if (langSelect.value !== activeLang) {
+        langSelect.value = activeLang;
+        translatePage(activeLang);
+      }
+    });
+  </script>
 </body>
+
 </html>

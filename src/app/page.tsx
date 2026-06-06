@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import { translations } from "@/lib/translations";
 
 /* ============ TYPES ============ */
 interface Contact {
@@ -104,6 +105,23 @@ const Ico = {
 };
 
 export default function Home() {
+  const [lang, setLang] = useState<"en" | "es">("en");
+
+  useEffect(() => {
+    const savedLang = localStorage.getItem("lang") as "en" | "es";
+    if (savedLang === "en" || savedLang === "es") {
+      setLang(savedLang);
+    }
+  }, []);
+
+  const changeLanguage = (newLang: "en" | "es") => {
+    setLang(newLang);
+    localStorage.setItem("lang", newLang);
+    window.dispatchEvent(new Event("storage"));
+  };
+
+  const t = translations[lang];
+
   const [scrolled, setScrolled] = useState(false);
   const [billingCycle, setBillingCycle] = useState<"monthly" | "annual">("monthly");
   
@@ -383,7 +401,7 @@ export default function Home() {
     setSimScreen({
       av: simMode === "menu" ? "\u2630" : "—",
       name: simMode === "menu" ? "Caller menu" : "Ready",
-      state: simMode === "menu" ? "Place a call to hear the options" : "Press call to start routing"
+      state: simMode === "menu" ? "{t.demo.startSim} to hear the options" : "Press call to start routing"
     });
     setSimDots([]);
   };
@@ -407,16 +425,36 @@ export default function Home() {
             <span>i<b>Can</b>Call</span>
           </a>
           <nav className="nav">
-            <a href="#how">How it works</a>
-            <a href="#features">Features</a>
-            <a href="#usecases">Who it's for</a>
-            <a href="#pricing">Pricing</a>
-            <a href="#faq">FAQ</a>
+            <a href="#how">{t.nav.how}</a>
+            <a href="#features">{t.nav.features}</a>
+            <a href="#usecases">{t.nav.who}</a>
+            <a href="#pricing">{t.nav.pricing}</a>
+            <a href="#faq">{t.nav.faq}</a>
           </nav>
-          <div className="header-cta">
-            <a className="btn btn-text" href="/login" style={{ marginRight: 6 }}>Login</a>
-            <a className="btn btn-ghost" href="#how">See how it works</a>
-            <a className="btn btn-primary" href="#pricing">Select a Plan</a>
+          <div className="header-cta" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <select
+              value={lang}
+              onChange={(e) => changeLanguage(e.target.value as "en" | "es")}
+              className="lang-select"
+              style={{
+                background: 'transparent',
+                border: '1px solid var(--line)',
+                color: 'var(--ink-soft)',
+                padding: '6px 10px',
+                borderRadius: '20px',
+                fontSize: '0.86rem',
+                fontWeight: '600',
+                cursor: 'pointer',
+                outline: 'none',
+                fontFamily: 'var(--font)'
+              }}
+            >
+              <option value="en">EN</option>
+              <option value="es">ES</option>
+            </select>
+            <a className="btn btn-text" href="/login" style={{ marginRight: 6 }}>{t.nav.login}</a>
+            <a className="btn btn-ghost" href="#how">{t.nav.howWorksBtn}</a>
+            <a className="btn btn-primary" href="#pricing">{t.nav.selectPlanBtn}</a>
           </div>
         </div>
       </header>
@@ -427,14 +465,14 @@ export default function Home() {
         <section className="hero">
           <div className="wrap hero-grid">
             <div className="hero-copy">
-              <span className="eyebrow">Safety on autopilot</span>
-              <h1><span className="block mb-2">One number.</span><span className="accent">Always answered.</span></h1>
-              <p className="lead">When it matters most, the people you love should never reach a dead end. iCanCall routes a single, memorable number to up to six trusted contacts — until someone picks up.</p>
+              <span className="eyebrow">{t.hero.eyebrow}</span>
+              <h1><span className="block mb-2">{t.hero.titleAccent}.</span><span className="accent">{t.hero.titleRest}</span></h1>
+              <p className="lead">{t.hero.lead}</p>
               <div className="hero-actions">
-                <a className="btn btn-primary btn-lg" href="#pricing">Select a Plan</a>
-                <a className="btn btn-ghost btn-lg" href="#how">How it works</a>
+                <a className="btn btn-primary btn-lg" href="#pricing">{t.hero.getStarted}</a>
+                <a className="btn btn-ghost btn-lg" href="#how">{t.hero.seeHow}</a>
               </div>
-              <div className="hero-note"><span className="dot"></span> No new hardware · Works with any phone · Set up in minutes</div>
+              <div className="hero-note"><span className="dot"></span> {lang === "es" ? "Sin hardware · Funciona con cualquier teléfono · En minutos" : "No new hardware · Works with any phone · Set up in minutes"}</div>
             </div>
 
             {/* Animated Routing Auto Demo */}
@@ -444,14 +482,14 @@ export default function Home() {
                   <span className="ring">
                     <Ico.phone className="w-[21px] h-[21px] text-white" />
                   </span>
-                  <span className="num">(415) 200-CARE<small>Mom's iCanCall number</small></span>
+                  <span className="num">(415) 200-CARE<small>{lang === "es" ? "Número iCanCall de Mamá" : "Mom's iCanCall number"}</small></span>
                 </div>
                 <span className="demo-status">
                   <span className="live" />
-                  <span className="txt">{demoStatus}</span>
+                  <span className="txt">{demoStatus === "Incoming call" ? t.demo.incomingCall : demoStatus === "Connected" ? t.demo.connected : demoStatus === "Voicemail" ? t.demo.voicemail : t.demo.activeCall}</span>
                 </span>
               </div>
-              <p className="demo-caption">Routing through trusted contacts, in order, until answered</p>
+              <p className="demo-caption">{lang === "es" ? "Enrutando por contactos de confianza en orden hasta contestar" : "Routing through trusted contacts, in order, until answered"}</p>
               <div className="chain">
                 {[
                   { initials: "SR", name: "Sarah R.", rel: "Daughter", color: "oklch(0.58 0.115 232)" },
@@ -468,7 +506,7 @@ export default function Home() {
                       <span className="avatar" style={{ background: c.color }}>{c.initials}</span>
                       <span className="who"><b>{c.name}</b><span>{c.rel}</span></span>
                       <span className="state">
-                        {isRinging ? "Ringing\u2026" : isConnected ? "Connected \u2713" : isMissed ? "No answer" : "Standing by"}
+                        {isRinging ? (lang === "es" ? "Llamando\u2026" : "Ringing\u2026") : isConnected ? (lang === "es" ? "Conectado \u2713" : "Connected \u2713") : isMissed ? (lang === "es" ? "Sin respuesta" : "No answer") : (lang === "es" ? "En espera" : "Standing by")}
                       </span>
                     </div>
                   );
@@ -481,12 +519,12 @@ export default function Home() {
         {/* ============== TRUST STRIP ============== */}
         <section className="trust">
           <div className="wrap trust-inner">
-            <span className="trust-label">Built for the moments that matter</span>
+            <span className="trust-label">{lang === "es" ? "Creado para los momentos importantes" : "Built for the moments that matter"}</span>
             <div className="trust-stats">
-              <div className="stat"><b>1</b><span>number to remember</span></div>
-              <div className="stat"><b>6</b><span>contacts per number</span></div>
-              <div className="stat"><b>&lt;3s</b><span>to start routing</span></div>
-              <div className="stat"><b>99.99%</b><span>uptime, always on</span></div>
+              <div className="stat"><b>1</b><span>{lang === "es" ? "número que recordar" : "number to remember"}</span></div>
+              <div className="stat"><b>6</b><span>{lang === "es" ? "contactos por número" : "contacts per number"}</span></div>
+              <div className="stat"><b>&lt;3s</b><span>{lang === "es" ? "para iniciar desvío" : "to start routing"}</span></div>
+              <div className="stat"><b>99.99%</b><span>{lang === "es" ? "de actividad constante" : "uptime, always on"}</span></div>
             </div>
           </div>
         </section>
@@ -496,26 +534,26 @@ export default function Home() {
           <div className="wrap">
             <div className="section-head reveal in">
               <span className="eyebrow">How it works</span>
-              <h2>Set it once. Trust it forever.</h2>
-              <p className="lead">Three simple steps stand between you and complete peace of mind.</p>
+              <h2>{lang === "es" ? "Configúrelo una vez. Confíe para siempre." : "Set it once. Trust it forever."}</h2>
+              <p className="lead">{t.steps.lead}</p>
             </div>
             <div className="steps">
               <div className="step reveal in">
                 <div className="idx">1</div>
-                <h3>Claim your number</h3>
-                <p>Pick a single, easy-to-remember iCanCall number. Share it once — on a bracelet, a fridge, a school form — and never juggle a list of numbers again.</p>
+                <h3>{t.steps.step1Title}</h3>
+                <p>{t.steps.step1Desc}</p>
                 <svg className="step-arrow" width="60" height="24" viewBox="0 0 60 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M0 12h54m0 0-7-7m7 7-7 7"></path></svg>
               </div>
               <div className="step reveal in">
                 <div className="idx">2</div>
-                <h3>Add your circle</h3>
-                <p>Designate up to six trusted contacts and set the order they should be reached. Family, neighbors, caregivers, doctors — your circle, your priority.</p>
+                <h3>{t.steps.step2Title}</h3>
+                <p>{t.steps.step2Desc}</p>
                 <svg className="step-arrow" width="60" height="24" viewBox="0 0 60 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M0 12h54m0 0-7-7m7 7-7 7"></path></svg>
               </div>
               <div className="step reveal in">
                 <div className="idx">3</div>
-                <h3>Choose how to connect</h3>
-                <p>Pick your routing in the dashboard: let iCanCall <b>cascade</b> through the circle until someone answers, or greet callers with a simple <b>menu</b> to reach the right person directly.</p>
+                <h3>{t.steps.step3Title}</h3>
+                <p>{t.steps.step3Desc}</p>
               </div>
             </div>
           </div>
@@ -525,20 +563,20 @@ export default function Home() {
         <section className="section tint-band" id="try">
           <div className="wrap">
             <div className="section-head center reveal in">
-              <span className="eyebrow">Interactive demo</span>
-              <h2>Build your circle. Place a call.</h2>
-              <p className="lead">Add the people you trust, then choose how callers reach them: let iCanCall <b>cascade</b> through the circle until someone answers, or hand callers a <b>menu</b> to pick exactly who to dial. Try both below.</p>
+              <span className="eyebrow">{t.demo.eyebrow}</span>
+              <h2>{t.demo.title}</h2>
+              <p className="lead">{t.demo.lead}</p>
             </div>
 
             <div className="mode-toggle reveal in">
-              <span className="mode-label">Routing mode</span>
+              <span className="mode-label">{t.demo.routingMode}</span>
               <div className="seg" role="tablist" aria-label="Routing mode">
-                <button className={`seg-btn ${simMode === "cascade" ? "active" : ""}`} type="button" onClick={() => !simCalling && setSimMode("cascade")}>Call cascade</button>
-                <button className={`seg-btn ${simMode === "menu" ? "active" : ""}`} type="button" onClick={() => !simCalling && setSimMode("menu")}>Caller menu</button>
+                <button className={`seg-btn ${simMode === "cascade" ? "active" : ""}`} type="button" onClick={() => !simCalling && setSimMode("cascade")}>{t.demo.btnCascade}</button>
+                <button className={`seg-btn ${simMode === "menu" ? "active" : ""}`} type="button" onClick={() => !simCalling && setSimMode("menu")}>{t.demo.btnMenu}</button>
               </div>
               <span className="mode-note">
                 <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-1.5"><rect x="4" y="10" width="16" height="10" rx="2"></rect><path d="M8 10V7a4 4 0 0 1 8 0v3"></path></svg>
-                Set by the account owner in the dashboard
+                {lang === "es" ? "Establecido por el dueño de la cuenta en el panel" : "Set by the account owner in the dashboard"}
               </span>
             </div>
 
@@ -546,13 +584,13 @@ export default function Home() {
               {/* Circle Editor panel */}
               <div className="builder-panel">
                 <div className="builder-head">
-                  <h3>Your circle</h3>
-                  <span className="count">{contacts.length}/6 contacts</span>
+                  <h3>{lang === "es" ? "Su círculo" : "Your circle"}</h3>
+                  <span className="count">{contacts.length}/6 {lang === "es" ? "contactos" : "contacts"}</span>
                 </div>
                 
                 <div className="circle-list">
                   {!contacts.length ? (
-                    <div className="circle-empty">Add up to six trusted contacts to build your circle.</div>
+                    <div className="circle-empty">{t.demo.addContact}</div>
                   ) : (
                     contacts.map((c, i) => {
                       const isRinging = simRingingRow === c.id;
@@ -572,7 +610,7 @@ export default function Home() {
                             aria-pressed={c.available}
                           >
                             <span className="track" />
-                            <span className="lbl">{c.available ? "Available" : "Busy"}</span>
+                            <span className="lbl">{c.available ? t.demo.available : t.demo.offline}</span>
                           </button>
 
                           <span className="row-tools">
@@ -593,8 +631,8 @@ export default function Home() {
                 </div>
 
                 <form onSubmit={handleAddContact} className="add-form" autoComplete="off">
-                  <input className="input" placeholder="Name" maxLength={22} value={addName} onChange={(e) => setAddName(e.target.value)} required />
-                  <input className="input" placeholder="Relationship" maxLength={22} value={addRel} onChange={(e) => setAddRel(e.target.value)} />
+                  <input className="input" placeholder={lang === "es" ? "Nombre" : "Name"} maxLength={22} value={addName} onChange={(e) => setAddName(e.target.value)} required />
+                  <input className="input" placeholder={lang === "es" ? "Relación" : "Relationship"} maxLength={22} value={addRel} onChange={(e) => setAddRel(e.target.value)} />
                   <button className="btn btn-primary add-btn" type="submit" disabled={contacts.length >= 6} title="Add contact">
                     <Ico.plus className="w-[18px] h-[18px] text-white" />
                   </button>
@@ -608,11 +646,11 @@ export default function Home() {
                   
                   {simScreen.cls === "menu-mode" ? (
                     <div className="sim-menu">
-                      <div className="menu-title">Thanks for calling. Choose who to reach:</div>
+                      <div className="menu-title">{lang === "es" ? "Gracias por llamar. Elija con quién comunicarse:" : "Thanks for calling. Choose who to reach:"}</div>
                       {contacts.map((c, i) => (
                         <button key={c.id} type="button" className="sim-opt" onClick={() => handleSelectMenuOption(i)}>
                           <span className="digit">{i + 1}</span>
-                          <span className="opt-who"><b>Press {i + 1} &mdash; {c.name}</b><small>{c.rel}</small></span>
+                          <span className="opt-who"><b>{lang === "es" ? "Marque" : "Press"} {i + 1} &mdash; {c.name}</b><small>{c.rel}</small></span>
                         </button>
                       ))}
                     </div>
@@ -634,13 +672,13 @@ export default function Home() {
 
                 <button className="btn btn-primary" onClick={handlePlaceCall} disabled={simCalling}>
                   <Ico.phone className="w-[18px] h-[18px] text-white mr-1.5" />
-                  Place a call
+                  {t.demo.startSim}
                 </button>
                 
                 <p className="sim-hint">
                   {simMode === "menu"
-                    ? "Callers pick who to reach. Flip a contact to “Busy” to send them to voicemail."
-                    : "Toggle contacts to “Busy” to see the cascade skip ahead."}
+                    ? "{lang === "es" ? "Los usuarios eligen a quién llamar. Marque un contacto como «Ocupado» para enviarlo al buzón." : "Callers pick who to reach. Flip a contact to “Busy” to send them to voicemail."}"
+                    : "{lang === "es" ? "Desactive contactos a «Ocupado» para ver cómo salta la cascada." : "Toggle contacts to “Busy” to see the cascade skip ahead."}"}
                 </p>
               </div>
             </div>
@@ -651,24 +689,24 @@ export default function Home() {
         <section className="section tint-band" id="features">
           <div className="wrap">
             <div className="section-head reveal in">
-              <span className="eyebrow">Why families choose iCanCall</span>
-              <h2>Thoughtful by design.<br />Dependable by default.</h2>
+              <span className="eyebrow">{lang === "es" ? "Por qué las familias eligen iCanCall" : "Why families choose iCanCall"}</span>
+              <h2>{lang === "es" ? "Diseñado con empatía." : "Thoughtful by design."}<br />{lang === "es" ? "Confiable por defecto." : "Dependable by default."}</h2>
             </div>
             <div className="features">
               <div className="feature reveal in">
                 <div className="ic"><Ico.shield className="w-[23px] h-[23px]" /></div>
-                <h3>Two ways to connect</h3>
-                <p>Cascade through your circle until someone answers, or hand callers a menu to pick exactly who to reach. Switchable anytime in the dashboard.</p>
+                <h3>{t.features.f1Title}</h3>
+                <p>{t.features.f1Desc}</p>
               </div>
               <div className="feature reveal in">
                 <div className="ic"><Ico.phone className="w-[23px] h-[23px]" /></div>
-                <h3>One number, any phone</h3>
-                <p>No app required for callers. Works from any landline or mobile, anywhere — exactly as a phone number should.</p>
+                <h3>{t.features.f2Title}</h3>
+                <p>{t.features.f2Desc}</p>
               </div>
               <div className="feature reveal in">
                 <div className="ic"><Ico.user className="w-[23px] h-[23px]" /></div>
-                <h3>Up to six contacts</h3>
-                <p>Build a circle of family, neighbors, caregivers and doctors. Reorder anyone, anytime, in seconds.</p>
+                <h3>{t.features.f3Title}</h3>
+                <p>{t.features.f3Desc}</p>
               </div>
               <div className="feature reveal in">
                 <div className="ic">
@@ -677,8 +715,8 @@ export default function Home() {
                     <path d="M12 7v5l3 2" />
                   </svg>
                 </div>
-                <h3>Time-aware rules</h3>
-                <p>Route differently by time of day. Reach the night caregiver after hours, the family doctor during the week — automatically.</p>
+                <h3>{t.features.f4Title}</h3>
+                <p>{t.features.f4Desc}</p>
               </div>
               <div className="feature reveal in">
                 <div className="ic">
@@ -687,8 +725,8 @@ export default function Home() {
                     <path d="M8 9h8M8 12h5" />
                   </svg>
                 </div>
-                <h3>Instant alerts</h3>
-                <p>Every contact gets a text the moment a call comes through — so your whole circle knows the second something happens.</p>
+                <h3>{t.features.f5Title}</h3>
+                <p>{t.features.f5Desc}</p>
               </div>
               <div className="feature reveal in">
                 <div className="ic">
@@ -697,8 +735,8 @@ export default function Home() {
                     <path d="M8 10V7a4 4 0 0 1 8 0v3" />
                   </svg>
                 </div>
-                <h3>Private &amp; protected</h3>
-                <p>Personal numbers stay hidden behind your single iCanCall line. Encrypted end to end, and never sold.</p>
+                <h3>{t.features.f6Title}</h3>
+                <p>{t.features.f6Desc}</p>
               </div>
             </div>
           </div>
@@ -709,29 +747,29 @@ export default function Home() {
           <div className="wrap">
             <div className="section-head reveal in">
               <span className="eyebrow">Who it's for</span>
-              <h2>Peace of mind for every family.</h2>
-              <p className="lead">Whoever you're protecting, iCanCall makes sure they're only ever one call from help.</p>
+              <h2>{t.usecases.title}</h2>
+              <p className="lead">{t.usecases.lead}</p>
             </div>
             <div className="usecases">
               <article className="usecase reveal in">
                 <div className="ph"><span>photo · aging parent</span></div>
                 <div className="body">
-                  <h3>Aging parents</h3>
-                  <p>One number on the fridge connects Mom or Dad to the whole family — and their care team — without memorizing a single contact.</p>
+                  <h3>{t.usecases.u1Title}</h3>
+                  <p>{t.usecases.u1Desc}</p>
                 </div>
               </article>
               <article className="usecase reveal in">
                 <div className="ph"><span>photo · child calling home</span></div>
                 <div className="body">
-                  <h3>Young children</h3>
-                  <p>Kids learn one number. Whether they reach you, a grandparent, or a trusted neighbor, someone they know always answers.</p>
+                  <h3>{t.usecases.u2Title}</h3>
+                  <p>{t.usecases.u2Desc}</p>
                 </div>
               </article>
               <article className="usecase reveal in">
                 <div className="ph"><span>photo · special-abilities care</span></div>
                 <div className="body">
-                  <h3>Special abilities &amp; caregivers</h3>
-                  <p>For loved ones who can't navigate a contact list, a single number routes straight to the right caregiver, every time.</p>
+                  <h3>{t.usecases.u3Title}</h3>
+                  <p>{t.usecases.u3Desc}</p>
                 </div>
               </article>
             </div>
@@ -741,60 +779,60 @@ export default function Home() {
         <section className="section tint-band" id="pricing">
           <div className="wrap">
             <div className="section-head center reveal in">
-              <span className="eyebrow">Simple, honest pricing</span>
-              <h2>Safety shouldn't be complicated.</h2>
-              <p className="lead">Both plans include cascade routing, the caller menu, and 24/7 reliability. Cancel anytime.</p>
+              <span className="eyebrow">{t.pricing.title}</span>
+              <h2>{t.pricing.lead}</h2>
+              <p className="lead">{lang === "es" ? "Ambos planes incluyen desvío en cascada, menú de opciones y fiabilidad 24/7. Cancele cuando quiera." : "Both plans include cascade routing, the caller menu, and 24/7 reliability. Cancel anytime."}</p>
             </div>
  
             <div className="bill-toggle center-toggle reveal in">
-              <button className={billingCycle === "monthly" ? "active" : ""} onClick={() => setBillingCycle("monthly")}>Monthly</button>
-              <button className={billingCycle === "annual" ? "active" : ""} onClick={() => setBillingCycle("annual")}>Annual <em>Save 17%</em></button>
+              <button className={billingCycle === "monthly" ? "active" : ""} onClick={() => setBillingCycle("monthly")}>{t.pricing.monthly}</button>
+              <button className={billingCycle === "annual" ? "active" : ""} onClick={() => setBillingCycle("annual")}>{t.pricing.annual} <em>{lang === "es" ? "Ahorre 17%" : "Save 17%"}</em></button>
             </div>
  
             <div className="pricing">
               {/* Essential Card */}
               <div className="plan reveal in">
-                <h3>Essential</h3>
-                <p className="desc">One number for one loved one.</p>
+                <h3>{t.pricing.essentialTitle}</h3>
+                <p className="desc">{t.pricing.essentialDesc}</p>
                 <div className="price">
                   <b className="amt">{billingCycle === "annual" ? "$129" : "$12.99"}</b>
-                  <span className="per">{billingCycle === "annual" ? "/ year" : "/ month"}</span>
+                  <span className="per">{billingCycle === "annual" ? (lang === "es" ? "/ año" : "/ year") : (lang === "es" ? "/ mes" : "/ month")}</span>
                 </div>
-                <p className="price-yr">{billingCycle === "annual" ? "Just $10.75/mo, billed annually" : "Billed monthly · cancel anytime"}</p>
+                <p className="price-yr">{billingCycle === "annual" ? "lang === "es" ? "Solo $10.75/mes, facturado anualmente" : "Just $10.75/mo, billed annually"" : "lang === "es" ? "Facturado mensualmente · cancele en cualquier momento" : "Billed monthly · cancel anytime""}</p>
                 <ul>
-                  <li><Ico.check className="w-[19px] h-[19px]" /> 1 number included</li>
-                  <li><Ico.check className="w-[19px] h-[19px]" /> 3 routable trusted contacts</li>
-                  <li><Ico.check className="w-[19px] h-[19px]" /> Cascade routing + Caller Menu</li>
-                  <li><Ico.check className="w-[19px] h-[19px]" /> 30 voice minutes</li>
-                  <li><Ico.check className="w-[19px] h-[19px]" /> Email notifications</li>
-                  <li><Ico.check className="w-[19px] h-[19px]" /> Bilingual greeting options</li>
-                  <li><Ico.check className="w-[19px] h-[19px]" /> Works on any phone — no app needed</li>
+                  <li><Ico.check className="w-[19px] h-[19px]" /> {t.pricing.eFeat1}</li>
+                  <li><Ico.check className="w-[19px] h-[19px]" /> {t.pricing.eFeat2}</li>
+                  <li><Ico.check className="w-[19px] h-[19px]" /> {t.pricing.eFeat3}</li>
+                  <li><Ico.check className="w-[19px] h-[19px]" /> 30 {lang === "es" ? "minutos de voz" : "voice minutes"}</li>
+                  <li><Ico.check className="w-[19px] h-[19px]" /> {t.pricing.eFeat4}</li>
+                  <li><Ico.check className="w-[19px] h-[19px]" /> {t.pricing.eFeat5}</li>
+                  <li><Ico.check className="w-[19px] h-[19px]" /> lang === "es" ? "Funciona en cualquier teléfono — sin aplicaciones" : "Works on any phone — no app needed"</li>
                 </ul>
-                <Link className="btn btn-ghost" href={`/onboarding?plan=essential&billing=${billingCycle}`}>Select Essential</Link>
+                <Link className="btn btn-ghost" href={`/onboarding?plan=essential&billing=${billingCycle}`}>{t.pricing.selectPlan}</Link>
               </div>
  
               {/* Pro Card */}
               <div className="plan featured reveal in">
-                <span className="tag">Most popular</span>
-                <h3>Pro</h3>
-                <p className="desc">Full protection for the whole circle.</p>
+                <span className="tag">{t.pricing.mostPopular}</span>
+                <h3>{t.pricing.proTitle}</h3>
+                <p className="desc">{t.pricing.proDesc}</p>
                 <div className="price">
                   <b className="amt">{billingCycle === "annual" ? "$199" : "$19.99"}</b>
-                  <span className="per">{billingCycle === "annual" ? "/ year" : "/ month"}</span>
+                  <span className="per">{billingCycle === "annual" ? (lang === "es" ? "/ año" : "/ year") : (lang === "es" ? "/ mes" : "/ month")}</span>
                 </div>
-                <p className="price-yr">{billingCycle === "annual" ? "Just $16.58/mo, billed annually" : "Billed monthly · cancel anytime"}</p>
+                <p className="price-yr">{billingCycle === "annual" ? "lang === "es" ? "Solo $16.58/mes, facturado anualmente" : "Just $16.58/mo, billed annually"" : "lang === "es" ? "Facturado mensualmente · cancele en cualquier momento" : "Billed monthly · cancel anytime""}</p>
                 <ul>
-                  <li><Ico.check className="w-[19px] h-[19px]" /> 2 dedicated phone numbers</li>
-                  <li><Ico.check className="w-[19px] h-[19px]" /> 6 routable trusted contacts</li>
-                  <li><Ico.check className="w-[19px] h-[19px]" /> Cascade routing + Caller Menu</li>
-                  <li><Ico.check className="w-[19px] h-[19px]" /> 60 minutes included</li>
-                  <li><Ico.check className="w-[19px] h-[19px]" /> Real-time call alerts</li>
-                  <li><Ico.check className="w-[19px] h-[19px]" /> Bilingual greeting options</li>
-                  <li><Ico.check className="w-[19px] h-[19px]" /> Admin dashboard</li>
-                  <li><Ico.check className="w-[19px] h-[19px]" /> SMS &amp; email notifications</li>
-                  <li><Ico.check className="w-[19px] h-[19px]" /> Works on any phone — no app needed</li>
+                  <li><Ico.check className="w-[19px] h-[19px]" /> {t.pricing.pFeat1}</li>
+                  <li><Ico.check className="w-[19px] h-[19px]" /> {t.pricing.pFeat2}</li>
+                  <li><Ico.check className="w-[19px] h-[19px]" /> {t.pricing.eFeat3}</li>
+                  <li><Ico.check className="w-[19px] h-[19px]" /> 60 {lang === "es" ? "minutos incluidos" : "minutes included"}</li>
+                  <li><Ico.check className="w-[19px] h-[19px]" /> {t.pricing.pFeat3}</li>
+                  <li><Ico.check className="w-[19px] h-[19px]" /> {t.pricing.eFeat5}</li>
+                  <li><Ico.check className="w-[19px] h-[19px]" /> {t.pricing.pFeat4}</li>
+                  <li><Ico.check className="w-[19px] h-[19px]" /> {t.pricing.pFeat5}</li>
+                  <li><Ico.check className="w-[19px] h-[19px]" /> lang === "es" ? "Funciona en cualquier teléfono — sin aplicaciones" : "Works on any phone — no app needed"</li>
                 </ul>
-                <Link className="btn btn-primary" href={`/onboarding?plan=pro&billing=${billingCycle}`}>Select Pro</Link>
+                <Link className="btn btn-primary" href={`/onboarding?plan=pro&billing=${billingCycle}`}>{t.pricing.selectPlan}</Link>
               </div>
             </div>
           </div>
@@ -804,32 +842,32 @@ export default function Home() {
         <section className="section" id="stories">
           <div className="wrap">
             <div className="section-head reveal in">
-              <span className="eyebrow">Stories from families</span>
-              <h2>The calls that got through.</h2>
+              <span className="eyebrow">{t.testimonials.stars}</span>
+              <h2>{lang === "es" ? "Las llamadas que conectaron." : "The calls that got through."}</h2>
             </div>
             <div className="quotes">
               <figure className="quote reveal in">
                 <div className="stars">★★★★★</div>
-                <p>"My father fell last winter and dialed his iCanCall number. It reached me, then my sister, then his neighbor — who was three doors down. He had help in minutes."</p>
+                <p>{t.testimonials.t1Quote}</p>
                 <figcaption className="by">
                   <span className="avatar" style={{ background: "oklch(0.58 0.115 232)" }}>JM</span>
-                  <span><b>Jenna M.</b><span>Daughter &amp; caregiver</span></span>
+                  <span><b>Jenna M.</b><span>{lang === "es" ? "Hija y cuidadora" : "Daughter & caregiver"}</span></span>
                 </figcaption>
               </figure>
               <figure className="quote reveal in">
                 <div className="stars">★★★★★</div>
-                <p>"My seven-year-old only has to remember one number. Whether it finds me at work or her grandma at home, she always reaches someone who loves her."</p>
+                <p>{t.testimonials.t2Quote}</p>
                 <figcaption className="by">
                   <span className="avatar" style={{ background: "oklch(0.62 0.10 198)" }}>AT</span>
-                  <span><b>Andre T.</b><span>Dad of two</span></span>
+                  <span><b>Andre T.</b><span>{lang === "es" ? "Padre de dos" : "Dad of two"}</span></span>
                 </figcaption>
               </figure>
               <figure className="quote reveal in">
                 <div className="stars">★★★★★</div>
-                <p>"For our son, a contact list was impossible. Now one button, one number, and the right caregiver answers — every single time. It changed everything for us."</p>
+                <p>{t.testimonials.t3Quote}</p>
                 <figcaption className="by">
                   <span className="avatar" style={{ background: "oklch(0.55 0.11 280)" }}>PR</span>
-                  <span><b>Priya R.</b><span>Special-abilities parent</span></span>
+                  <span><b>Priya R.</b><span>{lang === "es" ? "Madre de niño con necesidades especiales" : "Special-abilities parent"}</span></span>
                 </figcaption>
               </figure>
             </div>
@@ -840,27 +878,27 @@ export default function Home() {
         <section className="section tint-band" id="faq">
           <div className="wrap">
             <div className="section-head center reveal in">
-              <span className="eyebrow">Questions, answered</span>
-              <h2>Everything you might ask.</h2>
+              <span className="eyebrow">{t.faq.title}</span>
+              <h2>{lang === "es" ? "Todo lo que podría preguntar." : "Everything you might ask."}</h2>
             </div>
  
             <div className="faq reveal in">
               {[
                 {
-                  q: "Do my contacts need to install an app?",
-                  a: "No. iCanCall works with any phone — landline or mobile. Callers simply dial your one number, and your contacts answer on whatever phone they already use. No apps, no new hardware."
+                  q: t.faq.q1,
+                  a: t.faq.a1
                 },
                 {
-                  q: "What happens if nobody answers?",
-                  a: "iCanCall rings each contact in your chosen order until someone picks up. If the full circle is unreachable, the caller can leave a voicemail that's instantly transcribed and texted to every contact, so no message is ever lost."
+                  q: t.faq.q2,
+                  a: t.faq.a2
                 },
                 {
-                  q: "Cascade or caller menu — what's the difference?",
-                  a: "You choose how callers connect, right from your dashboard. Call cascade rings your contacts one after another until someone answers — ideal for emergencies, when reaching anyone is what matters. Caller menu greets callers and lets them choose who to reach (\"press 1 for Mom, press 2 for the nurse\") — ideal when the right person depends on the situation. Switch modes anytime."
+                  q: t.faq.q3,
+                  a: t.faq.a3
                 },
                 {
-                  q: "Can I change the contacts or their order?",
-                  a: "Anytime, in seconds. Add, remove, or reorder up to six contacts from your dashboard. Changes take effect on the very next call."
+                  q: t.faq.q4,
+                  a: t.faq.a4
                 },
                 {
                   q: "Is my family's information private?",
@@ -892,13 +930,13 @@ export default function Home() {
         <section className="section cta-band" id="cta">
           <div className="wrap">
             <div className="cta-card reveal in">
-              <h2>The people you love are one number away.</h2>
-              <p>Give your family the certainty of always getting through. Set up iCanCall today and put safety on autopilot.</p>
+              <h2>{t.cta.title}</h2>
+              <p>{t.cta.desc}</p>
               <div className="actions">
-                <a className="btn btn-primary btn-lg" href="#pricing">Select a Plan</a>
+                <a className="btn btn-primary btn-lg" href="#pricing">{t.cta.btn}</a>
                 <a className="btn btn-ghost btn-lg" href="#how" style={{ color: "#fff", borderColor: "oklch(1 0 0 / 0.5)" }}>See how it works</a>
               </div>
-              <p className="fine">Set up in minutes · No setup fees · Cancel anytime</p>
+              <p className="fine">{t.cta.fine}</p>
             </div>
           </div>
         </section>
@@ -917,48 +955,48 @@ export default function Home() {
                 </span>
                 <span>i<b>Can</b>Call</span>
               </a>
-              <p className="blurb">One memorable number that always connects to the people who matter most. Safety on autopilot.</p>
+              <p className="blurb">{t.footer.blurb}</p>
             </div>
             <div>
-              <h5>Product</h5>
+              <h5>{t.footer.product}</h5>
               <ul>
-                <li><a href="#how">How it works</a></li>
-                <li><a href="#features">Features</a></li>
-                <li><a href="#pricing">Pricing</a></li>
-                <li><a href="#faq">FAQ</a></li>
-                <li><a href="/comparison-chart">Comparison Chart</a></li>
+                <li><a href="#how">{t.nav.how}</a></li>
+                <li><a href="#features">{t.nav.features}</a></li>
+                <li><a href="#pricing">{t.nav.pricing}</a></li>
+                <li><a href="#faq">{t.nav.faq}</a></li>
+                <li><a href="/comparison-chart">{t.footer.comparisonChart}</a></li>
                 <li><a href="/login">Login</a></li>
               </ul>
             </div>
             <div>
-              <h5>Who</h5>
+              <h5>{t.footer.who}</h5>
               <ul>
-                <li><a href="/parents">Parents</a></li>
-                <li><a href="/caregivers">Caregivers</a></li>
-                <li><a href="/seniors">Seniors</a></li>
+                <li><a href="/parents">{t.footer.parents}</a></li>
+                <li><a href="/caregivers">{t.footer.caregivers}</a></li>
+                <li><a href="/seniors">{t.footer.seniors}</a></li>
               </ul>
             </div>
             <div>
-              <h5>Company</h5>
+              <h5>{t.footer.company}</h5>
               <ul>
-                <li><a href="#">About</a></li>
-                <li><a href="#">Careers</a></li>
-                <li><a href="#stories">Stories</a></li>
-                <li><a href="#">Contact</a></li>
+                <li><a href="#">{t.footer.about}</a></li>
+                <li><a href="#">{t.footer.careers}</a></li>
+                <li><a href="#stories">{t.footer.stories}</a></li>
+                <li><a href="#">{t.footer.contact}</a></li>
               </ul>
             </div>
             <div>
-              <h5>Trust</h5>
+              <h5>{t.footer.trust}</h5>
               <ul>
-                <li><a href="#">Privacy</a></li>
-                <li><a href="#">Security</a></li>
-                <li><a href="#">Terms</a></li>
+                <li><a href="#">{t.footer.privacy}</a></li>
+                <li><a href="#">{t.footer.security}</a></li>
+                <li><a href="#">{t.footer.terms}</a></li>
               </ul>
             </div>
           </div>
           <div className="footer-bottom">
-            <span>&copy; {new Date().getFullYear()} iCanCall, Inc. All rights reserved.</span>
-            <span>Made for the moments that matter.</span>
+            <span>&copy; {new Date().getFullYear()} iCanCall, Inc. {lang === "es" ? "Todos los derechos reservados." : "All rights reserved."}</span>
+            <span>{t.footer.moments}</span>
           </div>
         </div>
       </footer>
