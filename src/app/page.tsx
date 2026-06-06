@@ -798,7 +798,7 @@ export default function Home() {
                   <b className="amt">{billingCycle === "annual" ? "$129" : "$12.99"}</b>
                   <span className="per">{billingCycle === "annual" ? (lang === "es" ? "/ año" : "/ year") : (lang === "es" ? "/ mes" : "/ month")}</span>
                 </div>
-                <p className="price-yr">{billingCycle === "annual" ? "lang === "es" ? "Solo $10.75/mes, facturado anualmente" : "Just $10.75/mo, billed annually"" : "lang === "es" ? "Facturado mensualmente · cancele en cualquier momento" : "Billed monthly · cancel anytime""}</p>
+                <p className="price-yr">{billingCycle === "annual" ? (lang === "es" ? "Solo $10.75/mes, facturado anualmente" : "Just $10.75/mo, billed annually") : (lang === "es" ? "Facturado mensualmente · cancele en cualquier momento" : "Billed monthly · cancel anytime")}</p>
                 <ul>
                   <li><Ico.check className="w-[19px] h-[19px]" /> {t.pricing.eFeat1}</li>
                   <li><Ico.check className="w-[19px] h-[19px]" /> {t.pricing.eFeat2}</li>
@@ -806,7 +806,7 @@ export default function Home() {
                   <li><Ico.check className="w-[19px] h-[19px]" /> 30 {lang === "es" ? "minutos de voz" : "voice minutes"}</li>
                   <li><Ico.check className="w-[19px] h-[19px]" /> {t.pricing.eFeat4}</li>
                   <li><Ico.check className="w-[19px] h-[19px]" /> {t.pricing.eFeat5}</li>
-                  <li><Ico.check className="w-[19px] h-[19px]" /> lang === "es" ? "Funciona en cualquier teléfono — sin aplicaciones" : "Works on any phone — no app needed"</li>
+                  <li><Ico.check className="w-[19px] h-[19px]" /> {lang === "es" ? "Funciona en cualquier teléfono — sin aplicaciones" : "Works on any phone — no app needed"}</li>
                 </ul>
                 <Link className="btn btn-ghost" href={`/onboarding?plan=essential&billing=${billingCycle}`}>{t.pricing.selectPlan}</Link>
               </div>
@@ -820,7 +820,7 @@ export default function Home() {
                   <b className="amt">{billingCycle === "annual" ? "$199" : "$19.99"}</b>
                   <span className="per">{billingCycle === "annual" ? (lang === "es" ? "/ año" : "/ year") : (lang === "es" ? "/ mes" : "/ month")}</span>
                 </div>
-                <p className="price-yr">{billingCycle === "annual" ? "lang === "es" ? "Solo $16.58/mes, facturado anualmente" : "Just $16.58/mo, billed annually"" : "lang === "es" ? "Facturado mensualmente · cancele en cualquier momento" : "Billed monthly · cancel anytime""}</p>
+                <p className="price-yr">{billingCycle === "annual" ? (lang === "es" ? "Solo $16.58/mes, facturado anualmente" : "Just $16.58/mo, billed annually") : (lang === "es" ? "Facturado mensualmente · cancele en cualquier momento" : "Billed monthly · cancel anytime")}</p>
                 <ul>
                   <li><Ico.check className="w-[19px] h-[19px]" /> {t.pricing.pFeat1}</li>
                   <li><Ico.check className="w-[19px] h-[19px]" /> {t.pricing.pFeat2}</li>
@@ -830,7 +830,7 @@ export default function Home() {
                   <li><Ico.check className="w-[19px] h-[19px]" /> {t.pricing.eFeat5}</li>
                   <li><Ico.check className="w-[19px] h-[19px]" /> {t.pricing.pFeat4}</li>
                   <li><Ico.check className="w-[19px] h-[19px]" /> {t.pricing.pFeat5}</li>
-                  <li><Ico.check className="w-[19px] h-[19px]" /> lang === "es" ? "Funciona en cualquier teléfono — sin aplicaciones" : "Works on any phone — no app needed"</li>
+                  <li><Ico.check className="w-[19px] h-[19px]" /> {lang === "es" ? "Funciona en cualquier teléfono — sin aplicaciones" : "Works on any phone — no app needed"}</li>
                 </ul>
                 <Link className="btn btn-primary" href={`/onboarding?plan=pro&billing=${billingCycle}`}>{t.pricing.selectPlan}</Link>
               </div>
