@@ -453,8 +453,8 @@ export default function Home() {
                 marginLeft: 4
               }}
             >
-              <option value="en">EN</option>
-              <option value="es">ES</option>
+              <option value="en">🇺🇸 EN</option>
+              <option value="es">🇪🇸 ES</option>
             </select>
           </div>
         </div>
