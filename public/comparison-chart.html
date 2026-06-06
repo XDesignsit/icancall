@@ -342,6 +342,11 @@
         <select id="langSelect" class="lang-select" style="background: transparent; border: 1px solid var(--line); color: var(--ink-soft); padding: 6px 10px; border-radius: 20px; font-size: 0.86rem; font-weight: 600; cursor: pointer; outline: none; font-family: var(--font); margin-left: 4px;">
           <option value="en">🇺🇸 EN</option>
           <option value="es">🇪🇸 ES</option>
+          <option value="fr">🇫🇷 FR</option>
+          <option value="ja">🇯🇵 JA</option>
+          <option value="zh">🇨🇳 ZH</option>
+          <option value="ar">🇸🇦 AR</option>
+          <option value="hi">🇮🇳 HI</option>
         </select>
       </div>
     </div>
@@ -635,104 +640,333 @@
   </footer>
 
 
+  
   <!-- ============== TRANSLATION SYSTEM ============== -->
   <script>
     const TRANSLATIONS = {
-      en: {
-        navHow: "How it works",
-        navFeatures: "Features",
-        navWho: "Who it's for",
-        navPricing: "Pricing",
-        navFaq: "FAQ",
-        navHowWorksBtn: "See how it works",
-        navSelectPlanBtn: "Select a Plan",
-        pageEyebrow: "Competitor comparison",
-        pageTitle: "See How We Compare",
-        pageLead: "iCanCall is the only safety phone routing service built for kids, seniors, and the special needs community — with no device required and no long-term contracts.",
-        thYouName: "iCanCall",
-        thYouPrice: "from $12.99/mo",
-        thComp1Price: "~$29–$39/mo",
-        thComp2Price: "$369 device + $20/mo",
-        thComp3Price: "Free app (iPhone req.)",
-        ctaTitle: "Ready to secure your family?",
-        ctaDesc: "Give your loved ones the safety and simplicity of iCanCall today. Set up in under 5 minutes.",
-        ctaBtnPrimary: "Get Started Now",
-        ctaBtnGhost: "Back to Homepage",
-        ctaFine: "Set up in minutes · No setup fees · Cancel anytime",
-        footerBlurb: "One memorable number that always connects to the people who matter most. Safety on autopilot.",
-        footerProduct: "Product",
-        footerWho: "Who",
-        footerCompany: "Company",
-        footerTrust: "Trust",
-        footerParents: "Parents",
-        footerCaregivers: "Caregivers",
-        footerSeniors: "Seniors",
-        footerHow: "How it works",
-        footerFeatures: "Features",
-        footerPricing: "Pricing",
-        footerFaq: "FAQ",
-        footerLogin: "Login",
-        footerComparisonChart: "Comparison Chart",
-        footerAbout: "About",
-        footerCareers: "Careers",
-        footerStories: "Stories",
-        footerContact: "Contact",
-        footerPrivacy: "Privacy",
-        footerSecurity: "Security",
-        footerTerms: "Terms",
-        footerCopyright: "© 2026 iCanCall, Inc. All rights reserved.",
-        footerMoments: "Made for the moments that matter."
-      },
-      es: {
-        navHow: "Cómo funciona",
-        navFeatures: "Funciones",
-        navWho: "Para quién es",
-        navPricing: "Precios",
-        navFaq: "Preguntas",
-        navHowWorksBtn: "Ver cómo funciona",
-        navSelectPlanBtn: "Elegir un Plan",
-        pageEyebrow: "Tabla comparativa",
-        pageTitle: "Vea cómo nos comparamos",
-        pageLead: "iCanCall es el único servicio de desvío de seguridad telefónica creado para niños, personas mayores y personas con necesidades especiales, sin necesidad de dispositivos y sin contratos a largo plazo.",
-        thYouName: "iCanCall",
-        thYouPrice: "desde $12.99/mes",
-        thComp1Price: "~$29–$39/mes",
-        thComp2Price: "$369 dispositivo + $20/mes",
-        thComp3Price: "App gratuita (req. iPhone)",
-        ctaTitle: "¿Listo para proteger a su familia?",
-        ctaDesc: "Brinde a sus seres queridos la seguridad y simplicidad de iCanCall hoy. Se configura en menos de 5 minutos.",
-        ctaBtnPrimary: "Comenzar Ahora",
-        ctaBtnGhost: "Volver al Inicio",
-        ctaFine: "Configuración en minutos · Sin tarifas ocultas · Cancele cuando quiera",
-        footerBlurb: "Un número memorable que siempre conecta con las personas más importantes. Seguridad en piloto automático.",
-        footerProduct: "Producto",
-        footerWho: "Quiénes",
-        footerCompany: "Compañía",
-        footerTrust: "Confianza",
-        footerParents: "Padres",
-        footerCaregivers: "Cuidadores",
-        footerSeniors: "Adultos Mayores",
-        footerHow: "Cómo funciona",
-        footerFeatures: "Funciones",
-        footerPricing: "Precios",
-        footerFaq: "FAQ",
-        footerLogin: "Iniciar Sesión",
-        footerComparisonChart: "Tabla Comparativa",
-        footerAbout: "Sobre Nosotros",
-        footerCareers: "Empleos",
-        footerStories: "Historias",
-        footerContact: "Contacto",
-        footerPrivacy: "Privacidad",
-        footerSecurity: "Seguridad",
-        footerTerms: "Condiciones",
-        footerCopyright: "© 2026 iCanCall, Inc. Todos los derechos reservados.",
-        footerMoments: "Hecho para los momentos que importan."
-      }
-    };
+  "en": {
+    "navHow": "How it works",
+    "navFeatures": "Features",
+    "navWho": "Who it's for",
+    "navPricing": "Pricing",
+    "navFaq": "FAQ",
+    "navHowWorksBtn": "See how it works",
+    "navSelectPlanBtn": "Select a Plan",
+    "pageEyebrow": "Competitor comparison",
+    "pageTitle": "See How We Compare",
+    "pageLead": "iCanCall is the only safety phone routing service built for kids, seniors, and the special needs community — with no device required and no long-term contracts.",
+    "thYouName": "iCanCall",
+    "thYouPrice": "from $12.99/mo",
+    "thComp1Price": "~$29–$39/mo",
+    "thComp2Price": "$369 device + $20/mo",
+    "thComp3Price": "Free app (iPhone req.)",
+    "ctaTitle": "Ready to secure your family?",
+    "ctaDesc": "Give your loved ones the safety and simplicity of iCanCall today. Set up in under 5 minutes.",
+    "ctaBtnPrimary": "Get Started Now",
+    "ctaBtnGhost": "Back to Homepage",
+    "ctaFine": "Set up in minutes · No setup fees · Cancel anytime",
+    "footerBlurb": "One memorable number that always connects to the people who matter most. Safety on autopilot.",
+    "footerProduct": "Product",
+    "footerWho": "Who",
+    "footerCompany": "Company",
+    "footerTrust": "Trust",
+    "footerParents": "Parents",
+    "footerCaregivers": "Caregivers",
+    "footerSeniors": "Seniors",
+    "footerHow": "How it works",
+    "footerFeatures": "Features",
+    "footerPricing": "Pricing",
+    "footerFaq": "FAQ",
+    "footerLogin": "Login",
+    "footerComparisonChart": "Comparison Chart",
+    "footerAbout": "About",
+    "footerCareers": "Careers",
+    "footerStories": "Stories",
+    "footerContact": "Contact",
+    "footerPrivacy": "Privacy",
+    "footerSecurity": "Security",
+    "footerTerms": "Terms",
+    "footerCopyright": "© 2026 iCanCall, Inc. All rights reserved.",
+    "footerMoments": "Made for the moments that matter."
+  },
+  "es": {
+    "navHow": "Cómo funciona",
+    "navFeatures": "Funciones",
+    "navWho": "Para quién es",
+    "navPricing": "Precios",
+    "navFaq": "Preguntas",
+    "navHowWorksBtn": "Ver cómo funciona",
+    "navSelectPlanBtn": "Elegir un Plan",
+    "pageEyebrow": "Tabla comparativa",
+    "pageTitle": "Vea cómo nos comparamos",
+    "pageLead": "iCanCall es el único servicio de desvío de seguridad telefónica creado para niños, personas mayores y personas con necesidades especiales, sin necesidad de dispositivos y sin contratos a largo plazo.",
+    "thYouName": "iCanCall",
+    "thYouPrice": "desde $12.99/mes",
+    "thComp1Price": "~$29–$39/mes",
+    "thComp2Price": "$369 dispositivo + $20/mes",
+    "thComp3Price": "App gratuita (req. iPhone)",
+    "ctaTitle": "¿Listo para proteger a su familia?",
+    "ctaDesc": "Brinde a sus seres queridos la seguridad y simplicidad de iCanCall hoy. Se configura en menos de 5 minutos.",
+    "ctaBtnPrimary": "Comenzar Ahora",
+    "ctaBtnGhost": "Volver al Inicio",
+    "ctaFine": "Configuración en minutos · Sin tarifas ocultas · Cancele cuando quiera",
+    "footerBlurb": "Un número memorable que siempre conecta con las personas más importantes. Seguridad en piloto automático.",
+    "footerProduct": "Producto",
+    "footerWho": "Quiénes",
+    "footerCompany": "Compañía",
+    "footerTrust": "Confianza",
+    "footerParents": "Padres",
+    "footerCaregivers": "Cuidadores",
+    "footerSeniors": "Adultos Mayores",
+    "footerHow": "Cómo funciona",
+    "footerFeatures": "Funciones",
+    "footerPricing": "Precios",
+    "footerFaq": "FAQ",
+    "footerLogin": "Iniciar Sesión",
+    "footerComparisonChart": "Tabla Comparativa",
+    "footerAbout": "Sobre Nosotros",
+    "footerCareers": "Empleos",
+    "footerStories": "Historias",
+    "footerContact": "Contacto",
+    "footerPrivacy": "Privacidad",
+    "footerSecurity": "Seguridad",
+    "footerTerms": "Condiciones",
+    "footerCopyright": "© 2026 iCanCall, Inc. Todos los derechos reservados.",
+    "footerMoments": "Hecho para los momentos que importan."
+  },
+  "fr": {
+    "navHow": "Comment ça marche",
+    "navFeatures": "Fonctionnalités",
+    "navWho": "Pour qui",
+    "navPricing": "Tarifs",
+    "navFaq": "FAQ",
+    "navHowWorksBtn": "Voir le fonctionnement",
+    "navSelectPlanBtn": "Choisir un forfait",
+    "pageEyebrow": "Comparatif des concurrents",
+    "pageTitle": "Découvrez notre comparatif",
+    "pageLead": "iCanCall est le seul service de routage de sécurité téléphonique conçu pour les enfants, les aînés et les personnes ayant des besoins spécifiques — sans appareil requis ni contrat.",
+    "thYouName": "iCanCall",
+    "thYouPrice": "à partir de 12,99 $/mois",
+    "thComp1Price": "~29–39 $/mois",
+    "thComp2Price": "369 $ matériel + 20 $/mois",
+    "thComp3Price": "App gratuite (req. iPhone)",
+    "ctaTitle": "Prêt à sécuriser votre famille ?",
+    "ctaDesc": "Offrez dès aujourd'hui à vos proches la sécurité et la simplicité d'iCanCall. Configuration en moins de 5 minutes.",
+    "ctaBtnPrimary": "Démarrer maintenant",
+    "ctaBtnGhost": "Retour à l'accueil",
+    "ctaFine": "Configuration en minutes · Aucun frais d'activation · Sans engagement",
+    "footerBlurb": "Un numéro mémorable qui connecte toujours aux personnes qui comptent le plus. La sécurité en pilote automatique.",
+    "footerProduct": "Produit",
+    "footerWho": "Pour qui",
+    "footerCompany": "Entreprise",
+    "footerTrust": "Confiance",
+    "footerParents": "Parents",
+    "footerCaregivers": "Aidants",
+    "footerSeniors": "Séniors",
+    "footerHow": "Comment ça marche",
+    "footerFeatures": "Fonctionnalités",
+    "footerPricing": "Tarifs",
+    "footerFaq": "FAQ",
+    "footerLogin": "Connexion",
+    "footerComparisonChart": "Tableau comparatif",
+    "footerAbout": "À propos",
+    "footerCareers": "Recrutement",
+    "footerStories": "Histoires",
+    "footerContact": "Contact",
+    "footerPrivacy": "Confidentialité",
+    "footerSecurity": "Sécurité",
+    "footerTerms": "Conditions",
+    "footerCopyright": "© 2026 iCanCall, Inc. Tous droits réservés.",
+    "footerMoments": "Fait pour les moments qui comptent."
+  },
+  "ja": {
+    "navHow": "仕組み",
+    "navFeatures": "機能",
+    "navWho": "対象者",
+    "navPricing": "料金",
+    "navFaq": "よくある質問",
+    "navHowWorksBtn": "仕組みを見る",
+    "navSelectPlanBtn": "プランを選択",
+    "pageEyebrow": "競合他社との比較",
+    "pageTitle": "他社との違いを見る",
+    "pageLead": "iCanCallは、キッズ、シニア、特別なケアが必要な方向けの、新しい電話機器の購入や長期契約が不要な唯一の安全な転送サービスです。",
+    "thYouName": "iCanCall",
+    "thYouPrice": "月額 $12.99 〜",
+    "thComp1Price": "月額約 $29〜$39",
+    "thComp2Price": "$369 機器代 + 月額 $20",
+    "thComp3Price": "無料アプリ（iPhone必須）",
+    "ctaTitle": "ご家族の安心を、今すぐ始めましょう",
+    "ctaDesc": "大切なご家族に、iCanCallによる安全でシンプルな通話環境を提供しましょう。設定は5分で完了します。",
+    "ctaBtnPrimary": "今すぐ始める",
+    "ctaBtnGhost": "ホームに戻る",
+    "ctaFine": "数分でセットアップ完了 · 初期費用なし · いつでも解約可能",
+    "footerBlurb": "大切な人たちへ必ずつながる、たった1つの覚えやすい電話番号。安全管理を自動化します。",
+    "footerProduct": "製品情報",
+    "footerWho": "対象者",
+    "footerCompany": "会社情報",
+    "footerTrust": "信頼性",
+    "footerParents": "保護者の方",
+    "footerCaregivers": "介護者の方",
+    "footerSeniors": "ご高齢者の方",
+    "footerHow": "仕組み",
+    "footerFeatures": "機能",
+    "footerPricing": "料金",
+    "footerFaq": "よくある質問",
+    "footerLogin": "ログイン",
+    "footerComparisonChart": "競合比較チャート",
+    "footerAbout": "会社概要",
+    "footerCareers": "採用情報",
+    "footerStories": "導入事例",
+    "footerContact": "お問い合わせ",
+    "footerPrivacy": "プライバシーポリシー",
+    "footerSecurity": "セキュリティ方針",
+    "footerTerms": "利用規約",
+    "footerCopyright": "© 2026 iCanCall, Inc. All rights reserved.",
+    "footerMoments": "かけがえのない瞬間のために。"
+  },
+  "zh": {
+    "navHow": "工作原理",
+    "navFeatures": "核心功能",
+    "navWho": "适用人群",
+    "navPricing": "套餐资费",
+    "navFaq": "常见问题",
+    "navHowWorksBtn": "查看使用方法",
+    "navSelectPlanBtn": "选择套餐",
+    "pageEyebrow": "竞品对比",
+    "pageTitle": "查看竞品差异",
+    "pageLead": "iCanCall 是唯一专为儿童、老人和特殊群体打造的电话安全路由转接服务，无需购买任何硬件设备，无长期捆绑合约。",
+    "thYouName": "iCanCall",
+    "thYouPrice": "$12.99/月 起",
+    "thComp1Price": "约 $29–$39/月",
+    "thComp2Price": "$369 终端费 + $20/月",
+    "thComp3Price": "免费 App (限 iPhone)",
+    "ctaTitle": "立即为您的家人提供安全守护",
+    "ctaDesc": "今天就让您所爱的人享受 iCanCall 的极简与安全。设置只需不到 5 分钟。",
+    "ctaBtnPrimary": "立即注册体验",
+    "ctaBtnGhost": "返回首页",
+    "ctaFine": "几分钟快速开通 · 无初装费 · 随时取消订阅",
+    "footerBlurb": "一个好记的号码，永远为您和至亲架起沟通的桥梁。全自动安全防线。",
+    "footerProduct": "产品中心",
+    "footerWho": "适用场景",
+    "footerCompany": "关于我们",
+    "footerTrust": "合规与信任",
+    "footerParents": "针对家长儿童",
+    "footerCaregivers": "针对看护随行",
+    "footerSeniors": "针对年迈长辈",
+    "footerHow": "工作原理",
+    "footerFeatures": "核心功能",
+    "footerPricing": "套餐资费",
+    "footerFaq": "常见问题",
+    "footerLogin": "登录账户",
+    "footerComparisonChart": "竞合对照表",
+    "footerAbout": "关于团队",
+    "footerCareers": "招贤纳士",
+    "footerStories": "用户故事",
+    "footerContact": "联系我们",
+    "footerPrivacy": "隐私协议",
+    "footerSecurity": "安全说明",
+    "footerTerms": "使用条款",
+    "footerCopyright": "© 2026 iCanCall, Inc. 保留所有权利。",
+    "footerMoments": "只为生命中那些至关重要的时刻。"
+  },
+  "ar": {
+    "navHow": "كيف يعمل",
+    "navFeatures": "الميزات",
+    "navWho": "لمن هذا",
+    "navPricing": "الأسعار",
+    "navFaq": "الأسئلة الشائعة",
+    "navHowWorksBtn": "شاهد كيف يعمل",
+    "navSelectPlanBtn": "اختر خطة",
+    "pageEyebrow": "المقارنة مع المنافسين",
+    "pageTitle": "شاهد كيف نقارن معهم",
+    "pageLead": "iCanCall هي خدمة توجيه أمان الهاتف الوحيدة المخصصة للأطفال وكبار السن وذوي الاحتياجات الخاصة — دون الحاجة لأجهزة مخصصة وبدون عقود طويلة الأجل.",
+    "thYouName": "iCanCall",
+    "thYouPrice": "تبدأ من 12.99 دولاراً شهرياً",
+    "thComp1Price": "~29–39 دولاراً شهرياً",
+    "thComp2Price": "369 دولاراً للجهاز + 20 دولاراً شهرياً",
+    "thComp3Price": "تطبيق مجاني (يتطلب آيفون)",
+    "ctaTitle": "هل أنت مستعد لحماية عائلتك؟",
+    "ctaDesc": "امنح أحباءك أمان وبساطة iCanCall اليوم. يتم الإعداد في أقل من 5 دقائق.",
+    "ctaBtnPrimary": "ابدأ الآن",
+    "ctaBtnGhost": "العودة للرئيسية",
+    "ctaFine": "الإعداد في دقائق · لا رسوم إعداد · إلغاء في أي وقت",
+    "footerBlurb": "رقم واحد سهل التذكر يربط دائماً بالأشخاص الأكثر أهمية. أمان في وضع الطيار الآلي.",
+    "footerProduct": "المنتج",
+    "footerWho": "الجمهور",
+    "footerCompany": "الشركة",
+    "footerTrust": "الثقة والأمان",
+    "footerParents": "الوالدان والأطفال",
+    "footerCaregivers": "مقدمو الرعاية",
+    "footerSeniors": "كبار السن",
+    "footerHow": "كيف يعمل",
+    "footerFeatures": "الميزات",
+    "footerPricing": "الأسعار",
+    "footerFaq": "الأسئلة الشائعة",
+    "footerLogin": "تسجيل الدخول",
+    "footerComparisonChart": "جدول المقارنة",
+    "footerAbout": "معلومات عنا",
+    "footerCareers": "الوظائف",
+    "footerStories": "قصصنا",
+    "footerContact": "اتصل بنا",
+    "footerPrivacy": "سياسة الخصوصية",
+    "footerSecurity": "الأمان",
+    "footerTerms": "شروط الخدمة",
+    "footerCopyright": "© 2026 جميع الحقوق محفوظة لشركة iCanCall, Inc.",
+    "footerMoments": "صنع للحظات التي تهمك."
+  },
+  "hi": {
+    "navHow": "यह कैसे काम करता है",
+    "navFeatures": "विशेषताएं",
+    "navWho": "किसके लिए है",
+    "navPricing": "कीमतें",
+    "navFaq": "अक्सर पूछे जाने वाले प्रश्न",
+    "navHowWorksBtn": "देखें यह कैसे काम करता है",
+    "navSelectPlanBtn": "प्लान चुनें",
+    "pageEyebrow": "प्रतियोगी तुलना",
+    "pageTitle": "देखें हम कैसे तुलना करते हैं",
+    "pageLead": "iCanCall बच्चों, बुजुर्गों और विशेष आवश्यकता वाले लोगों के लिए बनाई गई एकमात्र सुरक्षा फोन रूटिंग सेवा है — बिना किसी हार्डवेयर उपकरण के और बिना किसी लंबी अवधि के अनुबंध के।",
+    "thYouName": "iCanCall",
+    "thYouPrice": "शुरुआत $12.99/माह से",
+    "thComp1Price": "~$29–$39/माह",
+    "thComp2Price": "$369 उपकरण + $20/माह",
+    "thComp3Price": "मुफ़्त ऐप (iPhone आवश्यक)",
+    "ctaTitle": "अपने परिवार को सुरक्षित रखने के लिए तैयार हैं?",
+    "ctaDesc": "आज ही अपने प्रियजनों को iCanCall की सुरक्षा और सादगी दें। सेटअप में 5 मिनट से भी कम समय लगता है।",
+    "ctaBtnPrimary": "अभी शुरू करें",
+    "ctaBtnGhost": "होमपेज पर वापस",
+    "ctaFine": "मिनटों में सेटअप · कोई सेटअप शुल्क नहीं · किसी भी समय रद्द करें",
+    "footerBlurb": "एक याद रखने योग्य नंबर जो हमेशा आपके सबसे करीबी लोगों से जोड़ता है। ऑटोपायलट पर सुरक्षा।",
+    "footerProduct": "उत्पाद",
+    "footerWho": "किसके लिए",
+    "footerCompany": "कंपनी",
+    "footerTrust": "विश्वसनीयता",
+    "footerParents": "माता-पिता",
+    "footerCaregivers": "केयरटेकर",
+    "footerSeniors": "बुजुर्ग",
+    "footerHow": "यह कैसे काम करता है",
+    "footerFeatures": "विशेषताएं",
+    "footerPricing": "कीमतें",
+    "footerFaq": "अक्सर पूछे जाने वाले प्रश्न",
+    "footerLogin": "लॉगिन",
+    "footerComparisonChart": "तुलनात्मक तालिका",
+    "footerAbout": "हमारे बारे में",
+    "footerCareers": "करियर",
+    "footerStories": "कहानियां",
+    "footerContact": "संपर्क",
+    "footerPrivacy": "गोपनीयता नीति",
+    "footerSecurity": "सुरक्षा नीति",
+    "footerTerms": "सेवा की शर्तें",
+    "footerCopyright": "© 2026 iCanCall, Inc. सर्वाधिकार सुरक्षित।",
+    "footerMoments": "उन पलों के लिए जो मायने रखते हैं।"
+  }
+};
 
     function translatePage(lang) {
       const t = TRANSLATIONS[lang];
       if (!t) return;
+
+      // Toggle page layout direction (RTL for Arabic)
+      document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
       
       // Update DOM elements
       document.getElementById("navLinkHow").textContent = t.navHow;
@@ -788,73 +1022,231 @@
       document.getElementById("footerCopyright").textContent = t.footerCopyright;
       document.getElementById("footerMoments").textContent = t.footerMoments;
 
-      // Translate table text content specifically (like ✓, ✗, notes)
-      if (lang === "es") {
-        document.querySelectorAll(".section-row td").forEach(td => {
-          if (td.textContent.includes("Accessibility & Setup")) td.textContent = "Accesibilidad y Configuración";
-          if (td.textContent.includes("Call Routing & Contact Management")) td.textContent = "Enrutamiento y Contactos";
-          if (td.textContent.includes("Caregiver Tools & Oversight")) td.textContent = "Herramientas de Cuidadores";
-          if (td.textContent.includes("Audience & Inclusivity")) td.textContent = "Público y Facilidad de Uso";
-          if (td.textContent.includes("Pricing & Commitment")) td.textContent = "Precios y Compromiso";
+      // Multilingual table translations (mapping english text elements dynamically)
+      const tableHeaders = {
+        "es": ["Accesibilidad y Configuración", "Enrutamiento y Contactos", "Herramientas de Cuidadores", "Público y Facilidad de Uso", "Precios y Compromiso"],
+        "fr": ["Accessibilité & Configuration", "Routage des appels & Contacts", "Outils d'aidants & Surveillance", "Public cible & Inclusion", "Tarifs & Engagement"],
+        "ja": ["アクセシビリティと初期設定", "着信ルーティングと連絡先管理", "介護者向けツールと監視機能", "対象者と使いやすさ", "料金プランと契約縛り"],
+        "zh": ["易用性与设置配置", "呼叫路由与联系人管理", "看护工具与远程监管", "适用场景与易用性", "资费套餐与服务合约"],
+        "ar": ["سهولة الوصول والإعداد", "توجيه المكالمات وإدارة جهات الاتصال", "أدوات مقدمي الرعاية والإشراف", "الجمهور والشمولية", "الأسعار والالتزام"],
+        "hi": ["सुलभता और सेटअप", "कॉल रूटिंग और संपर्क प्रबंधन", "केयरटेकर उपकरण और निगरानी", "उपयोगकर्ता और सुलभता", "कीमतें और अनुबंध"]
+      };
+
+      const rowMappings = {
+        "es": {
+          "Works on any phone — no device needed": "Funciona en cualquier teléfono — sin dispositivo",
+          "No app required for the caller": "Sin aplicaciones para quien llama",
+          "Setup in under 5 minutes": "Configuración en menos de 5 minutos",
+          "No hardware purchase required": "Sin compra de hardware",
+          "Caller-controlled routing menu": "Menú controlado por quien llama",
+          "Up to 6 routable contacts": "Hasta 6 contactos de apoyo",
+          "Single memorable number": "Un único número memorable",
+          "Add-on numbers available": "Números adicionales disponibles",
+          "Real-time call alerts & notifications": "Alertas y avisos en tempo real",
+          "Full call log & history": "Historial completo de llamadas",
+          "Remote contact management": "Gestión remota de contactos",
+          "Secure caregiver dashboard": "Panel de control seguro",
+          "Designed for children": "Diseñado para niños",
+          "Designed for seniors": "Diseñado para personas mayores",
+          "Designed for special needs community": "Para necesidades especiales",
+          "Bilingual greeting options": "Saludos en dos idiomas",
+          "User empowerment — caller chooses who answers": "El que llama elige quién responde",
+          "No hardware cost": "Sin costos de hardware",
+          "No long-term contract": "Sin contratos de permanencia",
+          "Monthly entry-level price": "Precio mensual de entrada"
+        },
+        "fr": {
+          "Works on any phone — no device needed": "Fonctionne sur tout téléphone — aucun appareil requis",
+          "No app required for the caller": "Aucune application requise pour l'appelant",
+          "Setup in under 5 minutes": "Configuration en moins de 5 minutes",
+          "No hardware purchase required": "Aucun achat de matériel requis",
+          "Caller-controlled routing menu": "Menu vocal contrôlé par l'appelant",
+          "Up to 6 routable contacts": "Jusqu'à 6 contacts configurables",
+          "Single memorable number": "Un seul numéro mémorable",
+          "Add-on numbers available": "Numéros additionnels disponibles",
+          "Real-time call alerts & notifications": "Alertes d'appels & notifications en temps réel",
+          "Full call log & history": "Journal d'appels complet & historique",
+          "Remote contact management": "Gestion des contacts à distance",
+          "Secure caregiver dashboard": "Tableau de bord sécurisé pour aidants",
+          "Designed for children": "Conçu pour les enfants",
+          "Designed for seniors": "Conçu pour les aînés",
+          "Designed for special needs community": "Conçu pour les besoins spécifiques",
+          "Bilingual greeting options": "Options d'accueil bilingues",
+          "User empowerment — caller chooses who answers": "Autonomie de l'appelant — choisit qui répond",
+          "No hardware cost": "Aucun coût matériel",
+          "No long-term contract": "Sans engagement à long terme",
+          "Monthly entry-level price": "Prix d'entrée mensuel"
+        },
+        "ja": {
+          "Works on any phone — no device needed": "どの電話でも動作 — 専用機器不要",
+          "No app required for the caller": "発信者側のアプリ不要",
+          "Setup in under 5 minutes": "5分以内で初期設定完了",
+          "No hardware purchase required": "新しいハードウェアの購入不要",
+          "Caller-controlled routing menu": "発信者が選択できる音声ダイヤルメニュー",
+          "Up to 6 routable contacts": "最大6名の転送先連絡先",
+          "Single memorable number": "覚えやすい1つの電話番号",
+          "Add-on numbers available": "追加の安全番号取得が可能",
+          "Real-time call alerts & notifications": "リアルタイム通話アラート＆通知",
+          "Full call log & history": "全通話ログと通話履歴",
+          "Remote contact management": "遠隔からの連絡先管理",
+          "Secure caregiver dashboard": "安全な管理者ダッシュボード",
+          "Designed for children": "お子様向け設計",
+          "Designed for seniors": "ご高齢者向け設計",
+          "Designed for special needs community": "特別ケアが必要な方向け",
+          "Bilingual greeting options": "2ヶ国語応答ガイダンス設定",
+          "User empowerment — caller chooses who answers": "発信者自身が繋ぎ先を選べる機能",
+          "No hardware cost": "初期機器費用なし",
+          "No long-term contract": "解約金・契約縛りなし",
+          "Monthly entry-level price": "月額の基本料金"
+        },
+        "zh": {
+          "Works on any phone — no device needed": "适用于任何电话 — 无需新终端设备",
+          "No app required for the caller": "拨打者无需安装 APP",
+          "Setup in under 5 minutes": "5分钟内快速自助开通",
+          "No hardware purchase required": "无需购买任何硬件设备",
+          "Caller-controlled routing menu": "拨打者联想选择菜单",
+          "Up to 6 routable contacts": "最多添加 6 位护理联系人",
+          "Single memorable number": "好记的单一安全号码",
+          "Add-on numbers available": "支持随时增购额外号码",
+          "Real-time call alerts & notifications": "实时呼叫通知与提醒",
+          "Full call log & history": "完整通话日志及历史记录",
+          "Remote contact management": "云端远程管理联系人",
+          "Secure caregiver dashboard": "安全的看护人管理后台",
+          "Designed for children": "专为儿童安全设计",
+          "Designed for seniors": "专为老年长辈设计",
+          "Designed for special needs community": "专为特殊照顾群体设计",
+          "Bilingual greeting options": "双语语音引导录音选项",
+          "User empowerment — caller chooses who answers": "主叫物联选择转接",
+          "No hardware cost": "无硬件终端采购成本",
+          "No long-term contract": "无长期捆绑合约限制",
+          "Monthly entry-level price": "每月基本资费门槛"
+        },
+        "ar": {
+          "Works on any phone — no device needed": "يعمل على أي هاتف — لا حاجة لأجهزة مخصصة",
+          "No app required for the caller": "لا يتطلب تطبيقاً للمتصل",
+          "Setup in under 5 minutes": "إعداد في أقل من 5 دقائق",
+          "No hardware purchase required": "لا يتطلب شراء أي أجهزة",
+          "Caller-controlled routing menu": "قائمة توجيه يتحكم بها المتصل",
+          "Up to 6 routable contacts": "ما يصل إلى 6 جهات اتصال موجهة",
+          "Single memorable number": "رقم واحد سهل الحفظ",
+          "Add-on numbers available": "أرقام إضافية متاحة للشراء",
+          "Real-time call alerts & notifications": "تنبيهات وإشعارات المكالمات في الوقت الفعلي",
+          "Full call log & history": "سجل كامل وتاريخ المكالمات",
+          "Remote contact management": "إدارة جهات الاتصال عن بعد",
+          "Secure caregiver dashboard": "لوحة تحكم آمنة لمقدمي الرعاية",
+          "Designed for children": "مصمم خصيصاً للأطفال",
+          "Designed for seniors": "مصمم خصيصاً لكبار السن",
+          "Designed for special needs community": "مصمم لذوي الاحتياجات الخاصة",
+          "Bilingual greeting options": "خيارات ترحيب ثنائية اللغة",
+          "User empowerment — caller chooses who answers": "تمكين المستخدم — يختار المتصل من يجيب",
+          "No hardware cost": "لا تكلفة للأجهزة",
+          "No long-term contract": "بدون عقود طويلة الأجل",
+          "Monthly entry-level price": "سعر الدخول الشهري المعتاد"
+        },
+        "hi": {
+          "Works on any phone — no device needed": "किसी भी फोन पर काम करता है — किसी उपकरण की आवश्यकता नहीं",
+          "No app required for the caller": "कॉलर के लिए किसी ऐप की आवश्यकता नहीं",
+          "Setup in under 5 minutes": "5 मिनट से कम में सेटअप",
+          "No hardware purchase required": "कोई हार्डवेयर खरीदने की आवश्यकता नहीं",
+          "Caller-controlled routing menu": "कॉलर द्वारा नियंत्रित वॉयस मेनू",
+          "Up to 6 routable contacts": "अधिकतम 6 संपर्क सदस्य",
+          "Single memorable number": "एक याद रखने योग्य नंबर",
+          "Add-on numbers available": "अतिरिक्त सुरक्षा नंबर उपलब्ध हैं",
+          "Real-time call alerts & notifications": "वास्तविक समय में कॉल अलर्ट और सूचनाएं",
+          "Full call log & history": "पूर्ण कॉल लॉग और इतिहास",
+          "Remote contact management": "रिमोट संपर्क प्रबंधन",
+          "Secure caregiver dashboard": "सुरक्षित केयरटेकर डैशबोर्ड",
+          "Designed for children": "बच्चों के लिए डिज़ाइन किया गया",
+          "Designed for seniors": "बुजुर्गों के लिए डिज़ाइन किया गया",
+          "Designed for special needs community": "विशेष आवश्यकता वाले लोगों के लिए",
+          "Bilingual greeting options": "द्विभाषी अभिवादन विकल्प",
+          "User empowerment — caller chooses who answers": "कॉलर स्वयं चुनता है कि किसे बात करनी है",
+          "No hardware cost": "कोई हार्डवेयर लागत नहीं",
+          "No long-term contract": "कोई दीर्घकालिक अनुबंध नहीं",
+          "Monthly entry-level price": "न्यूनतम मासिक प्रवेश मूल्य"
+        }
+      };
+
+      const legendTranslations = {
+        "es": ["✓ Incluido", "✗ No disponible", "~ Parcial Limitado o condicional"],
+        "fr": ["✓ Inclus", "✗ Non disponible", "~ Partiel Limité ou conditionnel"],
+        "ja": ["✓ 含まれる", "✗ 利用不可", "~ 一部機能制限あり / 条件付き"],
+        "zh": ["✓ 已包含", "✗ 未提供 / 不可用", "~ 部分提供 / 有限制条件"],
+        "ar": ["✓ مشمول", "✗ غير متاح", "~ جزئي محدود أو مشروط"],
+        "hi": ["✓ शामिल", "✗ उपलब्ध नहीं", "~ आंशिक सीमित या सशर्त"]
+      };
+
+      const legendLabels = {
+        "es": "Clave:",
+        "fr": "Légende :",
+        "ja": "凡例：",
+        "zh": "图例说明：",
+        "ar": "المفتاح:",
+        "hi": "संकेत:"
+      };
+
+      // Translate table headers
+      if (tableHeaders[lang]) {
+        const sections = document.querySelectorAll(".section-row td");
+        sections.forEach((td, idx) => {
+          if (tableHeaders[lang][idx]) td.textContent = tableHeaders[lang][idx];
         });
+      }
+
+      // Translate row texts
+      if (rowMappings[lang]) {
         document.querySelectorAll("tbody td").forEach(td => {
-          if (td.textContent.includes("Works on any phone — no device needed")) td.innerHTML = "Funciona en cualquier teléfono — sin dispositivo";
-          if (td.textContent.includes("No app required for the caller")) td.innerHTML = "Sin aplicaciones para quien llama";
-          if (td.textContent.includes("Setup in under 5 minutes")) td.innerHTML = "Configuración en menos de 5 minutos";
-          if (td.textContent.includes("No hardware purchase required")) td.innerHTML = "Sin compra de hardware";
-          if (td.textContent.includes("Caller-controlled routing menu")) td.innerHTML = "Menú controlado por quien llama";
-          if (td.textContent.includes("Up to 6 routable contacts")) td.innerHTML = "Hasta 6 contactos de apoyo";
-          if (td.textContent.includes("Single memorable number")) td.innerHTML = "Un único número memorable";
-          if (td.textContent.includes("Add-on numbers available")) td.innerHTML = "Números adicionales disponibles";
-          if (td.textContent.includes("Real-time call alerts & notifications")) td.innerHTML = "Alertas y avisos en tiempo real";
-          if (td.textContent.includes("Full call log & history")) td.innerHTML = "Historial completo de llamadas";
-          if (td.textContent.includes("Remote contact management")) td.innerHTML = "Gestión remota de contactos";
-          if (td.textContent.includes("Secure caregiver dashboard")) td.innerHTML = "Panel de control seguro";
-          if (td.textContent.includes("Designed for children")) td.innerHTML = "Diseñado para niños";
-          if (td.textContent.includes("Designed for seniors")) td.innerHTML = "Diseñado para personas mayores";
-          if (td.textContent.includes("Designed for special needs community")) td.innerHTML = "Para necesidades especiales";
-          if (td.textContent.includes("Bilingual greeting options")) td.innerHTML = "Saludos en dos idiomas";
-          if (td.textContent.includes("User empowerment — caller chooses who answers")) td.innerHTML = "El que llama elige quién responde";
-          if (td.textContent.includes("No hardware cost")) td.innerHTML = "Sin costos de hardware";
-          if (td.textContent.includes("No long-term contract")) td.innerHTML = "Sin contratos de permanencia";
-          if (td.textContent.includes("Monthly entry-level price")) td.innerHTML = "Precio mensual de entrada";
+          const txt = td.textContent.trim();
+          // Find if there is a match in mapping keys
+          for (const key in rowMappings[lang]) {
+            if (txt.includes(key)) {
+              td.innerHTML = td.innerHTML.replace(key, rowMappings[lang][key]);
+            }
+          }
         });
+      }
+
+      // Translate notes inside tds
+      if (tableNotes[lang]) {
         document.querySelectorAll(".note").forEach(span => {
-          if (span.textContent.includes("Requires landline setup")) span.textContent = "Requiere teléfono fijo";
-          if (span.textContent.includes("Requires $369 device")) span.textContent = "Requiere aparato de $369";
-          if (span.textContent.includes("Requires iPhone")) span.textContent = "Requiere iPhone";
-          if (span.textContent.includes("Proprietary device only")) span.textContent = "Solo aparato propietario";
-          if (span.textContent.includes("iPhone app required")) span.textContent = "Requiere app de iPhone";
-          if (span.textContent.includes("Phone line setup required")) span.textContent = "Requiere línea de teléfono";
-          if (span.textContent.includes("Device + carrier setup")) span.textContent = "Aparato + línea celular";
-          if (span.textContent.includes("App + account required")) span.textContent = "Requiere app y cuenta";
-          if (span.textContent.includes("Caregiver controls all routing")) span.textContent = "Cuidadores controlan desvío";
-          if (span.textContent.includes("Direct dial only")) span.textContent = "Marcado directo únicamente";
-          if (span.textContent.includes("Approved contact list")) span.textContent = "Lista aprobada únicamente";
-          if (span.textContent.includes("6 photo contacts")) span.textContent = "6 contactos con foto";
-          if (span.textContent.includes("Up to 5 contacts")) span.textContent = "Hasta 5 contactos";
-          if (span.textContent.includes("Device-based, not number-based")) span.textContent = "Basado en aparato, no número";
-          if (span.textContent.includes("Uses existing phone number")) span.textContent = "Usa número existente";
-          if (span.textContent.includes("$3.99/mo per number")) span.textContent = "$3.99/mes por número";
-          if (span.textContent.includes("Seniors only")) span.textContent = "Personas mayores únicamente";
-          if (span.textContent.includes("Seniors / cognitive impairment")) span.textContent = "Personas mayores / demencia";
-          if (span.textContent.includes("Cognitive impairment focus")) span.textContent = "Enfoque en demencia";
-          if (span.textContent.includes("Caregiver-controlled restriction")) span.textContent = "Restringido por cuidadores";
-          if (span.textContent.includes("$369 upfront")) span.textContent = "$369 iniciales";
-          if (span.textContent.includes("Check terms")) span.textContent = "Ver términos";
+          const txt = span.textContent.trim();
+          for (const key in tableNotes[lang]) {
+            if (txt.includes(key)) {
+              span.textContent = tableNotes[lang][key];
+            }
+          }
         });
-        document.querySelectorAll(".price-you").forEach(span => {
-          if (span.textContent.includes("$12.99/mo")) span.textContent = "$12.99/mes";
+      }
+
+      // Translate price strings
+      document.querySelectorAll(".price-you").forEach(span => {
+        if (lang === 'fr') span.textContent = span.textContent.replace("/mo", "/mois");
+        if (lang === 'es') span.textContent = span.textContent.replace("/mo", "/mes");
+        if (lang === 'ja') span.textContent = span.textContent.replace("/mo", "/月");
+        if (lang === 'zh') span.textContent = span.textContent.replace("/mo", "/月");
+        if (lang === 'ar') span.textContent = span.textContent.replace("/mo", "/شهر");
+        if (lang === 'hi') span.textContent = span.textContent.replace("/mo", "/माह");
+      });
+
+      // Translate legend indicators
+      if (legendTranslations[lang]) {
+        document.querySelectorAll(".legend-item").forEach((span, idx) => {
+          if (legendTranslations[lang][idx]) {
+            const raw = legendTranslations[lang][idx];
+            if (raw.startsWith("✓")) {
+              span.innerHTML = `<span class="yes" style="font-size:16px;">✓</span> ` + raw.slice(2);
+            } else if (raw.startsWith("✗")) {
+              span.innerHTML = `<span class="no" style="font-size:16px;">✗</span> ` + raw.slice(2);
+            } else if (raw.startsWith("~")) {
+              const content = raw.split(" ");
+              span.innerHTML = `<span class="partial">${content[0]} ${content[1]}</span> ` + content.slice(2).join(" ");
+            }
+          }
         });
-        document.querySelectorAll(".legend-item").forEach(span => {
-          if (span.textContent.includes("Included")) span.innerHTML = '<span class="yes" style="font-size:16px;">✓</span> Incluido';
-          if (span.textContent.includes("Not available")) span.innerHTML = '<span class="no" style="font-size:16px;">✗</span> No disponible';
-          if (span.textContent.includes("Limited or conditional")) span.innerHTML = '<span class="partial">~ Parcial</span> Limitado o condicional';
-        });
-        document.querySelector(".legend strong").textContent = "Clave:";
-      } else {
-        // Just reload the page to restore English default, or restore DOM
-        window.location.reload();
+      }
+
+      if (legendLabels[lang]) {
+        document.querySelector(".legend strong").textContent = legendLabels[lang];
       }
     }
 
@@ -863,20 +1255,14 @@
     // Load saved preference
     const savedLang = localStorage.getItem("lang") || "en";
     langSelect.value = savedLang;
-    if (savedLang === "es") {
-      translatePage("es");
-    }
+    translatePage(savedLang);
 
     langSelect.addEventListener("change", function(e) {
       const val = e.target.value;
       localStorage.setItem("lang", val);
       // Notify other tabs
       window.dispatchEvent(new Event("storage"));
-      if (val === "es") {
-        translatePage("es");
-      } else {
-        translatePage("en");
-      }
+      translatePage(val);
     });
 
     // Handle cross-tab storage sync
@@ -889,5 +1275,5 @@
     });
   </script>
 </body>
-
 </html>
+
