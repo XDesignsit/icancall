@@ -677,8 +677,8 @@ export default function Home() {
                 
                 <p className="sim-hint">
                   {simMode === "menu"
-                    ? "{lang === "es" ? "Los usuarios eligen a quién llamar. Marque un contacto como «Ocupado» para enviarlo al buzón." : "Callers pick who to reach. Flip a contact to “Busy” to send them to voicemail."}"
-                    : "{lang === "es" ? "Desactive contactos a «Ocupado» para ver cómo salta la cascada." : "Toggle contacts to “Busy” to see the cascade skip ahead."}"}
+                    ? (lang === "es" ? "Los usuarios eligen a quién llamar. Marque un contacto como «Ocupado» para enviarlo al buzón." : "Callers pick who to reach. Flip a contact to “Busy” to send them to voicemail.")
+                    : (lang === "es" ? "Desactive contactos a «Ocupado» para ver cómo salta la cascada." : "Toggle contacts to “Busy” to see the cascade skip ahead.")}
                 </p>
               </div>
             </div>
