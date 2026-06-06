@@ -105,11 +105,11 @@ const Ico = {
 };
 
 export default function Home() {
-  const [lang, setLang] = useState<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi">("en");
+  const [lang, setLang] = useState<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi" | "pt" | "de" | "it" | "ko">("en");
 
   useEffect(() => {
     const savedLang = localStorage.getItem("lang") as any;
-    const validLangs = ["en", "es", "fr", "ja", "zh", "ar", "hi"];
+    const validLangs = ["en", "es", "fr", "ja", "zh", "ar", "hi", "pt", "de", "it", "ko"];
     if (validLangs.includes(savedLang)) {
       setLang(savedLang);
     }
@@ -119,7 +119,7 @@ export default function Home() {
     document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
   }, [lang]);
 
-  const changeLanguage = (newLang: "en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi") => {
+  const changeLanguage = (newLang: "en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi" | "pt" | "de" | "it" | "ko") => {
     setLang(newLang);
     localStorage.setItem("lang", newLang);
     window.dispatchEvent(new Event("storage"));
@@ -465,6 +465,10 @@ export default function Home() {
               <option value="zh">🇨🇳 ZH</option>
               <option value="ar">🇸🇦 AR</option>
               <option value="hi">🇮🇳 HI</option>
+              <option value="pt">🇵🇹 PT</option>
+              <option value="de">🇩🇪 DE</option>
+              <option value="it">🇮🇹 IT</option>
+              <option value="ko">🇰🇷 KO</option>
             </select>
           </div>
         </div>
