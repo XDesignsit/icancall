@@ -432,6 +432,9 @@ export default function Home() {
             <a href="#faq">{t.nav.faq}</a>
           </nav>
           <div className="header-cta" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <a className="btn btn-text" href="/login" style={{ marginRight: 6 }}>{t.nav.login}</a>
+            <a className="btn btn-ghost" href="#how">{t.nav.howWorksBtn}</a>
+            <a className="btn btn-primary" href="#pricing">{t.nav.selectPlanBtn}</a>
             <select
               value={lang}
               onChange={(e) => changeLanguage(e.target.value as "en" | "es")}
@@ -446,15 +449,13 @@ export default function Home() {
                 fontWeight: '600',
                 cursor: 'pointer',
                 outline: 'none',
-                fontFamily: 'var(--font)'
+                fontFamily: 'var(--font)',
+                marginLeft: 4
               }}
             >
               <option value="en">EN</option>
               <option value="es">ES</option>
             </select>
-            <a className="btn btn-text" href="/login" style={{ marginRight: 6 }}>{t.nav.login}</a>
-            <a className="btn btn-ghost" href="#how">{t.nav.howWorksBtn}</a>
-            <a className="btn btn-primary" href="#pricing">{t.nav.selectPlanBtn}</a>
           </div>
         </div>
       </header>

@@ -123,8 +123,8 @@
     }
     .brand .mark svg { width: 18px; height: 18px; }
     .brand b { color: var(--blue-deep); }
-    .nav { display: flex; align-items: center; gap: 32px; }
-    .nav a { font-size: 0.96rem; color: var(--ink-soft); font-weight: 500; transition: color .15s; }
+    .nav { display: flex; align-items: center; gap: 20px; }
+    .nav a { font-size: 0.94rem; color: var(--ink-soft); font-weight: 500; transition: color .15s; white-space: nowrap; }
     .nav a:hover { color: var(--ink); }
     .header-cta { display: flex; align-items: center; gap: 14px; }
     @media (max-width: 880px) {
@@ -337,12 +337,12 @@
         <a href="/#faq" id="navLinkFaq">FAQ</a>
       </nav>
       <div class="header-cta" style="display: flex; align-items: center; gap: 12px;">
-        <select id="langSelect" class="lang-select" style="background: transparent; border: 1px solid var(--line); color: var(--ink-soft); padding: 6px 10px; border-radius: 20px; font-size: 0.86rem; font-weight: 600; cursor: pointer; outline: none; font-family: var(--font);">
+        <a class="btn btn-ghost" href="/#how" id="navHowWorks">See how it works</a>
+        <a class="btn btn-primary" href="/#pricing" id="navSelectPlan">Select a Plan</a>
+        <select id="langSelect" class="lang-select" style="background: transparent; border: 1px solid var(--line); color: var(--ink-soft); padding: 6px 10px; border-radius: 20px; font-size: 0.86rem; font-weight: 600; cursor: pointer; outline: none; font-family: var(--font); margin-left: 4px;">
           <option value="en">EN</option>
           <option value="es">ES</option>
         </select>
-        <a class="btn btn-ghost" href="/#how" id="navHowWorks">See how it works</a>
-        <a class="btn btn-primary" href="/#pricing" id="navSelectPlan">Select a Plan</a>
       </div>
     </div>
   </header>

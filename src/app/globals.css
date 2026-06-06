@@ -133,8 +133,8 @@ h3 { font-size: clamp(1.25rem, 2vw, 1.6rem); }
 }
 .brand .mark svg { width: 18px; height: 18px; }
 .brand b { color: var(--blue-deep); }
-.nav { display: flex; align-items: center; gap: 32px; font-family: var(--font); }
-.nav a { font-family: var(--font); font-size: 0.96rem; color: var(--ink-soft); font-weight: 500; transition: color .15s; }
+.nav { display: flex; align-items: center; gap: 20px; font-family: var(--font); }
+.nav a { font-family: var(--font); font-size: 0.94rem; color: var(--ink-soft); font-weight: 500; transition: color .15s; white-space: nowrap; }
 .nav a:hover { color: var(--ink); }
 .header-cta { display: flex; align-items: center; gap: 14px; }
 @media (max-width: 880px) {
