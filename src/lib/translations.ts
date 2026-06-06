@@ -1525,7 +1525,9 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "simScreenRinging": "घंटी बज रही है...",
     "simScreenConnected": "कनेक्टेड",
     "simScreenVoicemail": "वॉयस मेल रिकॉर्ड हो रहा है...",
-    "simScreenCallEnded": "कॉल समाप्त"
+    "simScreenCallEnded": "कॉल समाप्त",
+    "simExplanationCascade": "कॉल उपलब्ध सदस्यों को बारी-बारी से मिलाई जाती है। यदि कोई उत्तर नहीं देता, तो वह अगले सदस्य पर चली जाती है।",
+    "simExplanationMenu": "कॉलर को एक वॉयस मेनू सुनाई देता है (जैसे, 'Sarah के लिए 1 दबाएं, David के लिए 2 दबाएं') और वह चुनता है कि किससे बात करनी है।"
   },
   "features": {
     "title": "वह सब कुछ जो उन्हें जोड़े रखने के लिए आवश्यक है",
