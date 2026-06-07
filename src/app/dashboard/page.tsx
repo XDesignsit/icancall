@@ -88,6 +88,8 @@ interface Account {
   twoFactor: boolean;
   card: { brand: string; last4: string; exp: string };
   billingAddr: string;
+  plan: "essential" | "pro";
+  billingCycle: "monthly" | "yearly";
   addons: {
     extraNumbers: number;
     minuteBlocks: number;
@@ -2103,6 +2105,16 @@ export function AccountView({
   const ext = dashboardExtraTranslations[lang as keyof typeof dashboardExtraTranslations] || dashboardExtraTranslations.en;
   const a = account;
   const set = (patch: Partial<Account>) => setAccount((prev) => ({ ...prev, ...patch }));
+  const [planModalOpen, setPlanModalOpen] = useState(false);
+  const [tempPlan, setTempPlan] = useState<"essential" | "pro">(account.plan || "pro");
+  const [tempCycle, setTempCycle] = useState<"monthly" | "yearly">(account.billingCycle || "monthly");
+
+  useEffect(() => {
+    if (planModalOpen) {
+      setTempPlan(account.plan || "pro");
+      setTempCycle(account.billingCycle || "monthly");
+    }
+  }, [planModalOpen, account.plan, account.billingCycle]);
 
   const ACCT_TABS = [
     { id: "profile", label: d.account.profile },
@@ -2408,23 +2420,160 @@ export function AccountView({
 
       {tab === "billing" && (
         <>
+          {/* Plan Change Modal */}
+          {planModalOpen && (
+            <Modal
+              title={lang === "es" ? "Cambiar plan de suscripción" : lang === "fr" ? "Changer de forfait" : "Change Subscription Plan"}
+              onClose={() => setPlanModalOpen(false)}
+              footer={
+                <div style={{ display: "flex", justifyContent: "flex-end", gap: 10, width: "100%" }}>
+                  <button className="btn btn-ghost" onClick={() => setPlanModalOpen(false)}>
+                    {lang === "es" ? "Cancelar" : lang === "fr" ? "Annuler" : "Cancel"}
+                  </button>
+                  <button
+                    className="btn btn-primary"
+                    onClick={() => {
+                      set({ plan: tempPlan, billingCycle: tempCycle });
+                      setPlanModalOpen(false);
+                      showToast(lang === "es" ? "Plan actualizado correctamente" : lang === "fr" ? "Forfait mis à jour avec succès" : "Plan updated successfully");
+                    }}
+                  >
+                    {lang === "es" ? "Actualizar plan" : lang === "fr" ? "Mettre à jour" : "Update Plan"}
+                  </button>
+                </div>
+              }
+            >
+              <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
+                <p style={{ color: "var(--ink-soft)", fontSize: "0.95rem" }}>
+                  {lang === "es" 
+                    ? "Seleccione el plan y el ciclo de facturación que mejor se adapte a sus necesidades:" 
+                    : lang === "fr" 
+                    ? "Sélectionnez le forfait et le cycle de facturation qui vous conviennent :" 
+                    : "Select the plan and billing cycle that best fits your needs:"}
+                </p>
+                
+                {/* Billing Cycle Toggle inside Modal */}
+                <div style={{ display: "flex", justifyContent: "center", marginBlock: 5 }}>
+                  <div className="seg" style={{ padding: 4 }}>
+                    <button
+                      className={`seg-btn ${tempCycle === "monthly" ? "active" : ""}`}
+                      onClick={() => setTempCycle("monthly")}
+                      style={{ padding: "6px 16px", fontSize: "0.88rem" }}
+                    >
+                      {lang === "es" ? "Mensual" : lang === "fr" ? "Mensuel" : "Monthly"}
+                    </button>
+                    <button
+                      className={`seg-btn ${tempCycle === "yearly" ? "active" : ""}`}
+                      onClick={() => setTempCycle("yearly")}
+                      style={{ padding: "6px 16px", fontSize: "0.88rem" }}
+                    >
+                      {lang === "es" ? "Anual" : lang === "fr" ? "Annuel" : "Annual"}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Plans Selection List */}
+                <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                  {/* Essential Plan Option */}
+                  <div 
+                    className={`card ${tempPlan === "essential" ? "featured" : ""}`}
+                    onClick={() => setTempPlan("essential")}
+                    style={{ 
+                      padding: 18, 
+                      cursor: "pointer", 
+                      border: tempPlan === "essential" ? "2px solid var(--blue)" : "1px solid var(--line)",
+                      background: tempPlan === "essential" ? "var(--tint)" : "var(--surface)",
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: 6,
+                      borderRadius: "var(--r-md)",
+                      transition: "all 0.2s"
+                    }}
+                  >
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <b style={{ fontSize: "1.1rem" }}>{lang === "es" ? "Plan Esencial" : lang === "fr" ? "Forfait Essentiel" : "Essential Plan"}</b>
+                      <span style={{ fontWeight: 700, color: "var(--blue-deep)" }}>
+                        {tempCycle === "yearly" ? "$12.42/mo" : "$14.99/mo"}
+                      </span>
+                    </div>
+                    <p style={{ fontSize: "0.85rem", color: "var(--ink-faint)" }}>
+                      {lang === "es" 
+                        ? "Perfecto para familias individuales. Incluye 1 número y hasta 3 contactos." 
+                        : lang === "fr" 
+                        ? "Idéal pour une configuration mono-famille. 1 numéro et 3 contacts max." 
+                        : "Perfect for single-family setups. Includes 1 number and up to 3 contacts."}
+                    </p>
+                  </div>
+
+                  {/* Pro Plan Option */}
+                  <div 
+                    className={`card ${tempPlan === "pro" ? "featured" : ""}`}
+                    onClick={() => setTempPlan("pro")}
+                    style={{ 
+                      padding: 18, 
+                      cursor: "pointer", 
+                      border: tempPlan === "pro" ? "2px solid var(--blue)" : "1px solid var(--line)",
+                      background: tempPlan === "pro" ? "var(--tint)" : "var(--surface)",
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: 6,
+                      borderRadius: "var(--r-md)",
+                      transition: "all 0.2s"
+                    }}
+                  >
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <b style={{ fontSize: "1.1rem" }}>{lang === "es" ? "Plan Pro" : lang === "fr" ? "Forfait Pro" : "Pro Plan"}</b>
+                      <span style={{ fontWeight: 700, color: "var(--blue-deep)" }}>
+                        {tempCycle === "yearly" ? "$20.75/mo" : "$24.99/mo"}
+                      </span>
+                    </div>
+                    <p style={{ fontSize: "0.85rem", color: "var(--ink-faint)" }}>
+                      {lang === "es" 
+                        ? "Para grupos activos. Incluye 2 números, hasta 6 contactos, menús y horarios." 
+                        : lang === "fr" 
+                        ? "Pour les aidants actifs. 2 numéros, 6 contacts max, menus et planning." 
+                        : "For active care groups. Includes 2 numbers, up to 6 contacts, menus, and scheduling."}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </Modal>
+          )}
+
           <div className="card section-gap">
             <div className="card-head">
               <div>
                 <h2>{d.account.billing}</h2>
-                <p>{d.account.renewDateSub}</p>
+                <p>
+                  {account.billingCycle === "yearly" 
+                    ? (lang === "es" ? "Facturado anualmente · renueva el 1 de junio de 2026" : lang === "fr" ? "Facturé annuellement · se renouvelle le 1er juin 2026" : "Billed annually · renews June 1, 2026")
+                    : d.account.renewDateSub}
+                </p>
               </div>
-              <Badge kind="blue">Pro</Badge>
+              <Badge kind={account.plan === "pro" ? "blue" : "amber"}>
+                {account.plan === "pro" ? "Pro" : (lang === "es" ? "Esencial" : lang === "fr" ? "Essentiel" : "Essential")}
+              </Badge>
             </div>
             <div className="card-pad">
               <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 4 }}>
                 <span style={{ fontSize: "2.4rem", fontWeight: 700, letterSpacing: "-0.03em" }}>
-                  $24.99
+                  {account.plan === "pro"
+                    ? (account.billingCycle === "yearly" ? "$20.75" : "$24.99")
+                    : (account.billingCycle === "yearly" ? "$12.42" : "$14.99")}
                 </span>
-                <span style={{ color: "var(--ink-faint)" }}>{lang === "es" ? "/ mes" : lang === "fr" ? "/ mois" : lang === "ja" ? "/ 月" : lang === "zh" ? "/ 月" : lang === "ar" ? "/ شهر" : lang === "hi" ? "/ महीना" : lang === "/ mês" ? "/ mês" : lang === "de" ? "/ Monat" : lang === "it" ? "/ mese" : lang === "ko" ? "/ 월" : "/ month"}</span>
-                <span style={{ marginLeft: 10 }}>
-                  <Badge kind="green">{ext.saveAnnual}</Badge>
+                <span style={{ color: "var(--ink-faint)" }}>
+                  {lang === "es" ? "/ mes" : lang === "fr" ? "/ mois" : lang === "ja" ? "/ 月" : lang === "zh" ? "/ 月" : lang === "ar" ? "/ شهر" : lang === "hi" ? "/ महीना" : lang === "/ mês" ? "/ mês" : lang === "de" ? "/ Monat" : lang === "it" ? "/ mese" : lang === "ko" ? "/ 월" : "/ month"}
                 </span>
+                {account.billingCycle === "yearly" && (
+                  <span style={{ fontSize: "0.95rem", color: "var(--ink-faint)", marginLeft: 6 }}>
+                    {account.plan === "pro" ? "(billed annually at $249/yr)" : "(billed annually at $149/yr)"}
+                  </span>
+                )}
+                {account.billingCycle !== "yearly" && (
+                  <span style={{ marginLeft: 10 }}>
+                    <Badge kind="green">{ext.saveAnnual}</Badge>
+                  </span>
+                )}
               </div>
               <div
                 style={{
@@ -2435,7 +2584,14 @@ export function AccountView({
                 }}
                 className="feat-grid"
               >
-                {d.account.billingFeatures.map((f: string) => (
+                {((account.plan === "pro" ? d.account.billingFeatures : undefined) || [
+                  lang === "es" ? "1 número de teléfono dedicado" : lang === "fr" ? "1 numéro de sécurité dédié" : "1 dedicated phone number",
+                  lang === "es" ? "Hasta 3 contactos por número" : lang === "fr" ? "Jusqu'à 3 contacts par numéro" : "3 routable contacts per number",
+                  lang === "es" ? "Enrutamiento en cascada (Secuencial)" : lang === "fr" ? "Appel en cascade (séquentiel)" : "Call Cascade (Sequential)",
+                  lang === "es" ? "Alertas por correo electrónico" : lang === "fr" ? "Alertes e-mail en temps réel" : "Real-time email alerts",
+                  lang === "es" ? "Buzón de voz estándar" : lang === "fr" ? "Boîte messagerie standard" : "Standard voicemail box",
+                  lang === "es" ? "DASHBOARD de administración" : lang === "fr" ? "Tableau de bord administrateur" : "Admin dashboard"
+                ]).map((f: string) => (
                   <div className="plan-feat" key={f}>
                     <Icon name="check" /> {f}
                   </div>
@@ -2444,11 +2600,24 @@ export function AccountView({
               <div style={{ display: "flex", gap: 10, marginTop: 20 }}>
                 <button
                   className="btn btn-primary"
-                  onClick={() => showToast(ext.annualToast)}
+                  onClick={() => {
+                    const nextCycle = account.billingCycle === "monthly" ? "yearly" : "monthly";
+                    set({ billingCycle: nextCycle });
+                    if (nextCycle === "yearly") {
+                      showToast(account.plan === "pro" 
+                        ? ext.annualToast 
+                        : (lang === "es" ? "Cambiado a facturación anual — $149/año" : lang === "fr" ? "Facturation annuelle activée — 149 $/an" : "Switched to annual billing — $149/yr"));
+                    } else {
+                      showToast(lang === "es" ? "Cambiado a facturación mensual" : lang === "fr" ? "Facturation mensuelle activée" : "Switched to monthly billing");
+                    }
+                  }}
                 >
-                  <Icon name="spark" /> {ext.switchToAnnual}
+                  <Icon name="spark" />{" "}
+                  {account.billingCycle === "monthly" 
+                    ? ext.switchToAnnual 
+                    : (lang === "es" ? "Cambiar a mensual" : lang === "fr" ? "Passer au mensuel" : "Switch to monthly")}
                 </button>
-                <button className="btn btn-ghost" onClick={() => showToast(ext.planOptionsToast)}>
+                <button className="btn btn-ghost" onClick={() => setPlanModalOpen(true)}>
                   {ext.changePlan}
                 </button>
               </div>
@@ -2461,7 +2630,10 @@ export function AccountView({
               setAccount((prev) => ({ ...prev, addons: { ...(prev.addons || {}), ...patch } as Account["addons"] }));
             const numCost = ad.extraNumbers * 6.99;
             const minCost = ad.minuteBlocks * 4.99;
-            const total = 24.99 + numCost + minCost;
+            const basePrice = account.plan === "pro"
+              ? (account.billingCycle === "yearly" ? 20.75 : 24.99)
+              : (account.billingCycle === "yearly" ? 12.42 : 14.99);
+            const total = basePrice + numCost + minCost;
             const maxBlocks = 10;
             return (
               <div className="card section-gap">
@@ -3074,6 +3246,8 @@ export default function DashboardApp() {
     twoFactor: true,
     card: { brand: "Visa", last4: "4242", exp: "08 / 27" },
     billingAddr: "482 Linden Ave, Oakland, CA 94607",
+    plan: "pro",
+    billingCycle: "monthly",
     addons: { extraNumbers: 1, minuteBlocks: 2, usedMin: 41, rolloverMin: 18 },
   });
 
