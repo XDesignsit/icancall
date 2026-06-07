@@ -804,43 +804,43 @@ h3 { font-size: clamp(1.25rem, 2vw, 1.6rem); }
 
 /* ---------- Sidebar ---------- */
 .sidebar {
-  background: var(--blue-ink); color: oklch(0.92 0.02 225);
+  background: #cfebde; color: oklch(0.26 0.028 248);
   display: flex; flex-direction: column; padding: 22px 16px;
   position: relative; z-index: 10;
 }
-.sidebar .brand { display: flex; align-items: center; gap: 11px; font-weight: 700; font-size: 1.18rem; letter-spacing: -0.03em; color: #fff; padding: 4px 8px 0; margin-bottom: 26px; }
+.sidebar .brand { display: flex; align-items: center; gap: 11px; font-weight: 700; font-size: 1.18rem; letter-spacing: -0.03em; color: oklch(0.26 0.028 248); padding: 4px 8px 0; margin-bottom: 26px; }
 .sidebar .brand .mark { width: 34px; height: 34px; border-radius: 10px; flex: none; background: linear-gradient(150deg, var(--blue), var(--teal-deep)); display: grid; place-items: center; box-shadow: var(--shadow-sm); }
 .sidebar .brand .mark svg { width: 18px; height: 18px; }
 .sidebar .brand b { color: oklch(0.85 0.07 200); }
 
-.nav-group-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.07em; color: oklch(0.66 0.03 230); padding: 0 12px; margin: 18px 0 8px; font-weight: 600; }
+.nav-group-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.07em; color: oklch(0.35 0.06 160); padding: 0 12px; margin: 18px 0 8px; font-weight: 700; }
 .sidebar .nav { display: flex; flex-direction: column; gap: 3px; }
 .nav-item {
   display: flex; align-items: center; gap: 12px; width: 100%;
   padding: 10px 12px; border-radius: var(--r-md); border: none; background: none;
-  color: oklch(0.86 0.02 225); font-size: 0.94rem; font-weight: 500; cursor: pointer;
+  color: oklch(0.3 0.04 248); font-size: 0.94rem; font-weight: 600; cursor: pointer;
   text-align: left; transition: background .15s, color .15s;
 }
 .nav-item svg { width: 19px; height: 19px; flex: none; opacity: 0.85; }
-.nav-item:hover { background: oklch(1 0 0 / 0.07); color: #fff; }
-.nav-item.active { background: oklch(1 0 0 / 0.12); color: #fff; font-weight: 600; }
-.nav-item.active svg { opacity: 1; color: oklch(0.82 0.09 200); }
+.nav-item:hover { background: oklch(0.26 0.028 248 / 0.07); color: oklch(0.26 0.028 248); }
+.nav-item.active { background: oklch(0.26 0.028 248 / 0.12); color: oklch(0.26 0.028 248); font-weight: 700; }
+.nav-item.active svg { opacity: 1; color: var(--blue-deep); }
 .nav-item .badge-dot { margin-left: auto; min-width: 20px; height: 20px; padding: 0 6px; border-radius: 99px; background: var(--rose); color: #fff; font-size: 0.72rem; font-weight: 700; display: grid; place-items: center; }
 
 .sidebar-foot { margin-top: auto; padding-top: 18px; }
-.sidebar .plan-card { display: block !important; background: oklch(1 0 0 / 0.08) !important; border: 1px solid oklch(1 0 0 / 0.12) !important; border-radius: var(--r-md) !important; padding: 14px !important; }
-.signout-row { display: flex; align-items: center; justify-content: center; gap: 9px; width: 100%; margin-top: 10px; padding: 11px 14px; border-radius: var(--r-md); border: 1px solid oklch(1 0 0 / 0.12); background: oklch(1 0 0 / 0.04); color: oklch(0.86 0.02 225); font-family: var(--font); font-size: 0.88rem; font-weight: 600; cursor: pointer; transition: background .15s, color .15s, border-color .15s; }
-.signout-row:hover { background: oklch(1 0 0 / 0.10); color: #fff; border-color: oklch(1 0 0 / 0.2); }
+.sidebar .plan-card { display: block !important; background: oklch(0.26 0.028 248 / 0.06) !important; border: 1px solid oklch(0.26 0.028 248 / 0.1) !important; border-radius: var(--r-md) !important; padding: 14px !important; }
+.signout-row { display: flex; align-items: center; justify-content: center; gap: 9px; width: 100%; margin-top: 10px; padding: 11px 14px; border-radius: var(--r-md); border: 1px solid oklch(0.26 0.028 248 / 0.15); background: oklch(0.26 0.028 248 / 0.04); color: oklch(0.3 0.04 248); font-family: var(--font); font-size: 0.88rem; font-weight: 600; cursor: pointer; transition: background .15s, color .15s, border-color .15s; }
+.signout-row:hover { background: oklch(0.26 0.028 248 / 0.10); color: oklch(0.26 0.028 248); border-color: oklch(0.26 0.028 248 / 0.25); }
 .signout-row svg { flex: none; }
 .signout-btn { color: var(--ink-soft); }
 .signout-btn:hover { color: var(--rose); background: oklch(0.96 0.04 22); }
 .sidebar .plan-card .row { display: flex !important; align-items: center !important; justify-content: space-between !important; }
 .sidebar .plan-card .pill { display: inline-block !important; font-size: 0.68rem !important; font-weight: 700 !important; text-transform: uppercase !important; letter-spacing: 0.04em !important; background: linear-gradient(120deg, var(--blue), var(--teal-deep)) !important; color: #fff !important; padding: 3px 9px !important; border-radius: 99px !important; width: auto !important; height: auto !important; }
-.sidebar .plan-card .mins { font-size: 0.78rem !important; color: oklch(0.82 0.02 225) !important; margin-top: 10px !important; }
-.sidebar .plan-card .bar { height: 6px !important; border-radius: 99px !important; background: oklch(1 0 0 / 0.15) !important; margin-top: 7px !important; overflow: hidden !important; }
+.sidebar .plan-card .mins { font-size: 0.78rem !important; color: oklch(0.35 0.04 240) !important; margin-top: 10px !important; }
+.sidebar .plan-card .bar { height: 6px !important; border-radius: 99px !important; background: oklch(0.26 0.028 248 / 0.15) !important; margin-top: 7px !important; overflow: hidden !important; }
 .sidebar .plan-card .bar i { display: block !important; height: 100% !important; border-radius: 99px !important; background: linear-gradient(90deg, var(--teal), var(--blue)) !important; }
-.sidebar .plan-card .upgrade { display: block !important; margin-top: 12px !important; width: 100% !important; font-size: 0.82rem !important; font-weight: 600 !important; color: #fff !important; background: oklch(1 0 0 / 0.12) !important; border: none !important; border-radius: var(--r-sm) !important; padding: 9px !important; cursor: pointer !important; transition: background .15s !important; }
-.sidebar .plan-card .upgrade:hover { background: oklch(1 0 0 / 0.2) !important; }
+.sidebar .plan-card .upgrade { display: block !important; margin-top: 12px !important; width: 100% !important; font-size: 0.82rem !important; font-weight: 700 !important; color: oklch(0.26 0.028 248) !important; background: oklch(0.26 0.028 248 / 0.08) !important; border: none !important; border-radius: var(--r-sm) !important; padding: 9px !important; cursor: pointer !important; transition: background .15s !important; }
+.sidebar .plan-card .upgrade:hover { background: oklch(0.26 0.028 248 / 0.15) !important; }
 
 /* ---------- Main + topbar ---------- */
 .main { display: flex; flex-direction: column; min-width: 0; height: 100%; overflow: hidden; }
