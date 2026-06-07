@@ -2069,17 +2069,17 @@ function AccountView({
             <div className="field">
               <div className="row2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
                 <div>
-                  <label>Full name</label>
+                  <label>{d.contacts.fullName}</label>
                   <input value={a.name} onChange={(e) => set({ name: e.target.value })} />
                 </div>
                 <div>
-                  <label>Preferred name</label>
+                  <label>{d.account.prefName}</label>
                   <input value={a.preferred} onChange={(e) => set({ preferred: e.target.value })} />
                 </div>
               </div>
             </div>
             <div className="field" style={{ marginBottom: 0 }}>
-              <label>Role on this account</label>
+              <label>{d.account.role}</label>
               <select value={a.role} onChange={(e) => set({ role: e.target.value })} style={{ maxWidth: 320 }}>
                 {["Primary caregiver", "Family member", "Account administrator", "Care coordinator"].map(
                   (r) => (
@@ -2089,8 +2089,8 @@ function AccountView({
               </select>
             </div>
             <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 22 }}>
-              <button className="btn btn-primary" onClick={() => showToast("Profile saved")}>
-                <Icon name="check" /> Save changes
+              <button className="btn btn-primary" onClick={() => showToast(d.common.savedToast)}>
+                <Icon name="check" /> {d.contacts.saveChanges}
               </button>
             </div>
           </div>
@@ -2102,21 +2102,21 @@ function AccountView({
           <div className="card section-gap">
             <div className="card-head">
               <div>
-                <h2>Login email</h2>
+                <h2>{d.account.email}</h2>
                 <p>Used to sign in and recover your account</p>
               </div>
             </div>
             <div className="card-pad">
               <div className="field" style={{ marginBottom: 0, maxWidth: 420 }}>
-                <label>Email address</label>
+                <label>{d.account.email}</label>
                 <input type="email" value={a.email} onChange={(e) => set({ email: e.target.value })} />
               </div>
               <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 18 }}>
                 <button
                   className="btn btn-ghost"
-                  onClick={() => showToast("Verification sent to your new email")}
+                  onClick={() => showToast(d.common.savedToast)}
                 >
-                  Update email
+                  {d.contacts.saveChanges}
                 </button>
               </div>
             </div>
@@ -2125,14 +2125,14 @@ function AccountView({
           <div className="card section-gap">
             <div className="card-head">
               <div>
-                <h2>Password</h2>
+                <h2>{d.account.security}</h2>
                 <p>Choose a strong password you don’t use elsewhere</p>
               </div>
             </div>
             <div className="card-pad">
               <div style={{ maxWidth: 420 }}>
                 <div className="field">
-                  <label>Current password</label>
+                  <label>{d.account.security}</label>
                   <input
                     type="password"
                     value={pwd.cur}
@@ -2141,7 +2141,7 @@ function AccountView({
                   />
                 </div>
                 <div className="field">
-                  <label>New password</label>
+                  <label>{d.contacts.editContact}</label>
                   <input
                     type="password"
                     value={pwd.next}
@@ -2150,7 +2150,7 @@ function AccountView({
                   />
                 </div>
                 <div className="field" style={{ marginBottom: 0 }}>
-                  <label>Confirm new password</label>
+                  <label>{d.contacts.saveChanges}</label>
                   <input
                     type="password"
                     value={pwd.conf}
@@ -2161,7 +2161,7 @@ function AccountView({
               </div>
               <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 18 }}>
                 <button className="btn btn-primary" onClick={savePwd}>
-                  <Icon name="lock" /> Update password
+                  <Icon name="lock" /> {d.contacts.saveChanges}
                 </button>
               </div>
             </div>
@@ -2170,8 +2170,8 @@ function AccountView({
           <div className="card section-gap">
             <div className="card-head">
               <div>
-                <h2>Two-factor authentication</h2>
-                <p>Add an extra layer of security at sign-in</p>
+                <h2>{d.account.twoFactor}</h2>
+                <p>{d.account.twoFactorSub}</p>
               </div>
             </div>
             <div className="card-pad" style={{ paddingTop: 8 }}>
@@ -2246,11 +2246,11 @@ function AccountView({
             <div className="field">
               <div className="row2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
                 <div>
-                  <label>Mobile phone</label>
+                  <label>{d.account.phone}</label>
                   <input value={a.phone} onChange={(e) => set({ phone: e.target.value })} />
                 </div>
                 <div>
-                  <label>Notification email</label>
+                  <label>{d.account.email}</label>
                   <input
                     type="email"
                     value={a.notifyEmail}
@@ -2260,13 +2260,13 @@ function AccountView({
               </div>
             </div>
             <div className="field">
-              <label>Mailing address</label>
+              <label>Address</label>
               <input value={a.address} onChange={(e) => set({ address: e.target.value })} />
             </div>
             <div className="field" style={{ marginBottom: 0 }}>
               <div className="row2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
                 <div>
-                  <label>Time zone</label>
+                  <label>{d.account.timezone}</label>
                   <select value={a.timezone} onChange={(e) => set({ timezone: e.target.value })}>
                     {["Pacific (PT)", "Mountain (MT)", "Central (CT)", "Eastern (ET)"].map((tz) => (
                       <option key={tz}>{tz}</option>
@@ -2274,7 +2274,7 @@ function AccountView({
                   </select>
                 </div>
                 <div>
-                  <label>Preferred language</label>
+                  <label>{d.account.language}</label>
                   <select value={a.language} onChange={(e) => set({ language: e.target.value })}>
                     {["English", "Spanish", "Mandarin", "Tagalog", "Vietnamese", "French"].map((lang) => (
                       <option key={lang}>{lang}</option>
@@ -2284,8 +2284,8 @@ function AccountView({
               </div>
             </div>
             <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 22 }}>
-              <button className="btn btn-primary" onClick={() => showToast("Contact info saved")}>
-                <Icon name="check" /> Save changes
+              <button className="btn btn-primary" onClick={() => showToast(d.common.savedToast)}>
+                <Icon name="check" /> {d.contacts.saveChanges}
               </button>
             </div>
           </div>
@@ -2297,7 +2297,7 @@ function AccountView({
           <div className="card section-gap">
             <div className="card-head">
               <div>
-                <h2>Current plan</h2>
+                <h2>{d.account.billing}</h2>
                 <p>Billed monthly · renews June 1, 2026</p>
               </div>
               <Badge kind="blue">Pro</Badge>
@@ -2566,12 +2566,12 @@ function AccountView({
                 </button>
               </div>
               <div className="field" style={{ marginTop: 20, marginBottom: 0 }}>
-                <label>Billing address</label>
+                <label>{d.account.billingAddress}</label>
                 <input value={a.billingAddr} onChange={(e) => set({ billingAddr: e.target.value })} />
               </div>
               <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 20 }}>
-                <button className="btn btn-primary" onClick={() => showToast("Billing details saved")}>
-                  <Icon name="check" /> Save changes
+                <button className="btn btn-primary" onClick={() => showToast(d.common.savedToast)}>
+                  <Icon name="check" /> {d.contacts.saveChanges}
                 </button>
               </div>
             </div>
