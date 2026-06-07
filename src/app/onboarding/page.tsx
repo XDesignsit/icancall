@@ -44,8 +44,8 @@ const PLANS = [
     tag: null,
     desc: "One number for one loved one.",
     numbers: 1,
-    monthly: { amt: 12.99, label: "$12.99", per: "/mo", note: "Billed monthly" },
-    annual:  { amt: 129,   label: "$129",   per: "/yr", note: "$10.75/mo, billed yearly" },
+    monthly: { amt: 14.99, label: "$14.99", per: "/mo", note: "Billed monthly" },
+    annual:  { amt: 149,   label: "$149",   per: "/yr", note: "$12.42/mo, billed yearly" },
     feats: ["1 phone number", "3 trusted contacts", "Cascade + Caller Menu", "30 voice minutes"],
   },
   {
@@ -54,8 +54,8 @@ const PLANS = [
     tag: "Most popular",
     desc: "Full protection for the whole circle.",
     numbers: 2,
-    monthly: { amt: 19.99, label: "$19.99", per: "/mo", note: "Billed monthly" },
-    annual:  { amt: 199,   label: "$199",   per: "/yr", note: "$16.58/mo, billed yearly" },
+    monthly: { amt: 24.99, label: "$24.99", per: "/mo", note: "Billed monthly" },
+    annual:  { amt: 249,   label: "$249",   per: "/yr", note: "$20.75/mo, billed yearly" },
     feats: ["2 phone numbers", "6 trusted contacts", "Cascade + Caller Menu", "60 minutes + alerts"],
   },
 ];

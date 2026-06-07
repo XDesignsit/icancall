@@ -2419,7 +2419,7 @@ export function AccountView({
             <div className="card-pad">
               <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 4 }}>
                 <span style={{ fontSize: "2.4rem", fontWeight: 700, letterSpacing: "-0.03em" }}>
-                  $19.99
+                  $24.99
                 </span>
                 <span style={{ color: "var(--ink-faint)" }}>{lang === "es" ? "/ mes" : lang === "fr" ? "/ mois" : lang === "ja" ? "/ 月" : lang === "zh" ? "/ 月" : lang === "ar" ? "/ شهر" : lang === "hi" ? "/ महीना" : lang === "/ mês" ? "/ mês" : lang === "de" ? "/ Monat" : lang === "it" ? "/ mese" : lang === "ko" ? "/ 월" : "/ month"}</span>
                 <span style={{ marginLeft: 10 }}>
@@ -2461,7 +2461,7 @@ export function AccountView({
               setAccount((prev) => ({ ...prev, addons: { ...(prev.addons || {}), ...patch } as Account["addons"] }));
             const numCost = ad.extraNumbers * 6.99;
             const minCost = ad.minuteBlocks * 4.99;
-            const total = 19.99 + numCost + minCost;
+            const total = 24.99 + numCost + minCost;
             const maxBlocks = 10;
             return (
               <div className="card section-gap">
@@ -2689,9 +2689,9 @@ export function AccountView({
             </div>
             <div className="card-pad" style={{ paddingTop: 6, paddingBottom: 10 }}>
               {[
-                [lang === "es" ? "1 de mayo de 2026" : lang === "fr" ? "1 mai 2026" : lang === "ja" ? "2026年5月1日" : lang === "zh" ? "2026年5月1日" : lang === "ar" ? "1 مايو 2026" : lang === "hi" ? "1 मई, 2026" : lang === "pt" ? "1 de maio de 2026" : lang === "de" ? "1. Mai 2026" : lang === "it" ? "1 maggio 2026" : lang === "ko" ? "2026년 5월 1일" : "May 1, 2026", "Pro · monthly", "$19.99"],
-                [lang === "es" ? "1 de abr de 2026" : lang === "fr" ? "1 avr. 2026" : lang === "ja" ? "2026年4月1日" : lang === "zh" ? "2026年4月1日" : lang === "ar" ? "1 أبريل 2026" : lang === "hi" ? "1 अप्रैल, 2026" : lang === "pt" ? "1 de abr de 2026" : lang === "de" ? "1. Apr. 2026" : lang === "it" ? "1 aprile 2026" : lang === "ko" ? "2026년 4월 1일" : "Apr 1, 2026", "Pro · monthly", "$19.99"],
-                [lang === "es" ? "1 de mar de 2026" : lang === "fr" ? "1 mars 2026" : lang === "ja" ? "2026年3月1日" : lang === "zh" ? "2026年3月1日" : lang === "ar" ? "1 مارس 2026" : lang === "hi" ? "1 मार्च, 2026" : lang === "pt" ? "1 de mar de 2026" : lang === "de" ? "1. März 2026" : lang === "it" ? "1 marzo 2026" : lang === "ko" ? "2026년 3월 1일" : "Mar 1, 2026", "Pro · monthly", "$19.99"],
+                [lang === "es" ? "1 de mayo de 2026" : lang === "fr" ? "1 mai 2026" : lang === "ja" ? "2026年5月1日" : lang === "zh" ? "2026年5月1日" : lang === "ar" ? "1 مايو 2026" : lang === "hi" ? "1 मई, 2026" : lang === "pt" ? "1 de maio de 2026" : lang === "de" ? "1. Mai 2026" : lang === "it" ? "1 maggio 2026" : lang === "ko" ? "2026년 5월 1일" : "May 1, 2026", "Pro · monthly", "$24.99"],
+                [lang === "es" ? "1 de abr de 2026" : lang === "fr" ? "1 avr. 2026" : lang === "ja" ? "2026年4月1日" : lang === "zh" ? "2026年4月1日" : lang === "ar" ? "1 أبريل 2026" : lang === "hi" ? "1 अप्रैल, 2026" : lang === "pt" ? "1 de abr de 2026" : lang === "de" ? "1. Apr. 2026" : lang === "it" ? "1 aprile 2026" : lang === "ko" ? "2026년 4월 1일" : "Apr 1, 2026", "Pro · monthly", "$24.99"],
+                [lang === "es" ? "1 de mar de 2026" : lang === "fr" ? "1 mars 2026" : lang === "ja" ? "2026年3月1日" : lang === "zh" ? "2026年3月1日" : lang === "ar" ? "1 مارس 2026" : lang === "hi" ? "1 मार्च, 2026" : lang === "pt" ? "1 de mar de 2026" : lang === "de" ? "1. März 2026" : lang === "it" ? "1 marzo 2026" : lang === "ko" ? "2026년 3월 1일" : "Mar 1, 2026", "Pro · monthly", "$24.99"],
               ].map(([dVal, desc, amt]) => {
                 const localizedDesc = desc === "Pro · monthly" ? (lang === "es" ? "Pro · mensual" : lang === "fr" ? "Pro · mensuel" : lang === "ja" ? "プロ · 月額" : lang === "zh" ? "专业版 · 按月" : lang === "ar" ? "برو · شهرياً" : lang === "hi" ? "प्रो · मासिक" : lang === "pt" ? "Pro · mensal" : lang === "de" ? "Pro · monatlich" : lang === "it" ? "Pro · mensile" : lang === "ko" ? "프로 · 월간" : "Pro · monthly") : desc;
                 return (

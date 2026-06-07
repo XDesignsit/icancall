@@ -16,8 +16,8 @@ function CreemCheckoutContent() {
   const [success, setSuccess] = useState(false);
 
   const priceLabel = plan === "pro" 
-    ? (billing === "yearly" ? "$199/yr" : "$19.99/mo")
-    : (billing === "yearly" ? "$129/yr" : "$12.99/mo");
+    ? (billing === "yearly" ? "$249/yr" : "$24.99/mo")
+    : (billing === "yearly" ? "$149/yr" : "$14.99/mo");
 
   const planName = plan === "pro" ? "Pro Circle" : "Essential Solo";
 

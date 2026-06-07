@@ -224,7 +224,7 @@ const ACCOUNTS = [
     vmRate: 6.1,
     minutesUsed: 71,
     minutesCap: 120,
-    mrr: 19.99,
+    mrr: 24.99,
     ltv: 188,
     next: "Jun 19, 2025",
     lines: [
@@ -265,7 +265,7 @@ const ACCOUNTS = [
     vmRate: 3.1,
     minutesUsed: 22,
     minutesCap: 30,
-    mrr: 12.99,
+    mrr: 14.99,
     ltv: 104,
     next: "Jun 11, 2025",
     lines: [
@@ -372,7 +372,7 @@ const ACCOUNTS = [
     vmRate: 9.2,
     minutesUsed: 64,
     minutesCap: 120,
-    mrr: 19.99,
+    mrr: 24.99,
     ltv: 160,
     next: "Overdue · May 6",
     lines: [
@@ -397,12 +397,12 @@ const ACCOUNTS = [
 ];
 
 const TRANSACTIONS = [
-  { id: "in_8841", acct: "Aisha Bello", amt: 19.99, kind: "paid", when: "Today · 11:04 AM", plan: "Pro · Monthly" },
-  { id: "in_8840", acct: "Daniel Okonkwo", amt: 19.99, kind: "paid", when: "Today · 9:30 AM", plan: "Pro · Monthly" },
-  { id: "in_8838", acct: "James Patel", amt: 19.99, kind: "failed", when: "Today · 6:12 AM", plan: "Pro · Monthly" },
-  { id: "in_8835", acct: "Tomás Rivera", amt: 12.99, kind: "paid", when: "Yesterday · 8:41 PM", plan: "Essential · Monthly" },
-  { id: "in_8832", acct: "Maria Delgado", amt: 199.0, kind: "paid", when: "Yesterday · 2:02 PM", plan: "Pro · Annual" },
-  { id: "in_8829", acct: "Kevin O’Brien", amt: 12.99, kind: "paid", when: "Yesterday · 10:15 AM", plan: "Essential · Monthly" },
+  { id: "in_8841", acct: "Aisha Bello", amt: 24.99, kind: "paid", when: "Today · 11:04 AM", plan: "Pro · Monthly" },
+  { id: "in_8840", acct: "Daniel Okonkwo", amt: 24.99, kind: "paid", when: "Today · 9:30 AM", plan: "Pro · Monthly" },
+  { id: "in_8838", acct: "James Patel", amt: 24.99, kind: "failed", when: "Today · 6:12 AM", plan: "Pro · Monthly" },
+  { id: "in_8835", acct: "Tomás Rivera", amt: 14.99, kind: "paid", when: "Yesterday · 8:41 PM", plan: "Essential · Monthly" },
+  { id: "in_8832", acct: "Maria Delgado", amt: 249.0, kind: "paid", when: "Yesterday · 2:02 PM", plan: "Pro · Annual" },
+  { id: "in_8829", acct: "Kevin O’Brien", amt: 14.99, kind: "paid", when: "Yesterday · 10:15 AM", plan: "Essential · Monthly" },
   { id: "in_8826", acct: "Sofia Martinez", amt: 8.5, kind: "refund", when: "Mon · 4:48 PM", plan: "Goodwill credit" },
 ];
 

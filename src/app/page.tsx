@@ -823,7 +823,7 @@ export default function Home() {
                 <h3>{t.pricing.essentialTitle}</h3>
                 <p className="desc">{t.pricing.essentialDesc}</p>
                 <div className="price">
-                  <b className="amt">{billingCycle === "annual" ? "$129" : "$12.99"}</b>
+                  <b className="amt">{billingCycle === "annual" ? "$149" : "$14.99"}</b>
                   <span className="per">{billingCycle === "annual" ? t.ui.perYear : t.ui.perMonth}</span>
                 </div>
                 <p className="price-yr">{billingCycle === "annual" ? t.ui.justPriceAnnualEssential : t.ui.billedMonthlyCancelAnytime}</p>
@@ -845,7 +845,7 @@ export default function Home() {
                 <h3>{t.pricing.proTitle}</h3>
                 <p className="desc">{t.pricing.proDesc}</p>
                 <div className="price">
-                  <b className="amt">{billingCycle === "annual" ? "$199" : "$19.99"}</b>
+                  <b className="amt">{billingCycle === "annual" ? "$249" : "$24.99"}</b>
                   <span className="per">{billingCycle === "annual" ? t.ui.perYear : t.ui.perMonth}</span>
                 </div>
                 <p className="price-yr">{billingCycle === "annual" ? t.ui.justPriceAnnualPro : t.ui.billedMonthlyCancelAnytime}</p>
