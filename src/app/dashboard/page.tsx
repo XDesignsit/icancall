@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import { dashboardTranslations } from "@/lib/dashboardTranslations";
+import { dashboardExtraTranslations } from "@/lib/dashboardExtraTranslations";
 
 /* ============ DEMO DATA & HELPERS ============ */
 const AVATAR_COLORS = [
@@ -1046,12 +1047,15 @@ function RoutingView({
   setLine,
   showToast,
   d,
+  lang,
 }: {
   line: Line;
   setLine: React.Dispatch<React.SetStateAction<Line[]>>;
   showToast: (msg: string) => void;
   d: any;
+  lang: string;
 }) {
+  const ext = dashboardExtraTranslations[lang as keyof typeof dashboardExtraTranslations] || dashboardExtraTranslations.en;
   const [localSchedule, setLocalSchedule] = useState<CoverageSlot[]>([]);
   const [currentTime, setCurrentTime] = useState(new Date());
 
@@ -1392,14 +1396,14 @@ function RoutingView({
             <div style={{ marginTop: 16, padding: "12px 16px", borderRadius: "var(--r-sm)", background: hasOverlap ? "oklch(0.96 0.04 25)" : "oklch(0.96 0.05 75)", color: hasOverlap ? "oklch(0.5 0.13 20)" : "oklch(0.5 0.13 60)", fontSize: "0.86rem", display: "flex", alignItems: "center", gap: 8 }}>
               <span>⚠️</span>
               <div>
-                {hasOverlap && <div><b>Overlapping Coverage:</b> Two or more slots cover the same hours. Please adjust times to prevent conflict.</div>}
+                {hasOverlap && <div><b>{lang === "es" ? "Superposición de cobertura:" : lang === "fr" ? "Chevauchement de couverture :" : lang === "ja" ? "重複するカバー範囲:" : lang === "zh" ? "时间段重叠:" : lang === "ar" ? "تداخل التغطية:" : lang === "hi" ? "ओवरलैपिंग कवरेज:" : lang === "pt" ? "Sobreposição de cobertura:" : lang === "de" ? "Überschneidung der Abdeckung:" : lang === "it" ? "Copertura sovrapposta:" : lang === "ko" ? "스케줄 중복:" : "Overlapping Coverage:"}</b> {ext.overlappingCoverage.split(":").slice(1).join(":").trim() || ext.overlappingCoverage}</div>}
                 {hasGap && (
                   <div>
-                    <b>Uncovered Gaps:</b> Callers will hit voicemail during uncovered hours:{" "}
+                    <b>{lang === "es" ? "Horarios sin cobertura:" : lang === "fr" ? "Créneaux non couverts :" : lang === "ja" ? "未カバーの時間帯:" : lang === "zh" ? "未覆盖的时间段:" : lang === "ar" ? "فترات غير مغطاة:" : lang === "hi" ? "बिना कवरेज के अंतराल:" : lang === "pt" ? "Períodos sem cobertura:" : lang === "de" ? "Unabgedeckte Zeiten:" : lang === "it" ? "Fasce orarie scoperte:" : lang === "ko" ? "담당자 부재 시간대:" : "Uncovered Gaps:"}</b>{" "}
                     {gapsList.map((g, idx) => (
                       <span key={idx}>
                         {idx > 0 && ", "}
-                        {formatHour(g.start)} to {formatHour(g.end)}
+                        {formatHour(g.start)} {lang === "es" ? " a " : lang === "fr" ? " à " : lang === "ja" ? " から " : lang === "zh" ? " 至 " : lang === "ar" ? " إلى " : lang === "hi" ? " से " : lang === "pt" ? " a " : lang === "de" ? " bis " : lang === "it" ? " a " : lang === "ko" ? "부터 " : " to "} {formatHour(g.end)}
                       </span>
                     ))}
                   </div>
@@ -1410,7 +1414,7 @@ function RoutingView({
 
           {/* Slots List and Editor */}
           <div style={{ marginTop: 24 }}>
-            <h3 style={{ fontSize: "1.1rem", marginBottom: 12 }}>Manage Time Slots</h3>
+            <h3 style={{ fontSize: "1.1rem", marginBottom: 12 }}>{ext.manageTimeSlots}</h3>
             <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
               {sortedSlots.map((slot) => {
                 const isEditing = editingSlotId === slot.id;
@@ -1431,7 +1435,7 @@ function RoutingView({
                           <div>
                             <h4 style={{ fontSize: "0.96rem", fontWeight: 600 }}>{slot.name}</h4>
                             <p style={{ fontSize: "0.8rem", color: "var(--ink-soft)" }}>
-                              {slot.description} · {formatHour(slot.startHour)} to {formatHour(slot.endHour)}
+                              {slot.description === "Vacant slot" ? ext.vacantSlot : slot.description} · {formatHour(slot.startHour)} {lang === "es" ? " a " : lang === "fr" ? " à " : lang === "ja" ? " から " : lang === "zh" ? " 至 " : lang === "ar" ? " إلى " : lang === "hi" ? " से " : lang === "pt" ? " a " : lang === "de" ? " bis " : lang === "it" ? " a " : lang === "ko" ? "부터 " : " to "} {formatHour(slot.endHour)}
                             </p>
                           </div>
                         </div>
@@ -1441,14 +1445,14 @@ function RoutingView({
                             className="btn btn-soft btn-sm"
                             style={{ padding: "6px 12px", fontSize: "0.78rem" }}
                           >
-                            Edit
+                            {ext.edit}
                           </button>
                           <button
                             onClick={() => deleteSlot(slot.id)}
                             className="btn btn-soft btn-sm"
                             style={{ padding: "6px 12px", fontSize: "0.78rem", color: "oklch(0.55 0.18 25)" }}
                           >
-                            Delete
+                            {ext.delete}
                           </button>
                         </div>
                       </div>
@@ -1458,7 +1462,7 @@ function RoutingView({
                         <div style={{ display: "grid", gridTemplateColumns: "1.2fr 1fr 1fr 1fr", gap: 12 }}>
                           {/* Name Select Dropdown */}
                           <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                            <label style={{ fontSize: "0.74rem", color: "var(--ink-faint)", fontWeight: 600 }}>ASSIGN TO</label>
+                            <label style={{ fontSize: "0.74rem", color: "var(--ink-faint)", fontWeight: 600 }}>{ext.assignTo}</label>
                             <select
                               value={slotName}
                               onChange={(e) => {
@@ -1471,23 +1475,23 @@ function RoutingView({
                               }}
                               style={{ padding: 8, borderRadius: "var(--r-sm)", border: "1px solid var(--line)", background: "var(--surface)", color: "var(--ink)" }}
                             >
-                              <option value="Nurse Dawn">Nurse Dawn</option>
+                              <option value="Nurse Dawn">{lang === "ko" ? "간호사 Dawn" : lang === "ja" ? "看護師 Dawn" : lang === "zh" ? "护士 Dawn" : "Nurse Dawn"}</option>
                               {line.contacts.map((c) => (
                                 <option key={c.id} value={c.name}>
                                   {c.name} ({c.rel})
                                 </option>
                               ))}
-                              <option value="Custom">Custom...</option>
+                              <option value="Custom">{ext.custom}</option>
                             </select>
                           </div>
                           
                           {/* Custom Name text input if "Custom" selected */}
                           {slotName === "Custom" && (
                             <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                              <label style={{ fontSize: "0.74rem", color: "var(--ink-faint)", fontWeight: 600 }}>CUSTOM NAME</label>
+                              <label style={{ fontSize: "0.74rem", color: "var(--ink-faint)", fontWeight: 600 }}>{ext.customName}</label>
                               <input
                                 type="text"
-                                placeholder="Enter name"
+                                placeholder={ext.enterName}
                                 value={customName}
                                 onChange={(e) => setCustomName(e.target.value)}
                                 style={{ padding: 8, borderRadius: "var(--r-sm)", border: "1px solid var(--line)", background: "var(--surface)", color: "var(--ink)" }}
@@ -1497,10 +1501,10 @@ function RoutingView({
                           
                           {/* Description input */}
                           <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                            <label style={{ fontSize: "0.74rem", color: "var(--ink-faint)", fontWeight: 600 }}>DESCRIPTION</label>
+                            <label style={{ fontSize: "0.74rem", color: "var(--ink-faint)", fontWeight: 600 }}>{ext.description}</label>
                             <input
                               type="text"
-                              value={slotDesc}
+                              value={slotDesc === "Vacant slot" ? ext.vacantSlot : slotDesc}
                               onChange={(e) => setSlotDesc(e.target.value)}
                               style={{ padding: 8, borderRadius: "var(--r-sm)", border: "1px solid var(--line)", background: "var(--surface)", color: "var(--ink)" }}
                             />
@@ -1508,7 +1512,7 @@ function RoutingView({
                           
                           {/* Start hour dropdown */}
                           <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                            <label style={{ fontSize: "0.74rem", color: "var(--ink-faint)", fontWeight: 600 }}>START HOUR</label>
+                            <label style={{ fontSize: "0.74rem", color: "var(--ink-faint)", fontWeight: 600 }}>{ext.startHour}</label>
                             <select
                               value={slotStart}
                               onChange={(e) => setSlotStart(Number(e.target.value))}
@@ -1524,7 +1528,7 @@ function RoutingView({
                           
                           {/* End hour dropdown */}
                           <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                            <label style={{ fontSize: "0.74rem", color: "var(--ink-faint)", fontWeight: 600 }}>END HOUR</label>
+                            <label style={{ fontSize: "0.74rem", color: "var(--ink-faint)", fontWeight: 600 }}>{ext.endHour}</label>
                             <select
                               value={slotEnd}
                               onChange={(e) => setSlotEnd(Number(e.target.value))}
@@ -1541,7 +1545,7 @@ function RoutingView({
 
                         {/* Color Picker Swatches */}
                         <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                          <label style={{ fontSize: "0.74rem", color: "var(--ink-faint)", fontWeight: 600 }}>SWATCH COLOR</label>
+                          <label style={{ fontSize: "0.74rem", color: "var(--ink-faint)", fontWeight: 600 }}>{ext.swatchColor}</label>
                           <div style={{ display: "flex", gap: 8 }}>
                             {PRESET_COLORS.map((c) => (
                               <button
@@ -1569,14 +1573,14 @@ function RoutingView({
                             className="btn btn-ghost btn-sm"
                             style={{ padding: "6px 12px", fontSize: "0.78rem" }}
                           >
-                            Cancel
+                            {d.contacts.cancel}
                           </button>
                           <button
                             onClick={() => saveSlot(slot.id)}
                             className="btn btn-primary btn-sm"
                             style={{ padding: "6px 12px", fontSize: "0.78rem" }}
                           >
-                            Save
+                            {ext.save}
                           </button>
                         </div>
                       </div>
@@ -1603,7 +1607,7 @@ function RoutingView({
               className="btn btn-soft"
               style={{ marginTop: 18, width: "100%", padding: 12, border: "1px dashed var(--line)" }}
             >
-              + Add Coverage Time Slot
+              + {ext.addNewSegment}
             </button>
           ) : (
             <div
@@ -1618,11 +1622,11 @@ function RoutingView({
                 gap: 12,
               }}
             >
-              <h4 style={{ fontSize: "0.96rem", fontWeight: 600 }}>New Time Slot</h4>
+              <h4 style={{ fontSize: "0.96rem", fontWeight: 600 }}>{ext.addNewSlot}</h4>
               <div style={{ display: "grid", gridTemplateColumns: "1.2fr 1fr 1fr 1fr", gap: 12 }}>
                 {/* Assign dropdown */}
                 <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                  <label style={{ fontSize: "0.74rem", color: "var(--ink-faint)", fontWeight: 600 }}>ASSIGN TO</label>
+                  <label style={{ fontSize: "0.74rem", color: "var(--ink-faint)", fontWeight: 600 }}>{ext.assignTo}</label>
                   <select
                     value={slotName}
                     onChange={(e) => {
@@ -1634,22 +1638,22 @@ function RoutingView({
                     }}
                     style={{ padding: 8, borderRadius: "var(--r-sm)", border: "1px solid var(--line)", background: "var(--surface)", color: "var(--ink)" }}
                   >
-                    <option value="Nurse Dawn">Nurse Dawn</option>
+                    <option value="Nurse Dawn">{lang === "ko" ? "간호사 Dawn" : lang === "ja" ? "看護師 Dawn" : lang === "zh" ? "护士 Dawn" : "Nurse Dawn"}</option>
                     {line.contacts.map((c) => (
                       <option key={c.id} value={c.name}>
                         {c.name} ({c.rel})
                       </option>
                     ))}
-                    <option value="Custom">Custom...</option>
+                    <option value="Custom">{ext.custom}</option>
                   </select>
                 </div>
                 
                 {slotName === "Custom" && (
                   <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                    <label style={{ fontSize: "0.74rem", color: "var(--ink-faint)", fontWeight: 600 }}>CUSTOM NAME</label>
+                    <label style={{ fontSize: "0.74rem", color: "var(--ink-faint)", fontWeight: 600 }}>{ext.customName}</label>
                     <input
                       type="text"
-                      placeholder="Enter name"
+                      placeholder={ext.enterName}
                       value={customName}
                       onChange={(e) => setCustomName(e.target.value)}
                       style={{ padding: 8, borderRadius: "var(--r-sm)", border: "1px solid var(--line)", background: "var(--surface)", color: "var(--ink)" }}
@@ -1658,7 +1662,7 @@ function RoutingView({
                 )}
                 
                 <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                  <label style={{ fontSize: "0.74rem", color: "var(--ink-faint)", fontWeight: 600 }}>DESCRIPTION</label>
+                  <label style={{ fontSize: "0.74rem", color: "var(--ink-faint)", fontWeight: 600 }}>{ext.description}</label>
                   <input
                     type="text"
                     value={slotDesc}
@@ -1668,7 +1672,7 @@ function RoutingView({
                 </div>
                 
                 <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                  <label style={{ fontSize: "0.74rem", color: "var(--ink-faint)", fontWeight: 600 }}>START HOUR</label>
+                  <label style={{ fontSize: "0.74rem", color: "var(--ink-faint)", fontWeight: 600 }}>{ext.startHour}</label>
                   <select
                     value={slotStart}
                     onChange={(e) => setSlotStart(Number(e.target.value))}
@@ -1683,7 +1687,7 @@ function RoutingView({
                 </div>
                 
                 <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                  <label style={{ fontSize: "0.74rem", color: "var(--ink-faint)", fontWeight: 600 }}>END HOUR</label>
+                  <label style={{ fontSize: "0.74rem", color: "var(--ink-faint)", fontWeight: 600 }}>{ext.endHour}</label>
                   <select
                     value={slotEnd}
                     onChange={(e) => setSlotEnd(Number(e.target.value))}
@@ -1700,7 +1704,7 @@ function RoutingView({
 
               {/* Swatch color selection */}
               <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                <label style={{ fontSize: "0.74rem", color: "var(--ink-faint)", fontWeight: 600 }}>SWATCH COLOR</label>
+                <label style={{ fontSize: "0.74rem", color: "var(--ink-faint)", fontWeight: 600 }}>{ext.swatchColor}</label>
                 <div style={{ display: "flex", gap: 8 }}>
                   {PRESET_COLORS.map((c) => (
                     <button
@@ -1993,13 +1997,14 @@ const ACCT_TABS = [
   { id: "billing", label: "Payment & billing" },
 ];
 
-function AccountView({
+export function AccountView({
   account,
   setAccount,
   showToast,
   tab,
   setTab,
   d,
+  lang,
 }: {
   account: Account;
   setAccount: React.Dispatch<React.SetStateAction<Account>>;
@@ -2007,7 +2012,9 @@ function AccountView({
   tab: string;
   setTab: (t: string) => void;
   d: any;
+  lang: string;
 }) {
+  const ext = dashboardExtraTranslations[lang as keyof typeof dashboardExtraTranslations] || dashboardExtraTranslations.en;
   const a = account;
   const set = (patch: Partial<Account>) => setAccount((prev) => ({ ...prev, ...patch }));
 
@@ -2020,10 +2027,10 @@ function AccountView({
 
   const [pwd, setPwd] = useState({ cur: "", next: "", conf: "" });
   const savePwd = () => {
-    if (!pwd.cur || !pwd.next) return showToast("Enter your current and new password");
-    if (pwd.next !== pwd.conf) return showToast("New passwords don’t match");
+    if (!pwd.cur || !pwd.next) return showToast(ext.enterPasswordToast);
+    if (pwd.next !== pwd.conf) return showToast(ext.passwordMismatchToast);
     setPwd({ cur: "", next: "", conf: "" });
-    showToast("Password updated");
+    showToast(ext.passwordUpdatedToast);
   };
 
   return (
@@ -2045,7 +2052,7 @@ function AccountView({
           <div className="card-head">
             <div>
               <h2>{d.account.profile}</h2>
-              <p>Your personal details on the iCanCall account</p>
+              <p>{d.account.personalDetailsSub}</p>
             </div>
           </div>
           <div className="card-pad">
@@ -2055,13 +2062,19 @@ function AccountView({
               </span>
               <div className="pmeta">
                 <b>{a.name}</b>
-                <span>{a.role}</span>
+                <span>
+                  {a.role === "Primary caregiver" ? ext.primaryCaregiver :
+                   a.role === "Family member" ? ext.familyMember :
+                   a.role === "Account administrator" ? ext.accountAdmin :
+                   a.role === "Care coordinator" ? ext.careCoordinator :
+                   a.role}
+                </span>
                 <div className="pacts">
                   <button
                     className="btn btn-ghost btn-sm"
-                    onClick={() => showToast("Photo upload available soon")}
+                    onClick={() => showToast(ext.photoToast)}
                   >
-                    <Icon name="camera" /> Change photo
+                    <Icon name="camera" /> {ext.changePhoto}
                   </button>
                 </div>
               </div>
@@ -2081,11 +2094,14 @@ function AccountView({
             <div className="field" style={{ marginBottom: 0 }}>
               <label>{d.account.role}</label>
               <select value={a.role} onChange={(e) => set({ role: e.target.value })} style={{ maxWidth: 320 }}>
-                {["Primary caregiver", "Family member", "Account administrator", "Care coordinator"].map(
-                  (r) => (
-                    <option key={r}>{r}</option>
-                  )
-                )}
+                {[
+                  { id: "Primary caregiver", label: ext.primaryCaregiver },
+                  { id: "Family member", label: ext.familyMember },
+                  { id: "Account administrator", label: ext.accountAdmin },
+                  { id: "Care coordinator", label: ext.careCoordinator },
+                ].map((r) => (
+                  <option key={r.id} value={r.id}>{r.label}</option>
+                ))}
               </select>
             </div>
             <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 22 }}>
@@ -2103,7 +2119,7 @@ function AccountView({
             <div className="card-head">
               <div>
                 <h2>{d.account.email}</h2>
-                <p>Used to sign in and recover your account</p>
+                <p>{d.account.emailRecoverSub}</p>
               </div>
             </div>
             <div className="card-pad">
@@ -2126,13 +2142,13 @@ function AccountView({
             <div className="card-head">
               <div>
                 <h2>{d.account.security}</h2>
-                <p>Choose a strong password you don’t use elsewhere</p>
+                <p>{d.account.strongPasswordSub}</p>
               </div>
             </div>
             <div className="card-pad">
               <div style={{ maxWidth: 420 }}>
                 <div className="field">
-                  <label>{d.account.security}</label>
+                  <label>{lang === "es" ? "Contraseña actual" : lang === "fr" ? "Mot de passe actuel" : lang === "ja" ? "現在のパスワード" : lang === "zh" ? "当前密码" : lang === "ar" ? "كلمة المرور الحالية" : lang === "hi" ? "वर्तमान पासवर्ड" : lang === "pt" ? "Senha atual" : lang === "de" ? "Aktuelles Passwort" : lang === "it" ? "Password attuale" : lang === "ko" ? "현재 비밀번호" : "Current password"}</label>
                   <input
                     type="password"
                     value={pwd.cur}
@@ -2141,7 +2157,7 @@ function AccountView({
                   />
                 </div>
                 <div className="field">
-                  <label>{d.contacts.editContact}</label>
+                  <label>{lang === "es" ? "Nueva contraseña" : lang === "fr" ? "Nouveau mot de passe" : lang === "ja" ? "新しいパスワード" : lang === "zh" ? "新密码" : lang === "ar" ? "كلمة المرور الجديدة" : lang === "hi" ? "नया पासवर्ड" : lang === "pt" ? "Nova senha" : lang === "de" ? "Neues Passwort" : lang === "it" ? "Nuova password" : lang === "ko" ? "새 비밀번호" : "New password"}</label>
                   <input
                     type="password"
                     value={pwd.next}
@@ -2150,7 +2166,7 @@ function AccountView({
                   />
                 </div>
                 <div className="field" style={{ marginBottom: 0 }}>
-                  <label>{d.contacts.saveChanges}</label>
+                  <label>{lang === "es" ? "Confirmar nueva contraseña" : lang === "fr" ? "Confirmer le nouveau mot de passe" : lang === "ja" ? "新しいパスワードの確認" : lang === "zh" ? "确认新密码" : lang === "ar" ? "تأكيد كلمة المرور الجديدة" : lang === "hi" ? "नए पासवर्ड की पुष्टि करें" : lang === "pt" ? "Confirmar nova senha" : lang === "de" ? "Neues Passwort bestätigen" : lang === "it" ? "Conferma nuova password" : lang === "ko" ? "새 비밀번호 확인" : "Confirm new password"}</label>
                   <input
                     type="password"
                     value={pwd.conf}
@@ -2177,18 +2193,18 @@ function AccountView({
             <div className="card-pad" style={{ paddingTop: 8 }}>
               <div className="set-row" style={{ paddingTop: 4 }}>
                 <div className="txt">
-                  <b>Text message (SMS) codes</b>
+                  <b>{d.account.smsCodesTitle}</b>
                   <p>
-                    We’ll text a one-time code to {a.phone} each time you sign in on a new device.
+                    {d.account.smsCodesDesc} ({a.phone})
                   </p>
                 </div>
                 <Toggle
                   on={a.twoFactor}
                   onChange={(v) => {
                     set({ twoFactor: v });
-                    showToast(v ? "Two-factor enabled" : "Two-factor disabled");
+                    showToast(v ? (lang === "es" ? "Autenticación de dos factores activada" : lang === "fr" ? "Double authentification activée" : lang === "ja" ? "2段階認証を有効にしました" : lang === "zh" ? "双重验证已启用" : lang === "ar" ? "تم تفعيل التحقق بخطوتين" : lang === "hi" ? "दो-चरण प्रमाणीकरण सक्षम" : lang === "pt" ? "Autenticação de dois fatores ativada" : lang === "de" ? "Zwei-Faktor-Authentifizierung aktiviert" : lang === "it" ? "Autenticazione a due fattori abilitata" : lang === "ko" ? "2단계 인증이 활성화되었습니다" : "Two-factor enabled") : (lang === "es" ? "Autenticación de dos factores desactivada" : lang === "fr" ? "Double authentification désactivée" : lang === "ja" ? "2段階認証を无効にしました" : lang === "zh" ? "双重验证已禁用" : lang === "ar" ? "تم تعطيل التحقق بخطوتين" : lang === "hi" ? "दो-चरण प्रमाणीकरण अक्षम" : lang === "pt" ? "Autenticação de dois fatores desativada" : lang === "de" ? "Zwei-Faktor-Authentifizierung deaktiviert" : lang === "it" ? "Autenticazione a due fattori disabilitata" : lang === "ko" ? "2단계 인증이 비활성화되었습니다" : "Two-factor disabled"));
                   }}
-                  labels={["Off", "On"]}
+                  labels={[lang === "es" ? "Off" : lang === "fr" ? "Off" : lang === "ja" ? "オフ" : lang === "zh" ? "关闭" : lang === "ar" ? "إيقاف" : lang === "hi" ? "बंद" : lang === "pt" ? "Desativado" : lang === "de" ? "Aus" : lang === "it" ? "Off" : lang === "ko" ? "꺼짐" : "Off", lang === "es" ? "On" : lang === "fr" ? "On" : lang === "ja" ? "オン" : lang === "zh" ? "开启" : lang === "ar" ? "تشغيل" : lang === "hi" ? "चालू" : lang === "pt" ? "Ativado" : lang === "de" ? "An" : lang === "it" ? "On" : lang === "ko" ? "켜짐" : "On"]}
                 />
               </div>
             </div>
@@ -2197,15 +2213,15 @@ function AccountView({
           <div className="card">
             <div className="card-head">
               <div>
-                <h2>Active sessions</h2>
-                <p>Devices currently signed in to your account</p>
+                <h2>{ext.activeSessions}</h2>
+                <p>{d.account.activeSessionsSub}</p>
               </div>
             </div>
             <div className="card-pad" style={{ paddingTop: 6, paddingBottom: 10 }}>
               {[
-                { dev: "Chrome · MacBook Pro", loc: "Oakland, CA", last: "Active now", cur: true },
-                { dev: "iCanCall app · iPhone 15", loc: "Oakland, CA", last: "2 hours ago", cur: false },
-                { dev: "Safari · iPad", loc: "Sacramento, CA", last: "Yesterday", cur: false },
+                { dev: "Chrome · MacBook Pro", loc: "Oakland, CA", last: d.common.activeNow, cur: true },
+                { dev: "iCanCall app · iPhone 15", loc: "Oakland, CA", last: lang === "es" ? "Hace 2 horas" : lang === "fr" ? "Il y a 2 heures" : lang === "ja" ? "2時間前" : lang === "zh" ? "2小时前" : lang === "ar" ? "قبل ساعتين" : lang === "hi" ? "2 घंटे पहले" : lang === "pt" ? "Há 2 horas" : lang === "de" ? "Vor 2 Stunden" : lang === "it" ? "2 ore fa" : lang === "ko" ? "2시간 전" : "2 hours ago", cur: false },
+                { dev: "Safari · iPad", loc: "Sacramento, CA", last: lang === "es" ? "Ayer" : lang === "fr" ? "Hier" : lang === "ja" ? "昨日" : lang === "zh" ? "昨天" : lang === "ar" ? "أمس" : lang === "hi" ? "कल" : lang === "pt" ? "Ontem" : lang === "de" ? "Gestern" : lang === "it" ? "Ieri" : lang === "ko" ? "어제" : "Yesterday", cur: false },
               ].map((s, i) => (
                 <div className="session" key={i}>
                   <span className="sic">
@@ -2218,13 +2234,13 @@ function AccountView({
                     </span>
                   </div>
                   {s.cur ? (
-                    <Badge kind="green">This device</Badge>
+                    <Badge kind="green">{ext.thisDevice}</Badge>
                   ) : (
                     <button
                       className="btn btn-danger-ghost btn-sm"
-                      onClick={() => showToast("Signed out of " + s.dev)}
+                      onClick={() => showToast(ext.deviceSignoutToast + s.dev)}
                     >
-                      <Icon name="logout" /> Sign out
+                      <Icon name="logout" /> {ext.signOut}
                     </button>
                   )}
                 </div>
@@ -2239,7 +2255,7 @@ function AccountView({
           <div className="card-head">
             <div>
               <h2>{d.account.contactInfo}</h2>
-              <p>Where we reach you with call alerts and account notices</p>
+              <p>{d.account.contactReachSub}</p>
             </div>
           </div>
           <div className="card-pad">
@@ -2260,7 +2276,7 @@ function AccountView({
               </div>
             </div>
             <div className="field">
-              <label>Address</label>
+              <label>{ext.address}</label>
               <input value={a.address} onChange={(e) => set({ address: e.target.value })} />
             </div>
             <div className="field" style={{ marginBottom: 0 }}>
@@ -2268,16 +2284,28 @@ function AccountView({
                 <div>
                   <label>{d.account.timezone}</label>
                   <select value={a.timezone} onChange={(e) => set({ timezone: e.target.value })}>
-                    {["Pacific (PT)", "Mountain (MT)", "Central (CT)", "Eastern (ET)"].map((tz) => (
-                      <option key={tz}>{tz}</option>
+                    {[
+                      { id: "Pacific (PT)", label: lang === "es" ? "Pacífico (PT)" : lang === "fr" ? "Pacifique (PT)" : lang === "ja" ? "太平洋標準時 (PT)" : lang === "zh" ? "太平洋时间 (PT)" : lang === "ar" ? "الهادئ (PT)" : lang === "hi" ? "पैसिफिक (PT)" : lang === "pt" ? "Pacífico (PT)" : lang === "de" ? "Pazifik (PT)" : lang === "it" ? "Pacifico (PT)" : lang === "ko" ? "태평양시 (PT)" : "Pacific (PT)" },
+                      { id: "Mountain (MT)", label: lang === "es" ? "Montaña (MT)" : lang === "fr" ? "Rocheuses (MT)" : lang === "ja" ? "山岳部標準時 (MT)" : lang === "zh" ? "山地时间 (MT)" : lang === "ar" ? "الجبلي (MT)" : lang === "hi" ? "माउंटेन (MT)" : lang === "pt" ? "Montanha (MT)" : lang === "de" ? "Mountain (MT)" : lang === "it" ? "Montagne (MT)" : lang === "ko" ? "산악시 (MT)" : "Mountain (MT)" },
+                      { id: "Central (CT)", label: lang === "es" ? "Central (CT)" : lang === "fr" ? "Centre (CT)" : lang === "ja" ? "中部標準時 (CT)" : lang === "zh" ? "中部时间 (CT)" : lang === "ar" ? "المركزي (CT)" : lang === "hi" ? "सेंट्रल (CT)" : lang === "pt" ? "Central (CT)" : lang === "de" ? "Zentralzeit (CT)" : lang === "it" ? "Centrale (CT)" : lang === "ko" ? "중부시 (CT)" : "Central (CT)" },
+                      { id: "Eastern (ET)", label: lang === "es" ? "Este (ET)" : lang === "fr" ? "Est (ET)" : lang === "ja" ? "東部標準時 (ET)" : lang === "zh" ? "东部时间 (ET)" : lang === "ar" ? "الشرقي (ET)" : lang === "hi" ? "ईस्टर्न (ET)" : lang === "pt" ? "Leste (ET)" : lang === "de" ? "Ostküstenzeit (ET)" : lang === "it" ? "Orientale (ET)" : lang === "ko" ? "동부시 (ET)" : "Eastern (ET)" }
+                    ].map((tz) => (
+                      <option key={tz.id} value={tz.id}>{tz.label}</option>
                     ))}
                   </select>
                 </div>
                 <div>
                   <label>{d.account.language}</label>
                   <select value={a.language} onChange={(e) => set({ language: e.target.value })}>
-                    {["English", "Spanish", "Mandarin", "Tagalog", "Vietnamese", "French"].map((lang) => (
-                      <option key={lang}>{lang}</option>
+                    {[
+                      { id: "English", label: lang === "es" ? "Inglés" : lang === "fr" ? "Anglais" : lang === "ja" ? "英語" : lang === "zh" ? "英语" : lang === "ar" ? "الإنجليزية" : lang === "hi" ? "अंग्रेज़ी" : lang === "pt" ? "Inglês" : lang === "de" ? "Englisch" : lang === "it" ? "Inglese" : lang === "ko" ? "영어" : "English" },
+                      { id: "Spanish", label: lang === "es" ? "Español" : lang === "fr" ? "Espagnol" : lang === "ja" ? "スペイン語" : lang === "zh" ? "西班牙语" : lang === "ar" ? "الإسبانية" : lang === "hi" ? "स्पैनिश" : lang === "pt" ? "Espanhol" : lang === "de" ? "Spanisch" : lang === "it" ? "Spagnolo" : lang === "ko" ? "스페인어" : "Spanish" },
+                      { id: "Mandarin", label: lang === "es" ? "Mandarín" : lang === "fr" ? "Mandarin" : lang === "ja" ? "中国語" : lang === "zh" ? "中文（普通话）" : lang === "ar" ? "الماندرين" : lang === "hi" ? "मंदारिन" : lang === "pt" ? "Mandarim" : lang === "de" ? "Mandarin" : lang === "it" ? "Mandarino" : lang === "ko" ? "중국어" : "Mandarin" },
+                      { id: "Tagalog", label: lang === "es" ? "Tagalo" : lang === "fr" ? "Tagalog" : lang === "ja" ? "タガログ語" : lang === "zh" ? "塔加路语" : lang === "ar" ? "التاغالوغية" : lang === "hi" ? "तागालोग" : lang === "pt" ? "Tagalo" : lang === "de" ? "Tagalog" : lang === "it" ? "Tagalog" : lang === "ko" ? "타갈로그어" : "Tagalog" },
+                      { id: "Vietnamese", label: lang === "es" ? "Vietnamita" : lang === "fr" ? "Vietnamien" : lang === "ja" ? "ベトナム語" : lang === "zh" ? "越南语" : lang === "ar" ? "الفيتنامية" : lang === "hi" ? "वियतनामी" : lang === "pt" ? "Vietnamita" : lang === "de" ? "Vietnamesisch" : lang === "it" ? "Vietnamita" : lang === "ko" ? "베트남어" : "Vietnamese" },
+                      { id: "French", label: lang === "es" ? "Francés" : lang === "fr" ? "Français" : lang === "ja" ? "フランス語" : lang === "zh" ? "法语" : lang === "ar" ? "الفرنسية" : lang === "hi" ? "फ़्रेंच" : lang === "pt" ? "Francês" : lang === "de" ? "Französisch" : lang === "it" ? "Francese" : lang === "ko" ? "프랑스어" : "French" }
+                    ].map((l) => (
+                      <option key={l.id} value={l.id}>{l.label}</option>
                     ))}
                   </select>
                 </div>
@@ -2298,7 +2326,7 @@ function AccountView({
             <div className="card-head">
               <div>
                 <h2>{d.account.billing}</h2>
-                <p>Billed monthly · renews June 1, 2026</p>
+                <p>{d.account.renewDateSub}</p>
               </div>
               <Badge kind="blue">Pro</Badge>
             </div>
@@ -2307,9 +2335,9 @@ function AccountView({
                 <span style={{ fontSize: "2.4rem", fontWeight: 700, letterSpacing: "-0.03em" }}>
                   $19.99
                 </span>
-                <span style={{ color: "var(--ink-faint)" }}>/ month</span>
+                <span style={{ color: "var(--ink-faint)" }}>{lang === "es" ? "/ mes" : lang === "fr" ? "/ mois" : lang === "ja" ? "/ 月" : lang === "zh" ? "/ 月" : lang === "ar" ? "/ شهر" : lang === "hi" ? "/ महीना" : lang === "/ mês" ? "/ mês" : lang === "de" ? "/ Monat" : lang === "it" ? "/ mese" : lang === "ko" ? "/ 월" : "/ month"}</span>
                 <span style={{ marginLeft: 10 }}>
-                  <Badge kind="green">Save 17% on annual</Badge>
+                  <Badge kind="green">{ext.saveAnnual}</Badge>
                 </span>
               </div>
               <div
@@ -2321,14 +2349,7 @@ function AccountView({
                 }}
                 className="feat-grid"
               >
-                {[
-                  "2 dedicated phone numbers",
-                  "6 routable contacts per number",
-                  "Cascade routing + Caller Menu",
-                  "Real-time SMS & email alerts",
-                  "Bilingual greeting options",
-                  "Admin dashboard",
-                ].map((f) => (
+                {d.account.billingFeatures.map((f: string) => (
                   <div className="plan-feat" key={f}>
                     <Icon name="check" /> {f}
                   </div>
@@ -2337,12 +2358,12 @@ function AccountView({
               <div style={{ display: "flex", gap: 10, marginTop: 20 }}>
                 <button
                   className="btn btn-primary"
-                  onClick={() => showToast("Switched to annual billing — $199/yr")}
+                  onClick={() => showToast(ext.annualToast)}
                 >
-                  <Icon name="spark" /> Switch to annual
+                  <Icon name="spark" /> {ext.switchToAnnual}
                 </button>
-                <button className="btn btn-ghost" onClick={() => showToast("Opening plan options…")}>
-                  Change plan
+                <button className="btn btn-ghost" onClick={() => showToast(ext.planOptionsToast)}>
+                  {ext.changePlan}
                 </button>
               </div>
             </div>
@@ -2360,8 +2381,8 @@ function AccountView({
               <div className="card section-gap">
                 <div className="card-head">
                   <div>
-                    <h2>Add-ons</h2>
-                    <p>Available on both the Essential and Pro plans</p>
+                    <h2>{ext.addOns}</h2>
+                    <p>{d.account.addonsPlansSub}</p>
                   </div>
                 </div>
                 <div className="card-pad" style={{ paddingTop: 8 }}>
@@ -2371,12 +2392,11 @@ function AccountView({
                     </span>
                     <div className="abody">
                       <div className="atop">
-                        <b>Additional phone number</b>
-                        <span className="price">$6.99 / mo each</span>
+                        <b>{d.account.addonNumbersTitle}</b>
+                        <span className="price">{lang === "es" ? "$6.99 / mes c/u" : lang === "fr" ? "6,99 $ / mois chacun" : lang === "ja" ? "各 $6.99 / 月" : lang === "zh" ? "每个 $6.99 / 月" : lang === "ar" ? "$6.99 / شهرياً لكل رقم" : lang === "hi" ? "$6.99 / माह प्रत्येक" : lang === "pt" ? "$6.99 / mês cada" : lang === "de" ? "6,99 $ / Monat pro Nummer" : lang === "it" ? "6,99 $ / mese ciascuno" : lang === "ko" ? "개당 $6.99 / 월" : "$6.99 / mo each"}</span>
                       </div>
                       <p>
-                        Add another dedicated iCanCall number for another loved one, each with its own
-                        contacts and routing.
+                        {d.account.addonNumbersDesc}
                       </p>
                     </div>
                     <div className="actl">
@@ -2398,7 +2418,7 @@ function AccountView({
                         </button>
                       </div>
                       <span className="sub">
-                        {numCost > 0 ? `+$${numCost.toFixed(2)}/mo` : "Included: base plan"}
+                        {numCost > 0 ? `+$${numCost.toFixed(2)}/${lang === "es" ? "mes" : lang === "fr" ? "mois" : lang === "ja" ? "月" : lang === "zh" ? "月" : lang === "ar" ? "شهر" : lang === "hi" ? "माह" : lang === "pt" ? "mês" : lang === "de" ? "Monat" : lang === "it" ? "mese" : lang === "ko" ? "월" : "mo"}` : lang === "es" ? "Incluido: plan base" : lang === "fr" ? "Inclus : forfait de base" : lang === "ja" ? "基本プランに含まれる" : lang === "zh" ? "包含在基础版中" : lang === "ar" ? "مشمول في الباقة الأساسية" : lang === "hi" ? "शामिल: बेस प्लान" : lang === "pt" ? "Incluído: plano básico" : lang === "de" ? "Inklusive: Basistarif" : lang === "it" ? "Incluso: piano base" : lang === "ko" ? "기본 제공: 기본 플랜" : "Included: base plan"}
                       </span>
                     </div>
                   </div>
@@ -2409,12 +2429,11 @@ function AccountView({
                     </span>
                     <div className="abody">
                       <div className="atop">
-                        <b>Extra voice minutes</b>
-                        <span className="price">$4.99 per 30 min</span>
+                        <b>{ext.extraMinTitle}</b>
+                        <span className="price">{ext.extraMinPrice}</span>
                       </div>
                       <p>
-                        Top up talk time in 30-minute blocks. <b>Unused add-on minutes roll over</b> to
-                        the next 30-day billing cycle — you never lose what you've paid for.
+                        {ext.extraMinDesc}
                       </p>
                     </div>
                     <div className="actl">
@@ -2431,23 +2450,23 @@ function AccountView({
                         />
                       </div>
                       <span className="sub">
-                        {ad.minuteBlocks * 30} min · {minCost > 0 ? `+$${minCost.toFixed(2)}/mo` : "$0.00/mo"}
+                        {ad.minuteBlocks * 30} {lang === "es" ? "min" : lang === "fr" ? "min" : lang === "ja" ? "分" : lang === "zh" ? "分钟" : lang === "ar" ? "دقيقة" : lang === "hi" ? "मिनट" : lang === "pt" ? "min" : lang === "de" ? "Min" : lang === "it" ? "min" : lang === "ko" ? "분" : "min"} · {minCost > 0 ? `+$${minCost.toFixed(2)}/${lang === "es" ? "mes" : lang === "fr" ? "mois" : lang === "ja" ? "月" : lang === "zh" ? "月" : lang === "ar" ? "شهر" : lang === "hi" ? "माह" : lang === "pt" ? "mês" : lang === "de" ? "Monat" : lang === "it" ? "mese" : lang === "ko" ? "월" : "mo"}` : `$0.00/${lang === "es" ? "mes" : lang === "fr" ? "mois" : lang === "ja" ? "月" : lang === "zh" ? "月" : lang === "ar" ? "شهر" : lang === "hi" ? "माह" : lang === "pt" ? "mês" : lang === "de" ? "Monat" : lang === "it" ? "mese" : lang === "ko" ? "월" : "mo"}`}
                       </span>
                     </div>
                   </div>
 
                   <div className="addon-total">
                     <span className="lbl">
-                      New monthly total <b>(plan + add-ons)</b>
+                      {ext.newMonthlyTotal} <b>{ext.planAndAddons}</b>
                     </span>
                     <span className="big">
                       ${total.toFixed(2)}
-                      <span> / mo</span>
+                      <span> / {lang === "es" ? "mes" : lang === "fr" ? "mois" : lang === "ja" ? "月" : lang === "zh" ? "月" : lang === "ar" ? "شهر" : lang === "hi" ? "माह" : lang === "pt" ? "mês" : lang === "de" ? "Monat" : lang === "it" ? "mese" : lang === "ko" ? "월" : "mo"}</span>
                     </span>
                   </div>
                   <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 16 }}>
-                    <button className="btn btn-primary" onClick={() => showToast("Add-ons updated")}>
-                      <Icon name="check" /> Save add-ons
+                    <button className="btn btn-primary" onClick={() => showToast(ext.addonsUpdatedToast)}>
+                      <Icon name="check" /> {ext.saveAddons}
                     </button>
                   </div>
                 </div>
@@ -2468,10 +2487,10 @@ function AccountView({
               <div className="card section-gap">
                 <div className="card-head">
                   <div>
-                    <h2>Add-on minutes</h2>
-                    <p>Top-up talk time on top of your plan&rsquo;s included minutes</p>
+                    <h2>{ext.addonMinutesTitle}</h2>
+                    <p>{ext.addonMinutesDesc}</p>
                   </div>
-                  {total > 0 && <Badge kind={low ? "amber" : "green"}>{low ? "Running low" : "Rolls over"}</Badge>}
+                  {total > 0 && <Badge kind={low ? "amber" : "green"}>{low ? ext.runningLow : ext.rollsOver}</Badge>}
                 </div>
                 <div className="card-pad">
                   {total === 0 ? (
@@ -2480,10 +2499,9 @@ function AccountView({
                         <Icon name="clock" />
                       </span>
                       <div>
-                        <b>No add-on minutes yet</b>
+                        <b>{ext.noAddonMinYet}</b>
                         <p>
-                          Add extra voice minutes above and they&rsquo;ll show up here. Unused minutes roll
-                          over each cycle, so you never lose what you&rsquo;ve paid for.
+                          {ext.noAddonMinDesc}
                         </p>
                       </div>
                     </div>
@@ -2492,10 +2510,10 @@ function AccountView({
                       <div className="mb-top">
                         <div className="big">
                           {remaining}
-                          <span> min remaining</span>
+                          <span> {ext.minRemaining}</span>
                         </div>
                         <div className="mb-meta">
-                          {used} of {total} add-on min used &middot; renews June 1, 2026
+                          {used} {lang === "es" ? "de" : lang === "fr" ? "sur" : lang === "ja" ? "の" : lang === "zh" ? "共" : lang === "ar" ? "من" : lang === "hi" ? "कुल" : lang === "pt" ? "de" : lang === "de" ? "von" : lang === "it" ? "di" : lang === "ko" ? "중" : "of"} {total} {ext.addonMinUsed} &middot; {lang === "es" ? "renueva el 1 de junio de 2026" : lang === "fr" ? "renouvellement le 1er juin 2026" : lang === "ja" ? "2026年6月1日に更新" : lang === "zh" ? "于 2026年6月1日续期" : lang === "ar" ? "يتجدد في 1 يونيو 2026" : lang === "hi" ? "1 जून, 2026 को नवीनीकृत होगा" : lang === "pt" ? "renova em 1 de junho de 2026" : lang === "de" ? "verlängert sich am 1. Juni 2026" : lang === "it" ? "si rinnova il 1 giugno 2026" : lang === "ko" ? "2026년 6월 1일에 갱신 예정" : "renews June 1, 2026"}
                         </div>
                       </div>
                       <div className="usage-bar bigbar" style={{ marginTop: 14 }}>
@@ -2507,10 +2525,10 @@ function AccountView({
                             <Icon name="plus" />
                           </span>
                           <div>
-                            <b>{purchased} min</b>
+                            <b>{purchased} {lang === "es" ? "min" : lang === "fr" ? "min" : lang === "ja" ? "分" : lang === "zh" ? "分钟" : lang === "ar" ? "دقيقة" : lang === "hi" ? "मिनट" : lang === "pt" ? "min" : lang === "de" ? "Min" : lang === "it" ? "min" : lang === "ko" ? "분" : "min"}</b>
                             <span>
-                              This cycle&rsquo;s top-up
-                              {ad.minuteBlocks ? ` · ${ad.minuteBlocks} × 30 min` : ""}
+                              {ext.thisCycleTopup}
+                              {ad.minuteBlocks ? ` · ${ad.minuteBlocks} × 30 ${lang === "es" ? "min" : lang === "fr" ? "min" : lang === "ja" ? "分" : lang === "zh" ? "分钟" : lang === "ar" ? "دقيقة" : lang === "hi" ? "मिनट" : lang === "pt" ? "min" : lang === "de" ? "Min" : lang === "it" ? "min" : lang === "ko" ? "분" : "min"}` : ""}
                             </span>
                           </div>
                         </div>
@@ -2519,8 +2537,8 @@ function AccountView({
                             <Icon name="refresh" />
                           </span>
                           <div>
-                            <b>{rollover} min</b>
-                            <span>Rolled over from last cycle</span>
+                            <b>{rollover} {lang === "es" ? "min" : lang === "fr" ? "min" : lang === "ja" ? "分" : lang === "zh" ? "分钟" : lang === "ar" ? "دقيقة" : lang === "hi" ? "मिनट" : lang === "pt" ? "min" : lang === "de" ? "Min" : lang === "it" ? "min" : lang === "ko" ? "분" : "min"}</b>
+                            <span>{ext.rolledOverFromLast}</span>
                           </div>
                         </div>
                         <div className="mb-stat">
@@ -2528,14 +2546,13 @@ function AccountView({
                             <Icon name="phone" />
                           </span>
                           <div>
-                            <b>{used} min</b>
-                            <span>Used this cycle</span>
+                            <b>{used} {lang === "es" ? "min" : lang === "fr" ? "min" : lang === "ja" ? "分" : lang === "zh" ? "分钟" : lang === "ar" ? "دقيقة" : lang === "hi" ? "मिनट" : lang === "pt" ? "min" : lang === "de" ? "Min" : lang === "it" ? "min" : lang === "ko" ? "분" : "min"}</b>
+                            <span>{ext.usedThisCycle}</span>
                           </div>
                         </div>
                       </div>
                       <p className="mb-note">
-                        <Icon name="check" /> Plan minutes are used first; add-on minutes kick in only after
-                        those run out. Remaining add-on minutes roll over automatically.
+                        <Icon name="check" /> {ext.addonMinNote}
                       </p>
                     </>
                   )}
@@ -2548,7 +2565,7 @@ function AccountView({
             <div className="card-head">
               <div>
                 <h2>{d.account.paymentMethod}</h2>
-                <p>Charged on the 1st of each month</p>
+                <p>{ext.chargedOnFirst}</p>
               </div>
             </div>
             <div className="card-pad">
@@ -2556,13 +2573,13 @@ function AccountView({
                 <span className="card-brand">{a.card.brand.toUpperCase()}</span>
                 <div style={{ flex: 1 }}>
                   <div className="cnum">•••• •••• •••• {a.card.last4}</div>
-                  <div className="cexp">Expires {a.card.exp}</div>
+                  <div className="cexp">{lang === "es" ? "Vence" : lang === "fr" ? "Expire le" : lang === "ja" ? "有効期限" : lang === "zh" ? "有效期至" : lang === "ar" ? "تنتهي في" : lang === "hi" ? "समाप्ति तिथि" : lang === "pt" ? "Expira em" : lang === "de" ? "Gültig bis" : lang === "it" ? "Scade il" : lang === "ko" ? "만료일" : "Expires"} {a.card.exp}</div>
                 </div>
                 <button
                   className="btn btn-ghost btn-sm"
-                  onClick={() => showToast("Opening secure card form…")}
+                  onClick={() => showToast(lang === "es" ? "Abriendo el formulario de tarjeta seguro…" : lang === "fr" ? "Ouverture du formulaire de carte sécurisé…" : lang === "ja" ? "セキュアなカード入力フォームを開いています…" : lang === "zh" ? "正在打开安全信用卡表单…" : lang === "ar" ? "جاري فتح نموذج البطاقة الآمن…" : lang === "hi" ? "सुरक्षित कार्ड फ़ॉर्म खोला जा रहा है…" : lang === "pt" ? "Abrindo formulário seguro de cartão…" : lang === "de" ? "Sicheres Kartenformular wird geöffnet…" : lang === "it" ? "Apertura del modulo sicuro della carta…" : lang === "ko" ? "보안 카드 양식을 여는 중…" : "Opening secure card form…")}
                 >
-                  <Icon name="card" /> Update card
+                  <Icon name="card" /> {ext.updateCard}
                 </button>
               </div>
               <div className="field" style={{ marginTop: 20, marginBottom: 0 }}>
@@ -2580,45 +2597,48 @@ function AccountView({
           <div className="card section-gap">
             <div className="card-head">
               <div>
-                <h2>Billing history</h2>
-                <p>Visa ending {a.card.last4}</p>
+                <h2>{ext.billingHistory}</h2>
+                <p>{lang === "es" ? "Visa terminada en" : lang === "fr" ? "Visa se terminant par" : lang === "ja" ? "末尾が" : lang === "zh" ? "末尾为" : lang === "ar" ? "بطاقة Visa التي تنتهي بـ" : lang === "hi" ? "वीजा अंत" : lang === "pt" ? "Visa terminando em" : lang === "de" ? "Visa mit der Endung" : lang === "it" ? "Visa che termina con" : lang === "ko" ? "끝자리" : "Visa ending"} {a.card.last4}{lang === "ja" ? "のVisa" : lang === "ko" ? "인 Visa" : ""}</p>
               </div>
             </div>
             <div className="card-pad" style={{ paddingTop: 6, paddingBottom: 10 }}>
               {[
-                ["May 1, 2026", "Pro · monthly", "$19.99"],
-                ["Apr 1, 2026", "Pro · monthly", "$19.99"],
-                ["Mar 1, 2026", "Pro · monthly", "$19.99"],
-              ].map(([d, desc, amt]) => (
-                <div className="invoice" key={d}>
-                  <div className="l">
-                    <b>{d}</b>
-                    <span>{desc}</span>
+                [lang === "es" ? "1 de mayo de 2026" : lang === "fr" ? "1 mai 2026" : lang === "ja" ? "2026年5月1日" : lang === "zh" ? "2026年5月1日" : lang === "ar" ? "1 مايو 2026" : lang === "hi" ? "1 मई, 2026" : lang === "pt" ? "1 de maio de 2026" : lang === "de" ? "1. Mai 2026" : lang === "it" ? "1 maggio 2026" : lang === "ko" ? "2026년 5월 1일" : "May 1, 2026", "Pro · monthly", "$19.99"],
+                [lang === "es" ? "1 de abr de 2026" : lang === "fr" ? "1 avr. 2026" : lang === "ja" ? "2026年4月1日" : lang === "zh" ? "2026年4月1日" : lang === "ar" ? "1 أبريل 2026" : lang === "hi" ? "1 अप्रैल, 2026" : lang === "pt" ? "1 de abr de 2026" : lang === "de" ? "1. Apr. 2026" : lang === "it" ? "1 aprile 2026" : lang === "ko" ? "2026년 4월 1일" : "Apr 1, 2026", "Pro · monthly", "$19.99"],
+                [lang === "es" ? "1 de mar de 2026" : lang === "fr" ? "1 mars 2026" : lang === "ja" ? "2026年3月1日" : lang === "zh" ? "2026年3月1日" : lang === "ar" ? "1 مارس 2026" : lang === "hi" ? "1 मार्च, 2026" : lang === "pt" ? "1 de mar de 2026" : lang === "de" ? "1. März 2026" : lang === "it" ? "1 marzo 2026" : lang === "ko" ? "2026년 3월 1일" : "Mar 1, 2026", "Pro · monthly", "$19.99"],
+              ].map(([dVal, desc, amt]) => {
+                const localizedDesc = desc === "Pro · monthly" ? (lang === "es" ? "Pro · mensual" : lang === "fr" ? "Pro · mensuel" : lang === "ja" ? "プロ · 月額" : lang === "zh" ? "专业版 · 按月" : lang === "ar" ? "برو · شهرياً" : lang === "hi" ? "प्रो · मासिक" : lang === "pt" ? "Pro · mensal" : lang === "de" ? "Pro · monatlich" : lang === "it" ? "Pro · mensile" : lang === "ko" ? "프로 · 월간" : "Pro · monthly") : desc;
+                return (
+                  <div className="invoice" key={dVal}>
+                    <div className="l">
+                      <b>{dVal}</b>
+                      <span>{localizedDesc}</span>
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+                      <span className="amt">{amt}</span>
+                      <button className="btn btn-soft btn-sm" onClick={() => showToast(ext.downloadReceiptToast)}>
+                        <Icon name="download" /> {ext.receipt}
+                      </button>
+                    </div>
                   </div>
-                  <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-                    <span className="amt">{amt}</span>
-                    <button className="btn btn-soft btn-sm" onClick={() => showToast("Downloading receipt…")}>
-                      <Icon name="download" /> Receipt
-                    </button>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
 
           <div className="card danger-zone">
             <div className="card-head">
               <div>
-                <h2>Cancel subscription</h2>
-                <p>Your numbers stay active until the end of the billing period</p>
+                <h2>{ext.cancelSubscription}</h2>
+                <p>{ext.cancelSubscriptionDesc}</p>
               </div>
             </div>
             <div className="card-pad" style={{ paddingTop: 14 }}>
               <button
                 className="btn btn-danger-ghost"
-                onClick={() => showToast("We’d hate to see you go — contact support to cancel")}
+                onClick={() => showToast(ext.cancelToast)}
               >
-                Cancel iCanCall Pro
+                {ext.cancelPro}
               </button>
             </div>
           </div>
@@ -3378,7 +3398,7 @@ export default function DashboardApp() {
             <ContactsView line={line} setLine={setLines} showToast={showToast} d={d} lang={lang} />
           )}
           {view === "routing" && (
-            <RoutingView line={line} setLine={setLines} showToast={showToast} d={d} />
+            <RoutingView line={line} setLine={setLines} showToast={showToast} d={d} lang={lang} />
           )}
           {view === "log" && <CallLogView line={line} log={log} d={d} />}
           {view === "settings" && (
@@ -3392,6 +3412,7 @@ export default function DashboardApp() {
               tab={acctTab}
               setTab={setAcctTab}
               d={d}
+              lang={lang}
             />
           )}
         </div>

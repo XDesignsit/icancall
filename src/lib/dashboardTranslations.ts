@@ -116,6 +116,18 @@ export interface DashboardTranslations {
     twoFactorSub: string;
     paymentMethod: string;
     billingAddress: string;
+    personalDetailsSub: string;
+    emailRecoverSub: string;
+    strongPasswordSub: string;
+    activeSessionsSub: string;
+    contactReachSub: string;
+    renewDateSub: string;
+    addonsPlansSub: string;
+    addonNumbersTitle: string;
+    addonNumbersDesc: string;
+    smsCodesTitle: string;
+    smsCodesDesc: string;
+    billingFeatures: string[];
   };
   sim: {
     runTest: string;
@@ -252,6 +264,25 @@ export const dashboardTranslations: Record<
       twoFactorSub: "Add extra security to your account",
       paymentMethod: "Active Payment Method",
       billingAddress: "Billing Address",
+      personalDetailsSub: "Your personal details on the iCanCall account",
+      emailRecoverSub: "Used to sign in and recover your account",
+      strongPasswordSub: "Choose a strong password you don’t use elsewhere",
+      activeSessionsSub: "Devices currently signed in to your account",
+      contactReachSub: "Where we reach you with call alerts and account notices",
+      renewDateSub: "Billed monthly · renews June 1, 2026",
+      addonsPlansSub: "Available on both the Essential and Pro plans",
+      addonNumbersTitle: "Additional phone number",
+      addonNumbersDesc: "Add another dedicated iCanCall number for another loved one, each with its own contacts and routing.",
+      smsCodesTitle: "Text message (SMS) codes",
+      smsCodesDesc: "We’ll text a one-time code each time you sign in on a new device.",
+      billingFeatures: [
+        "2 dedicated phone numbers",
+        "6 routable contacts per number",
+        "Cascade routing + Caller Menu",
+        "Real-time SMS & email alerts",
+        "Bilingual greeting options",
+        "Admin dashboard"
+      ],
     },
     sim: {
       runTest: "Run a test call",
@@ -383,6 +414,25 @@ export const dashboardTranslations: Record<
       twoFactorSub: "Añada seguridad adicional a su cuenta",
       paymentMethod: "Método de pago activo",
       billingAddress: "Dirección de facturación",
+      personalDetailsSub: "Sus datos personales en la cuenta iCanCall",
+      emailRecoverSub: "Se usa para iniciar sesión y recuperar su cuenta",
+      strongPasswordSub: "Elija una contraseña segura que no use en otros sitios",
+      activeSessionsSub: "Dispositivos que han iniciado sesión en su cuenta",
+      contactReachSub: "Dónde nos comunicamos con usted para alertas de llamadas",
+      renewDateSub: "Facturado mensualmente · renueva el 1 de junio de 2026",
+      addonsPlansSub: "Disponible tanto en los planes Essential como Pro",
+      addonNumbersTitle: "Número de teléfono adicional",
+      addonNumbersDesc: "Añada otro número iCanCall dedicado para otro ser querido, cada uno con sus propios contactos y enrutamiento.",
+      smsCodesTitle: "Códigos de mensaje de texto (SMS)",
+      smsCodesDesc: "Enviaremos un código único por mensaje de texto cada vez que inicie sesión en un nuevo dispositivo.",
+      billingFeatures: [
+        "2 números de teléfono dedicados",
+        "6 contactos enrutables por número",
+        "Enrutamiento en cascada + Menú de llamadas",
+        "Alertas por SMS y correo electrónico en tiempo real",
+        "Opciones de saludo bilingües",
+        "DASHBOARD de administración"
+      ],
     },
     sim: {
       runTest: "Hacer llamada de prueba",
@@ -514,6 +564,25 @@ export const dashboardTranslations: Record<
       twoFactorSub: "Sécurisez l'accès à votre compte",
       paymentMethod: "Moyen de paiement",
       billingAddress: "Adresse de facturation",
+      personalDetailsSub: "Vos informations personnelles sur le compte iCanCall",
+      emailRecoverSub: "Utilisé pour vous connecter et récupérer votre compte",
+      strongPasswordSub: "Choisissez un mot de passe fort que vous n'utilisez pas ailleurs",
+      activeSessionsSub: "Appareils actuellement connectés à votre compte",
+      contactReachSub: "Où vous joindre pour les alertes d'appels",
+      renewDateSub: "Facturé mensuellement · se renouvelle le 1er juin 2026",
+      addonsPlansSub: "Disponible sur les forfaits Essential et Pro",
+      addonNumbersTitle: "Numéro de téléphone supplémentaire",
+      addonNumbersDesc: "Ajoutez un autre numéro iCanCall dédié pour un autre proche, chacun avec ses propres contacts et son routage.",
+      smsCodesTitle: "Codes par SMS",
+      smsCodesDesc: "Nous vous enverrons un code par SMS à chaque connexion sur un nouvel appareil.",
+      billingFeatures: [
+        "2 numéros de téléphone dédiés",
+        "6 contacts routables par numéro",
+        "Routage en cascade + Menu vocal",
+        "Alertes SMS et e-mail en temps réel",
+        "Options d'accueil bilingue",
+        "Tableau de bord administrateur"
+      ],
     },
     sim: {
       runTest: "Lancer un appel de test",
@@ -555,7 +624,7 @@ export const dashboardTranslations: Record<
     },
     common: {
       proPlan: "プロプラン",
-      numbers: "個の番号",
+      numbers: "個 of 番号",
       managePlan: "プラン管理",
       signOut: "サインアウト",
       addNumberTip: "追加番号はプロプランで利用可能です — サポートへ連絡",
@@ -645,6 +714,25 @@ export const dashboardTranslations: Record<
       twoFactorSub: "アカウントのセキュリティを高めます",
       paymentMethod: "現在のお支払い方法",
       billingAddress: "請求先住所",
+      personalDetailsSub: "iCanCallアカウントの個人詳細情報",
+      emailRecoverSub: "サインインおよびアカウント回復に使用されます",
+      strongPasswordSub: "他の場所で使用していない強力なパスワードを選択してください",
+      activeSessionsSub: "現在アカウントにサインインしているデバイス",
+      contactReachSub: "通話アラートおよびアカウント通知の連絡先",
+      renewDateSub: "月額課金 · 2026年6月1日に更新",
+      addonsPlansSub: "エッセンシャルプランとプロプランの両方で利用可能",
+      addonNumbersTitle: "追加の電話番号",
+      addonNumbersDesc: "ご家族のためにもう一つのiCanCall専用番号を追加できます。それぞれに個別の連絡先と転送ルールが設定可能です。",
+      smsCodesTitle: "テキストメッセージ (SMS) コード",
+      smsCodesDesc: "新しいデバイスでサインインするたびに、ワンタイムコードをテキストメッセージで送信します。",
+      billingFeatures: [
+        "2つの専用電話番号",
+        "番号ごとに6つの転送先連絡先",
+        "順次呼び出し + ダイヤルメニュー",
+        "リアルタイムのSMSおよびメール通知",
+        "バイリンガル対応ガイダンスオプション",
+        "管理者ダッシュボード"
+      ],
     },
     sim: {
       runTest: "テスト発信",
@@ -776,6 +864,25 @@ export const dashboardTranslations: Record<
       twoFactorSub: "为您的账户添加额外安全保护",
       paymentMethod: "付款方式",
       billingAddress: "账单地址",
+      personalDetailsSub: "您在 iCanCall 账户上的个人资料详情",
+      emailRecoverSub: "用于登录和恢复您的账户",
+      strongPasswordSub: "选择一个您不在其他地方使用的强密码",
+      activeSessionsSub: "当前登录您账户的的设备",
+      contactReachSub: "我们向您发送通话提醒和账户通知的联系方式",
+      renewDateSub: "按月计费 · 于 2026年6月1日续期",
+      addonsPlansSub: "适用于基础版和专业版方案",
+      addonNumbersTitle: "额外电话号码",
+      addonNumbersDesc: "为另一位亲人添加另一个专用的 iCanCall 号码，每个号码拥有独立的联系人和转接规则。",
+      smsCodesTitle: "短信 (SMS) 验证码",
+      smsCodesDesc: "每次在新设备上登录时，我们将向您发送短信验证码。",
+      billingFeatures: [
+        "2个专属电话号码",
+        "每个号码支持6个转接联系人",
+        "顺次呼叫 + 语音菜单",
+        "实时短信及邮件通知",
+        "双语欢迎语选项",
+        "管理后台"
+      ],
     },
     sim: {
       runTest: "测试呼叫",
@@ -907,6 +1014,25 @@ export const dashboardTranslations: Record<
       twoFactorSub: "أضف حماية إضافية لحسابك",
       paymentMethod: "طريقة الدفع النشطة",
       billingAddress: "عنوان الفواتير",
+      personalDetailsSub: "تفاصيلك الشخصية على حساب iCanCall",
+      emailRecoverSub: "يستخدم لتسجيل الدخول واستعادة حسابك",
+      strongPasswordSub: "اختر كلمة مرور قوية لا تستخدمها في مكان آخر",
+      activeSessionsSub: "الأجهزة المسجلة دخولها حالياً إلى حسابك",
+      contactReachSub: "حيث نصل إليك لتنبيهات المكالمات وإشعارات الحساب",
+      renewDateSub: "فوترة شهرية · يتجدد في 1 يونيو 2026",
+      addonsPlansSub: "متاح في كل من الباقة الأساسية والمحترفة",
+      addonNumbersTitle: "رقم هاتف إضافي",
+      addonNumbersDesc: "أضف رقماً مخصصاً آخر من iCanCall لشخص عزيز آخر، ولكل رقم جهات اتصال وتوجيه خاص به.",
+      smsCodesTitle: "رموز الرسائل النصية (SMS)",
+      smsCodesDesc: "سنرسل رمزاً مؤقتاً عبر رسالة نصية في كل مرة تسجل فيها الدخول من جهاز جديد.",
+      billingFeatures: [
+        "رقمين مخصصين للهاتف",
+        "6 جهات اتصال قابلة للتوجيه لكل رقم",
+        "رنين متتالي + قائمة المتصل",
+        "تنبيهات SMS وبريد إلكتروني فورية",
+        "خيارات الترحيب باللغتين",
+        "لوحة تحكم المشرف"
+      ],
     },
     sim: {
       runTest: "إجراء مكالمة اختبارية",
@@ -1038,6 +1164,25 @@ export const dashboardTranslations: Record<
       twoFactorSub: "अपने खाते में अतिरिक्त सुरक्षा जोड़ें",
       paymentMethod: "सक्रिय भुगतान विधि",
       billingAddress: "बिलिंग पता",
+      personalDetailsSub: "iCanCall खाते पर आपके व्यक्तिगत विवरण",
+      emailRecoverSub: "साइन इन करने और अपना खाता पुनर्प्राप्त करने के लिए उपयोग किया जाता है",
+      strongPasswordSub: "एक मजबूत पासवर्ड चुनें जिसे आप कहीं और उपयोग नहीं करते हैं",
+      activeSessionsSub: "आपके खाते में वर्तमान में साइन इन किए गए डिवाइस",
+      contactReachSub: "जहाँ हम कॉल अलर्ट और खाता सूचनाओं के साथ आप तक पहुँचते हैं",
+      renewDateSub: "मासिक बिल भेजा जाता है · 1 जून, 2026 को नवीनीकरण होगा",
+      addonsPlansSub: "एसेंशियल और प्रो दोनों प्लान पर उपलब्ध है",
+      addonNumbersTitle: "अतिरिक्त फ़ोन नंबर",
+      addonNumbersDesc: "अपने किसी अन्य प्रियजन के लिए दूसरा समर्पित iCanCall नंबर जोड़ें, प्रत्येक के पास अपने स्वयं के संपर्क और रूटिंग होंगे।",
+      smsCodesTitle: "पाठ संदेश (SMS) कोड",
+      smsCodesDesc: "जब भी आप किसी नए डिवाइस पर साइन इन करेंगे, हम हर बार एक बार का कोड एसएमएस करेंगे।",
+      billingFeatures: [
+        "2 समर्पित फोन नंबर",
+        "प्रति नंबर 6 रूट करने योग्य संपर्क",
+        "कैस्केड रूटिंग + कॉलर मेनू",
+        "वास्तविक समय एसएमएस और ईमेल अलर्ट",
+        "द्विभाषी स्वागत संदेश विकल्प",
+        "एडमिन डैशबोर्ड"
+      ],
     },
     sim: {
       runTest: "परीक्षण कॉल करें",
@@ -1169,6 +1314,25 @@ export const dashboardTranslations: Record<
       twoFactorSub: "Adicione segurança extra à sua conta",
       paymentMethod: "Método de pagamento ativo",
       billingAddress: "Endereço de cobrança",
+      personalDetailsSub: "Seus detalhes pessoais na conta iCanCall",
+      emailRecoverSub: "Usado para entrar e recuperar sua conta",
+      strongPasswordSub: "Escolha uma senha forte que não use em outro lugar",
+      activeSessionsSub: "Dispositivos conectados atualmente à sua conta",
+      contactReachSub: "Onde entramos em contato para alertas de chamadas",
+      renewDateSub: "Cobrado mensalmente · renova em 1 de junho de 2026",
+      addonsPlansSub: "Disponível nos planos Essential e Pro",
+      addonNumbersTitle: "Número de telefone adicional",
+      addonNumbersDesc: "Adicione outro número iCanCall dedicado para outro ente querido, cada um com seus próprios contatos e encaminhamento.",
+      smsCodesTitle: "Códigos de mensagem de texto (SMS)",
+      smsCodesDesc: "Enviaremos um código único por SMS cada vez que você entrar em um novo dispositivo.",
+      billingFeatures: [
+        "2 números de telefone dedicados",
+        "6 contatos roteáveis por número",
+        "Encaminhamento em cascata + Menu do chamador",
+        "Alertas de SMS e e-mail em tempo real",
+        "Opções de saudações bilíngues",
+        "Painel de administração"
+      ],
     },
     sim: {
       runTest: "Fazer chamada de teste",
@@ -1256,7 +1420,7 @@ export const dashboardTranslations: Record<
     routing: {
       connMethod: "Verbindungsmethode",
       connMethodSub: "Wählen Sie, wie eingehende Anrufe weitergeleitet werden.",
-      cascadeDesc: "Lässt Telefone der Reihe nach klingeln. Geht jemand nicht ran, folgt der nächste Kontakt.",
+      cascadeDesc: "Lässt Telefone der Reihe nach klingeln. Geht jemand nicht ran, folgt der nächste Konakt.",
       menuDesc: "Bietet ein gesprochenes Menü (z. B. „Drücken Sie 1 für Mama, 2 für den Sohn“), damit Anrufer wählen können.",
       scheduleDesc: "Leitet Anrufe basierend auf der Uhrzeit weiter. Perfekt für Tag- und Nachtschichten.",
       scheduleTitle: "Rund-um-die-Uhr-Abdeckung",
@@ -1300,6 +1464,25 @@ export const dashboardTranslations: Record<
       twoFactorSub: "Schützen Sie Ihr Konto zusätzlich",
       paymentMethod: "Aktive Zahlungsmethode",
       billingAddress: "Rechnungsadresse",
+      personalDetailsSub: "Ihre persönlichen Details auf dem iCanCall-Konto",
+      emailRecoverSub: "Wird zum Anmelden und Wiederherstellen Ihres Kontos verwendet",
+      strongPasswordSub: "Wählen Sie ein starkes Passwort, das Sie nirgendwo anders verwenden",
+      activeSessionsSub: "Geräte, die derzeit bei Ihrem Konto angemeldet sind",
+      contactReachSub: "Hier erreichen wir Sie mit Anrufalarmen und Kontobenachrichtigungen",
+      renewDateSub: "Monatlich abgerechnet · verlängert sich am 1. Juni 2026",
+      addonsPlansSub: "Sowohl im Essential- als auch im Pro-Tarif verfügbar",
+      addonNumbersTitle: "Zusätzliche Telefonnummer",
+      addonNumbersDesc: "Fügen Sie eine weitere dedizierte iCanCall-Nummer für ein anderes Familienmitglied hinzu, jeweils mit eigenen Kontakten und Weiterleitungen.",
+      smsCodesTitle: "SMS-Codes (Textnachricht)",
+      smsCodesDesc: "Wir senden Ihnen bei jeder Anmeldung auf einem neuen Gerät einen Einmalcode per SMS.",
+      billingFeatures: [
+        "2 dedizierte Telefonnummern",
+        "6 weiterleitbare Kontakte pro Nummer",
+        "Kaskadenweiterleitung + Anrufermenü",
+        "SMS- & E-Mail-Alarme in Echtzeit",
+        "Zweisprachige Ansagenoptionen",
+        "Admin-Dashboard"
+      ],
     },
     sim: {
       runTest: "Testanruf starten",
@@ -1427,10 +1610,29 @@ export const dashboardTranslations: Record<
       phone: "Numero di telefono",
       timezone: "Fuso orario",
       language: "Lingua",
-      twoFactor: "Autenticazione a due fattori",
+      twoFactor: "Autenticação a due fattori",
       twoFactorSub: "Aggiungi ulteriore sicurezza al tuo account",
       paymentMethod: "Metodo di pagamento attivo",
       billingAddress: "Indirizzo di fatturazione",
+      personalDetailsSub: "I tuoi dati personali sull'account iCanCall",
+      emailRecoverSub: "Utilizzato per accedere e recuperare il tuo account",
+      strongPasswordSub: "Scegli una password forte che non usi altrove",
+      activeSessionsSub: "Dispositivi attualmente connessi al tuo account",
+      contactReachSub: "Dove ti raggiungiamo con gli avvisi di chiamata e le notifiche",
+      renewDateSub: "Fatturato mensilmente · si rinnova il 1 giugno 2026",
+      addonsPlansSub: "Disponibile sia nei piani Essential che Pro",
+      addonNumbersTitle: "Numero di telefono aggiuntivo",
+      addonNumbersDesc: "Aggiungi un altro numero iCanCall dedicato per un altro familiare, ciascuno con i propri contatti e instradamento.",
+      smsCodesTitle: "Codici di messaggistica (SMS)",
+      smsCodesDesc: "Ti invieremo un codice monouso tramite SMS ogni volta che accedi da un nuovo dispositivo.",
+      billingFeatures: [
+        "2 numeri di telefono dedicados",
+        "6 contatos instradabili per numero",
+        "Instradamento a cascata + Menu chiamante",
+        "Avvisi SMS ed e-mail in tempo reale",
+        "Opzioni di saluto bilingue",
+        "Pannello di controllo amministratore"
+      ],
     },
     sim: {
       runTest: "Fai chiamata di prova",
@@ -1538,7 +1740,7 @@ export const dashboardTranslations: Record<
       ttsGreetingSub: "연결이 시작되기 전에 전화 건 사람에게 들려줄 첫 인사말입니다.",
       bilingualSupport: "이중 언어 지원",
       bilingualSupportSub: "두 번째 언어로도 안내 음성 출력",
-      secondLang: "두 번째 언어",
+      secondLang: "두 번째 언",
       secondLangSub: "다이얼 메뉴 및 음성 사서함 안내가 이 언어로도 반복 제공됩니다.",
       notifications: "알림 설정",
       notificationsSub: "전화 연결 및 통화 부재 시 즉시 알림을 받습니다.",
@@ -1562,6 +1764,25 @@ export const dashboardTranslations: Record<
       twoFactorSub: "계정에 보안 단계를 추가합니다",
       paymentMethod: "사용 중인 결제 수단",
       billingAddress: "청구지 주소",
+      personalDetailsSub: "iCanCall 계정의 프로필 상세 정보",
+      emailRecoverSub: "로그인 및 계정 복구용으로 사용됩니다",
+      strongPasswordSub: "다른 서비스에서 사용하지 않는 강력한 비밀번호를 선택하세요",
+      activeSessionsSub: "현재 계정에 로그인된 기기 목록",
+      contactReachSub: "통화 알림 및 계정 공지사항을 수신할 연락처",
+      renewDateSub: "매월 결제됨 · 2026년 6 1일 갱신 예정",
+      addonsPlansSub: "에ッ센셜 및 프로 플랜 모두 지원",
+      addonNumbersTitle: "추가 전화번호",
+      addonNumbersDesc: "가족을 위해 또 다른 iCanCall 전용 번호를 추가할 수 있습니다. 각 번호는 개별 연락처와 연결 정책을 가집니다.",
+      smsCodesTitle: "문자 메시지 (SMS) 인증",
+      smsCodesDesc: "새로운 기기에서 로그인할 때마다 등록된 번호로 일회용 인증 코드가 포함된 문자를 발송합니다.",
+      billingFeatures: [
+        "전용 전화번호 2개 제공",
+        "번호당 최대 6명의 연락처 지정 가능",
+        "순차 연결 + 다이얼 메뉴 안내",
+        "실시간 SMS 문자 및 이메일 알림",
+        "이중 언어 안내 멘트 설정 가능",
+        "관리자 대시보드 제공"
+      ],
     },
     sim: {
       runTest: "테스트 전화 걸기",
