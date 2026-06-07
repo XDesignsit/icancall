@@ -2465,9 +2465,25 @@ export function AccountView({
                     <button
                       className={`seg-btn ${tempCycle === "yearly" ? "active" : ""}`}
                       onClick={() => setTempCycle("yearly")}
-                      style={{ padding: "6px 16px", fontSize: "0.88rem" }}
+                      style={{ 
+                        padding: "6px 16px", 
+                        fontSize: "0.88rem", 
+                        display: "inline-flex", 
+                        alignItems: "center", 
+                        gap: 6 
+                      }}
                     >
                       {lang === "es" ? "Anual" : lang === "fr" ? "Annuel" : "Annual"}
+                      <span style={{ 
+                        fontSize: "0.72rem", 
+                        fontWeight: 700, 
+                        background: tempCycle === "yearly" ? "rgba(255, 255, 255, 0.25)" : "oklch(0.70 0.13 158 / 0.18)", 
+                        color: tempCycle === "yearly" ? "#fff" : "oklch(0.42 0.13 158)",
+                        padding: "2px 6px",
+                        borderRadius: 999
+                      }}>
+                        {d.ui.save17}
+                      </span>
                     </button>
                   </div>
                 </div>
