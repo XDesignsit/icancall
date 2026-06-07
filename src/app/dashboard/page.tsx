@@ -1872,12 +1872,17 @@ function SettingsView({
   setLine,
   showToast,
   d,
+  lang,
+  preferredName,
 }: {
   line: Line;
   setLine: React.Dispatch<React.SetStateAction<Line[]>>;
   showToast: (msg: string) => void;
   d: any;
+  lang: string;
+  preferredName: string;
 }) {
+  const ext = dashboardExtraTranslations[lang as keyof typeof dashboardExtraTranslations] || dashboardExtraTranslations.en;
   const s = line.settings || {};
   const set = (patch: Partial<NonNullable<Line["settings"]>>) =>
     setLine((prev) =>
@@ -1926,14 +1931,28 @@ function SettingsView({
                 {d.settings.bilingualSupportSub}
               </p>
             </div>
-            <Toggle on={bilingual} onChange={(v) => set({ bilingual: v })} labels={["Off", "On"]} />
+            <Toggle
+              on={bilingual}
+              onChange={(v) => set({ bilingual: v })}
+              labels={[
+                lang === "es" ? "Apagado" : lang === "fr" ? "Désactivé" : lang === "ja" ? "オフ" : lang === "zh" ? "关闭" : lang === "ar" ? "إيقاف" : lang === "hi" ? "बंद" : lang === "pt" ? "Desativado" : lang === "de" ? "Aus" : lang === "it" ? "Spento" : lang === "ko" ? "꺼짐" : "Off",
+                lang === "es" ? "Encendido" : lang === "fr" ? "Activé" : lang === "ja" ? "オン" : lang === "zh" ? "开启" : lang === "ar" ? "تشغيل" : lang === "hi" ? "चालू" : lang === "pt" ? "Ativado" : lang === "de" ? "An" : lang === "it" ? "Acceso" : lang === "ko" ? "켜짐" : "On"
+              ]}
+            />
           </div>
           {bilingual && (
             <div className="field" style={{ marginTop: 16, marginBottom: 0, maxWidth: 260 }}>
               <label>{d.settings.secondLang}</label>
               <select value={language2} onChange={(e) => set({ language2: e.target.value })}>
-                {["Spanish", "Mandarin", "Tagalog", "Vietnamese", "French", "Korean"].map((lang) => (
-                  <option key={lang}>{lang}</option>
+                {[
+                  { id: "Spanish", label: lang === "es" ? "Español" : lang === "fr" ? "Espagnol" : lang === "ja" ? "スペイン語" : lang === "zh" ? "西班牙语" : lang === "ar" ? "الإسبانية" : lang === "hi" ? "स्पैनिश" : lang === "pt" ? "Espanhol" : lang === "de" ? "Spanisch" : lang === "it" ? "Spagnolo" : lang === "ko" ? "스페인어" : "Spanish" },
+                  { id: "Mandarin", label: lang === "es" ? "Mandarín" : lang === "fr" ? "Mandarin" : lang === "ja" ? "中国語" : lang === "zh" ? "中文（普通话）" : lang === "ar" ? "الماندرين" : lang === "hi" ? "मंदारिन" : lang === "pt" ? "Mandarim" : lang === "de" ? "Mandarin" : lang === "it" ? "Mandarino" : lang === "ko" ? "중국어" : "Mandarin" },
+                  { id: "Tagalog", label: lang === "es" ? "Tagalo" : lang === "fr" ? "Tagalog" : lang === "ja" ? "タガログ語" : lang === "zh" ? "塔加路语" : lang === "ar" ? "التاغالوغية" : lang === "hi" ? "तागालोग" : lang === "pt" ? "Tagalo" : lang === "de" ? "Tagalog" : lang === "it" ? "Tagalog" : lang === "ko" ? "타갈로그어" : "Tagalog" },
+                  { id: "Vietnamese", label: lang === "es" ? "Vietnamita" : lang === "fr" ? "Vietnamien" : lang === "ja" ? "ベトナム語" : lang === "zh" ? "越南语" : lang === "ar" ? "الفيتنامية" : lang === "hi" ? "वियतनामी" : lang === "pt" ? "Vietnamita" : lang === "de" ? "Vietnamesisch" : lang === "it" ? "Vietnamita" : lang === "ko" ? "베트남어" : "Vietnamese" },
+                  { id: "French", label: lang === "es" ? "Francés" : lang === "fr" ? "Français" : lang === "ja" ? "フランス語" : lang === "zh" ? "法语" : lang === "ar" ? "الفرنسية" : lang === "hi" ? "फ़्रेंच" : lang === "pt" ? "Francês" : lang === "de" ? "Französisch" : lang === "it" ? "Francese" : lang === "ko" ? "프랑스어" : "French" },
+                  { id: "Korean", label: lang === "es" ? "Coreano" : lang === "fr" ? "Coréen" : lang === "ja" ? "韓国語" : lang === "zh" ? "韩语" : lang === "ar" ? "الكورية" : lang === "hi" ? "कोरियाई" : lang === "pt" ? "Coreano" : lang === "de" ? "Koreanisch" : lang === "it" ? "Coreano" : lang === "ko" ? "한국어" : "Korean" }
+                ].map((l) => (
+                  <option key={l.id} value={l.id}>{l.label}</option>
                 ))}
               </select>
             </div>
@@ -1952,30 +1971,58 @@ function SettingsView({
           <div className="set-row">
             <div className="txt">
               <b>{d.settings.smsAlerts}</b>
-              <p>Text Maria the moment a call comes through, including who answered.</p>
+              <p>{ext.smsAlertsDesc.replace("{name}", preferredName)}</p>
             </div>
-            <Toggle on={notifSMS} onChange={(v) => set({ notifSMS: v })} labels={["Off", "On"]} />
+            <Toggle
+              on={notifSMS}
+              onChange={(v) => set({ notifSMS: v })}
+              labels={[
+                lang === "es" ? "Apagado" : lang === "fr" ? "Désactivé" : lang === "ja" ? "オフ" : lang === "zh" ? "关闭" : lang === "ar" ? "إيقاف" : lang === "hi" ? "बंद" : lang === "pt" ? "Desativado" : lang === "de" ? "Aus" : lang === "it" ? "Spento" : lang === "ko" ? "꺼짐" : "Off",
+                lang === "es" ? "Encendido" : lang === "fr" ? "Activé" : lang === "ja" ? "オン" : lang === "zh" ? "开启" : lang === "ar" ? "تشغيل" : lang === "hi" ? "चालू" : lang === "pt" ? "Ativado" : lang === "de" ? "An" : lang === "it" ? "Acceso" : lang === "ko" ? "켜짐" : "On"
+              ]}
+            />
           </div>
           <div className="set-row">
             <div className="txt">
               <b>{d.settings.emailAlerts}</b>
-              <p>Send a copy of every call notification to your inbox.</p>
+              <p>{ext.emailAlertsDesc}</p>
             </div>
-            <Toggle on={notifEmail} onChange={(v) => set({ notifEmail: v })} labels={["Off", "On"]} />
+            <Toggle
+              on={notifEmail}
+              onChange={(v) => set({ notifEmail: v })}
+              labels={[
+                lang === "es" ? "Apagado" : lang === "fr" ? "Désactivé" : lang === "ja" ? "オフ" : lang === "zh" ? "关闭" : lang === "ar" ? "إيقاف" : lang === "hi" ? "बंद" : lang === "pt" ? "Desativado" : lang === "de" ? "Aus" : lang === "it" ? "Spento" : lang === "ko" ? "꺼짐" : "Off",
+                lang === "es" ? "Encendido" : lang === "fr" ? "Activé" : lang === "ja" ? "オン" : lang === "zh" ? "开启" : lang === "ar" ? "تشغيل" : lang === "hi" ? "चालू" : lang === "pt" ? "Ativado" : lang === "de" ? "An" : lang === "it" ? "Acceso" : lang === "ko" ? "켜짐" : "On"
+              ]}
+            />
           </div>
           <div className="set-row">
             <div className="txt">
               <b>{d.settings.missedAlerts}</b>
-              <p>Get notified immediately if no one in the circle answers.</p>
+              <p>{ext.missedAlertsDesc}</p>
             </div>
-            <Toggle on={notifMissed} onChange={(v) => set({ notifMissed: v })} labels={["Off", "On"]} />
+            <Toggle
+              on={notifMissed}
+              onChange={(v) => set({ notifMissed: v })}
+              labels={[
+                lang === "es" ? "Apagado" : lang === "fr" ? "Désactivé" : lang === "ja" ? "オフ" : lang === "zh" ? "关闭" : lang === "ar" ? "إيقاف" : lang === "hi" ? "बंद" : lang === "pt" ? "Desativado" : lang === "de" ? "Aus" : lang === "it" ? "Spento" : lang === "ko" ? "꺼짐" : "Off",
+                lang === "es" ? "Encendido" : lang === "fr" ? "Activé" : lang === "ja" ? "オン" : lang === "zh" ? "开启" : lang === "ar" ? "تشغيل" : lang === "hi" ? "चालू" : lang === "pt" ? "Ativado" : lang === "de" ? "An" : lang === "it" ? "Acceso" : lang === "ko" ? "켜짐" : "On"
+              ]}
+            />
           </div>
           <div className="set-row">
             <div className="txt">
               <b>{d.settings.weeklyReports}</b>
-              <p>A Monday summary of all call activity across this line.</p>
+              <p>{ext.weeklyReportsDesc}</p>
             </div>
-            <Toggle on={notifWeekly} onChange={(v) => set({ notifWeekly: v })} labels={["Off", "On"]} />
+            <Toggle
+              on={notifWeekly}
+              onChange={(v) => set({ notifWeekly: v })}
+              labels={[
+                lang === "es" ? "Apagado" : lang === "fr" ? "Désactivé" : lang === "ja" ? "オフ" : lang === "zh" ? "关闭" : lang === "ar" ? "إيقاف" : lang === "hi" ? "बंद" : lang === "pt" ? "Desativado" : lang === "de" ? "Aus" : lang === "it" ? "Spento" : lang === "ko" ? "꺼짐" : "Off",
+                lang === "es" ? "Encendido" : lang === "fr" ? "Activé" : lang === "ja" ? "オン" : lang === "zh" ? "开启" : lang === "ar" ? "تشغيل" : lang === "hi" ? "चालू" : lang === "pt" ? "Ativado" : lang === "de" ? "An" : lang === "it" ? "Acceso" : lang === "ko" ? "켜짐" : "On"
+              ]}
+            />
           </div>
         </div>
       </div>
@@ -3402,7 +3449,14 @@ export default function DashboardApp() {
           )}
           {view === "log" && <CallLogView line={line} log={log} d={d} />}
           {view === "settings" && (
-            <SettingsView line={line} setLine={setLines} showToast={showToast} d={d} />
+            <SettingsView
+              line={line}
+              setLine={setLines}
+              showToast={showToast}
+              d={d}
+              lang={lang}
+              preferredName={account.preferred}
+            />
           )}
           {view === "account" && (
             <AccountView
