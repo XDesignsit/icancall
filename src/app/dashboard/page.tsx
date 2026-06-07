@@ -2109,6 +2109,20 @@ export function AccountView({
   const [tempPlan, setTempPlan] = useState<"essential" | "pro">(account.plan || "pro");
   const [tempCycle, setTempCycle] = useState<"monthly" | "yearly">(account.billingCycle || "monthly");
 
+  const save17Map: Record<string, string> = {
+    en: "Save 17%",
+    es: "Ahorre 17%",
+    fr: "Économisez 17%",
+    ja: "17%お得",
+    zh: "省17%",
+    ar: "وفر 17%",
+    hi: "17% बचाएं",
+    pt: "Economize 17%",
+    de: "17% sparen",
+    it: "Risparmia il 17%",
+    ko: "17% 할인"
+  };
+
   useEffect(() => {
     if (planModalOpen) {
       setTempPlan(account.plan || "pro");
@@ -2482,7 +2496,7 @@ export function AccountView({
                         padding: "2px 6px",
                         borderRadius: 999
                       }}>
-                        {d.ui.save17}
+                        {save17Map[lang] || save17Map.en}
                       </span>
                     </button>
                   </div>
