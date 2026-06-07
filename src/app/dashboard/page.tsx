@@ -1773,7 +1773,7 @@ function RoutingView({
 }
 
 /* Call log */
-function CallLogView({ line, log, d }: { line: Line; log: Record<string, CallLogEntry[]>; d: any }) {
+function CallLogView({ line, log, d, lang }: { line: Line; log: Record<string, CallLogEntry[]>; d: any; lang: string }) {
   const [filter, setFilter] = useState("all");
   const calls = log[line.id] || [];
   const counts = {
@@ -1807,7 +1807,7 @@ function CallLogView({ line, log, d }: { line: Line; log: Record<string, CallLog
         </div>
         <div className="topbar-spacer"></div>
         <button className="btn btn-ghost btn-sm">
-          <Icon name="download" /> Export CSV
+          <Icon name="download" /> {lang === "es" ? "Exportar CSV" : lang === "fr" ? "Exporter en CSV" : lang === "ja" ? "CSVエクスポート" : lang === "zh" ? "导出 CSV" : lang === "ar" ? "تصدير CSV" : lang === "hi" ? "सीएसवी निर्यात करें" : lang === "pt" ? "Exportar CSV" : lang === "de" ? "CSV exportieren" : lang === "it" ? "Esporta CSV" : lang === "ko" ? "CSV 내보내기" : "Export CSV"}
         </button>
       </div>
 
@@ -1831,17 +1831,32 @@ function CallLogView({ line, log, d }: { line: Line; log: Record<string, CallLog
                   </div>
                   <div className="who">
                     <b>{c.caller}</b>
-                    <span>{d.sim.connected}</span>
+                    <span>{c.status === "voicemail" ? d.sim.voicemail : c.status === "missed" ? d.sim.noAnswer : d.sim.connected}</span>
                   </div>
                   <div className="routed">
                     <b>{c.routed}</b>
-                    {c.rel}
+                    {c.rel === "Daughter" ? (lang === "es" ? "Hija" : lang === "fr" ? "Fille" : lang === "ja" ? "娘" : lang === "zh" ? "女儿" : lang === "ar" ? "ابنة" : lang === "hi" ? "बेटी" : lang === "pt" ? "Filha" : lang === "de" ? "Tochter" : lang === "it" ? "Figlia" : lang === "ko" ? "딸" : "Daughter") :
+                     c.rel === "Son" ? (lang === "es" ? "Hijo" : lang === "fr" ? "Fils" : lang === "ja" ? "息子" : lang === "zh" ? "儿子" : lang === "ar" ? "ابن" : lang === "hi" ? "बेटा" : lang === "pt" ? "Filho" : lang === "de" ? "Sohn" : lang === "it" ? "Figlio" : lang === "ko" ? "아들" : "Son") :
+                     c.rel === "Daytime caregiver" ? (lang === "es" ? "Cuidador diurno" : lang === "fr" ? "Aidant de jour" : lang === "ja" ? "日中介護者" : lang === "zh" ? "日间看护" : lang === "ar" ? "مقدم الرعاية النهارية" : lang === "hi" ? "डेकेयरर" : lang === "pt" ? "Cuidador diurno" : lang === "de" ? "Tagespfleger" : lang === "it" ? "Caregiver diurno" : lang === "ko" ? "주간 보호자" : "Daytime caregiver") :
+                     c.rel === "Primary caregiver" ? (lang === "es" ? "Cuidador principal" : lang === "fr" ? "Aidant principal" : lang === "ja" ? "主な介護者" : lang === "zh" ? "主要看护人" : lang === "ar" ? "مقدم الرعاية الرئيسي" : lang === "hi" ? "मुख्य केयरटेकर" : lang === "pt" ? "Cuidador principal" : lang === "de" ? "Hauptbetreuer" : lang === "it" ? "Caregiver principale" : lang === "ko" ? "주 보호자" : "Primary caregiver") :
+                     c.rel === "Family member" ? (lang === "es" ? "Miembro de la familia" : lang === "fr" ? "Membre de la famille" : lang === "ja" ? "家族メンバー" : lang === "zh" ? "家庭成员" : lang === "ar" ? "أحد أفراد العائلة" : lang === "hi" ? "परिवार का सदस्य" : lang === "pt" ? "Membro da família" : lang === "de" ? "Familienmitglied" : lang === "it" ? "Familiare" : lang === "ko" ? "가족 구성원" : "Family member") :
+                     c.rel}
                   </div>
                   <div className="dur">{c.dur}</div>
                   <div style={{ textAlign: "right" }}>
-                    <Badge kind={m.badge.replace("badge-", "")}>{m.label}</Badge>
+                    <Badge kind={m.badge.replace("badge-", "")}>
+                      {c.status === "voicemail" ? d.sim.voicemail : c.status === "missed" ? d.sim.noAnswer : d.sim.connected}
+                    </Badge>
                     <div className="when" style={{ marginTop: 5 }}>
-                      {c.when}
+                      {c.when.replace("Today", lang === "es" ? "Hoy" : lang === "fr" ? "Aujourd'hui" : lang === "ja" ? "今日" : lang === "zh" ? "今天" : lang === "ar" ? "اليوم" : lang === "hi" ? "오늘" : lang === "pt" ? "Hoje" : lang === "de" ? "Heute" : lang === "it" ? "Oggi" : lang === "ko" ? "오늘" : "Today")
+                              .replace("Yesterday", lang === "es" ? "Ayer" : lang === "fr" ? "Hier" : lang === "ja" ? "昨日" : lang === "zh" ? "昨天" : lang === "ar" ? "أمس" : lang === "hi" ? "अकल" : lang === "pt" ? "Ontem" : lang === "de" ? "Gestern" : lang === "it" ? "Ieri" : lang === "ko" ? "어제" : "Yesterday")
+                              .replace("Mon", lang === "es" ? "Lun" : lang === "fr" ? "Lun" : lang === "ja" ? "月" : lang === "zh" ? "周一" : lang === "ar" ? "الإثنين" : lang === "hi" ? "सोम" : lang === "pt" ? "Seg" : lang === "de" ? "Mon" : lang === "it" ? "Lun" : lang === "ko" ? "월" : "Mon")
+                              .replace("Tue", lang === "es" ? "Mar" : lang === "fr" ? "Mar" : lang === "ja" ? "火" : lang === "zh" ? "周二" : lang === "ar" ? "الثلاثاء" : lang === "hi" ? "मंगल" : lang === "pt" ? "Ter" : lang === "de" ? "Tue" : lang === "it" ? "Mar" : lang === "ko" ? "화" : "Tue")
+                              .replace("Wed", lang === "es" ? "Mié" : lang === "fr" ? "Mer" : lang === "ja" ? "水" : lang === "zh" ? "周三" : lang === "ar" ? "الأربعاء" : lang === "hi" ? "बुध" : lang === "pt" ? "Qua" : lang === "de" ? "Wed" : lang === "it" ? "Mer" : lang === "ko" ? "수" : "Wed")
+                              .replace("Thu", lang === "es" ? "Jue" : lang === "fr" ? "Jeu" : lang === "ja" ? "木" : lang === "zh" ? "周四" : lang === "ar" ? "الخميس" : lang === "hi" ? "गुरु" : lang === "pt" ? "Qui" : lang === "de" ? "Thu" : lang === "it" ? "Gio" : lang === "ko" ? "목" : "Thu")
+                              .replace("Fri", lang === "es" ? "Vie" : lang === "fr" ? "Ven" : lang === "ja" ? "金" : lang === "zh" ? "周五" : lang === "ar" ? "الجمعة" : lang === "hi" ? "शुक्र" : lang === "pt" ? "Sex" : lang === "de" ? "Fr" : lang === "it" ? "Ven" : lang === "ko" ? "금" : "Fri")
+                              .replace("Sat", lang === "es" ? "Sáb" : lang === "fr" ? "Sam" : lang === "ja" ? "土" : lang === "zh" ? "周六" : lang === "ar" ? "السبت" : lang === "hi" ? "शनि" : lang === "pt" ? "Sáb" : lang === "de" ? "Sat" : lang === "it" ? "Sab" : lang === "ko" ? "토" : "Sat")
+                              .replace("Sun", lang === "es" ? "Dom" : lang === "fr" ? "Dim" : lang === "ja" ? "日" : lang === "zh" ? "周日" : lang === "ar" ? "الأحد" : lang === "hi" ? "रवि" : lang === "pt" ? "Dom" : lang === "de" ? "So" : lang === "it" ? "Dom" : lang === "ko" ? "일" : "Sun")}
                     </div>
                   </div>
                 </div>
@@ -1856,7 +1871,17 @@ function CallLogView({ line, log, d }: { line: Line; log: Record<string, CallLog
                   fontSize: "0.9rem",
                 }}
               >
-                No {filter} calls on this line.
+                {lang === "es" ? `No hay llamadas de tipo "${filter}" en esta línea.` :
+                 lang === "fr" ? `Aucun appel de type "${filter}" sur cette ligne.` :
+                 lang === "ja" ? `この回線には「${filter}」の通話はありません。` :
+                 lang === "zh" ? `此线路暂无“${filter}”类型通话。` :
+                 lang === "ar" ? `لا توجد مكالمات من فئة "${filter}" على هذا الخط.` :
+                 lang === "hi" ? `इस लाइन पर कोई "${filter}" कॉल नहीं है।` :
+                 lang === "pt" ? `Nenhuma chamada do tipo "${filter}" nesta linha.` :
+                 lang === "de" ? `Keine Anrufe des Typs „${filter}“ auf dieser Leitung.` :
+                 lang === "it" ? `Nessuna chiamata di tipo "${filter}" su questa linea.` :
+                 lang === "ko" ? `이 회선에 "${filter}" 통화 내역이 없습니다.` :
+                 `No ${filter} calls on this line.`}
               </div>
             )}
           </div>
@@ -3447,7 +3472,7 @@ export default function DashboardApp() {
           {view === "routing" && (
             <RoutingView line={line} setLine={setLines} showToast={showToast} d={d} lang={lang} />
           )}
-          {view === "log" && <CallLogView line={line} log={log} d={d} />}
+          {view === "log" && <CallLogView line={line} log={log} d={d} lang={lang} />}
           {view === "settings" && (
             <SettingsView
               line={line}
