@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
+import { dashboardTranslations } from "@/lib/dashboardTranslations";
 
 /* ============ DEMO DATA & HELPERS ============ */
 const AVATAR_COLORS = [
@@ -290,12 +291,14 @@ function OverviewView({
   line,
   setView,
   setActiveLineId,
+  d,
 }: {
   lines: Line[];
   log: Record<string, CallLogEntry[]>;
   line: Line;
   setView: (v: string) => void;
   setActiveLineId: (id: string) => void;
+  d: any;
 }) {
   const allCalls = Object.values(log).flat();
   const totalThisWeek = allCalls.length;
@@ -313,8 +316,8 @@ function OverviewView({
           iconBg="var(--tint)"
           iconColor="var(--blue-deep)"
           val={totalThisWeek}
-          lbl="Calls this week"
-          trend="▲ 18% vs last week"
+          lbl={d.overview.callsWeek}
+          trend="▲ 18%"
           trendDir="up"
         />
         <StatCard
@@ -322,7 +325,7 @@ function OverviewView({
           iconBg="oklch(0.95 0.05 158)"
           iconColor="oklch(0.45 0.13 158)"
           val={`${connectRate}%`}
-          lbl="Connected on first try"
+          lbl={d.overview.connectedFirst}
           trend="▲ 6%"
           trendDir="up"
         />
@@ -331,8 +334,8 @@ function OverviewView({
           iconBg="oklch(0.96 0.05 22)"
           iconColor="var(--rose)"
           val={missed}
-          lbl="Missed → alerted"
-          trend="▼ 2 vs last week"
+          lbl={d.overview.missedAlerted}
+          trend="▼ 2"
           trendDir="down"
         />
         <StatCard
@@ -340,8 +343,8 @@ function OverviewView({
           iconBg="oklch(0.96 0.04 285)"
           iconColor="var(--violet)"
           val={totalContacts}
-          lbl="Trusted contacts"
-          trend={`across ${lines.length} numbers`}
+          lbl={d.overview.trustedContacts}
+          trend={`across ${lines.length} ${d.common.numbers}`}
           trendDir="up"
         />
       </div>
@@ -350,8 +353,8 @@ function OverviewView({
         <div className="card">
           <div className="card-head">
             <div>
-              <h2>Your numbers</h2>
-              <p>{lines.length} of 2 included on Pro</p>
+              <h2>{d.overview.yourNumbers}</h2>
+              <p>{lines.length} {d.overview.includedPro}</p>
             </div>
           </div>
           <div className="card-pad" style={{ display: "flex", flexDirection: "column", gap: 12 }}>
@@ -373,10 +376,10 @@ function OverviewView({
                 </div>
                 <div style={{ textAlign: "right" }}>
                   <Badge kind={l.mode === "menu" ? "blue" : "amber"}>
-                    {l.mode === "menu" ? "Caller menu" : "Cascade"}
+                    {l.mode === "menu" ? d.overview.callerMenu : l.mode === "schedule" ? d.overview.timeSchedule : d.overview.cascade}
                   </Badge>
                   <div style={{ fontSize: "0.76rem", color: "var(--ink-faint)", marginTop: 6 }}>
-                    {l.contacts.length} contacts
+                    {l.contacts.length} {d.contacts.limitPill}
                   </div>
                 </div>
               </div>
@@ -387,11 +390,11 @@ function OverviewView({
         <div className="card">
           <div className="card-head">
             <div>
-              <h2>Recent calls</h2>
+              <h2>{d.overview.recentCalls}</h2>
               <p>{line.label}</p>
             </div>
             <button className="btn btn-soft btn-sm" onClick={() => setView("log")}>
-              View all
+              {d.overview.viewAll}
             </button>
           </div>
           <div className="card-pad" style={{ paddingTop: 6, paddingBottom: 6 }}>
@@ -408,7 +411,7 @@ function OverviewView({
                       {c.caller} · {c.when}
                     </span>
                   </div>
-                  <Badge kind={m.badge.replace("badge-", "")}>{m.label}</Badge>
+                  <Badge kind={m.badge.replace("badge-", "")}>{c.status === "voicemail" ? d.sim.voicemail : c.status === "missed" ? d.sim.noAnswer : d.sim.connected}</Badge>
                 </div>
               );
             })}
@@ -426,11 +429,13 @@ function ContactModal({
   order,
   onSave,
   onClose,
+  d,
 }: {
   initial?: Contact;
   order: number;
   onSave: (c: Contact) => void;
   onClose: () => void;
+  d: any;
 }) {
   const editing = !!initial;
   const [name, setName] = useState(initial?.name || "");
@@ -452,21 +457,21 @@ function ContactModal({
 
   return (
     <Modal
-      title={editing ? "Edit contact" : "Add a contact"}
+      title={editing ? d.contacts.editContact : d.contacts.addContact}
       onClose={onClose}
       footer={
         <>
           <button className="btn btn-ghost" onClick={onClose}>
-            Cancel
+            {d.contacts.cancel}
           </button>
           <button className="btn btn-primary" onClick={save}>
-            {editing ? "Save changes" : "Add contact"}
+            {editing ? d.contacts.saveChanges : d.contacts.addContact}
           </button>
         </>
       }
     >
       <div className="field">
-        <label>Full name</label>
+        <label>{d.contacts.fullName}</label>
         <input
           value={name}
           onChange={(e) => setName(e.target.value)}
@@ -478,7 +483,7 @@ function ContactModal({
       <div className="field">
         <div className="row2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
           <div>
-            <label>Relationship</label>
+            <label>{d.contacts.relationship}</label>
             <input
               value={rel}
               onChange={(e) => setRel(e.target.value)}
@@ -487,7 +492,7 @@ function ContactModal({
             />
           </div>
           <div>
-            <label>Phone to ring</label>
+            <label>{d.contacts.phoneRing}</label>
             <input
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
@@ -498,7 +503,7 @@ function ContactModal({
         </div>
       </div>
       <div className="field" style={{ marginBottom: 0 }}>
-        <label>Avatar color</label>
+        <label>{d.contacts.avatarColor}</label>
         <div className="swatch-row" style={{ display: "flex", gap: 8, marginTop: 6 }}>
           {AVATAR_COLORS.map((c) => (
             <span
@@ -525,10 +530,14 @@ function ContactsView({
   line,
   setLine,
   showToast,
+  d,
+  lang,
 }: {
   line: Line;
   setLine: React.Dispatch<React.SetStateAction<Line[]>>;
   showToast: (msg: string) => void;
+  d: any;
+  lang: string;
 }) {
   const [modal, setModal] = useState<{ edit?: Contact } | null>(null);
   const contacts = line.contacts;
@@ -551,7 +560,7 @@ function ContactsView({
     setLine((prev) =>
       prev.map((l) => (l.id === line.id ? { ...l, contacts: l.contacts.filter((c) => c.id !== id) } : l))
     );
-    showToast("Contact removed");
+    showToast(d.contacts.removedToast);
   };
 
   const toggleAvail = (id: string) =>
@@ -579,7 +588,7 @@ function ContactsView({
         };
       })
     );
-    showToast(modal?.edit ? "Contact updated" : "Contact added");
+    showToast(modal?.edit ? d.contacts.updatedToast : d.contacts.addedToast);
     setModal(null);
   };
 
@@ -588,15 +597,17 @@ function ContactsView({
       <div className="contacts-head">
         <div>
           <p className="hint">
-            These are the people <b>{line.person.split(" · ")[0]}</b> can reach on {line.number}.
+            <b>{line.person.split(" · ")[0]}</b>
+            {lang === "es" ? " puede contactar en " : lang === "fr" ? " peut joindre sur " : lang === "ja" ? " が連絡可能な相手番号: " : lang === "zh" ? " 可以呼叫的电话号码: " : lang === "ar" ? " يمكنه الاتصال على " : lang === "hi" ? " इस नंबर पर संपर्क कर सकते हैं: " : lang === "pt" ? " pode contatar em " : lang === "de" ? " kann unter dieser Nummer erreichen: " : lang === "it" ? " può raggiungere su " : lang === "ko" ? " 가 연락할 수 있는 번호: " : " can reach on "}
+            {line.number}.{" "}
             {line.mode === "schedule"
-              ? " Calls are routed to the caregiver active on the time-of-day schedule."
+              ? d.contacts.hintSchedule
               : line.mode === "menu"
-              ? " Callers pick from a menu in the order below."
-              : " iCanCall rings them top to bottom until someone answers."}
+              ? d.contacts.hintMenu
+              : d.contacts.hintCascade}
           </p>
         </div>
-        <span className="cap-pill">{contacts.length} / 6 contacts</span>
+        <span className="cap-pill">{contacts.length} / 6 {d.contacts.limitPill}</span>
       </div>
 
       <div className="clist">
@@ -620,7 +631,7 @@ function ContactsView({
               <div className="tel">{c.phone || "No number set"}</div>
             </div>
             <div className="acts">
-              <Toggle on={c.available} onChange={() => toggleAvail(c.id)} />
+              <Toggle on={c.available} onChange={() => toggleAvail(c.id)} labels={[d.contacts.busy, d.contacts.available]} />
               <button className="mini" onClick={() => setModal({ edit: c })} aria-label="Edit">
                 <Icon name="edit" />
               </button>
@@ -633,10 +644,10 @@ function ContactsView({
 
         <div className={`add-slot ${full ? "full" : ""}`} onClick={() => !full && setModal({})}>
           {full ? (
-            <>You've reached the 6-contact limit on this plan</>
+            <>{d.contacts.limitReached}</>
           ) : (
             <>
-              <Icon name="plus" /> Add a contact
+              <Icon name="plus" /> {d.contacts.addContact}
             </>
           )}
         </div>
@@ -648,6 +659,7 @@ function ContactsView({
           order={contacts.length}
           onSave={save}
           onClose={() => setModal(null)}
+          d={d}
         />
       )}
     </div>
@@ -655,13 +667,13 @@ function ContactsView({
 }
 
 /* Call Simulator */
-function TestCall({ line }: { line: Line }) {
+function TestCall({ line, d }: { line: Line; d: any }) {
   const [screen, setScreen] = useState({
     cls: "",
     av: "—",
     avColor: null as string | null,
-    name: "Ready to test",
-    state: "Run a test call to preview routing",
+    name: d.sim.ready,
+    state: d.sim.runTest,
     ring: false,
   });
   const [dots, setDots] = useState(0);
@@ -694,13 +706,13 @@ function TestCall({ line }: { line: Line }) {
       cls: "",
       av: line.mode === "schedule" ? "🕒" : line.mode === "menu" ? "☰" : "—",
       avColor: null,
-      name: line.mode === "schedule" ? "Time schedule" : line.mode === "menu" ? "Caller menu" : "Ready to test",
+      name: line.mode === "schedule" ? d.overview.timeSchedule : line.mode === "menu" ? d.overview.callerMenu : d.sim.ready,
       state:
         line.mode === "schedule"
-          ? "Run a test call to simulate active hour routing"
+          ? d.routing.scheduleDesc
           : line.mode === "menu"
-          ? "Run a test call to hear the options"
-          : "Run a test call to preview routing",
+          ? d.routing.menuDesc
+          : d.sim.runTest,
       ring: false,
     });
   }
@@ -711,7 +723,7 @@ function TestCall({ line }: { line: Line }) {
       av: initials(c.name),
       avColor: c.color,
       name: c.name,
-      state: `Ringing ${c.rel || "contact"}…`,
+      state: `${d.sim.ringing} ${c.rel || ""}…`,
       ring: true,
     });
     await sleep(1500);
@@ -722,7 +734,7 @@ function TestCall({ line }: { line: Line }) {
         av: initials(c.name),
         avColor: c.color,
         name: c.name,
-        state: "✓ Connected",
+        state: d.sim.connected,
         ring: false,
       });
       return true;
@@ -733,7 +745,7 @@ function TestCall({ line }: { line: Line }) {
   async function runCascade() {
     setDots(contacts.length);
     setActiveDots({});
-    setScreen({ cls: "", av: "•", avColor: null, name: "Connecting…", state: "Placing the call", ring: false });
+    setScreen({ cls: "", av: "•", avColor: null, name: d.sim.connecting, state: d.sim.connecting, ring: false });
     await sleep(800);
     let done = false;
     for (let i = 0; i < contacts.length; i++) {
@@ -752,7 +764,7 @@ function TestCall({ line }: { line: Line }) {
         av: initials(c.name),
         avColor: c.color,
         name: c.name,
-        state: "No answer — trying next…",
+        state: d.sim.noAnswer,
         ring: false,
       });
       await sleep(500);
@@ -762,8 +774,8 @@ function TestCall({ line }: { line: Line }) {
         cls: "voicemail",
         av: "✉",
         avColor: null,
-        name: "Voicemail",
-        state: "Message sent — everyone alerted",
+        name: d.sim.voicemail,
+        state: d.sim.vmSent,
         ring: false,
       });
     }
@@ -792,7 +804,7 @@ function TestCall({ line }: { line: Line }) {
       av: initials(c.name),
       avColor: c.color,
       name: c.name,
-      state: `Connecting to ${c.rel || c.name}…`,
+      state: `${d.sim.connecting} ${c.rel || c.name}…`,
       ring: true,
     });
     await sleep(1500);
@@ -803,7 +815,7 @@ function TestCall({ line }: { line: Line }) {
         av: initials(c.name),
         avColor: c.color,
         name: c.name,
-        state: "✓ Connected",
+        state: d.sim.connected,
         ring: false,
       });
     } else {
@@ -811,8 +823,8 @@ function TestCall({ line }: { line: Line }) {
         cls: "voicemail",
         av: "✉",
         avColor: null,
-        name: `${c.name} is busy`,
-        state: "Sent to voicemail — alerted",
+        name: `${c.name} (${d.contacts.busy})`,
+        state: d.sim.vmSent,
         ring: false,
       });
     }
@@ -821,7 +833,7 @@ function TestCall({ line }: { line: Line }) {
   async function runSchedule() {
     setDots(0);
     setActiveDots({});
-    setScreen({ cls: "", av: "•", avColor: null, name: "Connecting…", state: "Checking the schedule", ring: false });
+    setScreen({ cls: "", av: "•", avColor: null, name: d.sim.connecting, state: d.sim.connecting, ring: false });
     await sleep(900);
     if (cancelled.current) return;
 
@@ -870,8 +882,8 @@ function TestCall({ line }: { line: Line }) {
         cls: "voicemail",
         av: "✉",
         avColor: null,
-        name: "No Coverage",
-        state: "No caregiver on shift — sent to voicemail",
+        name: d.routing.noCaregivers,
+        state: d.sim.vmSent,
         ring: false,
       });
       return;
@@ -884,7 +896,7 @@ function TestCall({ line }: { line: Line }) {
       av: initials(activeSlot.name),
       avColor: activeSlot.color,
       name: activeSlot.name,
-      state: `Ringing active caregiver (${activeSlot.description})…`,
+      state: `${d.sim.ringing} (${activeSlot.description})…`,
       ring: true,
     });
     
@@ -899,7 +911,7 @@ function TestCall({ line }: { line: Line }) {
         av: initials(activeSlot.name),
         avColor: activeSlot.color,
         name: activeSlot.name,
-        state: "✓ Connected — shift active",
+        state: `${d.sim.connected} — ${d.common.activeNow}`,
         ring: false,
       });
     } else {
@@ -907,8 +919,8 @@ function TestCall({ line }: { line: Line }) {
         cls: "voicemail",
         av: "✉",
         avColor: null,
-        name: `${activeSlot.name} is busy`,
-        state: "Sent to voicemail — alerted",
+        name: `${activeSlot.name} (${d.contacts.busy})`,
+        state: d.sim.vmSent,
         ring: false,
       });
     }
@@ -944,13 +956,13 @@ function TestCall({ line }: { line: Line }) {
       >
         {menu ? (
           <div className="sim-menu">
-            <div className="t">Thanks for calling. Choose who to reach:</div>
+            <div className="t">Thanks for calling:</div>
             {menu.map((c, i) => (
               <button className="sim-opt" key={c.id} onClick={() => pick(i)}>
                 <span className="digit">{i + 1}</span>
                 <span>
                   <b>
-                    Press {i + 1} — {c.name}
+                    {d.routing.caregiver} {i + 1} — {c.name}
                   </b>
                   <small>{c.rel || "Contact"}</small>
                 </span>
@@ -990,10 +1002,10 @@ function TestCall({ line }: { line: Line }) {
             }}
           >
             {line.mode === "schedule"
-              ? "SCHEDULED CONTACTS"
+              ? d.routing.scheduleTitle
               : line.mode === "menu"
-              ? "MENU ORDER"
-              : "CASCADE ORDER"}
+              ? d.overview.callerMenu
+              : d.overview.cascade}
           </div>
           {contacts.map((c, i) => (
             <div className="preview-row" key={c.id}>
@@ -1004,7 +1016,7 @@ function TestCall({ line }: { line: Line }) {
               </div>
               {!c.available && (
                 <span className="badge badge-gray">
-                  <span className="d"></span>Busy
+                  <span className="d"></span>{d.contacts.busy}
                 </span>
               )}
             </div>
@@ -1021,7 +1033,7 @@ function TestCall({ line }: { line: Line }) {
           onClick={run}
           disabled={running || !contacts.length}
         >
-          <Icon name="phone" style={{ width: 16, height: 16 }} /> {running ? "Calling…" : "Run a test call"}
+          <Icon name="phone" style={{ width: 16, height: 16 }} /> {running ? d.sim.connecting : d.sim.runTest}
         </button>
       </div>
     </div>
@@ -1033,10 +1045,12 @@ function RoutingView({
   line,
   setLine,
   showToast,
+  d,
 }: {
   line: Line;
   setLine: React.Dispatch<React.SetStateAction<Line[]>>;
   showToast: (msg: string) => void;
+  d: any;
 }) {
   const [localSchedule, setLocalSchedule] = useState<CoverageSlot[]>([]);
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -1215,13 +1229,7 @@ function RoutingView({
   const setMode = (mode: "cascade" | "menu" | "schedule") => {
     if (mode === line.mode) return;
     setLine((prev) => prev.map((l) => (l.id === line.id ? { ...l, mode } : l)));
-    showToast(
-      mode === "schedule"
-        ? "Switched to Time-of-Day Routing"
-        : mode === "menu"
-        ? "Switched to Caller Menu"
-        : "Switched to Call Cascade"
-    );
+    showToast(d.common.savedToast);
   };
 
   return (
@@ -1229,9 +1237,9 @@ function RoutingView({
       <div className="card section-gap">
         <div className="card-head">
           <div>
-            <h2>How callers connect</h2>
+            <h2>{d.routing.connMethod}</h2>
             <p>
-              Choose what happens when someone dials {line.number}. Changes take effect on the next call.
+              {d.routing.connMethodSub}
             </p>
           </div>
         </div>
@@ -1250,10 +1258,9 @@ function RoutingView({
               <div className="ic" style={{ marginBottom: 12 }}>
                 <Icon name="routing" style={{ width: 24, height: 24 }} />
               </div>
-              <h4>Call cascade</h4>
+              <h4>{d.routing.cascade}</h4>
               <p style={{ fontSize: "0.86rem", color: "var(--ink-soft)", marginTop: 6 }}>
-                Ring contacts one after another in the order below until someone answers. Best for
-                emergencies — reaching <i>anyone</i> is what matters.
+                {d.routing.cascadeDesc}
               </p>
             </div>
             <div
@@ -1269,10 +1276,9 @@ function RoutingView({
               <div className="ic" style={{ marginBottom: 12 }}>
                 <Icon name="list" style={{ width: 24, height: 24 }} />
               </div>
-              <h4>Caller menu</h4>
+              <h4>{d.routing.callerMenu}</h4>
               <p style={{ fontSize: "0.86rem", color: "var(--ink-soft)", marginTop: 6 }}>
-                Greet callers and let them choose ("Press 1 for Maria, Press 2 for the doctor…"). Best when
-                the right person depends on the situation.
+                {d.routing.menuDesc}
               </p>
             </div>
             <div
@@ -1288,9 +1294,9 @@ function RoutingView({
               <div className="ic" style={{ marginBottom: 12 }}>
                 <Icon name="clock" style={{ width: 24, height: 24 }} />
               </div>
-              <h4>Time-of-day routing</h4>
+              <h4>{d.routing.scheduleTitle}</h4>
               <p style={{ fontSize: "0.86rem", color: "var(--ink-soft)", marginTop: 6 }}>
-                Route calls dynamically depending on the hour of the day (e.g. caregivers on shift, overnight nurse, or daytime care clinic).
+                {d.routing.scheduleDesc}
               </p>
             </div>
           </div>
@@ -1302,14 +1308,14 @@ function RoutingView({
         <div className="card section-gap">
           <div className="card-head">
             <div>
-              <h2>Around-the-clock coverage</h2>
+              <h2>{d.routing.scheduleTitle}</h2>
               <p>
-                Route incoming calls dynamically based on the time of day. Assign slots to your contacts to ensure 24/7 coverage.
+                {d.routing.scheduleSub}
               </p>
             </div>
             {activeSlot && (
               <Badge kind="green">
-                Active: {activeSlot.name}
+                {d.common.activeNow}: {activeSlot.name}
               </Badge>
             )}
           </div>
@@ -1721,14 +1727,14 @@ function RoutingView({
                   className="btn btn-ghost btn-sm"
                   style={{ padding: "6px 12px", fontSize: "0.78rem" }}
                 >
-                  Cancel
+                  {d.contacts.cancel}
                 </button>
                 <button
                   onClick={addNewSlot}
                   className="btn btn-primary btn-sm"
                   style={{ padding: "6px 12px", fontSize: "0.78rem" }}
                 >
-                  Add Slot
+                  {d.routing.addSlot}
                 </button>
               </div>
             </div>
@@ -1740,7 +1746,7 @@ function RoutingView({
       <div className="card">
         <div className="card-head">
           <div>
-            <h2>Preview &amp; test</h2>
+            <h2>{d.sim.runTest}</h2>
             <p>
               Place a simulated call to see exactly what {line.person.split(" · ")[0]}'s callers will
               experience.
@@ -1748,14 +1754,14 @@ function RoutingView({
           </div>
           <Badge kind="blue">
             {line.mode === "schedule"
-              ? "Time-of-day routing"
+              ? d.routing.scheduleTitle
               : line.mode === "menu"
-              ? "Caller menu"
-              : "Call cascade"}
+              ? d.overview.callerMenu
+              : d.overview.cascade}
           </Badge>
         </div>
         <div className="card-pad">
-          <TestCall line={line} />
+          <TestCall line={line} d={d} />
         </div>
       </div>
     </div>
@@ -1763,7 +1769,7 @@ function RoutingView({
 }
 
 /* Call log */
-function CallLogView({ line, log }: { line: Line; log: Record<string, CallLogEntry[]> }) {
+function CallLogView({ line, log, d }: { line: Line; log: Record<string, CallLogEntry[]>; d: any }) {
   const [filter, setFilter] = useState("all");
   const calls = log[line.id] || [];
   const counts = {
@@ -1775,10 +1781,10 @@ function CallLogView({ line, log }: { line: Line; log: Record<string, CallLogEnt
   const shown = filter === "all" ? calls : calls.filter((c) => c.status === filter);
 
   const pills = [
-    ["all", "All"],
-    ["connected", "Connected"],
-    ["missed", "Missed"],
-    ["voicemail", "Voicemail"],
+    ["all", d.overview.viewAll],
+    ["connected", d.sim.connected],
+    ["missed", d.sim.noAnswer],
+    ["voicemail", d.sim.voicemail],
   ];
 
   return (
@@ -1804,8 +1810,8 @@ function CallLogView({ line, log }: { line: Line; log: Record<string, CallLogEnt
       <div className="card">
         <div className="card-head">
           <div>
-            <h2>Call history</h2>
-            <p>Every call to {line.number}, including missed attempts</p>
+            <h2>{d.titles.log}</h2>
+            <p>{d.titles.logSub}</p>
           </div>
         </div>
         <div className="card-pad" style={{ paddingTop: 4, paddingBottom: 4 }}>
@@ -1821,7 +1827,7 @@ function CallLogView({ line, log }: { line: Line; log: Record<string, CallLogEnt
                   </div>
                   <div className="who">
                     <b>{c.caller}</b>
-                    <span>incoming call</span>
+                    <span>{d.sim.connected}</span>
                   </div>
                   <div className="routed">
                     <b>{c.routed}</b>
@@ -1861,10 +1867,12 @@ function SettingsView({
   line,
   setLine,
   showToast,
+  d,
 }: {
   line: Line;
   setLine: React.Dispatch<React.SetStateAction<Line[]>>;
   showToast: (msg: string) => void;
+  d: any;
 }) {
   const s = line.settings || {};
   const set = (patch: Partial<NonNullable<Line["settings"]>>) =>
@@ -1893,13 +1901,13 @@ function SettingsView({
       <div className="card section-gap">
         <div className="card-head">
           <div>
-            <h2>Greeting</h2>
-            <p>What callers hear when they dial {line.number}</p>
+            <h2>{d.settings.greetingVoicemail}</h2>
+            <p>{d.settings.ttsGreetingSub}</p>
           </div>
         </div>
         <div className="card-pad">
           <div className="field">
-            <label>Greeting message</label>
+            <label>{d.settings.ttsGreeting}</label>
             <textarea
               rows={3}
               value={greeting}
@@ -1909,17 +1917,16 @@ function SettingsView({
           </div>
           <div className="set-row" style={{ paddingTop: 4 }}>
             <div className="txt">
-              <b>Bilingual greeting</b>
+              <b>{d.settings.bilingualSupport}</b>
               <p>
-                Play the greeting in a second language after English. Recommended for caregivers and
-                multilingual families.
+                {d.settings.bilingualSupportSub}
               </p>
             </div>
             <Toggle on={bilingual} onChange={(v) => set({ bilingual: v })} labels={["Off", "On"]} />
           </div>
           {bilingual && (
             <div className="field" style={{ marginTop: 16, marginBottom: 0, maxWidth: 260 }}>
-              <label>Second language</label>
+              <label>{d.settings.secondLang}</label>
               <select value={language2} onChange={(e) => set({ language2: e.target.value })}>
                 {["Spanish", "Mandarin", "Tagalog", "Vietnamese", "French", "Korean"].map((lang) => (
                   <option key={lang}>{lang}</option>
@@ -1933,35 +1940,35 @@ function SettingsView({
       <div className="card">
         <div className="card-head">
           <div>
-            <h2>Notifications</h2>
-            <p>How you're alerted about calls on this line</p>
+            <h2>{d.settings.notifications}</h2>
+            <p>{d.settings.notificationsSub}</p>
           </div>
         </div>
         <div className="card-pad" style={{ paddingTop: 4 }}>
           <div className="set-row">
             <div className="txt">
-              <b>SMS alerts</b>
+              <b>{d.settings.smsAlerts}</b>
               <p>Text Maria the moment a call comes through, including who answered.</p>
             </div>
             <Toggle on={notifSMS} onChange={(v) => set({ notifSMS: v })} labels={["Off", "On"]} />
           </div>
           <div className="set-row">
             <div className="txt">
-              <b>Email alerts</b>
+              <b>{d.settings.emailAlerts}</b>
               <p>Send a copy of every call notification to your inbox.</p>
             </div>
             <Toggle on={notifEmail} onChange={(v) => set({ notifEmail: v })} labels={["Off", "On"]} />
           </div>
           <div className="set-row">
             <div className="txt">
-              <b>Missed-call alerts</b>
+              <b>{d.settings.missedAlerts}</b>
               <p>Get notified immediately if no one in the circle answers.</p>
             </div>
             <Toggle on={notifMissed} onChange={(v) => set({ notifMissed: v })} labels={["Off", "On"]} />
           </div>
           <div className="set-row">
             <div className="txt">
-              <b>Weekly safety report</b>
+              <b>{d.settings.weeklyReports}</b>
               <p>A Monday summary of all call activity across this line.</p>
             </div>
             <Toggle on={notifWeekly} onChange={(v) => set({ notifWeekly: v })} labels={["Off", "On"]} />
@@ -1970,8 +1977,8 @@ function SettingsView({
       </div>
 
       <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 20 }}>
-        <button className="btn btn-primary" onClick={() => showToast("Settings saved")}>
-          <Icon name="check" /> Save changes
+        <button className="btn btn-primary" onClick={() => showToast(d.common.savedToast)}>
+          <Icon name="check" /> {d.contacts.saveChanges}
         </button>
       </div>
     </div>
@@ -1992,15 +1999,24 @@ function AccountView({
   showToast,
   tab,
   setTab,
+  d,
 }: {
   account: Account;
   setAccount: React.Dispatch<React.SetStateAction<Account>>;
   showToast: (msg: string) => void;
   tab: string;
   setTab: (t: string) => void;
+  d: any;
 }) {
   const a = account;
   const set = (patch: Partial<Account>) => setAccount((prev) => ({ ...prev, ...patch }));
+
+  const ACCT_TABS = [
+    { id: "profile", label: d.account.profile },
+    { id: "security", label: d.account.security },
+    { id: "contact", label: d.account.contactInfo },
+    { id: "billing", label: d.account.billing },
+  ];
 
   const [pwd, setPwd] = useState({ cur: "", next: "", conf: "" });
   const savePwd = () => {
@@ -2028,7 +2044,7 @@ function AccountView({
         <div className="card">
           <div className="card-head">
             <div>
-              <h2>Profile</h2>
+              <h2>{d.account.profile}</h2>
               <p>Your personal details on the iCanCall account</p>
             </div>
           </div>
@@ -2222,7 +2238,7 @@ function AccountView({
         <div className="card">
           <div className="card-head">
             <div>
-              <h2>Contact information</h2>
+              <h2>{d.account.contactInfo}</h2>
               <p>Where we reach you with call alerts and account notices</p>
             </div>
           </div>
@@ -2531,7 +2547,7 @@ function AccountView({
           <div className="card section-gap">
             <div className="card-head">
               <div>
-                <h2>Payment method</h2>
+                <h2>{d.account.paymentMethod}</h2>
                 <p>Charged on the 1st of each month</p>
               </div>
             </div>
@@ -2955,6 +2971,71 @@ export default function DashboardApp() {
     addons: { extraNumbers: 1, minuteBlocks: 2, usedMin: 41, rolloverMin: 18 },
   });
 
+  const [lang, setLang] = useState<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi" | "pt" | "de" | "it" | "ko">("en");
+
+  useEffect(() => {
+    const savedLang = localStorage.getItem("lang") as any;
+    const validLangs = ["en", "es", "fr", "ja", "zh", "ar", "hi", "pt", "de", "it", "ko"];
+    if (validLangs.includes(savedLang)) {
+      setLang(savedLang);
+    }
+  }, []);
+
+  useEffect(() => {
+    document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
+  }, [lang]);
+
+  useEffect(() => {
+    const syncLang = () => {
+      const savedLang = localStorage.getItem("lang") as any;
+      const validLangs = ["en", "es", "fr", "ja", "zh", "ar", "hi", "pt", "de", "it", "ko"];
+      if (validLangs.includes(savedLang)) {
+        setLang(savedLang);
+      }
+    };
+    window.addEventListener("storage", syncLang);
+    return () => window.removeEventListener("storage", syncLang);
+  }, []);
+
+  const changeLanguage = (newLang: "en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi" | "pt" | "de" | "it" | "ko") => {
+    setLang(newLang);
+    localStorage.setItem("lang", newLang);
+    window.dispatchEvent(new Event("storage"));
+  };
+
+  const d = dashboardTranslations[lang];
+
+  const NAV = [
+    {
+      group: d.nav.manage,
+      items: [
+        { id: "overview", label: d.nav.overview, icon: "overview" as keyof typeof ICONS },
+        { id: "contacts", label: d.nav.contacts, icon: "contacts" as keyof typeof ICONS },
+        { id: "routing", label: d.nav.routing, icon: "routing" as keyof typeof ICONS },
+      ],
+    },
+    {
+      group: d.nav.activity,
+      items: [{ id: "log", label: d.nav.log, icon: "log" as keyof typeof ICONS, badge: true }],
+    },
+    {
+      group: d.nav.configure,
+      items: [
+        { id: "settings", label: d.nav.settings, icon: "settings" as keyof typeof ICONS },
+        { id: "account", label: d.nav.account, icon: "user" as keyof typeof ICONS },
+      ],
+    },
+  ];
+
+  const TITLES = {
+    overview: [d.titles.overview, `${d.titles.overviewSub}, ${account.preferred}`],
+    contacts: [d.titles.contacts, d.titles.contactsSub],
+    routing: [d.titles.routing, d.titles.routingSub],
+    log: [d.titles.log, d.titles.logSub],
+    settings: [d.titles.settings, d.titles.settingsSub],
+    account: [d.titles.account, d.titles.accountSub],
+  };
+
   useEffect(() => {
     if (typeof window !== "undefined") {
       if (localStorage.getItem("isLoggedIn") !== "true") {
@@ -3119,7 +3200,7 @@ export default function DashboardApp() {
             <div className="row">
               <span className="pill">PRO PLAN</span>
               <span style={{ fontSize: "0.78rem", color: "oklch(0.82 0.02 225)" }}>
-                {lines.length}/2 numbers
+                {lines.length}/2 {d.common.numbers}
               </span>
             </div>
             <button
@@ -3129,11 +3210,11 @@ export default function DashboardApp() {
                 go("account");
               }}
             >
-              Manage plan
+              {d.common.managePlan}
             </button>
           </div>
           <button className="signout-row" onClick={signOut}>
-            <Icon name="logout" style={{ width: 18, height: 18 }} /> Sign out
+            <Icon name="logout" style={{ width: 18, height: 18 }} /> {d.common.signOut}
           </button>
         </div>
       </aside>
@@ -3154,6 +3235,37 @@ export default function DashboardApp() {
             <p>{LINE_SCOPED[view as keyof typeof LINE_SCOPED] ? line.label + " · " + line.person : t2}</p>
           </div>
           <div className="topbar-spacer"></div>
+
+          <select
+            value={lang}
+            onChange={(e) => changeLanguage(e.target.value as any)}
+            className="lang-select"
+            style={{
+              background: 'transparent',
+              border: '1px solid var(--line)',
+              color: 'var(--ink-soft)',
+              padding: '6px 10px',
+              borderRadius: '20px',
+              fontSize: '0.86rem',
+              fontWeight: '600',
+              cursor: 'pointer',
+              outline: 'none',
+              fontFamily: 'var(--font)',
+              marginRight: 12
+            }}
+          >
+            <option value="en">🇺🇸 EN</option>
+            <option value="es">🇪🇸 ES</option>
+            <option value="fr">🇫🇷 FR</option>
+            <option value="ja">🇯🇵 JA</option>
+            <option value="zh">🇨🇳 ZH</option>
+            <option value="ar">🇸🇦 AR</option>
+            <option value="hi">🇮🇳 HI</option>
+            <option value="pt">🇵🇹 PT</option>
+            <option value="de">🇩🇪 DE</option>
+            <option value="it">🇮🇹 IT</option>
+            <option value="ko">🇰🇷 KO</option>
+          </select>
 
           {/* number switcher */}
           <div className={`numswitch ${switchOpen ? "open" : ""}`}>
@@ -3198,10 +3310,10 @@ export default function DashboardApp() {
                   className="add-num"
                   onClick={() => {
                     setSwitchOpen(false);
-                    showToast("Add-a-number is available on Pro — contact support");
+                    showToast(d.common.addNumberTip);
                   }}
                 >
-                  <Icon name="plus" style={{ width: 16, height: 16 }} /> Add another number
+                  <Icon name="plus" style={{ width: 16, height: 16 }} /> {d.common.addAnotherNumber}
                 </button>
               </div>
             )}
@@ -3214,15 +3326,15 @@ export default function DashboardApp() {
           <div className="user-chip clickable" onClick={() => go("account")}>
             <span className="ava">MD</span>
             <span className="who">
-              <b>Maria Delgado</b>
-              <span>Account owner</span>
+              <b>{account.name}</b>
+              <span>{d.common.accountOwner}</span>
             </span>
           </div>
           <button
             className="iconbtn signout-btn"
             onClick={signOut}
-            aria-label="Sign out"
-            title="Sign out"
+            aria-label={d.common.signOut}
+            title={d.common.signOut}
           >
             <Icon name="logout" />
           </button>
@@ -3259,17 +3371,18 @@ export default function DashboardApp() {
               line={line}
               setView={go}
               setActiveLineId={setActiveLineId}
+              d={d}
             />
           )}
           {view === "contacts" && (
-            <ContactsView line={line} setLine={setLines} showToast={showToast} />
+            <ContactsView line={line} setLine={setLines} showToast={showToast} d={d} lang={lang} />
           )}
           {view === "routing" && (
-            <RoutingView line={line} setLine={setLines} showToast={showToast} />
+            <RoutingView line={line} setLine={setLines} showToast={showToast} d={d} />
           )}
-          {view === "log" && <CallLogView line={line} log={log} />}
+          {view === "log" && <CallLogView line={line} log={log} d={d} />}
           {view === "settings" && (
-            <SettingsView line={line} setLine={setLines} showToast={showToast} />
+            <SettingsView line={line} setLine={setLines} showToast={showToast} d={d} />
           )}
           {view === "account" && (
             <AccountView
@@ -3278,6 +3391,7 @@ export default function DashboardApp() {
               showToast={showToast}
               tab={acctTab}
               setTab={setAcctTab}
+              d={d}
             />
           )}
         </div>
