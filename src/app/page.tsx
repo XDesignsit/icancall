@@ -857,42 +857,7 @@ export default function Home() {
             </div>
           </div>
         </section>
- 
-        {/* ============== TESTIMONIALS SECTION ============== */}
-        <section className="section" id="stories">
-          <div className="wrap">
-            <div className="section-head reveal in">
-              <span className="eyebrow">{t.testimonials.stars}</span>
-              <h2>{t.ui.callsThatConnected}</h2>
-            </div>
-            <div className="quotes">
-              <figure className="quote reveal in">
-                <div className="stars">★★★★★</div>
-                <p>{t.testimonials.t1Quote}</p>
-                <figcaption className="by">
-                  <span className="avatar" style={{ background: "oklch(0.58 0.115 232)" }}>JM</span>
-                  <span><b>Jenna M.</b><span>{t.ui.daughterCaregiver}</span></span>
-                </figcaption>
-              </figure>
-              <figure className="quote reveal in">
-                <div className="stars">★★★★★</div>
-                <p>{t.testimonials.t2Quote}</p>
-                <figcaption className="by">
-                  <span className="avatar" style={{ background: "oklch(0.62 0.10 198)" }}>AT</span>
-                  <span><b>Andre T.</b><span>{t.ui.dadOfTwo}</span></span>
-                </figcaption>
-              </figure>
-              <figure className="quote reveal in">
-                <div className="stars">★★★★★</div>
-                <p>{t.testimonials.t3Quote}</p>
-                <figcaption className="by">
-                  <span className="avatar" style={{ background: "oklch(0.55 0.11 280)" }}>PR</span>
-                  <span><b>Priya R.</b><span>{t.ui.specialAbilitiesParent}</span></span>
-                </figcaption>
-              </figure>
-            </div>
-          </div>
-        </section>
+
  
         {/* ============== FAQ SECTION ============== */}
         <section className="section tint-band" id="faq">
@@ -1007,7 +972,7 @@ export default function Home() {
               <ul>
                 <li><a href="#">{t.footer.about}</a></li>
                 <li><a href="#">{t.footer.careers}</a></li>
-                <li><a href="#stories">{t.footer.stories}</a></li>
+
                 <li><a href="#">{t.footer.contact}</a></li>
               </ul>
             </div>
