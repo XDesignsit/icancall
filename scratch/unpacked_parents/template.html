@@ -2,7 +2,7 @@
 <html lang="en"><head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>iCanCall for Seniors — One number Mom or Dad already knows how to use.</title>
+<title>iCanCall for Parents — One number your child will never forget.</title>
 <style>/* ===========================================================
    iCanCall — landing page styles
    Warm & reassuring · soft blue/teal · clean neutral sans
@@ -449,7 +449,7 @@ h3 { font-size: clamp(1.25rem, 2vw, 1.6rem); }
 
 /* ---------- Footer ---------- */
 .footer { padding-block: 60px 40px; border-top: 1px solid var(--line); background: var(--surface); }
-.footer-grid { display: grid; grid-template-columns: 1.4fr repeat(3, 1fr); gap: 40px; }
+.footer-grid { display: grid; grid-template-columns: 1.4fr repeat(4, 1fr); gap: 40px; }
 .footer .brand { margin-bottom: 16px; }
 .footer .blurb { color: var(--ink-soft); font-size: 0.92rem; max-width: 30ch; }
 .footer h5 { font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--ink-faint); margin-bottom: 16px; font-weight: 700; }
@@ -526,104 +526,89 @@ h3 { font-size: clamp(1.25rem, 2vw, 1.6rem); }
 @media (max-width: 820px) { .spotlight-card { grid-template-columns: 1fr; } }
 </style>
 <style>/* ===========================================================
-   iCanCall — Seniors landing page
-   Layers on top of styles.css. Two jobs:
-   1) Light-touch accessibility (slightly larger type & targets)
-   2) Bespoke sections unique to this audience
+   iCanCall — Parents of young children
+   Layers on styles.css + audience.css. Signature sections:
+   1) "One number is the whole lesson" before/after
+   2) "Works wherever they are" scenarios strip
+   A single warm accent differentiates this audience on-brand.
    =========================================================== */
 
-/* ---------- Light-touch accessibility ---------- */
-body { font-size: 18.5px; }
-.lead { font-size: clamp(1.18rem, 1.7vw, 1.46rem); line-height: 1.55; }
-.nav a { font-size: 1.02rem; }
-.btn { font-size: 1.06rem; padding: 15px 28px; }
-.btn-lg { padding: 18px 38px; font-size: 1.18rem; }
-.faq-q { font-size: 1.2rem; padding-block: 26px; }
-.faq-a p { font-size: 1.08rem; }
-.feature p, .step p, .usecase p { font-size: 1.05rem; }
-.feature h3 { font-size: 1.24rem; }
-
-/* a touch more breathing room in the eyebrow for older eyes */
-.eyebrow { font-size: 0.9rem; letter-spacing: 0.05em; }
-
-/* Larger senior buttons need the header to collapse sooner than the
-   base 880px breakpoint, or the CTA row overflows the viewport. */
-@media (max-width: 1000px) {
-  .nav { display: none; }
-  .header-cta .btn-ghost { display: none; }
+:root {
+  --warm:      oklch(0.70 0.145 52);    /* warm amber — used sparingly */
+  --warm-deep: oklch(0.55 0.13 48);
+  --warm-tint: oklch(0.95 0.035 60);
 }
 
-/* ---------- "Nothing new to learn" any-phone band ---------- */
-.noapp { padding-block: clamp(64px, 9vw, 110px); }
-.noapp-grid {
-  display: grid; grid-template-columns: 0.92fr 1.08fr;
-  gap: clamp(36px, 5vw, 72px); align-items: center;
+/* ---------- "One number is the whole lesson" ---------- */
+.lesson { padding-block: clamp(64px, 9vw, 110px); }
+.lesson-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: clamp(18px, 3vw, 30px);
+  margin-top: 52px; align-items: stretch;
 }
-.noapp-copy .checks { list-style: none; margin-top: 26px; display: flex; flex-direction: column; gap: 14px; }
-.noapp-copy .checks li { display: flex; gap: 13px; align-items: flex-start; font-size: 1.08rem; color: var(--ink-soft); }
-.noapp-copy .checks li b { color: var(--ink); font-weight: 600; }
-.noapp-copy .checks .ck {
-  width: 28px; height: 28px; border-radius: 50%; flex: none; margin-top: 1px;
-  background: oklch(0.70 0.13 158 / 0.16); display: grid; place-items: center;
+.lesson-card {
+  position: relative; border-radius: var(--r-xl); padding: clamp(26px, 3vw, 38px);
+  border: 1px solid var(--line); background: var(--surface); box-shadow: var(--shadow-sm);
+  display: flex; flex-direction: column;
 }
-.noapp-copy .checks .ck svg { width: 16px; height: 16px; color: oklch(0.45 0.13 158); }
+.lesson-card .tab {
+  display: inline-flex; align-items: center; gap: 8px; align-self: flex-start;
+  font-size: 0.82rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase;
+  padding: 6px 13px; border-radius: 999px; margin-bottom: 22px;
+}
+.lesson-card.before .tab { background: var(--tint); color: var(--ink-faint); }
+.lesson-card.after  .tab { background: var(--warm-tint); color: var(--warm-deep); }
+.lesson-card h3 { font-size: 1.3rem; margin-bottom: 6px; }
+.lesson-card .sub { font-size: 0.98rem; color: var(--ink-soft); margin-bottom: 22px; }
 
-/* the three devices, all converging on one number */
-.devices {
-  position: relative;
-  background: var(--surface); border: 1px solid var(--line);
-  border-radius: var(--r-xl); box-shadow: var(--shadow-lg);
-  padding: clamp(24px, 3vw, 36px);
+/* the messy "old way" number list */
+.scribbles { display: flex; flex-direction: column; gap: 10px; margin-top: auto; }
+.scribbles .line {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 11px 14px; border-radius: var(--r-md);
+  background: var(--bg); border: 1px dashed var(--line); color: var(--ink-faint);
 }
-.devices-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
-.device {
-  display: flex; flex-direction: column; align-items: center; text-align: center; gap: 12px;
-  padding: 22px 12px 18px; border-radius: var(--r-lg);
-  border: 1px solid var(--line); background: var(--bg);
-}
-.device .glyph {
-  width: 58px; height: 58px; border-radius: 16px; display: grid; place-items: center;
-  background: var(--tint); color: var(--blue-deep);
-}
-.device .glyph svg { width: 30px; height: 30px; }
-.device .dname { font-weight: 600; font-size: 1.0rem; }
-.device .dtag {
-  display: inline-flex; align-items: center; gap: 6px;
-  font-size: 0.82rem; font-weight: 600; color: oklch(0.45 0.13 158);
-}
-.device .dtag svg { width: 14px; height: 14px; }
+.scribbles .line .lbl { font-size: 0.96rem; font-weight: 600; color: var(--ink-soft); }
+.scribbles .line .no { font-family: var(--mono); font-size: 0.92rem; }
+.scribbles .line.crossed { opacity: 0.6; text-decoration: line-through; text-decoration-color: oklch(0.6 0.16 25 / 0.6); }
+.scribbles .note { font-size: 0.86rem; color: var(--ink-faint); margin-top: 6px; font-style: italic; }
 
-.devices-link {
-  display: flex; align-items: center; justify-content: center; gap: 12px;
-  margin: 20px 0 4px; color: var(--ink-faint); font-size: 0.86rem; font-weight: 600;
-  text-transform: uppercase; letter-spacing: 0.06em;
+/* the clean "new way" flashcard */
+.flashcard {
+  margin-top: auto; border-radius: var(--r-lg); padding: 34px 26px;
+  background: linear-gradient(160deg, var(--warm-tint), var(--surface));
+  border: 1px solid var(--warm-tint); text-align: center;
 }
-.devices-link::before, .devices-link::after {
-  content: ""; height: 1px; flex: 1; background: var(--line);
+.flashcard .ribbon { font-size: 0.84rem; font-weight: 600; color: var(--warm-deep); letter-spacing: 0.04em; }
+.flashcard .big {
+  font-size: clamp(2.1rem, 4.5vw, 3rem); font-weight: 700; letter-spacing: -0.02em;
+  color: var(--ink); margin: 10px 0 4px; line-height: 1;
 }
-.devices-one {
-  display: flex; align-items: center; gap: 14px; justify-content: center;
-  padding: 16px 20px; border-radius: var(--r-md);
-  background: linear-gradient(150deg, var(--blue-ink), var(--blue-deep)); color: #fff;
-}
-.devices-one .ring {
-  width: 44px; height: 44px; border-radius: 13px; flex: none;
-  background: oklch(1 0 0 / 0.16); display: grid; place-items: center;
-}
-.devices-one .ring svg { width: 22px; height: 22px; }
-.devices-one .num { font-weight: 700; font-size: 1.18rem; letter-spacing: -0.02em; }
-.devices-one .num small { display: block; font-size: 0.76rem; font-weight: 500; color: oklch(0.9 0.03 220); letter-spacing: 0.01em; }
+.flashcard .whisper { font-size: 0.92rem; color: var(--ink-soft); }
+.flashcard .hearts { margin-top: 18px; display: flex; gap: 7px; justify-content: center; color: var(--warm); }
+.flashcard .hearts svg { width: 18px; height: 18px; }
 
-@media (max-width: 900px) {
-  .noapp-grid { grid-template-columns: 1fr; }
-}
-@media (max-width: 480px) {
-  .devices-row { grid-template-columns: 1fr; }
-}
+@media (max-width: 760px) { .lesson-grid { grid-template-columns: 1fr; } }
 
-/* ---------- Single-story spotlight (replaces 3-up quotes) ---------- */
-/* shared component — see audience.css */
+/* ---------- "Works wherever they are" scenarios ---------- */
+.scenes { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; margin-top: 52px; }
+.scene {
+  padding: 26px 22px 24px; border-radius: var(--r-lg);
+  background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow-sm);
+  transition: transform .2s, box-shadow .2s, border-color .2s;
+}
+.scene:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); border-color: var(--teal-deep); }
+.scene .ic { width: 46px; height: 46px; border-radius: 13px; display: grid; place-items: center; margin-bottom: 16px; background: var(--tint); color: var(--blue-deep); }
+.scene .ic svg { width: 24px; height: 24px; }
+.scene h3 { font-size: 1.1rem; margin-bottom: 7px; }
+.scene p { font-size: 0.96rem; color: var(--ink-soft); }
+@media (max-width: 920px) { .scenes { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 520px) { .scenes { grid-template-columns: 1fr; } }
 
+/* warm-tinted hero reassurance for this audience */
+.hero-reassure.warm {
+  background: var(--warm-tint); border-color: oklch(0.70 0.145 52 / 0.32);
+}
+.hero-reassure.warm svg { color: var(--warm-deep); }
 </style>
 </head>
 <body>
@@ -633,14 +618,14 @@ body { font-size: 18.5px; }
 <!-- ============== HEADER ============== -->
 <header class="header">
   <div class="wrap header-inner">
-    <a class="brand" href="#top" aria-label="iCanCall home">
+    <a class="brand" href="/" aria-label="iCanCall home">
       <span class="mark">
         <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 3.5h3l1.5 4-2 1.5a12 12 0 0 0 5 5l1.5-2 4 1.5v3a2 2 0 0 1-2.2 2A16 16 0 0 1 4.5 5.7 2 2 0 0 1 6.5 3.5Z"></path></svg>
       </span>
       <span>i<b>Can</b>Call</span>
     </a>
     <nav class="nav">
-      <a href="#noapp">Nothing to learn</a>
+      <a href="#lesson">One number</a>
       <a href="#how">How it works</a>
       <a href="#build">Build the circle</a>
       <a href="#pricing">Pricing</a>
@@ -648,7 +633,7 @@ body { font-size: 18.5px; }
     </nav>
     <div class="header-cta" style="display: flex; align-items: center; gap: 12px;">
       <a class="btn btn-ghost" href="#how">See how it works</a>
-      <a class="btn btn-primary" href="#pricing">Set it up for them</a>
+      <a class="btn btn-primary" href="#pricing">Get started</a>
       <select id="langSelect" class="lang-select" style="background: transparent; border: 1px solid var(--line); color: var(--ink-soft); padding: 6px 10px; border-radius: 20px; font-size: 0.86rem; font-weight: 600; cursor: pointer; outline: none; font-family: var(--font); margin-left: 4px;">
         <option value="en">🇺🇸 EN</option>
         <option value="es">🇪🇸 ES</option>
@@ -673,18 +658,18 @@ body { font-size: 18.5px; }
   <div class="wrap hero-grid">
     <div class="hero-copy">
       <span class="aud-badge">
-        <span class="hh"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 18a4 4 0 0 0-8 0"></path><circle cx="12" cy="9" r="3.5"></circle></svg></span>
-        For families with aging parents
+        <span class="hh"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 5v6c0 5 3.5 8.5 8 11 4.5-2.5 8-6 8-11V5l-8-3Z"></path></svg></span>
+        For parents of young children
       </span>
-      <h1>Mom can always reach you.<br><span class="accent">On the phone she already uses.</span></h1>
-      <p class="lead">Give your parent one easy number that quietly finds the whole family — until someone picks up. There's no app to install and nothing new for them to learn. You set it up in minutes; they just answer their phone, the way they always have.</p>
+      <h1>One number<br><span class="accent">they'll never forget.</span></h1>
+      <p class="lead">Little ones can't memorize a whole contact list — but they can learn one number. iCanCall turns that single number into the entire family: it rings you, then your partner, then Grandma, then a trusted neighbor, until someone who loves them picks up.</p>
       <div class="hero-actions">
-        <a class="btn btn-primary btn-lg" href="#pricing">Set it up for them</a>
+        <a class="btn btn-primary btn-lg" href="#pricing">Get started</a>
         <a class="btn btn-ghost btn-lg" href="#how">How it works</a>
       </div>
-      <div class="hero-reassure">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 5v6c0 5 3.5 8.5 8 11 4.5-2.5 8-6 8-11V5l-8-3Z"></path><path d="m9 12 2 2 4-4"></path></svg>
-        <p><b>You do the setup. They do nothing new.</b> Works on a landline, a flip phone, or a smartphone — no app, no new device.</p>
+      <div class="hero-reassure warm">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L16 13l5 2v4a2 2 0 0 1-2.2 2A16 16 0 0 1 3 6.2 2 2 0 0 1 5 4Z"></path></svg>
+        <p><b>No phone of their own required.</b> They can call from a friend's house, the school office, or any phone — and still reach family in seconds.</p>
       </div>
     </div>
 
@@ -695,34 +680,34 @@ body { font-size: 18.5px; }
           <span class="ring">
             <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 3.5h3l1.5 4-2 1.5a12 12 0 0 0 5 5l1.5-2 4 1.5v3a2 2 0 0 1-2.2 2A16 16 0 0 1 4.5 5.7 2 2 0 0 1 6.5 3.5Z"></path></svg>
           </span>
-          <span class="num">(415) 200-CARE<small>Mom's iCanCall number</small></span>
+          <span class="num">(415) 200-CARE<small>Emma's iCanCall number</small></span>
         </div>
         <span class="demo-status"><span class="live"></span><span class="txt">Incoming call</span></span>
       </div>
-      <p class="demo-caption">She dials one number — it finds the family in order, until someone answers</p>
+      <p class="demo-caption">She dials one number — it finds a grown-up she knows, in order, until someone answers</p>
       <div class="chain">
         <div class="contact">
           <span class="order">1</span>
-          <span class="avatar" style="background:oklch(0.58 0.115 232)">SR</span>
-          <span class="who"><b>Sarah R.</b><span>Daughter</span></span>
+          <span class="avatar" style="background:oklch(0.58 0.115 232)">MO</span>
+          <span class="who"><b>Mom</b><span>Mobile</span></span>
           <span class="state">Standing by</span>
         </div>
         <div class="contact">
           <span class="order">2</span>
-          <span class="avatar" style="background:oklch(0.62 0.10 198)">DM</span>
-          <span class="who"><b>David M.</b><span>Son</span></span>
+          <span class="avatar" style="background:oklch(0.62 0.10 198)">DA</span>
+          <span class="who"><b>Dad</b><span>Mobile</span></span>
           <span class="state">Standing by</span>
         </div>
         <div class="contact">
           <span class="order">3</span>
-          <span class="avatar" style="background:oklch(0.55 0.11 280)">LN</span>
-          <span class="who"><b>Lena N.</b><span>Neighbor</span></span>
+          <span class="avatar" style="background:oklch(0.55 0.11 280)">GR</span>
+          <span class="who"><b>Grandma Rose</b><span>Grandparent</span></span>
           <span class="state">Standing by</span>
         </div>
         <div class="contact">
           <span class="order">4</span>
-          <span class="avatar" style="background:oklch(0.6 0.12 30)">DR</span>
-          <span class="who"><b>Dr. Patel</b><span>Care team</span></span>
+          <span class="avatar" style="background:oklch(0.6 0.12 30)">MA</span>
+          <span class="who"><b>Mr. Alvarez</b><span>Neighbor</span></span>
           <span class="state">Standing by</span>
         </div>
       </div>
@@ -730,72 +715,117 @@ body { font-size: 18.5px; }
   </div>
 </section>
 
-<!-- ============== NOTHING TO LEARN (any phone) ============== -->
-<section class="section noapp tint-band" id="noapp">
-  <div class="wrap noapp-grid">
-    <div class="noapp-copy reveal">
-      <span class="eyebrow">No app · No new device</span>
-      <h2>Nothing new for them to learn.</h2>
-      <p class="lead">The hardest part of most "safety" gadgets is getting an older parent to use them. iCanCall asks nothing of them. It lives on the phone that's already by their chair — so making a call feels exactly like it always has.</p>
-      <ul class="checks">
-        <li><span class="ck"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L20 6"></path></svg></span><span><b>No app to download</b> and no account for them to manage.</span></li>
-        <li><span class="ck"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L20 6"></path></svg></span><span><b>No new gadget</b> to charge, wear, or learn to operate.</span></li>
-        <li><span class="ck"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L20 6"></path></svg></span><span><b>One number to remember</b> — write it once on the fridge.</span></li>
-      </ul>
+<!-- ============== TRUST STRIP ============== -->
+<section class="trust">
+  <div class="wrap trust-inner">
+    <span class="trust-label">Made for little hands and big worries</span>
+    <div class="trust-stats">
+      <div class="stat"><b>1</b><span>number to memorize</span></div>
+      <div class="stat"><b>6</b><span>grown-ups it can reach</span></div>
+      <div class="stat"><b>0</b><span>apps or phones needed</span></div>
+      <div class="stat"><b>Any</b><span>phone, anywhere</span></div>
     </div>
+  </div>
+</section>
 
-    <div class="devices reveal">
-      <div class="devices-row">
-        <div class="device">
-          <span class="glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"></rect><path d="M7 11V8a5 5 0 0 1 10 0v3"></path><path d="M7 16h.01M12 16h.01M17 16h.01"></path></svg></span>
-          <span class="dname">Landline</span>
-          <span class="dtag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L20 6"></path></svg> Works</span>
-        </div>
-        <div class="device">
-          <span class="glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="2"></rect><rect x="8.5" y="4.5" width="7" height="5" rx="1"></rect><path d="M9 13h.01M12 13h.01M15 13h.01M9 16h.01M12 16h.01M15 16h.01M9 19h.01M12 19h.01M15 19h.01"></path></svg></span>
-          <span class="dname">Flip phone</span>
-          <span class="dtag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L20 6"></path></svg> Works</span>
-        </div>
-        <div class="device">
-          <span class="glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="3"></rect><path d="M11 18.5h2"></path></svg></span>
-          <span class="dname">Smartphone</span>
-          <span class="dtag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L20 6"></path></svg> Works</span>
+<!-- ============== ONE NUMBER (signature before/after) ============== -->
+<section class="section lesson" id="lesson">
+  <div class="wrap">
+    <div class="section-head center reveal">
+      <span class="eyebrow">The whole lesson</span>
+      <h2>One number is all they have to learn.</h2>
+      <p class="lead">Ask a five-year-old to remember Mom's cell, Dad's cell, Grandma's house, and the neighbor next door, and you'll lose them at "cell." iCanCall replaces the whole list with a single number — and quietly does the rest.</p>
+    </div>
+    <div class="lesson-grid">
+      <div class="lesson-card before reveal">
+        <span class="tab">The old way</span>
+        <h3>A list no child can hold</h3>
+        <p class="sub">Too many numbers, scribbled on the fridge — and never the right one in the moment that counts.</p>
+        <div class="scribbles">
+          <div class="line crossed"><span class="lbl">Mom — cell</span><span class="no">555 · 0148</span></div>
+          <div class="line crossed"><span class="lbl">Dad — work</span><span class="no">555 · 7732</span></div>
+          <div class="line crossed"><span class="lbl">Grandma Rose</span><span class="no">555 · 2290</span></div>
+          <div class="line crossed"><span class="lbl">Mr. Alvarez</span><span class="no">555 · 6611</span></div>
+          <p class="note">"Which one do I call if you don't answer?"</p>
         </div>
       </div>
-      <div class="devices-link">all dial the same number</div>
-      <div class="devices-one">
-        <span class="ring"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 3.5h3l1.5 4-2 1.5a12 12 0 0 0 5 5l1.5-2 4 1.5v3a2 2 0 0 1-2.2 2A16 16 0 0 1 4.5 5.7 2 2 0 0 1 6.5 3.5Z"></path></svg></span>
-        <span class="num">(415) 200-CARE<small>One number · always answered</small></span>
+      <div class="lesson-card after reveal">
+        <span class="tab">With iCanCall</span>
+        <h3>One number, every grown-up</h3>
+        <p class="sub">They learn it like a nursery rhyme. It finds whoever's available — you don't have to be the one who picks up.</p>
+        <div class="flashcard">
+          <span class="ribbon">Our family number</span>
+          <div class="big">(415) 200-CARE</div>
+          <span class="whisper">"If you ever need us, call this. Someone will always answer."</span>
+          <div class="hearts">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21s-7-4.5-9.5-9A5 5 0 0 1 12 6a5 5 0 0 1 9.5 6c-2.5 4.5-9.5 9-9.5 9Z"></path></svg>
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21s-7-4.5-9.5-9A5 5 0 0 1 12 6a5 5 0 0 1 9.5 6c-2.5 4.5-9.5 9-9.5 9Z"></path></svg>
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21s-7-4.5-9.5-9A5 5 0 0 1 12 6a5 5 0 0 1 9.5 6c-2.5 4.5-9.5 9-9.5 9Z"></path></svg>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 </section>
 
 <!-- ============== HOW IT WORKS ============== -->
-<section class="section" id="how">
+<section class="section tint-band" id="how">
   <div class="wrap">
     <div class="section-head reveal">
       <span class="eyebrow">How it works</span>
-      <h2>You set it up. They just answer.</h2>
-      <p class="lead">Three quiet steps, all on your side. Your parent never has to do a thing differently.</p>
+      <h2>Set it up once. Teach it once.</h2>
+      <p class="lead">A few minutes of setup buys years of "I can always reach a grown-up."</p>
     </div>
     <div class="steps">
       <div class="step reveal">
         <div class="idx">1</div>
-        <h3>Claim their number</h3>
-        <p>Pick one easy-to-remember iCanCall number for Mom or Dad. Write it on the fridge, program it as a speed-dial, or save it as "Family." That's the only number they'll ever need.</p>
+        <h3>Claim your family number</h3>
+        <p>Pick one easy-to-remember iCanCall number. Put it on a backpack tag, a lunchbox card, and the classroom emergency form — the only number your child needs anywhere they go.</p>
         <svg class="step-arrow" width="60" height="24" viewBox="0 0 60 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M0 12h54m0 0-7-7m7 7-7 7"></path></svg>
       </div>
       <div class="step reveal">
         <div class="idx">2</div>
-        <h3>Add the family circle</h3>
-        <p>Put yourself, your siblings, a trusted neighbor, and the care team in order — up to six people. You manage it all from your phone; nothing is installed on theirs.</p>
+        <h3>Add the grown-ups</h3>
+        <p>You, your partner, grandparents, a babysitter, a trusted neighbor — up to six people, in the order you want them reached. Adjust anytime from your phone.</p>
         <svg class="step-arrow" width="60" height="24" viewBox="0 0 60 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M0 12h54m0 0-7-7m7 7-7 7"></path></svg>
       </div>
       <div class="step reveal">
         <div class="idx">3</div>
-        <h3>They dial like always</h3>
-        <p>When they call that one number, iCanCall <b>cascades</b> through the circle until someone answers — and everyone gets a text that the call came in. No menus to navigate unless you want them.</p>
+        <h3>Teach them the number</h3>
+        <p>That's the whole job for them. When they call, iCanCall <b>cascades</b> through the circle until someone answers — and every grown-up gets a text that the call came in.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== SCENARIOS ============== -->
+<section class="section" id="scenes">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="eyebrow">Wherever they are</span>
+      <h2>The same number works<br>everywhere life happens.</h2>
+      <p class="lead">No phone of their own? No problem. One number reaches family from any phone they can get to.</p>
+    </div>
+    <div class="scenes">
+      <div class="scene reveal">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 10 9-6 9 6"></path><path d="M5 9v11h14V9"></path><path d="M9 20v-6h6v6"></path></svg></div>
+        <h3>Home after school</h3>
+        <p>Beat you home? One call lets them check in and reach whoever's free — you, Grandma, or the neighbor.</p>
+      </div>
+      <div class="scene reveal">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"></circle><path d="M3 20a6 6 0 0 1 12 0"></path><circle cx="17" cy="9" r="2.4"></circle><path d="M16 14.5a5 5 0 0 1 5 5"></path></svg></div>
+        <h3>At a friend's house</h3>
+        <p>From a friend's landline or a parent's phone, the one number still finds your family — no contacts to look up.</p>
+      </div>
+      <div class="scene reveal">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 6-9 12-9 12s-9-6-9-12a9 9 0 0 1 18 0Z"></path><circle cx="12" cy="10" r="3"></circle></svg></div>
+        <h3>Lost at the store</h3>
+        <p>A clerk or another grown-up can dial the number with them, and a familiar voice answers right away.</p>
+      </div>
+      <div class="scene reveal">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg></div>
+        <h3>When plans change</h3>
+        <p>Practice ran late or pickup got moved? One call routes to whoever can come — no scramble, no guessing.</p>
       </div>
     </div>
   </div>
@@ -806,15 +836,14 @@ body { font-size: 18.5px; }
   <div class="wrap">
     <div class="section-head center reveal">
       <span class="eyebrow">Try it yourself</span>
-      <h2>Build the circle that answers for Mom.</h2>
-      <p class="lead">Add the people you trust, set their order, then place a pretend call. Choose <b>cascade</b> — ring everyone in turn until someone picks up — or a simple <b>caller menu</b>. You control all of this; your parent only ever dials one number.</p>
+      <h2>Build the circle that answers for your child.</h2>
+      <p class="lead">Add the grown-ups you trust, set their order, then place a pretend call. Choose <b>cascade</b> — ring everyone in turn until someone picks up — or a simple <b>caller menu</b>. Your child only ever dials one number.</p>
     </div>
     <div class="mode-toggle reveal">
       <span class="mode-label">Routing mode</span>
       <div class="seg" role="tablist" aria-label="Routing mode">
         <button class="seg-btn active" type="button" data-mode="cascade" role="tab">Call cascade</button>
         <button class="seg-btn" type="button" data-mode="menu" role="tab">Caller menu</button>
-        <button class="seg-btn" type="button" data-mode="schedule" role="tab">Around-the-clock</button>
       </div>
       <span class="mode-note">
         <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="10" rx="2"></rect><path d="M8 10V7a4 4 0 0 1 8 0v3"></path></svg>
@@ -825,7 +854,7 @@ body { font-size: 18.5px; }
       <!-- editor -->
       <div class="builder-panel">
         <div class="builder-head">
-          <h3>Mom's circle</h3>
+          <h3>Your child's circle</h3>
           <span class="count"><span id="ccount">0</span>/6 contacts</span>
         </div>
         <div id="circle-list" class="circle-list"></div>
@@ -839,10 +868,6 @@ body { font-size: 18.5px; }
       </div>
       <!-- simulator -->
       <div class="sim-panel">
-        <div id="schedule-time-selector" style="margin-bottom: 15px; display: none; align-items: center; gap: 8px; justify-content: center;">
-          <span style="font-size: 0.82rem; font-weight: 600; color: var(--ink-soft);">Simulated Time:</span>
-          <input type="time" id="sim-time-input" value="09:00" style="background: var(--bg); border: 1px solid var(--line); color: var(--ink); padding: 8px 12px; border-radius: 999px; font-size: 0.88rem; font-weight: 600; cursor: pointer; outline: none; font-family: var(--font); box-shadow: var(--shadow-sm);">
-        </div>
         <div class="sim-screen" id="sim-screen">
           <span class="num-line">(415) 200-CARE</span>
           <div class="sim-avatar" id="sim-avatar">—</div>
@@ -864,39 +889,39 @@ body { font-size: 18.5px; }
 <section class="section" id="features">
   <div class="wrap">
     <div class="section-head reveal">
-      <span class="eyebrow">Why families choose iCanCall</span>
-      <h2>Made for the call that<br>can't go unanswered.</h2>
+      <span class="eyebrow">Why parents choose iCanCall</span>
+      <h2>Built so they always reach<br>someone who loves them.</h2>
     </div>
     <div class="features">
       <div class="feature reveal">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v4M12 16h.01"></path></svg></div>
+        <h3>One number to memorize</h3>
+        <p>Children learn a single number instead of a fragile list. It's the only one they'll ever need to reach the whole family.</p>
+      </div>
+      <div class="feature reveal">
         <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L16 13l5 2v4a2 2 0 0 1-2.2 2A16 16 0 0 1 3 6.2 2 2 0 0 1 5 4Z"></path></svg></div>
-        <h3>Works on any phone</h3>
-        <p>Landline, flip phone, or smartphone — it all works. No app to install and no new device to learn. The phone they have today is all they need.</p>
+        <h3>No phone of their own</h3>
+        <p>Works from any phone — a friend's, a teacher's, a landline. Your child doesn't need a device to reach you.</p>
       </div>
       <div class="feature reveal">
         <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 18a4 4 0 0 0-8 0"></path><circle cx="12" cy="9" r="3.5"></circle><path d="M5 20a7 7 0 0 1 14 0"></path></svg></div>
-        <h3>The whole family, in order</h3>
-        <p>One call reaches up to six people — you, your siblings, a neighbor, the doctor — in the order you choose, until someone picks up.</p>
+        <h3>Someone always answers</h3>
+        <p>If you're busy, the call rolls to your partner, then a grandparent, then a trusted neighbor — until a familiar voice picks up.</p>
       </div>
       <div class="feature reveal">
         <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v11H7l-3 3V5Z"></path><path d="M8 9h8M8 12h5"></path></svg></div>
-        <h3>Everyone gets a text</h3>
-        <p>The moment Mom or Dad calls, every contact gets a message. So even if you're in a meeting, you know the second they reached out.</p>
+        <h3>You always know</h3>
+        <p>Every grown-up in the circle gets a text the moment your child calls — so you're never the last to find out.</p>
       </div>
       <div class="feature reveal">
         <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg></div>
-        <h3>Different rules by time of day</h3>
-        <p>Reach the night caregiver after hours and the family during the day — automatically. Help is always the right person for the moment.</p>
-      </div>
-      <div class="feature reveal">
-        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 5v6c0 5 3.5 8.5 8 11 4.5-2.5 8-6 8-11V5l-8-3Z"></path><path d="m9 12 2 2 4-4"></path></svg></div>
-        <h3>Never a dead end</h3>
-        <p>If the whole circle is unreachable, the call goes to voicemail that's transcribed and texted to everyone — so no cry for help is ever missed.</p>
+        <h3>Different by time of day</h3>
+        <p>Route to the babysitter after school and to you in the evening — automatically, so the right grown-up always answers.</p>
       </div>
       <div class="feature reveal">
         <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="2"></rect><path d="M8 10V7a4 4 0 0 1 8 0v3"></path></svg></div>
         <h3>Private &amp; protected</h3>
-        <p>Everyone's personal numbers stay hidden behind the single iCanCall line. All routing is encrypted, and your family's data is never sold.</p>
+        <p>Everyone's real numbers stay hidden behind your single iCanCall line. All routing is encrypted, and your data is never sold.</p>
       </div>
     </div>
   </div>
@@ -911,7 +936,7 @@ body { font-size: 18.5px; }
     <div class="section-head center reveal">
       <span class="eyebrow">Simple, honest pricing</span>
       <h2>Peace of mind, less than a phone bill.</h2>
-      <p class="lead">Both plans include cascade routing, the caller menu, and 24/7 reliability. Set it up for your parent in minutes — cancel anytime.</p>
+      <p class="lead">Both plans include cascade routing, the caller menu, and 24/7 reliability. Set it up in minutes — cancel anytime.</p>
     </div>
 
     <div class="bill-toggle reveal" id="bill-toggle">
@@ -922,7 +947,7 @@ body { font-size: 18.5px; }
     <div class="pricing">
       <div class="plan reveal" data-m-amt="$12.99" data-m-per="/ month" data-m-note="Billed monthly · cancel anytime" data-a-amt="$129" data-a-per="/ year" data-a-note="Just $10.75/mo, billed annually">
         <h3>Essential</h3>
-        <p class="desc">One number for one parent.</p>
+        <p class="desc">One number for one child.</p>
         <div class="price"><b class="amt">$12.99</b><span class="per">/ month</span></div>
         <p class="price-yr">Billed monthly · cancel anytime</p>
         <ul>
@@ -934,7 +959,7 @@ body { font-size: 18.5px; }
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L20 6"></path></svg> Bilingual greeting options</li>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L20 6"></path></svg> Works on any phone — no app needed</li>
         </ul>
-        <a class="btn btn-ghost plan-select" href="iCanCall Onboarding.html?plan=essential&amp;billing=monthly">Select Essential</a>
+        <a class="btn btn-ghost plan-select" href="/onboarding?plan=essential&amp;billing=monthly">Select Essential</a>
       </div>
       <div class="plan featured reveal" data-m-amt="$19.99" data-m-per="/ month" data-m-note="Billed monthly · cancel anytime" data-a-amt="$199" data-a-per="/ year" data-a-note="Just $16.58/mo, billed annually">
         <span class="tag">Most popular</span>
@@ -953,7 +978,7 @@ body { font-size: 18.5px; }
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L20 6"></path></svg> SMS &amp; email notifications</li>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L20 6"></path></svg> Works on any phone — no app needed</li>
         </ul>
-        <a class="btn btn-primary plan-select" href="iCanCall Onboarding.html?plan=pro&amp;billing=monthly">Select Pro</a>
+        <a class="btn btn-primary plan-select" href="/onboarding?plan=pro&amp;billing=monthly">Select Pro</a>
       </div>
     </div>
   </div>
@@ -964,32 +989,32 @@ body { font-size: 18.5px; }
   <div class="wrap">
     <div class="section-head center reveal">
       <span class="eyebrow">Questions, answered</span>
-      <h2>What families ask us most.</h2>
+      <h2>What parents ask us most.</h2>
     </div>
     <div class="faq reveal">
       <div class="faq-item">
-        <button class="faq-q">Does my parent need a smartphone?<span class="pm">+</span></button>
-        <div class="faq-a"><p>Not at all. iCanCall works on whatever phone they already use — a landline, a basic flip phone, or a smartphone. There's no app to install and no new device to buy or charge. They simply dial one number, exactly the way they make any other call.</p></div>
+        <button class="faq-q">Does my child need their own phone?<span class="pm">+</span></button>
+        <div class="faq-a"><p>No. That's the whole idea. iCanCall is one number that works from <i>any</i> phone — a friend's house, the school office, a neighbor's landline. Your child just needs to know the number, and a familiar grown-up answers.</p></div>
       </div>
       <div class="faq-item">
-        <button class="faq-q">Will it work with their landline?<span class="pm">+</span></button>
-        <div class="faq-a"><p>Yes. The single iCanCall number can be dialed from any phone, landline included. Many families program it as a one-touch speed dial or write it on a card by the phone, so reaching the whole family is as easy as it gets.</p></div>
+        <button class="faq-q">Isn't one number too simple for a real emergency?<span class="pm">+</span></button>
+        <div class="faq-a"><p>Simple is exactly what works under stress. One number rings each grown-up in your circle in order until someone picks up — so a child who's scared or hurt never has to decide <i>who</i> to call. (iCanCall is for reaching family quickly; for life-threatening emergencies, always teach your child to call 911 too.)</p></div>
       </div>
       <div class="faq-item">
-        <button class="faq-q">Do they have to learn anything new?<span class="pm">+</span></button>
-        <div class="faq-a"><p>No. That's the point. Everything — adding contacts, setting the order, choosing how calls route — is managed by you from your own phone. Your parent never installs anything or changes how they make a call. To them, it's just one easy number that always reaches someone.</p></div>
+        <button class="faq-q">What if I'm busy and can't pick up?<span class="pm">+</span></button>
+        <div class="faq-a"><p>The call simply rolls to the next grown-up — your partner, then a grandparent, then a trusted neighbor — until someone answers. Everyone in the circle also gets a text that your child called, so you'll know the moment you're free.</p></div>
       </div>
       <div class="faq-item">
-        <button class="faq-q">What happens if nobody answers?<span class="pm">+</span></button>
-        <div class="faq-a"><p>iCanCall rings each contact in your chosen order until someone picks up. If the whole circle is unreachable, the call goes to voicemail that's instantly transcribed and texted to every contact — so no message, and no moment that matters, is ever lost.</p></div>
+        <button class="faq-q">Can I change who's in the circle, or the order?<span class="pm">+</span></button>
+        <div class="faq-a"><p>Anytime, in seconds, from your dashboard. Add the new babysitter, drop a contact, or reorder who's reached first. Changes take effect on the very next call.</p></div>
       </div>
       <div class="faq-item">
-        <button class="faq-q">Can I set it up and manage it for them?<span class="pm">+</span></button>
-        <div class="faq-a"><p>Absolutely — most families do. You claim the number, add the circle, and adjust the order anytime from your dashboard. Changes take effect on the very next call, and your parent doesn't have to lift a finger.</p></div>
+        <button class="faq-q">Will strangers see our family's phone numbers?<span class="pm">+</span></button>
+        <div class="faq-a"><p>Never. Everyone's personal numbers stay hidden behind your single iCanCall line. All routing is encrypted, and we never sell your data.</p></div>
       </div>
       <div class="faq-item">
-        <button class="faq-q">Is my family's information private?<span class="pm">+</span></button>
-        <div class="faq-a"><p>Always. Everyone's personal numbers stay hidden behind your single iCanCall line, all routing is encrypted, and we never sell your data.</p></div>
+        <button class="faq-q">How do I help my child remember the number?<span class="pm">+</span></button>
+        <div class="faq-a"><p>Most families turn it into a little rhyme or song and practice a "pretend call" together. Put it on a backpack tag and the school emergency form, and within a week it sticks — because it's the only number they have to know.</p></div>
       </div>
     </div>
   </div>
@@ -999,10 +1024,10 @@ body { font-size: 18.5px; }
 <section class="section cta-band" id="cta">
   <div class="wrap">
     <div class="cta-card reveal">
-      <h2>Set it up today. Rest easier tonight.</h2>
-      <p>In a few minutes, your parent will have one number that always finds the family — on the phone they already know how to use. No app, no new device, nothing for them to learn.</p>
+      <h2>Give them one number. Give yourself peace of mind.</h2>
+      <p>In a few minutes, your child will have a single number that always reaches a grown-up who loves them — from any phone, anywhere. No device, no contact list, no guessing.</p>
       <div class="actions">
-        <a class="btn btn-primary btn-lg" href="#pricing">Set it up for them</a>
+        <a class="btn btn-primary btn-lg" href="#pricing">Get started</a>
         <a class="btn btn-ghost btn-lg" href="#how" style="color:#fff;border-color:oklch(1 0 0 / 0.5)">See how it works</a>
       </div>
       <p class="fine">Set up in minutes · No setup fees · Cancel anytime</p>
@@ -1017,19 +1042,28 @@ body { font-size: 18.5px; }
   <div class="wrap">
     <div class="footer-grid">
       <div>
-        <a class="brand" href="#top">
+        <a class="brand" href="/">
           <span class="mark"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 3.5h3l1.5 4-2 1.5a12 12 0 0 0 5 5l1.5-2 4 1.5v3a2 2 0 0 1-2.2 2A16 16 0 0 1 4.5 5.7 2 2 0 0 1 6.5 3.5Z"></path></svg></span>
           <span>i<b>Can</b>Call</span>
         </a>
-        <p class="blurb">One memorable number that always connects your parent to the people who matter most — on the phone they already use.</p>
+        <p class="blurb">One memorable number that always connects your child to a grown-up who loves them — from any phone, anywhere.</p>
       </div>
       <div>
         <h5>Product</h5>
         <ul>
-          <li><a href="#noapp">Nothing to learn</a></li>
+          <li><a href="#lesson">One number</a></li>
           <li><a href="#how">How it works</a></li>
           <li><a href="#pricing">Pricing</a></li>
           <li><a href="#faq">Questions</a></li>
+          <li><a href="/comparison-chart">Comparison Chart</a></li>
+        </ul>
+      </div>
+      <div>
+        <h5>Who</h5>
+        <ul>
+          <li><a href="/parents">Parents</a></li>
+          <li><a href="/caregivers">Caregivers</a></li>
+          <li><a href="/seniors">Seniors</a></li>
         </ul>
       </div>
       <div>
@@ -1057,7 +1091,14 @@ body { font-size: 18.5px; }
   </div>
 </footer>
 
-<script src="b62e6c20-5318-4666-a23f-8023975464f7"></script>
+<script>
+  window.IC_DEFAULT_CONTACTS = [
+    { name: 'Mom', rel: 'Mobile', available: false },
+    { name: 'Dad', rel: 'Mobile', available: true },
+    { name: 'Grandma Rose', rel: 'Grandparent', available: true },
+  ];
+</script>
+<script src="61b29d69-e725-4072-9983-c8e66644aee2"></script>
 
 
 
