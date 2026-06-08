@@ -801,6 +801,7 @@ body { font-size: 18.5px; }
       <div class="seg" role="tablist" aria-label="Routing mode">
         <button class="seg-btn active" type="button" data-mode="cascade" role="tab">Call cascade</button>
         <button class="seg-btn" type="button" data-mode="menu" role="tab">Caller menu</button>
+        <button class="seg-btn" type="button" data-mode="schedule" role="tab">Around-the-clock</button>
       </div>
       <span class="mode-note">
         <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="10" rx="2"></rect><path d="M8 10V7a4 4 0 0 1 8 0v3"></path></svg>
@@ -825,6 +826,10 @@ body { font-size: 18.5px; }
       </div>
       <!-- simulator -->
       <div class="sim-panel">
+        <div id="schedule-time-selector" class="seg" style="margin-bottom: 15px; display: none;">
+          <button class="seg-btn active" type="button" data-time="day" style="padding: 6px 16px; font-size: 0.85rem;">☀️ Day</button>
+          <button class="seg-btn" type="button" data-time="night" style="padding: 6px 16px; font-size: 0.85rem;">🌙 Night</button>
+        </div>
         <div class="sim-screen" id="sim-screen">
           <span class="num-line">(415) 200-CARE</span>
           <div class="sim-avatar" id="sim-avatar">—</div>

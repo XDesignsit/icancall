@@ -227,6 +227,7 @@ document.querySelectorAll('.faq-item').forEach((item) => {
     render();
 
     if (mode === 'menu') await runMenu();
+    else if (mode === 'schedule') await runSchedule();
     else await runCascade();
 
     listEl.querySelectorAll('.circle-row').forEach((r) => r.classList.remove('is-ringing', 'is-missed', 'is-connected'));
@@ -268,6 +269,80 @@ document.querySelectorAll('.faq-item').forEach((item) => {
     }
     if (!connected) setScreen({ av: '\u2709', name: 'Voicemail', state: 'Message sent \u2014 whole circle alerted', cls: 'voicemail' });
     await sleep(2400);
+  }
+
+  /* --- schedule: route based on daytime/nighttime --- */
+  async function runSchedule() {
+    screen.classList.remove('menu-mode');
+    if (scheduleTime === 'day') {
+      buildDots(contacts.length);
+      setScreen({ av: '☀️', name: 'Daytime Routing', state: 'Routing to family circle\u2026' });
+      await sleep(1000);
+
+      let connected = false;
+      for (let i = 0; i < contacts.length; i++) {
+        const c = contacts[i];
+        const row = listEl.querySelector(`.circle-row[data-id="${c.id}"]`);
+        markDot(i, 'active');
+        row && row.classList.add('is-ringing');
+        setScreen({ av: initials(c.name), avColor: colorOf(i), name: c.name, state: `Ringing ${c.rel || 'contact'} (Daytime)\u2026`, cls: 'ringing-state' });
+        await sleep(1500);
+
+        if (c.available) {
+          row && row.classList.replace('is-ringing', 'is-connected');
+          setScreen({ av: initials(c.name), avColor: colorOf(i), name: c.name, state: '\u2713 Connected \u2014 say hello!', cls: 'connected' });
+          connected = true;
+          break;
+        } else {
+          row && row.classList.replace('is-ringing', 'is-missed');
+          markDot(i, 'done');
+          setScreen({ av: initials(c.name), avColor: colorOf(i), name: c.name, state: 'No answer \u2014 trying next\u2026', cls: 'ringing-state' });
+          await sleep(550);
+        }
+      }
+      if (!connected) setScreen({ av: '\u2709', name: 'Voicemail', state: 'Message sent \u2014 whole circle alerted', cls: 'voicemail' });
+      await sleep(2400);
+    } else {
+      buildDots(0);
+      setScreen({ av: '🌙', name: 'Nighttime Routing', state: 'Checking night coverage\u2026' });
+      await sleep(1000);
+
+      // Find if we have a caregiver/doctor/nurse in the contacts
+      let caregiverIdx = contacts.findIndex(c => {
+        const r = (c.rel || '').toLowerCase();
+        const n = (c.name || '').toLowerCase();
+        return r.includes('care') || r.includes('doctor') || r.includes('dr') || r.includes('nurse') || r.includes('night') ||
+               n.includes('care') || n.includes('doctor') || n.includes('dr') || n.includes('nurse') || n.includes('night');
+      });
+
+      let c, idx;
+      let realContact = false;
+      if (caregiverIdx !== -1) {
+        c = contacts[caregiverIdx];
+        idx = caregiverIdx;
+        realContact = true;
+      } else {
+        c = { name: 'Dr. Patel (Care team)', rel: 'On-Call Caregiver', available: true };
+        idx = contacts.length;
+      }
+
+      let row = null;
+      if (realContact) {
+        row = listEl.querySelector(`.circle-row[data-id="${c.id}"]`);
+      }
+      row && row.classList.add('is-ringing');
+      setScreen({ av: initials(c.name), avColor: colorOf(idx), name: c.name, state: `Ringing ${c.rel || 'Caregiver'} (Nighttime)\u2026`, cls: 'ringing-state' });
+      await sleep(1800);
+
+      if (c.available) {
+        row && row.classList.replace('is-ringing', 'is-connected');
+        setScreen({ av: initials(c.name), avColor: colorOf(idx), name: c.name, state: '\u2713 Connected \u2014 say hello!', cls: 'connected' });
+      } else {
+        row && row.classList.replace('is-ringing', 'is-missed');
+        setScreen({ av: '\u2709', name: 'Night Support', state: 'Voicemail sent \u2014 care team alerted', cls: 'voicemail' });
+      }
+      await sleep(2400);
+    }
   }
 
   /* --- menu: caller hears options and picks who to reach --- */
@@ -338,6 +413,12 @@ document.querySelectorAll('.faq-item').forEach((item) => {
       simName.textContent = 'Caller menu';
       simState.textContent = 'Place a call to hear the options';
       simAvatar.textContent = '\u2630';
+    } else if (mode === 'schedule') {
+      simName.textContent = scheduleTime === 'day' ? 'Daytime routing' : 'Nighttime routing';
+      simState.textContent = scheduleTime === 'day'
+        ? 'Calls cascade to family. Press call to start.'
+        : 'Calls route to Care Team. Press call to start.';
+      simAvatar.textContent = scheduleTime === 'day' ? '☀️' : '🌙';
     } else {
       simName.textContent = 'Ready';
       simState.textContent = 'Press call to start routing';
@@ -347,13 +428,33 @@ document.querySelectorAll('.faq-item').forEach((item) => {
 
   callBtn.addEventListener('click', placeCall);
 
-  document.querySelectorAll('.seg-btn').forEach((b) => {
+  const timeSelector = document.getElementById('schedule-time-selector');
+  let scheduleTime = 'day';
+  if (timeSelector) {
+    timeSelector.querySelectorAll('.seg-btn').forEach((b) => {
+      b.addEventListener('click', () => {
+        if (calling) return;
+        scheduleTime = b.dataset.time;
+        timeSelector.querySelectorAll('.seg-btn').forEach((x) => x.classList.toggle('active', x === b));
+        resetSim();
+      });
+    });
+  }
+
+  const modeSelector = document.querySelector('div[aria-label="Routing mode"]');
+  const modeBtns = modeSelector.querySelectorAll('.seg-btn');
+  modeBtns.forEach((b) => {
     b.addEventListener('click', () => {
       if (calling) return;
       mode = b.dataset.mode;
-      document.querySelectorAll('.seg-btn').forEach((x) => x.classList.toggle('active', x === b));
+      modeBtns.forEach((x) => x.classList.toggle('active', x === b));
+      if (timeSelector) {
+        timeSelector.style.display = mode === 'schedule' ? 'inline-flex' : 'none';
+      }
       simHint.textContent = mode === 'menu'
         ? 'Callers pick who to reach. Flip a contact to \u201cBusy\u201d to send them to voicemail.'
+        : mode === 'schedule'
+        ? 'Daytime calls cascade to family. Nighttime calls route directly to the caregiver.'
         : 'Toggle contacts to \u201cBusy\u201d to see the cascade skip ahead.';
       resetSim();
     });
