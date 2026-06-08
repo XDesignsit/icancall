@@ -421,7 +421,7 @@ export default function Home() {
       {/* ============== HEADER ============== */}
       <header className={`header ${scrolled ? "scrolled" : ""}`}>
         <div className="wrap header-inner">
-          <a className="brand" href="#top" aria-label="iCanCall home">
+          <a className="brand" href="/" aria-label="iCanCall home">
             <svg className="logo-main" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 553.0305" style={{ height: "40px", width: "auto", display: "block" }}>
           <style>{`
             .logo-main .cls-1 { fill: #1c2530; }
