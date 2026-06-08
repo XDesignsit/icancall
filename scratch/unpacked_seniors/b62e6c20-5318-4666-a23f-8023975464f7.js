@@ -192,6 +192,7 @@ document.querySelectorAll('.faq-item').forEach((item) => {
     if (calling) return;
     const btn = e.target.closest('[data-act]');
     if (!btn) return;
+    if (btn.tagName.toLowerCase() === 'select') return;
     const row = e.target.closest('.circle-row');
     const id = Number(row.dataset.id);
     const idx = contacts.findIndex((c) => c.id === id);
@@ -250,6 +251,8 @@ document.querySelectorAll('.faq-item').forEach((item) => {
     calling = true;
     callBtn.disabled = true;
     callBtn.style.opacity = '0.6';
+    const simTimeSelect = document.getElementById('sim-time-select');
+    if (simTimeSelect) simTimeSelect.disabled = true;
     document.querySelectorAll('.seg-btn').forEach((b) => { b.disabled = true; });
     render();
 
@@ -261,6 +264,7 @@ document.querySelectorAll('.faq-item').forEach((item) => {
     calling = false;
     callBtn.disabled = false;
     callBtn.style.opacity = '';
+    if (simTimeSelect) simTimeSelect.disabled = false;
     document.querySelectorAll('.seg-btn').forEach((b) => { b.disabled = false; });
     render();
     resetSim();
@@ -460,18 +464,17 @@ document.querySelectorAll('.faq-item').forEach((item) => {
   callBtn.addEventListener('click', placeCall);
 
   const timeSelector = document.getElementById('schedule-time-selector');
+  const timeSelect = document.getElementById('sim-time-select');
   let scheduleTime = 'day';
-  if (timeSelector) {
-    timeSelector.querySelectorAll('.seg-btn').forEach((b) => {
-      b.addEventListener('click', () => {
-        if (calling) return;
-        scheduleTime = b.dataset.time;
-        timeSelector.querySelectorAll('.seg-btn').forEach((x) => x.classList.toggle('active', x === b));
-        resetSim();
-      });
+  if (timeSelect) {
+    timeSelect.addEventListener('change', () => {
+      if (calling) return;
+      const hour = Number(timeSelect.value);
+      scheduleTime = (hour >= 8 && hour < 20) ? 'day' : 'night';
+      resetSim();
     });
   }
-
+  
   const modeSelector = document.querySelector('div[aria-label="Routing mode"]');
   const modeBtns = modeSelector.querySelectorAll('.seg-btn');
   modeBtns.forEach((b) => {
@@ -480,7 +483,7 @@ document.querySelectorAll('.faq-item').forEach((item) => {
       mode = b.dataset.mode;
       modeBtns.forEach((x) => x.classList.toggle('active', x === b));
       if (timeSelector) {
-        timeSelector.style.display = mode === 'schedule' ? 'inline-flex' : 'none';
+        timeSelector.style.display = mode === 'schedule' ? 'flex' : 'none';
       }
       simHint.textContent = mode === 'menu'
         ? 'Callers pick who to reach. Flip a contact to \u201cBusy\u201d to send them to voicemail.'
