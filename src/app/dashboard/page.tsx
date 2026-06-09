@@ -2130,6 +2130,27 @@ export function AccountView({
     }
   }, [planModalOpen, account.plan, account.billingCycle]);
 
+  const getModalButtonText = () => {
+    const isCurrentPlan = tempPlan === account.plan;
+    const isCurrentCycle = tempCycle === account.billingCycle;
+    
+    if (isCurrentPlan && isCurrentCycle) {
+      return lang === "es" ? "Plan actual" : lang === "fr" ? "Forfait actuel" : "Current Plan";
+    }
+    
+    if (isCurrentPlan) {
+      return lang === "es" ? "Actualizar ciclo de facturación" : lang === "fr" ? "Mettre à jour le cycle" : "Update Billing Cycle";
+    }
+    
+    if (tempPlan === "pro" && account.plan === "essential") {
+      return lang === "es" ? "Actualizar a Pro" : lang === "fr" ? "Passer à Pro" : "Upgrade to Pro";
+    } else {
+      return lang === "es" ? "Degradar a Esencial" : lang === "fr" ? "Passer à Essentiel" : "Downgrade to Essential";
+    }
+  };
+
+  const isModalButtonDisabled = tempPlan === account.plan && tempCycle === account.billingCycle;
+
   const ACCT_TABS = [
     { id: "profile", label: d.account.profile },
     { id: "security", label: d.account.security },
@@ -2446,13 +2467,14 @@ export function AccountView({
                   </button>
                   <button
                     className="btn btn-primary"
+                    disabled={isModalButtonDisabled}
                     onClick={() => {
                       set({ plan: tempPlan, billingCycle: tempCycle });
                       setPlanModalOpen(false);
                       showToast(lang === "es" ? "Plan actualizado correctamente" : lang === "fr" ? "Forfait mis à jour avec succès" : "Plan updated successfully");
                     }}
                   >
-                    {lang === "es" ? "Actualizar plan" : lang === "fr" ? "Mettre à jour" : "Update Plan"}
+                    {getModalButtonText()}
                   </button>
                 </div>
               }
@@ -2521,7 +2543,14 @@ export function AccountView({
                     }}
                   >
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                      <b style={{ fontSize: "1.1rem" }}>{lang === "es" ? "Plan Esencial" : lang === "fr" ? "Forfait Essentiel" : "Essential Plan"}</b>
+                      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                        <b style={{ fontSize: "1.1rem" }}>{lang === "es" ? "Plan Esencial" : lang === "fr" ? "Forfait Essentiel" : "Essential Plan"}</b>
+                        {account.plan === "essential" && (
+                          <span className="badge badge-green" style={{ fontSize: "0.72rem", padding: "2px 8px" }}>
+                            {lang === "es" ? "Plan actual" : lang === "fr" ? "Forfait actuel" : "Current Plan"}
+                          </span>
+                        )}
+                      </div>
                       <span style={{ fontWeight: 700, color: "var(--blue-deep)" }}>
                         {tempCycle === "yearly" ? "$12.42/mo" : "$14.99/mo"}
                       </span>
@@ -2552,7 +2581,14 @@ export function AccountView({
                     }}
                   >
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                      <b style={{ fontSize: "1.1rem" }}>{lang === "es" ? "Plan Pro" : lang === "fr" ? "Forfait Pro" : "Pro Plan"}</b>
+                      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                        <b style={{ fontSize: "1.1rem" }}>{lang === "es" ? "Plan Pro" : lang === "fr" ? "Forfait Pro" : "Pro Plan"}</b>
+                        {account.plan === "pro" && (
+                          <span className="badge badge-green" style={{ fontSize: "0.72rem", padding: "2px 8px" }}>
+                            {lang === "es" ? "Plan actual" : lang === "fr" ? "Forfait actuel" : "Current Plan"}
+                          </span>
+                        )}
+                      </div>
                       <span style={{ fontWeight: 700, color: "var(--blue-deep)" }}>
                         {tempCycle === "yearly" ? "$20.75/mo" : "$24.99/mo"}
                       </span>
@@ -2627,28 +2663,49 @@ export function AccountView({
                   </div>
                 ))}
               </div>
-              <div style={{ display: "flex", gap: 10, marginTop: 20 }}>
-                <button
-                  className="btn btn-primary"
-                  onClick={() => {
-                    const nextCycle = account.billingCycle === "monthly" ? "yearly" : "monthly";
-                    set({ billingCycle: nextCycle });
-                    if (nextCycle === "yearly") {
+              <div style={{ display: "flex", gap: 12, alignItems: "center", marginTop: 20 }}>
+                <div className="seg" style={{ padding: 4 }}>
+                  <button
+                    className={`seg-btn ${account.billingCycle === "monthly" ? "active" : ""}`}
+                    onClick={() => {
+                      set({ billingCycle: "monthly" });
+                      showToast(lang === "es" ? "Cambiado a facturación mensual" : lang === "fr" ? "Facturation mensuelle activée" : "Switched to monthly billing");
+                    }}
+                    style={{ padding: "8px 16px", fontSize: "0.9rem" }}
+                  >
+                    {lang === "es" ? "Mensual" : lang === "fr" ? "Mensuel" : "Monthly"}
+                  </button>
+                  <button
+                    className={`seg-btn ${account.billingCycle === "yearly" ? "active" : ""}`}
+                    onClick={() => {
+                      set({ billingCycle: "yearly" });
                       showToast(account.plan === "pro" 
                         ? ext.annualToast 
                         : (lang === "es" ? "Cambiado a facturación anual — $149/año" : lang === "fr" ? "Facturation annuelle activée — 149 $/an" : "Switched to annual billing — $149/yr"));
-                    } else {
-                      showToast(lang === "es" ? "Cambiado a facturación mensual" : lang === "fr" ? "Facturation mensuelle activée" : "Switched to monthly billing");
-                    }
-                  }}
-                >
-                  <Icon name="spark" />{" "}
-                  {account.billingCycle === "monthly" 
-                    ? ext.switchToAnnual 
-                    : (lang === "es" ? "Cambiar a mensual" : lang === "fr" ? "Passer au mensuel" : "Switch to monthly")}
-                </button>
+                    }}
+                    style={{ 
+                      padding: "8px 16px", 
+                      fontSize: "0.9rem", 
+                      display: "inline-flex", 
+                      alignItems: "center", 
+                      gap: 6 
+                    }}
+                  >
+                    {lang === "es" ? "Anual" : lang === "fr" ? "Annuel" : "Annual"}
+                    <span style={{ 
+                      fontSize: "0.72rem", 
+                      fontWeight: 700, 
+                      background: account.billingCycle === "yearly" ? "rgba(255, 255, 255, 0.25)" : "oklch(0.70 0.13 158 / 0.18)", 
+                      color: account.billingCycle === "yearly" ? "#fff" : "oklch(0.42 0.13 158)",
+                      padding: "2px 6px",
+                      borderRadius: 999
+                    }}>
+                      {save17Map[lang] || save17Map.en}
+                    </span>
+                  </button>
+                </div>
                 <button className="btn btn-ghost" onClick={() => setPlanModalOpen(true)}>
-                  {ext.changePlan}
+                  <Icon name="spark" /> {ext.changePlan}
                 </button>
               </div>
             </div>
@@ -3361,12 +3418,18 @@ export default function DashboardApp() {
           const ownerName = userObj.owner || userObj.name || "Test User";
           const ownerEmail = userObj.email || "";
           setImpersonatingUser({ name: ownerName, email: ownerEmail });
+
+          const rawCycle = userObj.billing || userObj.billingCycle || "monthly";
+          const mappedCycle = rawCycle === "annual" ? "yearly" : (rawCycle === "yearly" ? "yearly" : "monthly");
+
           setAccount((prev) => ({
             ...prev,
             name: ownerName,
             preferred: ownerName.split(" ")[0] || ownerName,
             email: ownerEmail,
             notifyEmail: ownerEmail,
+            plan: userObj.plan || prev.plan,
+            billingCycle: mappedCycle,
           }));
 
           if (userObj.lines && userObj.lines.length > 0) {
