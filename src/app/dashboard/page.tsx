@@ -2717,10 +2717,7 @@ export function AccountView({
               setAccount((prev) => ({ ...prev, addons: { ...(prev.addons || {}), ...patch } as Account["addons"] }));
             const numCost = ad.extraNumbers * 6.99;
             const minCost = ad.minuteBlocks * 4.99;
-            const basePrice = account.plan === "pro"
-              ? (account.billingCycle === "yearly" ? 20.75 : 24.99)
-              : (account.billingCycle === "yearly" ? 12.42 : 14.99);
-            const total = basePrice + numCost + minCost;
+            const total = numCost + minCost;
             const maxBlocks = 10;
             return (
               <div className="card section-gap">
@@ -2802,7 +2799,7 @@ export function AccountView({
 
                   <div className="addon-total">
                     <span className="lbl">
-                      {ext.newMonthlyTotal} <b>{ext.planAndAddons}</b>
+                      {lang === "es" ? "Total mensual de complementos" : lang === "fr" ? "Total mensuel des options" : "Add-ons monthly total"}
                     </span>
                     <span className="big">
                       ${total.toFixed(2)}
@@ -3335,7 +3332,7 @@ export default function DashboardApp() {
     billingAddr: "482 Linden Ave, Oakland, CA 94607",
     plan: "pro",
     billingCycle: "monthly",
-    addons: { extraNumbers: 1, minuteBlocks: 2, usedMin: 41, rolloverMin: 18 },
+    addons: { extraNumbers: 0, minuteBlocks: 0, usedMin: 41, rolloverMin: 18 },
   });
 
   const [lang, setLang] = useState<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi" | "pt" | "de" | "it" | "ko">("en");
