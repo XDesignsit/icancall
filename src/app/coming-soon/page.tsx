@@ -51,6 +51,15 @@ export default function ComingSoon() {
     if (validLangs.includes(savedLang)) {
       setLang(savedLang);
     }
+
+    const handleStorageChange = () => {
+      const updated = localStorage.getItem("lang") as any;
+      if (validLangs.includes(updated)) {
+        setLang(updated);
+      }
+    };
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
   }, []);
 
   useEffect(() => {
