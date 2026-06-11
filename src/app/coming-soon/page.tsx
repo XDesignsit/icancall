@@ -385,17 +385,14 @@ export default function ComingSoon() {
             <div className="hero-copy">
               <span className="soon-badge">
                 <span className="pip"></span>
-                {lang === "es" ? "Próximo lanzamiento · Acceso anticipado privado" : lang === "fr" ? "Lancement imminent · Accès anticipé privé" : "Launching soon · Private early access"}
+                {t.waitlist?.launchingSoon || "Launching soon · Private early access"}
               </span>
               <h1>
-                {lang === "es" ? <>Sé el primero<br /><span className="accent">en la fila.</span></> : 
-                 lang === "fr" ? <>Soyez le premier<br /><span className="accent">en ligne.</span></> : 
-                 <>Be first<br /><span className="accent">in line.</span></>}
+                {t.waitlist?.beFirstInLine || "Be first"}<br />
+                <span className="accent">{t.waitlist?.beFirstInLineAccent || "in line."}</span>
               </h1>
               <p className="lead">
-                {lang === "es" ? "iCanCall ofrece a las personas que amas un número fácil de recordar que siempre es atendido, redirigiendo las llamadas hasta a seis contactos de confianza hasta que alguien responda. Estamos dando los toques finales. Únete a la lista de espera y sé el primero." :
-                 lang === "fr" ? "iCanCall donne à vos proches un numéro mémorable auquel on répond toujours, qui redirige les appels vers 6 contacts de confiance max. Nous y mettons la touche finale. Rejoignez la liste d'attente pour être le premier informé." :
-                 "iCanCall gives the people you love one memorable number that's always answered — routing to up to six trusted contacts until someone picks up. We're putting the finishing touches on it. Join the waitlist and you'll be first through the door."}
+                {t.waitlist?.heroLead || "iCanCall gives the people you love one memorable number that's always answered — routing to up to six trusted contacts until someone picks up. We're putting the finishing touches on it. Join the waitlist and you'll be first through the door."}
               </p>
 
               {/* Waitlist form */}
@@ -403,24 +400,24 @@ export default function ComingSoon() {
                 <div className="wl-fields">
                   <div className="wl-row">
                     <div className="wl-field">
-                      <label htmlFor="wl-email">{lang === "es" ? "Correo electrónico" : lang === "fr" ? "E-mail" : "Email"}</label>
+                      <label htmlFor="wl-email">{t.waitlist?.emailLabel || "Email"}</label>
                       <input
                         id="wl-email"
                         type="email"
                         className={emailInvalid ? "invalid" : ""}
-                        placeholder="you@email.com"
+                        placeholder={t.waitlist?.emailPlaceholder || "you@email.com"}
                         value={emailInput}
                         onChange={(e) => { setEmailInput(e.target.value); setEmailInvalid(false); }}
                         required
                       />
                     </div>
                     <div className="wl-field">
-                      <label htmlFor="wl-phone">{lang === "es" ? "Teléfono móvil" : lang === "fr" ? "Numéro mobile" : "Mobile number"}</label>
+                      <label htmlFor="wl-phone">{t.waitlist?.phoneLabel || "Mobile number"}</label>
                       <input
                         id="wl-phone"
                         type="tel"
                         className={phoneInvalid ? "invalid" : ""}
-                        placeholder="(555) 123-4567"
+                        placeholder={t.waitlist?.phonePlaceholder || "(555) 123-4567"}
                         value={phoneInput}
                         onChange={(e) => { setPhoneInput(e.target.value); setPhoneInvalid(false); }}
                         required
@@ -443,15 +440,13 @@ export default function ComingSoon() {
                     </svg>
                   </span>
                   <span className="ctxt">
-                    <b>{lang === "es" ? "Enviarme actualizaciones." : lang === "fr" ? "M'envoyer des mises à jour." : "Text me launch updates."}</b>{" "}
-                    {lang === "es" ? "Acepto recibir mensajes SMS ocasionales de iCanCall sobre acceso anticipado y lanzamiento. Pueden aplicarse tarifas de mensajes y datos; responde STOP para cancelar en cualquier momento." :
-                     lang === "fr" ? "J'accepte de recevoir des SMS occasionnels d'iCanCall concernant l'accès anticipé et le lancement. Des tarifs de messagerie/données peuvent s'appliquer ; répondez STOP pour vous désabonner." :
-                     "I agree to receive occasional SMS messages from iCanCall about early access and launch. Msg & data rates may apply; reply STOP to opt out anytime."}
+                    <b>{t.waitlist?.smsConsentB || "Text me launch updates."}</b>{" "}
+                    {t.waitlist?.smsConsentText || "I agree to receive occasional SMS messages from iCanCall about early access and launch. Msg & data rates may apply; reply STOP to opt out anytime."}
                   </span>
                 </label>
 
                 <button className="btn btn-primary btn-lg btn-submit" type="submit">
-                  {lang === "es" ? "Unirse a la lista" : lang === "fr" ? "Rejoindre la liste" : "Join the waitlist"}
+                  {t.waitlist?.joinBtn || "Join the waitlist"}
                 </button>
 
                 <p className={`wl-error ${showError ? "show" : ""}`} id="wl-error">
@@ -459,9 +454,7 @@ export default function ComingSoon() {
                   <span className="msg">{errorMsg}</span>
                 </p>
                 <p className="wl-fine">
-                  {lang === "es" ? "Sin spam, nunca. Solo nos comunicaremos para invitarte al acceso anticipado; puedes darte de baja con un toque." :
-                   lang === "fr" ? "Aucun spam. Nous vous contacterons uniquement pour votre invitation d'accès anticipé. Désinscription en un clic." :
-                   "No spam, ever. We'll only reach out about your early-access invite — and you can unsubscribe in one tap."}
+                  {t.waitlist?.noSpamFine || "No spam, ever. We'll only reach out about your early-access invite — and you can unsubscribe in one tap."}
                 </p>
               </form>
 
@@ -470,11 +463,9 @@ export default function ComingSoon() {
                 <span className="tick">
                   <Ico.check style={{ width: 26, height: 26 }} />
                 </span>
-                <h3>{lang === "es" ? "Estás en la lista." : lang === "fr" ? "Vous êtes inscrit." : "You're on the list."}</h3>
+                <h3>{t.waitlist?.successTitle || "You're on the list."}</h3>
                 <p>
-                  {lang === "es" ? <>Hemos guardado tu lugar para <span className="em" id="wl-shown-email">{emailInput}</span>. En cuanto iCanCall esté activo, recibirás tu invitación de acceso anticipado y prioridad para elegir un número memorable.</> :
-                   lang === "fr" ? <>Votre place est réservée pour <span className="em" id="wl-shown-email">{emailInput}</span>. Dès que iCanCall sera disponible, vous recevrez votre invitation d'accès anticipé et pourrez choisir votre numéro en priorité.</> :
-                   <>We saved your spot under <span className="em" id="wl-shown-email">{emailInput}</span>. The moment iCanCall goes live, you'll get your early-access invite and first pick of a memorable number.</>}
+                  {(t.waitlist?.successBody || "We saved your spot under email_here. The moment iCanCall goes live, you'll get your early-access invite and first pick of a memorable number.").replace("email_here", emailInput)}
                 </p>
               </div>
             </div>
@@ -488,7 +479,7 @@ export default function ComingSoon() {
                   </span>
                   <span className="num">
                     (415) 200-CARE
-                    <small>{lang === "es" ? "Un número, siempre respondido" : lang === "fr" ? "Un numéro, toujours décroché" : "One number, always answered"}</small>
+                    <small>{t.waitlist?.demoSub || "One number, always answered"}</small>
                   </span>
                 </div>
                 <span className="demo-status">
@@ -497,9 +488,7 @@ export default function ComingSoon() {
                 </span>
               </div>
               <p className="demo-caption">
-                {lang === "es" ? "Una vista previa de lo que viene: un número que busca a las personas en orden hasta que alguien responde." :
-                 lang === "fr" ? "Un aperçu de ce qui arrive : un numéro unique qui appelle vos proches, dans l'ordre, jusqu'à ce que quelqu'un réponde." :
-                 "A preview of what's coming — one number that finds a person, in order, until someone answers"}
+                {t.waitlist?.demoBody || "A preview of what's coming — one number that finds a person, in order, until someone answers"}
               </p>
               <div className="chain">
                 {contactsState.map((c, i) => (
@@ -521,10 +510,8 @@ export default function ComingSoon() {
                   <Ico.save style={{ width: 19, height: 19 }} />
                 </span>
                 <span className="txt">
-                  <b>{lang === "es" ? "Reserva temprano, elige primero" : lang === "fr" ? "Réservez tôt, choisissez en priorité" : "Reserve early, choose first"}</b>
-                  <span>{lang === "es" ? "Los miembros de la lista tienen prioridad para elegir números memorables en el lanzamiento" :
-                        lang === "fr" ? "Les membres de la liste d'attente ont le premier choix des numéros mémorables au lancement" :
-                        "Waitlist members get first pick of memorable numbers at launch"}</span>
+                  <b>{t.waitlist?.reserveTitle || "Reserve early, choose first"}</b>
+                  <span>{t.waitlist?.reserveText || "Waitlist members get first pick of memorable numbers at launch"}</span>
                 </span>
               </div>
             </div>
@@ -535,44 +522,34 @@ export default function ComingSoon() {
         <section className="section tint-band" id="expect">
           <div className="wrap">
             <div className="section-head center">
-              <span className="eyebrow">{lang === "es" ? "Qué esperar" : lang === "fr" ? "À quoi s'attendre" : "What to expect"}</span>
+              <span className="eyebrow">{t.waitlist?.expectTitle || "What to expect"}</span>
               <h2>
-                {lang === "es" ? <>Estar en la lista viene con<br />algunas cosas buenas.</> :
-                 lang === "fr" ? <>S'inscrire sur la liste apporte<br />plusieurs avantages.</> :
-                 <>A spot on the list comes<br />with a few good things.</>}
+                {t.waitlist?.expectSub || "A spot on the list comes with a few good things."}
               </h2>
               <p className="lead">
-                {lang === "es" ? "Sin compromiso hoy: solo las ventajas de ser uno de los primeros cuando iCanCall abra sus puertas." :
-                 lang === "fr" ? "Aucun engagement aujourd'hui — profitez simplement des avantages des premiers arrivés à l'ouverture de iCanCall." :
-                 "No commitment today — just the perks of being early when iCanCall opens its doors."}
+                {t.waitlist?.expectLead || "No commitment today — just the perks of being early when iCanCall opens its doors."}
               </p>
             </div>
             <div className="expect">
               <div className="expect-card">
                 <div className="ic"><Ico.phone style={{ width: 23, height: 23 }} /></div>
-                <h3>{lang === "es" ? "Primer derecho a elegir números" : lang === "fr" ? "Premier choix du numéro" : "First pick of numbers"}</h3>
+                <h3>{t.waitlist?.expectCardTitle1 || "First pick of numbers"}</h3>
                 <p>
-                  {lang === "es" ? "Los números memorables se agotan rápido. Los miembros de la lista eligen el suyo antes que los demás." :
-                   lang === "fr" ? "Les numéros faciles à retenir partent vite. Les inscrits choisissent le leur en priorité." :
-                   "Memorable numbers go fast. Waitlist members choose theirs before doors open to everyone else."}
+                  {t.waitlist?.expectCardText1 || "Memorable numbers go fast. Waitlist members choose theirs before doors open to everyone else."}
                 </p>
               </div>
               <div className="expect-card">
                 <div className="ic"><Ico.user style={{ width: 23, height: 23 }} /></div>
-                <h3>{lang === "es" ? "Tarifa de miembro fundador" : lang === "fr" ? "Tarif membre fondateur" : "Founding-member rate"}</h3>
+                <h3>{t.waitlist?.expectCardTitle2 || "Founding-member rate"}</h3>
                 <p>
-                  {lang === "es" ? "Asegura el precio de lanzamiento para siempre, como agradecimiento por creer en nosotros desde el principio." :
-                   lang === "fr" ? "Verrouillez le tarif de lancement à vie — notre façon de vous remercier de croire en nous si tôt." :
-                   "Lock in launch pricing that stays yours for good — our thank-you for believing in this early."}
+                  {t.waitlist?.expectCardText2 || "Lock in launch pricing that stays yours for good — our thank-you for believing in this early."}
                 </p>
               </div>
               <div className="expect-card">
                 <div className="ic"><Ico.chat style={{ width: 23, height: 23 }} /></div>
-                <h3>{lang === "es" ? "Tú decides qué construimos" : lang === "fr" ? "Votre avis sur nos fonctions" : "A say in what we build"}</h3>
+                <h3>{t.waitlist?.expectCardTitle3 || "A say in what we build"}</h3>
                 <p>
-                  {lang === "es" ? "Los miembros fundadores guían el desarrollo. Te preguntaremos qué es lo más importante para tu familia." :
-                   lang === "fr" ? "Les premiers inscrits orientent le projet. Nous vous demanderons ce qui compte le plus pour votre famille." :
-                   "Early members shape the roadmap. We'll ask what matters most to your family — and listen."}
+                  {t.waitlist?.expectCardText3 || "Early members shape the roadmap. We'll ask what matters most to your family — and listen."}
                 </p>
               </div>
             </div>

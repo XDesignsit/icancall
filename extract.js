@@ -7,7 +7,8 @@ const filesToExtract = [
   'iCanCall Dashboard (standalone).html',
   'iCanCall Landing Page (standalone).html',
   'iCanCall Onboarding (standalone).html',
-  'iCanCall Super Admin (standalone).html'
+  'iCanCall Super Admin (standalone).html',
+  'iCanCall Coming Soon (standalone).html'
 ];
 
 const outputDir = path.join(__dirname, 'extracted_designs');

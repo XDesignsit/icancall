@@ -1,4 +1,33 @@
 export interface HomepageTranslations {
+  waitlist?: {
+    launchingSoon: string;
+    beFirstInLine: string;
+    beFirstInLineAccent: string;
+    heroLead: string;
+    emailLabel: string;
+    emailPlaceholder: string;
+    phoneLabel: string;
+    phonePlaceholder: string;
+    smsConsentB: string;
+    smsConsentText: string;
+    joinBtn: string;
+    noSpamFine: string;
+    successTitle: string;
+    successBody: string;
+    demoSub: string;
+    demoBody: string;
+    reserveTitle: string;
+    reserveText: string;
+    expectTitle: string;
+    expectSub: string;
+    expectLead: string;
+    expectCardTitle1: string;
+    expectCardText1: string;
+    expectCardTitle2: string;
+    expectCardText2: string;
+    expectCardTitle3: string;
+    expectCardText3: string;
+  };
   nav: {
     how: string;
     features: string;
@@ -210,6 +239,35 @@ export interface HomepageTranslations {
 
 export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi" | "pt" | "de" | "it" | "ko", HomepageTranslations> = {
   en: {
+    waitlist: {
+      launchingSoon: "Launching soon · Private early access",
+      beFirstInLine: "Be first",
+      beFirstInLineAccent: "in line.",
+      heroLead: "iCanCall gives the people you love one memorable number that's always answered — routing to up to six trusted contacts until someone picks up. We're putting the finishing touches on it. Join the waitlist and you'll be first through the door.",
+      emailLabel: "Email",
+      emailPlaceholder: "you@email.com",
+      phoneLabel: "Mobile number",
+      phonePlaceholder: "(555) 123-4567",
+      smsConsentB: "Text me launch updates.",
+      smsConsentText: "I agree to receive occasional SMS messages from iCanCall about early access and launch. Msg & data rates may apply; reply STOP to opt out anytime.",
+      joinBtn: "Join the waitlist",
+      noSpamFine: "No spam, ever. We'll only reach out about your early-access invite — and you can unsubscribe in one tap.",
+      successTitle: "You're on the list.",
+      successBody: "We saved your spot under email_here. The moment iCanCall goes live, you'll get your early-access invite and first pick of a memorable number.",
+      demoSub: "One number, always answered",
+      demoBody: "A preview of what's coming — one number that finds a person, in order, until someone answers",
+      reserveTitle: "Reserve early, choose first",
+      reserveText: "Waitlist members get first pick of memorable numbers at launch",
+      expectTitle: "What to expect",
+      expectSub: "A spot on the list comes with a few good things.",
+      expectLead: "No commitment today — just the perks of being early when iCanCall opens its doors.",
+      expectCardTitle1: "First pick of numbers",
+      expectCardText1: "Memorable numbers go fast. Waitlist members choose theirs before doors open to everyone else.",
+      expectCardTitle2: "Founding-member rate",
+      expectCardText2: "Lock in launch pricing that stays yours for good — our thank-you for believing in this early.",
+      expectCardTitle3: "A say in what we build",
+      expectCardText3: "Early members shape the roadmap. We'll ask what matters most to your family — and listen."
+    },
   "nav": {
     "how": "How it works",
     "features": "Features",
@@ -419,6 +477,35 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
   }
 },
   es: {
+    waitlist: {
+      launchingSoon: "Próximo lanzamiento · Acceso anticipado privado",
+      beFirstInLine: "Sé el primero",
+      beFirstInLineAccent: "en la fila.",
+      heroLead: "iCanCall ofrece a las personas que amas un número fácil de recordar que siempre es atendido, redirigiendo las llamadas hasta a seis contactos de confianza hasta que alguien responda. Estamos dando los toques finales. Únete a la lista de espera y sé el primero.",
+      emailLabel: "Correo electrónico",
+      emailPlaceholder: "you@email.com",
+      phoneLabel: "Teléfono móvil",
+      phonePlaceholder: "(555) 123-4567",
+      smsConsentB: "Enviarme actualizaciones.",
+      smsConsentText: "Acepto recibir mensajes SMS ocasionales de iCanCall sobre acceso anticipado y lanzamiento. Pueden aplicarse tarifas de mensajes y datos; responde STOP para cancelar en cualquier momento.",
+      joinBtn: "Unirse a la lista",
+      noSpamFine: "Sin spam, nunca. Solo nos comunicaremos para invitarte al acceso anticipado; puedes darte de baja con un toque.",
+      successTitle: "Estás en la lista.",
+      successBody: "Hemos guardado tu lugar para email_here. En cuanto iCanCall esté activo, recibirás tu invitación de acceso anticipado y prioridad para elegir un número memorable.",
+      demoSub: "Un número, siempre respondido",
+      demoBody: "Una vista previa de lo que viene: un número que busca a las personas en orden hasta que alguien responde.",
+      reserveTitle: "Reserva temprano, elige primero",
+      reserveText: "Los miembros de la lista tienen prioridad para elegir números memorables en el lanzamiento",
+      expectTitle: "Qué esperar",
+      expectSub: "Estar en la lista viene con algunas cosas buenas.",
+      expectLead: "Sin compromiso hoy: solo las ventajas de ser uno de los primeros cuando iCanCall abra sus puertas.",
+      expectCardTitle1: "Primer derecho a elegir números",
+      expectCardText1: "Los números memorables se agotan rápido. Los miembros de la lista eligen el suyo antes que los demás.",
+      expectCardTitle2: "Tarifa de miembro fundador",
+      expectCardText2: "Asegura el precio de lanzamiento para siempre, como agradecimiento por creer en nosotros desde el principio.",
+      expectCardTitle3: "Tú decides qué construimos",
+      expectCardText3: "Los miembros fundadores guían el desarrollo. Te preguntaremos qué es lo más importante para tu familia."
+    },
   "nav": {
     "how": "Cómo funciona",
     "features": "Funciones",
@@ -628,6 +715,35 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
   }
 },
   fr: {
+    waitlist: {
+      launchingSoon: "Lancement imminent · Accès anticipé privé",
+      beFirstInLine: "Soyez le premier",
+      beFirstInLineAccent: "en ligne.",
+      heroLead: "iCanCall donne à vos proches un numéro mémorable auquel on répond toujours, qui redirige les appels vers 6 contacts de confiance max. Nous y mettons la touche finale. Rejoignez la liste d'attente pour être le premier informé.",
+      emailLabel: "E-mail",
+      emailPlaceholder: "you@email.com",
+      phoneLabel: "Numéro mobile",
+      phonePlaceholder: "(555) 123-4567",
+      smsConsentB: "M'envoyer des mises à jour.",
+      smsConsentText: "J'accepte de recevoir des SMS occasionnels d'iCanCall concernant l'accès anticipé et le lancement. Des tarifs de messagerie/données peuvent s'appliquer ; répondez STOP pour vous désabonner.",
+      joinBtn: "Rejoindre la liste",
+      noSpamFine: "Aucun spam. Nous vous contacterons uniquement pour votre invitation d'accès anticipé. Désinscription en un clic.",
+      successTitle: "Vous êtes inscrit.",
+      successBody: "Votre place est réservée pour email_here. Dès que iCanCall sera disponible, vous recevrez votre invitation d'accès anticipé et pourrez choisir votre numéro en priorité.",
+      demoSub: "Un numéro, toujours décroché",
+      demoBody: "Un aperçu de ce qui arrive : un numéro unique qui appelle vos proches, dans l'ordre, jusqu'à ce que quelqu'un réponde.",
+      reserveTitle: "Réservez tôt, choisissez en priorité",
+      reserveText: "Les membres de la liste d'attente ont le premier choix des numéros mémorables au lancement",
+      expectTitle: "À quoi s'attendre",
+      expectSub: "S'inscrire sur la liste apporte plusieurs avantages.",
+      expectLead: "Aucun engagement aujourd'hui — profitez simplement des avantages des premiers arrivés à l'ouverture de iCanCall.",
+      expectCardTitle1: "Premier choix du numéro",
+      expectCardText1: "Les numéros faciles à retenir partent vite. Les inscrits choisissent le leur en priorité.",
+      expectCardTitle2: "Tarif membre fondateur",
+      expectCardText2: "Verrouillez le tarif de lancement à vie — notre façon de vous remercier de croire en nous si tôt.",
+      expectCardTitle3: "Votre avis sur nos fonctions",
+      expectCardText3: "Les premiers inscrits orientent le projet. Nous vous demanderons ce qui compte le plus pour votre famille."
+    },
   "nav": {
     "how": "Comment ça marche",
     "features": "Fonctionnalités",
