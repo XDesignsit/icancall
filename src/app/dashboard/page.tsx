@@ -3377,6 +3377,8 @@ export function AccountView({
             const handleSaveAddons = () => {
               const currentExtra = a.addons?.extraNumbers || 0;
               const delta = tempExtraNumbers - currentExtra;
+              console.log("handleSaveAddons click", { currentExtra, tempExtraNumbers, delta });
+              alert(`handleSaveAddons click: currentExtra=${currentExtra}, tempExtraNumbers=${tempExtraNumbers}, delta=${delta}`);
               if (delta > 0) {
                 // Initialize configuration slots for the newly added numbers
                 const initialConfig: AddonNumberSlotConfig[] = Array.from({ length: delta }).map((_, idx) => ({
