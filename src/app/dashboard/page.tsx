@@ -2136,8 +2136,17 @@ export function AccountView({
   const [tempExtraNumbers, setTempExtraNumbers] = useState(a.addons?.extraNumbers || 0);
   const [tempMinuteBlocks, setTempMinuteBlocks] = useState(a.addons?.minuteBlocks || 0);
 
+  const [lastPropExtraNumbers, setLastPropExtraNumbers] = useState(a.addons?.extraNumbers || 0);
+  const [lastPropMinuteBlocks, setLastPropMinuteBlocks] = useState(a.addons?.minuteBlocks || 0);
 
-
+  if ((a.addons?.extraNumbers || 0) !== lastPropExtraNumbers) {
+    setLastPropExtraNumbers(a.addons?.extraNumbers || 0);
+    setTempExtraNumbers(a.addons?.extraNumbers || 0);
+  }
+  if ((a.addons?.minuteBlocks || 0) !== lastPropMinuteBlocks) {
+    setLastPropMinuteBlocks(a.addons?.minuteBlocks || 0);
+    setTempMinuteBlocks(a.addons?.minuteBlocks || 0);
+  }
   const [addonModalOpen, setAddonModalOpen] = useState(false);
   const [addonRemovalModalOpen, setAddonRemovalModalOpen] = useState(false);
 
