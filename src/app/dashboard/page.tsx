@@ -2126,6 +2126,27 @@ export function AccountView({
     }
   }, [planModalOpen, lines]);
 
+  // Upgrade to Pro number selection state
+  const [upgradeAreaCode, setUpgradeAreaCode] = useState("415");
+  const [upgradeNumbersList, setUpgradeNumbersList] = useState<any[]>([]);
+  const [upgradeSelectedNumber, setUpgradeSelectedNumber] = useState<any | null>(null);
+  const [isSearchingNumbers, setIsSearchingNumbers] = useState(false);
+
+  const loadUpgradeNumbers = (ac: string) => {
+    setIsSearchingNumbers(true);
+    setTimeout(() => {
+      setUpgradeNumbersList(fetchNumbers(ac, 6));
+      setIsSearchingNumbers(false);
+    }, 650);
+  };
+
+  useEffect(() => {
+    if (planModalOpen) {
+      loadUpgradeNumbers(upgradeAreaCode);
+      setUpgradeSelectedNumber(null);
+    }
+  }, [planModalOpen]);
+
   const save17Map: Record<string, string> = {
     en: "Save 17%",
     es: "Ahorre 17%",
@@ -2166,7 +2187,10 @@ export function AccountView({
     }
   };
 
-  const isModalButtonDisabled = tempPlan === account.plan && tempCycle === account.billingCycle;
+  const isUpgradingToPro = tempPlan === "pro" && account.plan === "essential";
+  const isModalButtonDisabled =
+    (tempPlan === account.plan && tempCycle === account.billingCycle) ||
+    (isUpgradingToPro && !upgradeSelectedNumber);
 
   const ACCT_TABS = [
     { id: "profile", label: d.account.profile },
@@ -2508,6 +2532,20 @@ export function AccountView({
                         const nextLines = lines.filter(l => l.id === selectedLineToKeep);
                         setLines(nextLines);
                         localStorage.setItem("ic_lines_data", JSON.stringify(nextLines));
+                      } else if (tempPlan === "pro" && account.plan === "essential" && upgradeSelectedNumber) {
+                        const newLine: Line = {
+                          id: "line_" + Date.now(),
+                          label: lang === "es" ? "Línea secundaria" : lang === "fr" ? "Ligne secondaire" : "Secondary line",
+                          person: lang === "es" ? "Línea del círculo de emergencia" : lang === "fr" ? "Ligne du cercle d'urgence" : "Emergency circle line",
+                          number: upgradeSelectedNumber.number,
+                          color: "oklch(0.58 0.115 232)",
+                          mode: "cascade",
+                          minutesUsed: 0,
+                          contacts: lines[0]?.contacts ? JSON.parse(JSON.stringify(lines[0].contacts)) : [],
+                        };
+                        const nextLines = [...lines, newLine];
+                        setLines(nextLines);
+                        localStorage.setItem("ic_lines_data", JSON.stringify(nextLines));
                       }
                       set({ plan: tempPlan, billingCycle: tempCycle });
                       setPlanModalOpen(false);
@@ -2642,6 +2680,132 @@ export function AccountView({
                     </p>
                   </div>
                 </div>
+
+                {/* Phone number picker if upgrading to Pro and current plan is Essential */}
+                {tempPlan === "pro" && account.plan === "essential" && (
+                  <div style={{ display: "flex", flexDirection: "column", gap: 12, marginTop: 12, borderTop: "1px solid var(--line)", paddingTop: 16 }}>
+                    <b style={{ fontSize: "0.95rem", color: "var(--ink)", textAlign: "left" }}>
+                      {lang === "es"
+                        ? "Seleccione su segundo número de teléfono para el plan Pro:"
+                        : lang === "fr"
+                        ? "Sélectionnez votre deuxième numéro de téléphone pour le forfait Pro :"
+                        : "Select your second phone number for the Pro plan:"}
+                    </b>
+                    <p style={{ fontSize: "0.85rem", color: "var(--ink-faint)", margin: 0, textAlign: "left" }}>
+                      {lang === "es"
+                        ? "Busque por código de área para encontrar números locales disponibles:"
+                        : lang === "fr"
+                        ? "Recherchez par indicatif régional pour trouver des numéros locaux disponibles :"
+                        : "Search by area code to find available local numbers:"}
+                    </p>
+
+                    {/* Search Bar */}
+                    <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                      <div style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 6,
+                        border: "1px solid var(--line)",
+                        borderRadius: "var(--r-md)",
+                        padding: "6px 10px",
+                        background: "var(--surface)",
+                        flex: 1
+                      }}>
+                        <span style={{ fontSize: "0.8rem", color: "var(--ink-faint)", fontWeight: 600 }}>
+                          {lang === "es" ? "Cód. área" : lang === "fr" ? "Indicatif" : "Area code"}
+                        </span>
+                        <input
+                          type="text"
+                          maxLength={3}
+                          value={upgradeAreaCode}
+                          onChange={(e) => setUpgradeAreaCode(e.target.value.replace(/\D/g, "").slice(0, 3))}
+                          onKeyDown={(e) => e.key === "Enter" && loadUpgradeNumbers(upgradeAreaCode)}
+                          style={{
+                            border: "none",
+                            outline: "none",
+                            width: "100%",
+                            background: "transparent",
+                            fontSize: "0.95rem",
+                            fontWeight: 600,
+                            color: "var(--ink)"
+                          }}
+                        />
+                      </div>
+                      <button
+                        className="btn btn-ghost"
+                        onClick={() => loadUpgradeNumbers(upgradeAreaCode)}
+                        disabled={upgradeAreaCode.length !== 3 || isSearchingNumbers}
+                        style={{ padding: "8px 14px", height: 38 }}
+                      >
+                        {lang === "es" ? "Buscar" : lang === "fr" ? "Rechercher" : "Search"}
+                      </button>
+                    </div>
+
+                    {/* Suggestions */}
+                    <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                      {AREA_SUGGESTIONS.map((a) => (
+                        <button
+                          key={a.code}
+                          onClick={() => { setUpgradeAreaCode(a.code); loadUpgradeNumbers(a.code); }}
+                          style={{
+                            fontSize: "0.76rem",
+                            padding: "4px 10px",
+                            borderRadius: 999,
+                            background: "var(--bg)",
+                            border: "1px solid var(--line)",
+                            color: "var(--ink-soft)",
+                            cursor: "pointer"
+                          }}
+                        >
+                          {a.code} · {a.city}
+                        </button>
+                      ))}
+                    </div>
+
+                    {/* Results grid */}
+                    {isSearchingNumbers ? (
+                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+                        {Array.from({ length: 6 }).map((_, i) => (
+                          <div key={i} className="skeleton" style={{ height: 48, borderRadius: "var(--r-md)", animation: "pulse 1.5s infinite" }} />
+                        ))}
+                      </div>
+                    ) : upgradeNumbersList.length > 0 ? (
+                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, maxHeight: 160, overflowY: "auto", padding: 2 }}>
+                        {upgradeNumbersList.map((n) => {
+                          const isSelected = upgradeSelectedNumber?.number === n.number;
+                          return (
+                            <button
+                              key={n.id}
+                              onClick={() => setUpgradeSelectedNumber(n)}
+                              style={{
+                                display: "flex",
+                                flexDirection: "column",
+                                alignItems: "flex-start",
+                                padding: "8px 12px",
+                                borderRadius: "var(--r-md)",
+                                border: isSelected ? "2px solid var(--blue)" : "1px solid var(--line)",
+                                background: isSelected ? "var(--tint)" : "var(--surface)",
+                                cursor: "pointer",
+                                transition: "all 0.15s",
+                                textAlign: "left",
+                                gap: 2
+                              }}
+                            >
+                              <span style={{ fontSize: "0.9rem", fontWeight: 700, color: "var(--ink)" }}>{n.number}</span>
+                              <span style={{ fontSize: "0.72rem", color: isSelected ? "var(--blue)" : "var(--ink-faint)" }}>
+                                {n.memorable || (lang === "es" ? "Número local" : lang === "fr" ? "Numéro local" : "Local number")}
+                              </span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      <p style={{ fontSize: "0.86rem", color: "var(--ink-faint)", margin: 0 }}>
+                        {lang === "es" ? "No se encontraron números." : lang === "fr" ? "Aucun numéro trouvé." : "No numbers found."}
+                      </p>
+                    )}
+                  </div>
+                )}
 
                 {/* Phone number selector if downgrading to Essential and has >1 number */}
                 {tempPlan === "essential" && lines.length > 1 && (
@@ -3962,3 +4126,72 @@ export default function DashboardApp() {
     </div>
   );
 }
+
+const AREA_SUGGESTIONS = [
+  { code: "415", city: "San Francisco" },
+  { code: "212", city: "New York" },
+  { code: "312", city: "Chicago" },
+  { code: "305", city: "Miami" },
+  { code: "206", city: "Seattle" },
+  { code: "617", city: "Boston" },
+];
+
+const VANITY_WORDS = [
+  { word: "CARE", digits: "2273" },
+  { word: "HOME", digits: "4663" },
+  { word: "HELP", digits: "4357" },
+  { word: "SAFE", digits: "7233" },
+  { word: "CALL", digits: "2255" },
+  { word: "LOVE", digits: "5683" },
+  { word: "FAMI", digits: "3264" },
+];
+
+function pad(n: number, len: number) { return String(n).padStart(len, "0"); }
+
+function memorableLabel(prefix: string, line: string) {
+  if (line[0] === line[1] && line[1] === line[2] && line[2] === line[3]) return "Repeating";
+  if (line === "1234" || line === "4321" || line === "2345") return "Sequence";
+  if (line[0] === line[3] && line[1] === line[2]) return "Mirror";
+  if (prefix === line.slice(0, 3)) return "Easy recall";
+  return null;
+}
+
+let _numSeed = Math.floor(Math.random() * 9000);
+
+function fetchNumbers(areaCode: string, count = 6) {
+  const ac = areaCode.replace(/\D/g, "").slice(0, 3) || "415";
+  const out: { id: string; number: string; area: string; memorable: string | null }[] = [];
+  const usedVanity = new Set();
+  for (let i = 0; i < count; i++) {
+    _numSeed = (_numSeed * 1103515245 + 12345) & 0x7fffffff;
+    const r = _numSeed;
+    let prefix = "";
+    let line = "";
+    let vanity = null;
+
+    if (r % 3 === 0) {
+      const v = VANITY_WORDS[(r >> 4) % VANITY_WORDS.length];
+      if (!usedVanity.has(v.word)) {
+        usedVanity.add(v.word);
+        prefix = pad(200 + ((r >> 8) % 700), 3);
+        line = v.digits;
+        vanity = v.word;
+      }
+    }
+    if (!line) {
+      prefix = pad(200 + ((r >> 6) % 700), 3);
+      line = pad((r >> 10) % 10000, 4);
+    }
+
+    const formatted = `(${ac}) ${prefix}-${line}`;
+    const memo = vanity ? `Spells ${vanity}` : memorableLabel(prefix, line);
+    out.push({
+      id: `${ac}-${prefix}-${line}-${i}`,
+      number: formatted,
+      area: ac,
+      memorable: memo,
+    });
+  }
+  return out;
+}
+
