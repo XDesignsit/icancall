@@ -2136,12 +2136,7 @@ export function AccountView({
   const [tempExtraNumbers, setTempExtraNumbers] = useState(a.addons?.extraNumbers || 0);
   const [tempMinuteBlocks, setTempMinuteBlocks] = useState(a.addons?.minuteBlocks || 0);
 
-  // Sync states on load or when account data changes
-  useEffect(() => {
-    console.log("Sync useEffect running", { propExtra: a.addons?.extraNumbers, propMin: a.addons?.minuteBlocks });
-    setTempExtraNumbers(a.addons?.extraNumbers || 0);
-    setTempMinuteBlocks(a.addons?.minuteBlocks || 0);
-  }, [a.addons?.extraNumbers, a.addons?.minuteBlocks]);
+
 
   const [addonModalOpen, setAddonModalOpen] = useState(false);
   const [addonRemovalModalOpen, setAddonRemovalModalOpen] = useState(false);
