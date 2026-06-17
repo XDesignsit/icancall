@@ -2138,6 +2138,7 @@ export function AccountView({
 
   // Sync states on load or when account data changes
   useEffect(() => {
+    console.log("Sync useEffect running", { propExtra: a.addons?.extraNumbers, propMin: a.addons?.minuteBlocks });
     setTempExtraNumbers(a.addons?.extraNumbers || 0);
     setTempMinuteBlocks(a.addons?.minuteBlocks || 0);
   }, [a.addons?.extraNumbers, a.addons?.minuteBlocks]);
@@ -3437,7 +3438,12 @@ export function AccountView({
                     <div className="actl">
                       <div className="stepper">
                         <button
-                          onClick={() => setTempExtraNumbers(Math.max(0, tempExtraNumbers - 1))}
+                          onClick={() => {
+                            const val = Math.max(0, tempExtraNumbers - 1);
+                            console.log("Stepper - clicked", { tempExtraNumbers, newVal: val });
+                            alert(`Stepper - clicked: prev=${tempExtraNumbers}, new=${val}`);
+                            setTempExtraNumbers(val);
+                          }}
                           disabled={tempExtraNumbers === 0}
                           aria-label="Remove one"
                         >
@@ -3445,7 +3451,12 @@ export function AccountView({
                         </button>
                         <span className="v">{tempExtraNumbers}</span>
                         <button
-                          onClick={() => setTempExtraNumbers(Math.min(8, tempExtraNumbers + 1))}
+                          onClick={() => {
+                            const val = Math.min(8, tempExtraNumbers + 1);
+                            console.log("Stepper + clicked", { tempExtraNumbers, newVal: val });
+                            alert(`Stepper + clicked: prev=${tempExtraNumbers}, new=${val}`);
+                            setTempExtraNumbers(val);
+                          }}
                           disabled={tempExtraNumbers === 8}
                           aria-label="Add one"
                         >
