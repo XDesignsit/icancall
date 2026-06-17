@@ -44,6 +44,7 @@ export default function LoginPage() {
         window.location.href = "/super-admin";
       } else {
         localStorage.setItem("isLoggedIn", "true");
+        localStorage.setItem("userEmail", email);
         window.location.href = "/dashboard";
       }
     }, 800);
@@ -56,6 +57,7 @@ export default function LoginPage() {
     // Simulate OAuth pop-up redirect delay
     setTimeout(() => {
       localStorage.setItem("isLoggedIn", "true");
+      localStorage.setItem("userEmail", "support@icancall.co");
       window.location.href = "/dashboard";
     }, 1000);
   };

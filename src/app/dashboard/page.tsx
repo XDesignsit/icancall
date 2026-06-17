@@ -2104,7 +2104,13 @@ export function AccountView({
 }) {
   const ext = dashboardExtraTranslations[lang as keyof typeof dashboardExtraTranslations] || dashboardExtraTranslations.en;
   const a = account;
-  const set = (patch: Partial<Account>) => setAccount((prev) => ({ ...prev, ...patch }));
+  const set = (patch: Partial<Account>) => {
+    setAccount((prev) => {
+      const updated = { ...prev, ...patch };
+      localStorage.setItem("ic_account_data", JSON.stringify(updated));
+      return updated;
+    });
+  };
   const [planModalOpen, setPlanModalOpen] = useState(false);
   const [tempPlan, setTempPlan] = useState<"essential" | "pro">(account.plan || "pro");
   const [tempCycle, setTempCycle] = useState<"monthly" | "yearly">(account.billingCycle || "monthly");
@@ -2721,7 +2727,11 @@ export function AccountView({
           {(() => {
             const ad = a.addons || { extraNumbers: 0, minuteBlocks: 0 };
             const setAd = (patch: Partial<Account["addons"]>) =>
-              setAccount((prev) => ({ ...prev, addons: { ...(prev.addons || {}), ...patch } as Account["addons"] }));
+              setAccount((prev) => {
+                const updated = { ...prev, addons: { ...(prev.addons || {}), ...patch } as Account["addons"] };
+                localStorage.setItem("ic_account_data", JSON.stringify(updated));
+                return updated;
+              });
             const numCost = ad.extraNumbers * 6.99;
             const minCost = ad.minuteBlocks * 4.99;
             const total = numCost + minCost;
@@ -3343,6 +3353,37 @@ export default function DashboardApp() {
   });
 
   const [lang, setLang] = useState<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi" | "pt" | "de" | "it" | "ko">("en");
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const imp = localStorage.getItem("impersonatingUser");
+      if (!imp) {
+        const savedEmail = localStorage.getItem("userEmail");
+        const savedData = localStorage.getItem("ic_account_data");
+        let initialData: Account | null = null;
+        if (savedData) {
+          try {
+            initialData = JSON.parse(savedData);
+          } catch (_) {}
+        }
+        if (initialData) {
+          setAccount(initialData);
+        } else if (savedEmail) {
+          setAccount((prev) => {
+            const name = savedEmail === "support@icancall.co" ? "Support Demo" : "Maria Delgado";
+            const preferred = savedEmail === "support@icancall.co" ? "Support" : "Maria";
+            return {
+              ...prev,
+              email: savedEmail,
+              notifyEmail: savedEmail,
+              name,
+              preferred,
+            };
+          });
+        }
+      }
+    }
+  }, []);
 
   useEffect(() => {
     const savedLang = localStorage.getItem("lang") as any;
