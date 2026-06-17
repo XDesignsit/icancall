@@ -2132,6 +2132,41 @@ export function AccountView({
   const [upgradeSelectedNumber, setUpgradeSelectedNumber] = useState<any | null>(null);
   const [isSearchingNumbers, setIsSearchingNumbers] = useState(false);
 
+  // States for Add-on changes
+  const [tempExtraNumbers, setTempExtraNumbers] = useState(a.addons?.extraNumbers || 0);
+  const [tempMinuteBlocks, setTempMinuteBlocks] = useState(a.addons?.minuteBlocks || 0);
+
+  // Sync states on load or when account data changes
+  useEffect(() => {
+    setTempExtraNumbers(a.addons?.extraNumbers || 0);
+    setTempMinuteBlocks(a.addons?.minuteBlocks || 0);
+  }, [a.addons?.extraNumbers, a.addons?.minuteBlocks]);
+
+  const [addonModalOpen, setAddonModalOpen] = useState(false);
+  const [addonRemovalModalOpen, setAddonRemovalModalOpen] = useState(false);
+
+  interface AddonNumberSlotConfig {
+    index: number;
+    areaCode: string;
+    numbersList: any[];
+    selectedNumber: any | null;
+    isSearching: boolean;
+  }
+
+  const [addedNumbersConfig, setAddedNumbersConfig] = useState<AddonNumberSlotConfig[]>([]);
+  const [selectedLinesToRemove, setSelectedLinesToRemove] = useState<string[]>([]);
+
+  const loadAddonNumberSlot = (index: number, ac: string) => {
+    setAddedNumbersConfig(prev => prev.map(c => c.index === index ? { ...c, isSearching: true, areaCode: ac } : c));
+    setTimeout(() => {
+      setAddedNumbersConfig(prev => prev.map(c => c.index === index ? {
+        ...c,
+        isSearching: false,
+        numbersList: fetchNumbers(ac, 6)
+      } : c));
+    }, 650);
+  };
+
   const loadUpgradeNumbers = (ac: string) => {
     setIsSearchingNumbers(true);
     setTimeout(() => {
@@ -2872,6 +2907,352 @@ export function AccountView({
             </Modal>
           )}
 
+          {/* Add-on Numbers Configuration Modal */}
+          {addonModalOpen && (
+            <Modal
+              title={lang === "es" ? "Configurar números adicionales de teléfono" : lang === "fr" ? "Configurer les numéros de téléphone supplémentaires" : "Configure Additional Phone Numbers"}
+              onClose={() => setAddonModalOpen(false)}
+              footer={
+                <div style={{ display: "flex", justifyContent: "flex-end", gap: 10, width: "100%" }}>
+                  <button className="btn btn-ghost" onClick={() => setAddonModalOpen(false)}>
+                    {lang === "es" ? "Cancelar" : lang === "fr" ? "Annuler" : "Cancel"}
+                  </button>
+                  <button
+                    className="btn btn-primary"
+                    disabled={addedNumbersConfig.some(c => !c.selectedNumber)}
+                    onClick={() => {
+                      // Update account addons
+                      setAccount((prev) => {
+                        const updated = {
+                          ...prev,
+                          addons: {
+                            ...(prev.addons || {}),
+                            extraNumbers: tempExtraNumbers,
+                            minuteBlocks: tempMinuteBlocks,
+                          } as Account["addons"],
+                        };
+                        localStorage.setItem("ic_account_data", JSON.stringify(updated));
+                        return updated;
+                      });
+
+                      // Construct and add the new phone lines
+                      const newLines = addedNumbersConfig.map((config, index) => {
+                        const newLine: Line = {
+                          id: "line_" + Date.now() + "_" + index,
+                          label: lang === "es" ? `Línea adicional ${index + 1}` : lang === "fr" ? `Ligne supplémentaire ${index + 1}` : `Additional line ${index + 1}`,
+                          person: lang === "es" ? "Línea del círculo de emergencia" : lang === "fr" ? "Ligne du cercle d'urgence" : "Emergency circle line",
+                          number: config.selectedNumber.number,
+                          color: AVATAR_COLORS[(lines.length + index) % AVATAR_COLORS.length],
+                          mode: "cascade",
+                          minutesUsed: 0,
+                          contacts: lines[0]?.contacts ? JSON.parse(JSON.stringify(lines[0].contacts)) : [],
+                        };
+                        return newLine;
+                      });
+
+                      const nextLines = [...lines, ...newLines];
+                      setLines(nextLines);
+                      localStorage.setItem("ic_lines_data", JSON.stringify(nextLines));
+
+                      setAddonModalOpen(false);
+                      showToast(ext.addonsUpdatedToast);
+                    }}
+                  >
+                    {lang === "es" ? "Aprobar y guardar" : lang === "fr" ? "Approuver et enregistrer" : "Approve & Save Add-ons"}
+                  </button>
+                </div>
+              }
+            >
+              <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+                {/* Billing Notice */}
+                <div style={{
+                  fontSize: "0.88rem",
+                  color: "oklch(0.55 0.18 25)",
+                  background: "oklch(0.97 0.04 25 / 0.3)",
+                  border: "1px solid oklch(0.85 0.08 25 / 0.3)",
+                  borderRadius: "var(--r-md)",
+                  padding: "10px 14px",
+                  fontWeight: 500,
+                  textAlign: "left",
+                  lineHeight: "1.4"
+                }}>
+                  ℹ️ <b>
+                    {lang === "es" 
+                      ? "Aviso de facturación:" 
+                      : lang === "fr" 
+                      ? "Avis de facturation :" 
+                      : "Billing Notice:"}
+                  </b>{" "}
+                  {lang === "es"
+                    ? "La facturación de los números adicionales comenzará inmediatamente después de aprobar los complementos."
+                    : lang === "fr"
+                    ? "La facturation des numéros supplémentaires sera effective immédiatement après l'approbation des options."
+                    : "Billing for the add-on numbers will be effective immediately upon approving the add-ons."}
+                </div>
+
+                <div style={{ display: "flex", flexDirection: "column", gap: 20, maxHeight: 420, overflowY: "auto", paddingRight: 4 }}>
+                  {addedNumbersConfig.map((config) => (
+                    <div key={config.index} style={{
+                      border: "1px solid var(--line)",
+                      borderRadius: "var(--r-lg)",
+                      padding: 16,
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: 12,
+                      background: "var(--bg-card)",
+                      textAlign: "left"
+                    }}>
+                      <h4 style={{ margin: 0, fontSize: "0.95rem", fontWeight: 700, display: "flex", gap: 8, alignItems: "center" }}>
+                        <Icon name="phone" />
+                        {lang === "es" 
+                          ? `Número adicional ${config.index + 1}` 
+                          : lang === "fr" 
+                          ? `Numéro supplémentaire ${config.index + 1}` 
+                          : `Additional Number ${config.index + 1}`}
+                        {config.selectedNumber && (
+                          <span style={{ fontSize: "0.8rem", color: "var(--blue)", fontWeight: 500 }}>
+                            ({config.selectedNumber.number})
+                          </span>
+                        )}
+                      </h4>
+
+                      {/* Search Bar */}
+                      <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                        <div style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 6,
+                          border: "1px solid var(--line)",
+                          borderRadius: "var(--r-md)",
+                          padding: "6px 10px",
+                          background: "var(--surface)",
+                          flex: 1
+                        }}>
+                          <span style={{ fontSize: "0.8rem", color: "var(--ink-faint)", fontWeight: 600 }}>
+                            {lang === "es" ? "Cód. área" : lang === "fr" ? "Indicatif" : "Area code"}
+                          </span>
+                          <input
+                            type="text"
+                            maxLength={3}
+                            value={config.areaCode}
+                            onChange={(e) => {
+                              const val = e.target.value.replace(/\D/g, "").slice(0, 3);
+                              setAddedNumbersConfig(prev => prev.map(c => c.index === config.index ? { ...c, areaCode: val } : c));
+                            }}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter" && config.areaCode.length === 3) {
+                                loadAddonNumberSlot(config.index, config.areaCode);
+                              }
+                            }}
+                            style={{
+                              border: "none",
+                              outline: "none",
+                              width: "100%",
+                              background: "transparent",
+                              fontSize: "0.95rem",
+                              fontWeight: 600,
+                              color: "var(--ink)"
+                            }}
+                          />
+                        </div>
+                        <button
+                          className="btn btn-ghost"
+                          onClick={() => loadAddonNumberSlot(config.index, config.areaCode)}
+                          disabled={config.areaCode.length !== 3 || config.isSearching}
+                          style={{ padding: "8px 14px", height: 38 }}
+                        >
+                          {lang === "es" ? "Buscar" : lang === "fr" ? "Rechercher" : "Search"}
+                        </button>
+                      </div>
+
+                      {/* Suggestions */}
+                      <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                        {AREA_SUGGESTIONS.map((a) => (
+                          <button
+                            key={a.code}
+                            onClick={() => {
+                              setAddedNumbersConfig(prev => prev.map(c => c.index === config.index ? { ...c, areaCode: a.code } : c));
+                              loadAddonNumberSlot(config.index, a.code);
+                            }}
+                            style={{
+                              fontSize: "0.76rem",
+                              padding: "4px 10px",
+                              borderRadius: 999,
+                              background: "var(--bg)",
+                              border: "1px solid var(--line)",
+                              color: "var(--ink-soft)",
+                              cursor: "pointer"
+                            }}
+                          >
+                            {a.code} · {a.city}
+                          </button>
+                        ))}
+                      </div>
+
+                      {/* Results grid */}
+                      {config.isSearching ? (
+                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+                          {Array.from({ length: 6 }).map((_, i) => (
+                            <div key={i} className="skeleton" style={{ height: 48, borderRadius: "var(--r-md)", animation: "pulse 1.5s infinite" }} />
+                          ))}
+                        </div>
+                      ) : config.numbersList && config.numbersList.length > 0 ? (
+                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, maxHeight: 160, overflowY: "auto", padding: 2 }}>
+                          {config.numbersList.map((n) => {
+                            const isSelected = config.selectedNumber?.number === n.number;
+                            return (
+                              <button
+                                key={n.id}
+                                onClick={() => setAddedNumbersConfig(prev => prev.map(c => c.index === config.index ? { ...c, selectedNumber: n } : c))}
+                                style={{
+                                  display: "flex",
+                                  flexDirection: "column",
+                                  alignItems: "flex-start",
+                                  padding: "8px 12px",
+                                  borderRadius: "var(--r-md)",
+                                  border: isSelected ? "2px solid var(--blue)" : "1px solid var(--line)",
+                                  background: isSelected ? "var(--tint)" : "var(--surface)",
+                                  cursor: "pointer",
+                                  transition: "all 0.15s",
+                                  textAlign: "left",
+                                  gap: 2
+                                }}
+                              >
+                                <span style={{ fontSize: "0.9rem", fontWeight: 700, color: "var(--ink)" }}>{n.number}</span>
+                                <span style={{ fontSize: "0.72rem", color: isSelected ? "var(--blue)" : "var(--ink-faint)" }}>
+                                  {n.memorable || (lang === "es" ? "Número local" : lang === "fr" ? "Numéro local" : "Local number")}
+                                </span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      ) : (
+                        <div style={{ fontSize: "0.85rem", color: "var(--ink-faint)", textAlign: "center", padding: 12 }}>
+                          {lang === "es" 
+                            ? "Ingrese un código de área para buscar números disponibles" 
+                            : lang === "fr" 
+                            ? "Entrez un indicatif pour rechercher les numéros disponibles" 
+                            : "Enter an area code to search for available numbers"}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </Modal>
+          )}
+
+          {/* Add-on Numbers Removal Modal */}
+          {addonRemovalModalOpen && (
+            <Modal
+              title={lang === "es" ? "Seleccionar números a devolver" : lang === "fr" ? "Sélectionner les numéros à restituer" : "Select Phone Numbers to Return"}
+              onClose={() => setAddonRemovalModalOpen(false)}
+              footer={
+                <div style={{ display: "flex", justifyContent: "flex-end", gap: 10, width: "100%" }}>
+                  <button className="btn btn-ghost" onClick={() => setAddonRemovalModalOpen(false)}>
+                    {lang === "es" ? "Cancelar" : lang === "fr" ? "Annuler" : "Cancel"}
+                  </button>
+                  <button
+                    className="btn btn-primary"
+                    disabled={selectedLinesToRemove.length !== ((a.addons?.extraNumbers || 0) - tempExtraNumbers)}
+                    onClick={() => {
+                      // Filter out returned lines
+                      const nextLines = lines.filter(l => !selectedLinesToRemove.includes(l.id));
+                      setLines(nextLines);
+                      localStorage.setItem("ic_lines_data", JSON.stringify(nextLines));
+
+                      // Update account addons
+                      setAccount((prev) => {
+                        const updated = {
+                          ...prev,
+                          addons: {
+                            ...(prev.addons || {}),
+                            extraNumbers: tempExtraNumbers,
+                            minuteBlocks: tempMinuteBlocks,
+                          } as Account["addons"],
+                        };
+                        localStorage.setItem("ic_account_data", JSON.stringify(updated));
+                        return updated;
+                      });
+
+                      setAddonRemovalModalOpen(false);
+                      showToast(ext.addonsUpdatedToast);
+                    }}
+                  >
+                    {lang === "es" ? "Confirmar y guardar" : lang === "fr" ? "Confirmer et enregistrer" : "Confirm & Save"}
+                  </button>
+                </div>
+              }
+            >
+              <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+                <p style={{ color: "var(--ink-soft)", fontSize: "0.95rem", textAlign: "left" }}>
+                  {lang === "es"
+                    ? `Debe seleccionar exactamente ${(a.addons?.extraNumbers || 0) - tempExtraNumbers} número(s) para devolver:`
+                    : lang === "fr"
+                    ? `Vous devez sélectionner exactement ${(a.addons?.extraNumbers || 0) - tempExtraNumbers} numéro(s) à restituer :`
+                    : `You must select exactly ${(a.addons?.extraNumbers || 0) - tempExtraNumbers} phone number(s) to return:`}
+                </p>
+
+                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                  {lines.slice(a.plan === "pro" ? 2 : 1).map((l) => {
+                    const isSelected = selectedLinesToRemove.includes(l.id);
+                    return (
+                      <label
+                        key={l.id}
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 10,
+                          padding: "10px 14px",
+                          border: isSelected ? "2px solid var(--blue)" : "1px solid var(--line)",
+                          background: isSelected ? "var(--tint)" : "transparent",
+                          borderRadius: "var(--r-md)",
+                          cursor: "pointer",
+                          transition: "all 0.15s"
+                        }}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={isSelected}
+                          onChange={() => {
+                            if (isSelected) {
+                              setSelectedLinesToRemove(prev => prev.filter(id => id !== l.id));
+                            } else {
+                              setSelectedLinesToRemove(prev => [...prev, l.id]);
+                            }
+                          }}
+                          style={{ width: 16, height: 16 }}
+                        />
+                        <div style={{ display: "flex", flexDirection: "column", textAlign: "left" }}>
+                          <span style={{ fontSize: "0.92rem", fontWeight: 600 }}>{l.label}</span>
+                          <span style={{ fontSize: "0.82rem", color: "var(--ink-faint)" }}>{l.number}</span>
+                        </div>
+                      </label>
+                    );
+                  })}
+                </div>
+
+                <p style={{ 
+                  fontSize: "0.82rem", 
+                  color: "oklch(0.55 0.18 25)", 
+                  background: "oklch(0.97 0.04 25 / 0.3)", 
+                  border: "1px solid oklch(0.85 0.08 25 / 0.3)",
+                  borderRadius: "var(--r-md)",
+                  padding: "8px 12px",
+                  margin: 0,
+                  fontWeight: 500,
+                  textAlign: "left"
+                }}>
+                  ⚠️ {lang === "es"
+                    ? "Una vez devuelto un número, no podrá volver a reclamarlo."
+                    : lang === "fr"
+                    ? "Une fois qu'un numéro est restitué, vous ne pouvez plus le réclamer."
+                    : "Warning: Once a number is returned, you can no longer claim it again."}
+                </p>
+              </div>
+            </Modal>
+          )}
+
           <div className="card section-gap">
             <div className="card-head">
               <div>
@@ -2988,17 +3369,47 @@ export function AccountView({
           </div>
 
           {(() => {
-            const ad = a.addons || { extraNumbers: 0, minuteBlocks: 0 };
-            const setAd = (patch: Partial<Account["addons"]>) =>
-              setAccount((prev) => {
-                const updated = { ...prev, addons: { ...(prev.addons || {}), ...patch } as Account["addons"] };
-                localStorage.setItem("ic_account_data", JSON.stringify(updated));
-                return updated;
-              });
-            const numCost = ad.extraNumbers * 6.99;
-            const minCost = ad.minuteBlocks * 4.99;
+            const numCost = tempExtraNumbers * 6.99;
+            const minCost = tempMinuteBlocks * 4.99;
             const total = numCost + minCost;
             const maxBlocks = 10;
+
+            const handleSaveAddons = () => {
+              const currentExtra = a.addons?.extraNumbers || 0;
+              const delta = tempExtraNumbers - currentExtra;
+              if (delta > 0) {
+                // Initialize configuration slots for the newly added numbers
+                const initialConfig: AddonNumberSlotConfig[] = Array.from({ length: delta }).map((_, idx) => ({
+                  index: idx,
+                  areaCode: "415",
+                  numbersList: fetchNumbers("415", 6),
+                  selectedNumber: null,
+                  isSearching: false,
+                }));
+                setAddedNumbersConfig(initialConfig);
+                setAddonModalOpen(true);
+              } else if (delta < 0) {
+                // User is removing numbers, must choose which ones to return
+                setSelectedLinesToRemove([]);
+                setAddonRemovalModalOpen(true);
+              } else {
+                // Just saving minutes or no changes at all
+                setAccount((prev) => {
+                  const updated = {
+                    ...prev,
+                    addons: {
+                      ...(prev.addons || {}),
+                      extraNumbers: tempExtraNumbers,
+                      minuteBlocks: tempMinuteBlocks,
+                    } as Account["addons"],
+                  };
+                  localStorage.setItem("ic_account_data", JSON.stringify(updated));
+                  return updated;
+                });
+                showToast(ext.addonsUpdatedToast);
+              }
+            };
+
             return (
               <div className="card section-gap">
                 <div className="card-head">
@@ -3024,16 +3435,16 @@ export function AccountView({
                     <div className="actl">
                       <div className="stepper">
                         <button
-                          onClick={() => setAd({ extraNumbers: Math.max(0, ad.extraNumbers - 1) })}
-                          disabled={ad.extraNumbers === 0}
+                          onClick={() => setTempExtraNumbers(Math.max(0, tempExtraNumbers - 1))}
+                          disabled={tempExtraNumbers === 0}
                           aria-label="Remove one"
                         >
                           −
                         </button>
-                        <span className="v">{ad.extraNumbers}</span>
+                        <span className="v">{tempExtraNumbers}</span>
                         <button
-                          onClick={() => setAd({ extraNumbers: Math.min(8, ad.extraNumbers + 1) })}
-                          disabled={ad.extraNumbers === 8}
+                          onClick={() => setTempExtraNumbers(Math.min(8, tempExtraNumbers + 1))}
+                          disabled={tempExtraNumbers === 8}
                           aria-label="Add one"
                         >
                           +
@@ -3066,13 +3477,13 @@ export function AccountView({
                           min={0}
                           max={maxBlocks}
                           step={1}
-                          value={ad.minuteBlocks}
-                          style={{ "--pct": `${(ad.minuteBlocks / maxBlocks) * 100}%` } as React.CSSProperties}
-                          onChange={(e) => setAd({ minuteBlocks: Number(e.target.value) })}
+                          value={tempMinuteBlocks}
+                          style={{ "--pct": `${(tempMinuteBlocks / maxBlocks) * 100}%` } as React.CSSProperties}
+                          onChange={(e) => setTempMinuteBlocks(Number(e.target.value))}
                         />
                       </div>
                       <span className="sub">
-                        {ad.minuteBlocks * 30} {lang === "es" ? "min" : lang === "fr" ? "min" : lang === "ja" ? "分" : lang === "zh" ? "分钟" : lang === "ar" ? "دقيقة" : lang === "hi" ? "मिनट" : lang === "pt" ? "min" : lang === "de" ? "Min" : lang === "it" ? "min" : lang === "ko" ? "분" : "min"} · {minCost > 0 ? `+$${minCost.toFixed(2)}/${lang === "es" ? "mes" : lang === "fr" ? "mois" : lang === "ja" ? "月" : lang === "zh" ? "月" : lang === "ar" ? "شهر" : lang === "hi" ? "माह" : lang === "pt" ? "mês" : lang === "de" ? "Monat" : lang === "it" ? "mese" : lang === "ko" ? "월" : "mo"}` : `$0.00/${lang === "es" ? "mes" : lang === "fr" ? "mois" : lang === "ja" ? "月" : lang === "zh" ? "月" : lang === "ar" ? "شهر" : lang === "hi" ? "माह" : lang === "pt" ? "mês" : lang === "de" ? "Monat" : lang === "it" ? "mese" : lang === "ko" ? "월" : "mo"}`}
+                        {tempMinuteBlocks * 30} {lang === "es" ? "min" : lang === "fr" ? "min" : lang === "ja" ? "分" : lang === "zh" ? "分钟" : lang === "ar" ? "دقيقة" : lang === "hi" ? "मिनट" : lang === "pt" ? "min" : lang === "de" ? "Min" : lang === "it" ? "min" : lang === "ko" ? "분" : "min"} · {minCost > 0 ? `+$${minCost.toFixed(2)}/${lang === "es" ? "mes" : lang === "fr" ? "mois" : lang === "ja" ? "月" : lang === "zh" ? "月" : lang === "ar" ? "شهر" : lang === "hi" ? "माह" : lang === "pt" ? "mês" : lang === "de" ? "Monat" : lang === "it" ? "mese" : lang === "ko" ? "월" : "mo"}` : `$0.00/${lang === "es" ? "mes" : lang === "fr" ? "mois" : lang === "ja" ? "月" : lang === "zh" ? "月" : lang === "ar" ? "شهر" : lang === "hi" ? "माह" : lang === "pt" ? "mês" : lang === "de" ? "Monat" : lang === "it" ? "mese" : lang === "ko" ? "월" : "mo"}`}
                       </span>
                     </div>
                   </div>
@@ -3087,7 +3498,7 @@ export function AccountView({
                     </span>
                   </div>
                   <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 16 }}>
-                    <button className="btn btn-primary" onClick={() => showToast(ext.addonsUpdatedToast)}>
+                    <button className="btn btn-primary" onClick={handleSaveAddons}>
                       <Icon name="check" /> {ext.saveAddons}
                     </button>
                   </div>
