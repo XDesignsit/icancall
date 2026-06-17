@@ -2093,6 +2093,8 @@ export function AccountView({
   setTab,
   d,
   lang,
+  lines,
+  setLines,
 }: {
   account: Account;
   setAccount: React.Dispatch<React.SetStateAction<Account>>;
@@ -2101,6 +2103,8 @@ export function AccountView({
   setTab: (t: string) => void;
   d: any;
   lang: string;
+  lines: Line[];
+  setLines: React.Dispatch<React.SetStateAction<Line[]>>;
 }) {
   const ext = dashboardExtraTranslations[lang as keyof typeof dashboardExtraTranslations] || dashboardExtraTranslations.en;
   const a = account;
@@ -2114,6 +2118,13 @@ export function AccountView({
   const [planModalOpen, setPlanModalOpen] = useState(false);
   const [tempPlan, setTempPlan] = useState<"essential" | "pro">(account.plan || "pro");
   const [tempCycle, setTempCycle] = useState<"monthly" | "yearly">(account.billingCycle || "monthly");
+  const [selectedLineToKeep, setSelectedLineToKeep] = useState<string>("");
+
+  useEffect(() => {
+    if (planModalOpen && lines && lines.length > 0) {
+      setSelectedLineToKeep(lines[0].id);
+    }
+  }, [planModalOpen, lines]);
 
   const save17Map: Record<string, string> = {
     en: "Save 17%",
@@ -2493,6 +2504,11 @@ export function AccountView({
                           return;
                         }
                       }
+                      if (tempPlan === "essential" && lines.length > 1) {
+                        const nextLines = lines.filter(l => l.id === selectedLineToKeep);
+                        setLines(nextLines);
+                        localStorage.setItem("ic_lines_data", JSON.stringify(nextLines));
+                      }
                       set({ plan: tempPlan, billingCycle: tempCycle });
                       setPlanModalOpen(false);
                       showToast(lang === "es" ? "Plan actualizado correctamente" : lang === "fr" ? "Forfait mis à jour avec succès" : "Plan updated successfully");
@@ -2626,6 +2642,68 @@ export function AccountView({
                     </p>
                   </div>
                 </div>
+
+                {/* Phone number selector if downgrading to Essential and has >1 number */}
+                {tempPlan === "essential" && lines.length > 1 && (
+                  <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 12, borderTop: "1px solid var(--line)", paddingTop: 16 }}>
+                    <b style={{ fontSize: "0.95rem", color: "var(--ink)", textAlign: "left" }}>
+                      {lang === "es"
+                        ? "Seleccione el número de teléfono que desea conservar:"
+                        : lang === "fr"
+                        ? "Sélectionnez le numéro de téléphone que vous souhaitez conserver :"
+                        : "Select the phone number you wish to keep:"}
+                    </b>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                      {lines.map((l) => (
+                        <label
+                          key={l.id}
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 10,
+                            padding: "10px 14px",
+                            border: selectedLineToKeep === l.id ? "2px solid var(--blue)" : "1px solid var(--line)",
+                            background: selectedLineToKeep === l.id ? "var(--tint)" : "transparent",
+                            borderRadius: "var(--r-md)",
+                            cursor: "pointer",
+                            transition: "all 0.15s"
+                          }}
+                        >
+                          <input
+                            type="radio"
+                            name="lineToKeep"
+                            value={l.id}
+                            checked={selectedLineToKeep === l.id}
+                            onChange={() => setSelectedLineToKeep(l.id)}
+                            style={{ width: 16, height: 16 }}
+                          />
+                          <div style={{ display: "flex", flexDirection: "column", textAlign: "left" }}>
+                            <span style={{ fontSize: "0.92rem", fontWeight: 600 }}>{l.label}</span>
+                            <span style={{ fontSize: "0.82rem", color: "var(--ink-faint)" }}>{l.number}</span>
+                          </div>
+                        </label>
+                      ))}
+                    </div>
+                    
+                    <p style={{ 
+                      fontSize: "0.82rem", 
+                      color: "oklch(0.55 0.18 25)", 
+                      background: "oklch(0.97 0.04 25 / 0.3)", 
+                      border: "1px solid oklch(0.85 0.08 25 / 0.3)",
+                      borderRadius: "var(--r-md)",
+                      padding: "8px 12px",
+                      margin: 0,
+                      fontWeight: 500,
+                      textAlign: "left"
+                    }}>
+                      ⚠️ {lang === "es"
+                        ? "Una vez devuelto un número, no podrá volver a reclamarlo."
+                        : lang === "fr"
+                        ? "Une fois qu'un numéro est restitué, vous ne pouvez plus le réclamer."
+                        : "Warning: Once a number is returned, you can no longer claim it again."}
+                    </p>
+                  </div>
+                )}
               </div>
             </Modal>
           )}
@@ -3402,9 +3480,30 @@ export default function DashboardApp() {
             };
           });
         }
+        const savedLines = localStorage.getItem("ic_lines_data");
+        if (savedLines) {
+          try {
+            const parsed = JSON.parse(savedLines);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              setLines(parsed);
+              if (parsed[0]) {
+                setActiveLineId(parsed[0].id);
+              }
+            }
+          } catch (_) {}
+        }
       }
     }
   }, []);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const imp = localStorage.getItem("impersonatingUser");
+      if (!imp) {
+        localStorage.setItem("ic_lines_data", JSON.stringify(lines));
+      }
+    }
+  }, [lines]);
 
   useEffect(() => {
     const savedLang = localStorage.getItem("lang") as any;
@@ -3851,6 +3950,8 @@ export default function DashboardApp() {
               setTab={setAcctTab}
               d={d}
               lang={lang}
+              lines={lines}
+              setLines={setLines}
             />
           )}
         </div>
