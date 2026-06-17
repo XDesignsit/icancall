@@ -4445,9 +4445,11 @@ export default function DashboardApp() {
         <div className="sidebar-foot">
           <div className="plan-card">
             <div className="row">
-              <span className="pill">PRO PLAN</span>
+              <span className="pill">
+                {account.plan === "pro" ? "PRO PLAN" : "ESSENTIAL PLAN"}
+              </span>
               <span style={{ fontSize: "0.78rem", color: "oklch(0.82 0.02 225)" }}>
-                {lines.length}/2 {d.common.numbers}
+                {lines.length}/{account.plan === "pro" ? 2 + (account.addons?.extraNumbers || 0) : 1 + (account.addons?.extraNumbers || 0)} {d.common.numbers}
               </span>
             </div>
             <button
