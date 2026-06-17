@@ -3159,7 +3159,7 @@ export function AccountView({
                   </button>
                   <button
                     className="btn btn-primary"
-                    disabled={selectedLinesToRemove.length !== ((a.addons?.extraNumbers || 0) - tempExtraNumbers)}
+                    disabled={selectedLinesToRemove.length !== (Math.max(0, lines.length - (a.plan === "pro" ? 2 : 1)) - tempExtraNumbers)}
                     onClick={() => {
                       // Filter out returned lines
                       const nextLines = lines.filter(l => !selectedLinesToRemove.includes(l.id));
@@ -3192,10 +3192,10 @@ export function AccountView({
               <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
                 <p style={{ color: "var(--ink-soft)", fontSize: "0.95rem", textAlign: "left" }}>
                   {lang === "es"
-                    ? `Debe seleccionar exactamente ${(a.addons?.extraNumbers || 0) - tempExtraNumbers} número(s) para devolver:`
+                    ? `Debe seleccionar exactamente ${Math.max(0, lines.length - (a.plan === "pro" ? 2 : 1)) - tempExtraNumbers} número(s) para devolver:`
                     : lang === "fr"
-                    ? `Vous devez sélectionner exactement ${(a.addons?.extraNumbers || 0) - tempExtraNumbers} numéro(s) à restituer :`
-                    : `You must select exactly ${(a.addons?.extraNumbers || 0) - tempExtraNumbers} phone number(s) to return:`}
+                    ? `Vous devez sélectionner exactement ${Math.max(0, lines.length - (a.plan === "pro" ? 2 : 1)) - tempExtraNumbers} numéro(s) à restituer :`
+                    : `You must select exactly ${Math.max(0, lines.length - (a.plan === "pro" ? 2 : 1)) - tempExtraNumbers} phone number(s) to return:`}
                 </p>
 
                 <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
@@ -3380,10 +3380,9 @@ export function AccountView({
             const maxBlocks = 10;
 
             const handleSaveAddons = () => {
-              const currentExtra = a.addons?.extraNumbers || 0;
-              const delta = tempExtraNumbers - currentExtra;
-              alert(`handleSaveAddons: currentExtra=${currentExtra}, tempExtraNumbers=${tempExtraNumbers}, delta=${delta}`);
-              console.log("handleSaveAddons click:", { currentExtra, tempExtraNumbers, delta });
+              const baseLinesCount = a.plan === "pro" ? 2 : 1;
+              const currentExtraLines = Math.max(0, lines.length - baseLinesCount);
+              const delta = tempExtraNumbers - currentExtraLines;
               if (delta > 0) {
                 // Initialize configuration slots for the newly added numbers
                 const initialConfig: AddonNumberSlotConfig[] = Array.from({ length: delta }).map((_, idx) => ({
