@@ -2149,6 +2149,7 @@ export function AccountView({
   }
   const [addonModalOpen, setAddonModalOpen] = useState(false);
   const [addonRemovalModalOpen, setAddonRemovalModalOpen] = useState(false);
+  const [minuteBlocksConfirmOpen, setMinuteBlocksConfirmOpen] = useState(false);
 
   interface AddonNumberSlotConfig {
     index: number;
@@ -3389,10 +3390,7 @@ export function AccountView({
             const total = numCost + minCost;
             const maxBlocks = 10;
 
-            const handleSaveAddons = () => {
-              const baseLinesCount = a.plan === "pro" ? 2 : 1;
-              const currentExtraLines = Math.max(0, lines.length - baseLinesCount);
-              const delta = tempExtraNumbers - currentExtraLines;
+            const proceedWithSaveAddons = (delta: number, minBlocksToSave: number) => {
               if (delta > 0) {
                 // Initialize configuration slots for the newly added numbers
                 const initialConfig: AddonNumberSlotConfig[] = Array.from({ length: delta }).map((_, idx) => ({
@@ -3416,7 +3414,7 @@ export function AccountView({
                     addons: {
                       ...(prev.addons || {}),
                       extraNumbers: tempExtraNumbers,
-                      minuteBlocks: tempMinuteBlocks,
+                      minuteBlocks: minBlocksToSave,
                     } as Account["addons"],
                   };
                   localStorage.setItem("ic_account_data", JSON.stringify(updated));
@@ -3426,8 +3424,23 @@ export function AccountView({
               }
             };
 
+            const handleSaveAddons = () => {
+              const baseLinesCount = a.plan === "pro" ? 2 : 1;
+              const currentExtraLines = Math.max(0, lines.length - baseLinesCount);
+              const delta = tempExtraNumbers - currentExtraLines;
+
+              const minutesChanged = tempMinuteBlocks !== (a.addons?.minuteBlocks || 0);
+
+              if (minutesChanged) {
+                setMinuteBlocksConfirmOpen(true);
+              } else {
+                proceedWithSaveAddons(delta, tempMinuteBlocks);
+              }
+            };
+
             return (
-              <div className="card section-gap">
+              <>
+                <div className="card section-gap">
                 <div className="card-head">
                   <div>
                     <h2>{ext.addOns}</h2>
@@ -3528,8 +3541,64 @@ export function AccountView({
                   </div>
                 </div>
               </div>
-            );
-          })()}
+
+              {/* Extra Voice Minutes Confirmation Modal */}
+              {minuteBlocksConfirmOpen && (
+                <Modal
+                  title={lang === "es" ? "Confirmar minutos de voz adicionales" : lang === "fr" ? "Confirmer les minutes vocales supplémentaires" : "Confirm Extra Voice Minutes"}
+                  onClose={() => setMinuteBlocksConfirmOpen(false)}
+                  footer={
+                    <div style={{ display: "flex", justifyContent: "flex-end", gap: 10, width: "100%" }}>
+                      <button className="btn btn-ghost" onClick={() => setMinuteBlocksConfirmOpen(false)}>
+                        {lang === "es" ? "Cancelar" : lang === "fr" ? "Annuler" : "Cancel"}
+                      </button>
+                      <button
+                        className="btn btn-primary"
+                        onClick={() => {
+                          setMinuteBlocksConfirmOpen(false);
+                          const baseLinesCount = a.plan === "pro" ? 2 : 1;
+                          const currentExtraLines = Math.max(0, lines.length - baseLinesCount);
+                          const delta = tempExtraNumbers - currentExtraLines;
+                          proceedWithSaveAddons(delta, tempMinuteBlocks);
+                        }}
+                      >
+                        {lang === "es" ? "Confirmar y guardar" : lang === "fr" ? "Confirmer et enregistrer" : "Confirm & Save"}
+                      </button>
+                    </div>
+                  }
+                >
+                  <div style={{ display: "flex", flexDirection: "column", gap: 16, textAlign: "left" }}>
+                    <p style={{ color: "var(--ink-soft)", fontSize: "0.95rem", margin: 0 }}>
+                      {lang === "es"
+                        ? `Está actualizando sus bloques de minutos de voz adicionales a ${tempMinuteBlocks * 30} minutos (anteriormente: ${(account.addons?.minuteBlocks || 0) * 30} minutos).`
+                        : lang === "fr"
+                        ? `Vous mettez à jour vos blocs de minutes vocales supplémentaires à ${tempMinuteBlocks * 30} minutes (précédemment : ${(account.addons?.minuteBlocks || 0) * 30} minutes).`
+                        : `You are updating your extra voice minutes blocks to ${tempMinuteBlocks * 30} minutes (previously: ${(account.addons?.minuteBlocks || 0) * 30} minutes).`}
+                    </p>
+
+                    <p style={{ 
+                      fontSize: "0.88rem", 
+                      color: "oklch(0.55 0.18 25)", 
+                      background: "oklch(0.97 0.04 25 / 0.3)", 
+                      border: "1px solid oklch(0.85 0.08 25 / 0.3)",
+                      borderRadius: "var(--r-md)",
+                      padding: "10px 14px",
+                      margin: 0,
+                      fontWeight: 500
+                    }}>
+                      ⚠️ <strong>{lang === "es" ? "Aviso de facturación:" : lang === "fr" ? "Avis de facturation :" : "Billing Notice:"}</strong>{" "}
+                      {lang === "es"
+                        ? "La facturación por los minutos adicionales será efectiva de inmediato. Una vez confirmados los minutos adicionales, se facturarán inmediatamente a su cuenta."
+                        : lang === "fr"
+                        ? "La facturation des minutes supplémentaires sera effective immédiatement. Une fois les minutes supplémentaires confirmées, elles seront immédiatement facturées sur votre compte."
+                        : "Billing for the add-on minutes will be effective immediately. Once add-on minutes are confirmed, it will be billed immediately to your account."}
+                    </p>
+                  </div>
+                </Modal>
+              )}
+            </>
+          );
+        })()}
 
           {(() => {
             const ad = a.addons || {};
