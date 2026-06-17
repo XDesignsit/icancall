@@ -2970,6 +2970,27 @@ export function AccountView({
               }
             >
               <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+                {/* Voice Minutes Confirmation Info */}
+                {tempMinuteBlocks !== (account.addons?.minuteBlocks || 0) && (
+                  <div style={{
+                    fontSize: "0.9rem",
+                    color: "var(--ink-soft)",
+                    background: "var(--tint)",
+                    border: "1px solid var(--line)",
+                    borderRadius: "var(--r-md)",
+                    padding: "10px 14px",
+                    textAlign: "left",
+                    fontWeight: 500
+                  }}>
+                    📞 <b>{lang === "es" ? "Confirmar minutos adicionales:" : lang === "fr" ? "Confirmer les minutes supplémentaires :" : "Confirm Extra Voice Minutes:"}</b>{" "}
+                    {lang === "es"
+                      ? `Actualizando a ${tempMinuteBlocks * 30} minutos (anteriormente: ${(account.addons?.minuteBlocks || 0) * 30} minutos).`
+                      : lang === "fr"
+                      ? `Mise à jour à ${tempMinuteBlocks * 30} minutes (précédemment : ${(account.addons?.minuteBlocks || 0) * 30} minutes).`
+                      : `Updating to ${tempMinuteBlocks * 30} minutes (previously: ${(account.addons?.minuteBlocks || 0) * 30} minutes).`}
+                  </div>
+                )}
+
                 {/* Billing Notice */}
                 <div style={{
                   fontSize: "0.88rem",
@@ -2989,11 +3010,19 @@ export function AccountView({
                       ? "Avis de facturation :" 
                       : "Billing Notice:"}
                   </b>{" "}
-                  {lang === "es"
-                    ? "La facturación de los números adicionales comenzará inmediatamente después de aprobar los complementos."
-                    : lang === "fr"
-                    ? "La facturation des numéros supplémentaires sera effective immédiatement après l'approbation des options."
-                    : "Billing for the add-on numbers will be effective immediately upon approving the add-ons."}
+                  {tempMinuteBlocks !== (account.addons?.minuteBlocks || 0) ? (
+                    lang === "es"
+                      ? "La facturación de los números y minutos adicionales comenzará inmediatamente después de aprobar los complementos."
+                      : lang === "fr"
+                      ? "La facturation des numéros supplémentaires et des minutes vocales supplémentaires sera effective immédiatement après l'approbation des options."
+                      : "Billing for the add-on numbers and extra voice minutes will be effective immediately upon approving the add-ons."
+                  ) : (
+                    lang === "es"
+                      ? "La facturación de los números adicionales comenzará inmediatamente después de aprobar los complementos."
+                      : lang === "fr"
+                      ? "La facturation des numéros supplémentaires sera effective immédiatement après l'approbation des options."
+                      : "Billing for the add-on numbers will be effective immediately upon approving the add-ons."
+                  )}
                 </div>
 
                 <div style={{ display: "flex", flexDirection: "column", gap: 20, maxHeight: 420, overflowY: "auto", paddingRight: 4 }}>
