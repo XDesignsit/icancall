@@ -2482,6 +2482,17 @@ export function AccountView({
                     className="btn btn-primary"
                     disabled={isModalButtonDisabled}
                     onClick={() => {
+                      const isUpgradingCycle = account.billingCycle === "monthly" && tempCycle === "yearly";
+                      if (isUpgradingCycle) {
+                        const msg = lang === "es"
+                          ? "¿Está seguro de que desea cambiar a la facturación anual? Se cargará el importe correspondiente al método de pago registrado."
+                          : lang === "fr"
+                          ? "Êtes-vous sûr de vouloir passer à la facturation annuelle ? Le montant sera débité de votre mode de paiement enregistré."
+                          : "Are you sure you want to switch to annual billing? Your payment method on file will be charged immediately.";
+                        if (!window.confirm(msg)) {
+                          return;
+                        }
+                      }
                       set({ plan: tempPlan, billingCycle: tempCycle });
                       setPlanModalOpen(false);
                       showToast(lang === "es" ? "Plan actualizado correctamente" : lang === "fr" ? "Forfait mis à jour avec succès" : "Plan updated successfully");
@@ -2691,6 +2702,16 @@ export function AccountView({
                   <button
                     className={`seg-btn ${account.billingCycle === "yearly" ? "active" : ""}`}
                     onClick={() => {
+                      if (account.billingCycle === "monthly") {
+                        const msg = lang === "es"
+                          ? "¿Está seguro de que desea cambiar a la facturación anual? Se cargará el importe correspondiente al método de pago registrado."
+                          : lang === "fr"
+                          ? "Êtes-vous sûr de vouloir passer à la facturation annuelle ? Le montant sera débité de votre mode de paiement enregistré."
+                          : "Are you sure you want to switch to annual billing? Your payment method on file will be charged immediately.";
+                        if (!window.confirm(msg)) {
+                          return;
+                        }
+                      }
                       set({ billingCycle: "yearly" });
                       showToast(account.plan === "pro" 
                         ? ext.annualToast 
