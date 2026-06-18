@@ -13,6 +13,15 @@ const cryptoProvider = typeof globalThis !== "undefined" && globalThis.crypto
   ? globalThis.crypto
   : (webcrypto as unknown as Crypto);
 
+// Helper to pad base64url string back to standard base64 for decoding
+function base64urlToBase64(str: string): string {
+  let base64 = str.replace(/-/g, "+").replace(/_/g, "/");
+  while (base64.length % 4) {
+    base64 += "=";
+  }
+  return base64;
+}
+
 // Convert ArrayBuffer to base64url string
 function bufferToBase64url(buffer: ArrayBuffer): string {
   const bytes = new Uint8Array(buffer);
@@ -78,15 +87,20 @@ export async function verifySession(token: string): Promise<SessionPayload | nul
     );
     const expectedSig = bufferToBase64url(expectedBuffer);
 
-    if (signature !== expectedSig) return null;
+    if (signature !== expectedSig) {
+      console.warn("Session verification failed: Signature mismatch.");
+      return null;
+    }
 
-    const decoded = atob(data.replace(/-/g, "+").replace(/_/g, "/"));
+    const decoded = atob(base64urlToBase64(data));
     const payload = JSON.parse(decoded) as SessionPayload;
     if (payload.expiresAt < Date.now()) {
+      console.warn("Session verification failed: Token expired.");
       return null;
     }
     return payload;
   } catch (err) {
+    console.error("Session verification failed with error:", err);
     return null;
   }
 }
