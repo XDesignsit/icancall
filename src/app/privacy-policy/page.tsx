@@ -4,17 +4,10 @@ import React, { useEffect } from "react";
 import Link from "next/link";
 
 export default function PrivacyPolicyPage() {
-  const policyId = process.env.NEXT_PUBLIC_TERMAGEDDON_POLICY_ID || "YOUR_POLICY_KEY";
-
   useEffect(() => {
-    // Dynamically inject the Termageddon embed script on client-side mount
-    if (policyId === "YOUR_POLICY_KEY") {
-      console.warn("Termageddon Policy ID is not configured. Please set NEXT_PUBLIC_TERMAGEDDON_POLICY_ID in your environment variables.");
-      return;
-    }
-
+    // Inject the specific Termageddon script provided
     const script = document.createElement("script");
-    script.src = `https://app.termageddon.com/api/v1/policy/${policyId}?type=js`;
+    script.src = "https://policies.termageddon.com/api/embed/WVdVNVRHaENhRXczVkUwcmJHYzlQUT09.js";
     script.defer = true;
     document.body.appendChild(script);
 
@@ -22,7 +15,7 @@ export default function PrivacyPolicyPage() {
       // Clean up the script when page unmounts
       document.body.removeChild(script);
     };
-  }, [policyId]);
+  }, []);
 
   return (
     <div
@@ -91,36 +84,28 @@ export default function PrivacyPolicyPage() {
         </p>
 
         {/* Termageddon Embed Container */}
-        {policyId === "YOUR_POLICY_KEY" ? (
-          <div
-            style={{
-              padding: "32px",
-              background: "oklch(0.96 0.02 220)",
-              border: "1px dashed oklch(0.80 0.04 220)",
-              borderRadius: 16,
-              textAlign: "center",
-              color: "oklch(0.50 0.02 240)",
-            }}
+        <div
+          id="WVdVNVRHaENhRXczVkUwcmJHYzlQUT09"
+          className="policy_embed_div"
+          aria-live="polite"
+          aria-busy="true"
+          style={{
+            fontSize: "1rem",
+            lineHeight: "1.7",
+            color: "oklch(0.30 0.02 240)",
+          }}
+        >
+          Please wait while the policy is loaded. If it does not load, please{" "}
+          <a
+            rel="nofollow"
+            aria-label="click here to view the policy"
+            href="https://policies.termageddon.com/api/policy/WVdVNVRHaENhRXczVkUwcmJHYzlQUT09"
+            target="_blank"
+            style={{ color: "oklch(0.45 0.13 242)", textDecoration: "underline" }}
           >
-            <h3 style={{ margin: "0 0 12px 0", color: "oklch(0.35 0.02 240)" }}>Termageddon Policy Placeholder</h3>
-            <p style={{ margin: 0, fontSize: "0.9rem", lineHeight: "1.5" }}>
-              To display your live Privacy Policy, please configure the <b>`NEXT_PUBLIC_TERMAGEDDON_POLICY_ID`</b> environment variable in your Vercel project settings with your Termageddon policy key.
-            </p>
-          </div>
-        ) : (
-          <div
-            data-name="termageddon-embed"
-            id={policyId}
-            style={{
-              fontSize: "1rem",
-              lineHeight: "1.7",
-              color: "oklch(0.30 0.02 240)",
-            }}
-          >
-            {/* The policy content will be injected here dynamically by Termageddon's script */}
-            <p style={{ textAlign: "center", color: "oklch(0.60 0.015 240)" }}>Loading Privacy Policy...</p>
-          </div>
-        )}
+            click here to view the policy
+          </a>.
+        </div>
       </div>
     </div>
   );
