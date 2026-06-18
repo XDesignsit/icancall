@@ -2134,18 +2134,13 @@ export function AccountView({
 
   // States for Add-on changes
   const [tempExtraNumbers, setTempExtraNumbers] = useState(a.addons?.extraNumbers || 0);
-  const [tempMinuteBlocks, setTempMinuteBlocks] = useState(a.addons?.minuteBlocks || 0);
+  const [tempMinuteBlocks, setTempMinuteBlocks] = useState(0);
 
   const [lastPropExtraNumbers, setLastPropExtraNumbers] = useState(a.addons?.extraNumbers || 0);
-  const [lastPropMinuteBlocks, setLastPropMinuteBlocks] = useState(a.addons?.minuteBlocks || 0);
 
   if ((a.addons?.extraNumbers || 0) !== lastPropExtraNumbers) {
     setLastPropExtraNumbers(a.addons?.extraNumbers || 0);
     setTempExtraNumbers(a.addons?.extraNumbers || 0);
-  }
-  if ((a.addons?.minuteBlocks || 0) !== lastPropMinuteBlocks) {
-    setLastPropMinuteBlocks(a.addons?.minuteBlocks || 0);
-    setTempMinuteBlocks(a.addons?.minuteBlocks || 0);
   }
   const [addonModalOpen, setAddonModalOpen] = useState(false);
   const [addonRemovalModalOpen, setAddonRemovalModalOpen] = useState(false);
@@ -2935,12 +2930,13 @@ export function AccountView({
                           addons: {
                             ...(prev.addons || {}),
                             extraNumbers: tempExtraNumbers,
-                            minuteBlocks: tempMinuteBlocks,
+                            minuteBlocks: (prev.addons?.minuteBlocks || 0) + tempMinuteBlocks,
                           } as Account["addons"],
                         };
                         localStorage.setItem("ic_account_data", JSON.stringify(updated));
                         return updated;
                       });
+                      setTempMinuteBlocks(0);
 
                       // Construct and add the new phone lines
                       const newLines = addedNumbersConfig.map((config, index) => {
@@ -2972,7 +2968,7 @@ export function AccountView({
             >
               <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
                 {/* Voice Minutes Confirmation Info */}
-                {tempMinuteBlocks !== (account.addons?.minuteBlocks || 0) && (
+                {tempMinuteBlocks > 0 && (
                   <div style={{
                     fontSize: "0.9rem",
                     color: "var(--ink-soft)",
@@ -2985,10 +2981,10 @@ export function AccountView({
                   }}>
                     📞 <b>{lang === "es" ? "Confirmar minutos adicionales:" : lang === "fr" ? "Confirmer les minutes supplémentaires :" : "Confirm Extra Voice Minutes:"}</b>{" "}
                     {lang === "es"
-                      ? `Actualizando a ${tempMinuteBlocks * 30} minutos (anteriormente: ${(account.addons?.minuteBlocks || 0) * 30} minutos).`
+                      ? `Agregando ${tempMinuteBlocks * 30} minutos adicionales.`
                       : lang === "fr"
-                      ? `Mise à jour à ${tempMinuteBlocks * 30} minutes (précédemment : ${(account.addons?.minuteBlocks || 0) * 30} minutes).`
-                      : `Updating to ${tempMinuteBlocks * 30} minutes (previously: ${(account.addons?.minuteBlocks || 0) * 30} minutes).`}
+                      ? `Ajout de ${tempMinuteBlocks * 30} minutes vocales supplémentaires.`
+                      : `Adding ${tempMinuteBlocks * 30} extra voice minutes.`}
                   </div>
                 )}
 
@@ -3011,7 +3007,7 @@ export function AccountView({
                       ? "Avis de facturation :" 
                       : "Billing Notice:"}
                   </b>{" "}
-                  {tempMinuteBlocks !== (account.addons?.minuteBlocks || 0) ? (
+                  {tempMinuteBlocks > 0 ? (
                     lang === "es"
                       ? "La facturación de los números y minutos adicionales comenzará inmediatamente después de aprobar los complementos."
                       : lang === "fr"
@@ -3504,12 +3500,13 @@ export function AccountView({
                     addons: {
                       ...(prev.addons || {}),
                       extraNumbers: tempExtraNumbers,
-                      minuteBlocks: minBlocksToSave,
+                      minuteBlocks: (prev.addons?.minuteBlocks || 0) + minBlocksToSave,
                     } as Account["addons"],
                   };
                   localStorage.setItem("ic_account_data", JSON.stringify(updated));
                   return updated;
                 });
+                setTempMinuteBlocks(0);
                 showToast(ext.addonsUpdatedToast);
               }
             };
@@ -3519,7 +3516,7 @@ export function AccountView({
               const currentExtraLines = Math.max(0, lines.length - baseLinesCount);
               const delta = tempExtraNumbers - currentExtraLines;
 
-              const minutesChanged = tempMinuteBlocks !== (a.addons?.minuteBlocks || 0);
+              const minutesChanged = tempMinuteBlocks > 0;
 
               if (minutesChanged) {
                 setMinuteBlocksConfirmOpen(true);
@@ -3660,10 +3657,10 @@ export function AccountView({
                   <div style={{ display: "flex", flexDirection: "column", gap: 16, textAlign: "left" }}>
                     <p style={{ color: "var(--ink-soft)", fontSize: "0.95rem", margin: 0 }}>
                       {lang === "es"
-                        ? `Está actualizando sus bloques de minutos de voz adicionales a ${tempMinuteBlocks * 30} minutos (anteriormente: ${(account.addons?.minuteBlocks || 0) * 30} minutos).`
+                        ? `Está agregando ${tempMinuteBlocks * 30} minutos de voz adicionales.`
                         : lang === "fr"
-                        ? `Vous mettez à jour vos blocs de minutes vocales supplémentaires à ${tempMinuteBlocks * 30} minutes (précédemment : ${(account.addons?.minuteBlocks || 0) * 30} minutes).`
-                        : `You are updating your extra voice minutes blocks to ${tempMinuteBlocks * 30} minutes (previously: ${(account.addons?.minuteBlocks || 0) * 30} minutes).`}
+                        ? `Vous ajoutez ${tempMinuteBlocks * 30} minutes vocales supplémentaires.`
+                        : `You are adding ${tempMinuteBlocks * 30} extra voice minutes.`}
                     </p>
 
                     <p style={{ 
