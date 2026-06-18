@@ -661,7 +661,7 @@ function ContactsView({
 
         <div className={`add-slot ${full ? "full" : ""}`} onClick={() => !full && setModal({})}>
           {full ? (
-            <>{d.contacts.limitReached}</>
+            <>{d.contacts.limitReached.replace("6", limit.toString())}</>
           ) : (
             <>
               <Icon name="plus" /> {d.contacts.addContact}
