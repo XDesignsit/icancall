@@ -26,11 +26,11 @@ export async function POST(request: Request) {
 
     const isSecure = request.headers.get("x-forwarded-proto") === "https" || request.url.startsWith("https:");
 
-    // Set secure HTTP-only cookie
+    // Set secure HTTP-only cookie (SameSite=None is required for iframe preview sandboxes)
     response.cookies.set("session", token, {
       httpOnly: true,
-      secure: isSecure,
-      sameSite: "lax",
+      secure: true,
+      sameSite: "none",
       maxAge: 7 * 24 * 60 * 60, // 7 days in seconds
       path: "/",
     });
