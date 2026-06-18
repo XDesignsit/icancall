@@ -612,7 +612,7 @@ export default function ComingSoon() {
             <div>
               <h5>{t.footer.trust}</h5>
               <ul>
-                <li><a href="#">{t.footer.privacy}</a></li>
+                <li><a href="/privacy-policy">{t.footer.privacy}</a></li>
                 <li><a href="#">{t.footer.security}</a></li>
                 <li><a href="#">{t.footer.terms}</a></li>
               </ul>
