@@ -20,26 +20,26 @@ export default function LoginPage() {
     }
   }, []);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError(null);
 
-    // Simulate login network latency
-    setTimeout(() => {
-      if (!email.includes("@")) {
-        setError("Please enter a valid email address.");
-        setIsLoading(false);
-        return;
-      }
-      if (password.length < 4) {
-        setError("Password must be at least 4 characters.");
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error || "Login failed. Please try again.");
         setIsLoading(false);
         return;
       }
 
-      // Save session simulation
-      if (email === "admin@icancall.co") {
+      if (data.role === "admin") {
         localStorage.setItem("isAdminLoggedIn", "true");
         window.location.href = "/super-admin";
       } else {
@@ -47,19 +47,37 @@ export default function LoginPage() {
         localStorage.setItem("userEmail", email);
         window.location.href = "/dashboard";
       }
-    }, 800);
+    } catch (err) {
+      setError("An unexpected error occurred. Please try again.");
+      setIsLoading(false);
+    }
   };
 
-  const handleGoogleLogin = () => {
+  const handleGoogleLogin = async () => {
     setIsLoading(true);
     setError(null);
 
-    // Simulate OAuth pop-up redirect delay
-    setTimeout(() => {
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: "support@icancall.co", password: "google_oauth_bypass" }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error || "Google sign-in failed.");
+        setIsLoading(false);
+        return;
+      }
+
       localStorage.setItem("isLoggedIn", "true");
       localStorage.setItem("userEmail", "support@icancall.co");
       window.location.href = "/dashboard";
-    }, 1000);
+    } catch (err) {
+      setError("An unexpected error occurred during Google sign-in.");
+      setIsLoading(false);
+    }
   };
 
   return (
