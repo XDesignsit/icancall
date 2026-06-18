@@ -614,7 +614,7 @@ export default function ComingSoon() {
               <ul>
                 <li><a href="/privacy-policy">{t.footer.privacy}</a></li>
                 <li><a href="#">{t.footer.security}</a></li>
-                <li><a href="#">{t.footer.terms}</a></li>
+                <li><a href="/terms-of-service">{t.footer.terms}</a></li>
               </ul>
             </div>
           </div>
