@@ -24,10 +24,12 @@ export async function POST(request: Request) {
 
     const response = NextResponse.json({ success: true, role });
 
+    const isSecure = request.headers.get("x-forwarded-proto") === "https" || request.url.startsWith("https:");
+
     // Set secure HTTP-only cookie
     response.cookies.set("session", token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+      secure: isSecure,
       sameSite: "lax",
       maxAge: 7 * 24 * 60 * 60, // 7 days in seconds
       path: "/",

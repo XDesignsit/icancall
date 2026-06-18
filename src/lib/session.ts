@@ -11,28 +11,32 @@ async function getCryptoProvider(): Promise<Crypto> {
   if (typeof globalThis !== "undefined" && globalThis.crypto) {
     return globalThis.crypto;
   }
-  // Dynamic import prevents Edge Runtime bundler from throwing module errors
   const { webcrypto } = await import("crypto");
   return webcrypto as unknown as Crypto;
 }
 
-// Helper to pad base64url string back to standard base64 for decoding
-function base64urlToBase64(str: string): string {
+// Convert string to base64url using Buffer (fully robust and standard in Node/Edge)
+function stringToBase64url(str: string): string {
+  return Buffer.from(str, "utf8")
+    .toString("base64")
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/, "");
+}
+
+// Convert base64url back to standard UTF-8 string
+function base64urlToString(str: string): string {
   let base64 = str.replace(/-/g, "+").replace(/_/g, "/");
   while (base64.length % 4) {
     base64 += "=";
   }
-  return base64;
+  return Buffer.from(base64, "base64").toString("utf8");
 }
 
 // Convert ArrayBuffer to base64url string
 function bufferToBase64url(buffer: ArrayBuffer): string {
-  const bytes = new Uint8Array(buffer);
-  let binary = "";
-  for (let i = 0; i < bytes.byteLength; i++) {
-    binary += String.fromCharCode(bytes[i]);
-  }
-  return btoa(binary)
+  return Buffer.from(buffer)
+    .toString("base64")
     .replace(/\+/g, "-")
     .replace(/\//g, "_")
     .replace(/=+$/, "");
@@ -56,11 +60,7 @@ async function getHmacKey(): Promise<CryptoKey> {
  * Sign session payload to a base64url token (Edge Runtime compatible).
  */
 export async function signSession(payload: SessionPayload): Promise<string> {
-  const data = btoa(JSON.stringify(payload))
-    .replace(/\+/g, "-")
-    .replace(/\//g, "_")
-    .replace(/=+$/, "");
-  
+  const data = stringToBase64url(JSON.stringify(payload));
   const key = await getHmacKey();
   const encoder = new TextEncoder();
   const crypto = await getCryptoProvider();
@@ -98,7 +98,7 @@ export async function verifySession(token: string): Promise<SessionPayload | nul
       return null;
     }
 
-    const decoded = atob(base64urlToBase64(data));
+    const decoded = base64urlToString(data);
     const payload = JSON.parse(decoded) as SessionPayload;
     if (payload.expiresAt < Date.now()) {
       console.warn("Session verification failed: Token expired.");
