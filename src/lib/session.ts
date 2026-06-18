@@ -1,5 +1,3 @@
-import { webcrypto } from "crypto";
-
 const JWT_SECRET = process.env.JWT_SECRET || "icancall_dev_fallback_secret_key_12345";
 
 export interface SessionPayload {
@@ -8,10 +6,15 @@ export interface SessionPayload {
   expiresAt: number;
 }
 
-// Get the correct crypto provider depending on runtime (Edge vs Node.js)
-const cryptoProvider = typeof globalThis !== "undefined" && globalThis.crypto
-  ? globalThis.crypto
-  : (webcrypto as unknown as Crypto);
+// Get the correct crypto provider dynamically to avoid static bundling of Node.js "crypto" in Edge Runtime
+async function getCryptoProvider(): Promise<Crypto> {
+  if (typeof globalThis !== "undefined" && globalThis.crypto) {
+    return globalThis.crypto;
+  }
+  // Dynamic import prevents Edge Runtime bundler from throwing module errors
+  const { webcrypto } = await import("crypto");
+  return webcrypto as unknown as Crypto;
+}
 
 // Helper to pad base64url string back to standard base64 for decoding
 function base64urlToBase64(str: string): string {
@@ -39,7 +42,8 @@ function bufferToBase64url(buffer: ArrayBuffer): string {
 async function getHmacKey(): Promise<CryptoKey> {
   const encoder = new TextEncoder();
   const keyData = encoder.encode(JWT_SECRET);
-  return cryptoProvider.subtle.importKey(
+  const crypto = await getCryptoProvider();
+  return crypto.subtle.importKey(
     "raw",
     keyData,
     { name: "HMAC", hash: "SHA-256" },
@@ -59,7 +63,8 @@ export async function signSession(payload: SessionPayload): Promise<string> {
   
   const key = await getHmacKey();
   const encoder = new TextEncoder();
-  const signatureBuffer = await cryptoProvider.subtle.sign(
+  const crypto = await getCryptoProvider();
+  const signatureBuffer = await crypto.subtle.sign(
     "HMAC",
     key,
     encoder.encode(data)
@@ -80,7 +85,8 @@ export async function verifySession(token: string): Promise<SessionPayload | nul
     
     const key = await getHmacKey();
     const encoder = new TextEncoder();
-    const expectedBuffer = await cryptoProvider.subtle.sign(
+    const crypto = await getCryptoProvider();
+    const expectedBuffer = await crypto.subtle.sign(
       "HMAC",
       key,
       encoder.encode(data)
