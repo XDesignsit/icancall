@@ -1,20 +1,36 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 
 export default function PrivacyPolicyPage() {
-  useEffect(() => {
-    // Inject the specific Termageddon script provided
-    const script = document.createElement("script");
-    script.src = "https://policies.termageddon.com/api/embed/WVdVNVRHaENhRXczVkUwcmJHYzlQUT09.js";
-    script.defer = true;
-    document.body.appendChild(script);
+  const [policyHtml, setPolicyHtml] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
-    return () => {
-      // Clean up the script when page unmounts
-      document.body.removeChild(script);
+  useEffect(() => {
+    const fetchPolicy = async () => {
+      try {
+        const origin = window.location.href;
+        const res = await fetch(
+          `https://embed.termageddon.com/api/render/WVdVNVRHaENhRXczVkUwcmJHYzlQUT09?origin=${encodeURIComponent(
+            origin
+          )}`
+        );
+        if (!res.ok) {
+          throw new Error("Network response was not ok");
+        }
+        const data = await res.text();
+        setPolicyHtml(data);
+      } catch (err) {
+        console.error("Failed to load Termageddon policy:", err);
+        setError(true);
+      } finally {
+        setLoading(false);
+      }
     };
+
+    fetchPolicy();
   }, []);
 
   return (
@@ -88,25 +104,47 @@ export default function PrivacyPolicyPage() {
           id="WVdVNVRHaENhRXczVkUwcmJHYzlQUT09"
           className="policy_embed_div"
           aria-live="polite"
-          aria-busy="true"
+          aria-busy={loading ? "true" : "false"}
           style={{
             fontSize: "1rem",
             lineHeight: "1.7",
             color: "oklch(0.30 0.02 240)",
           }}
         >
-          Please wait while the policy is loaded. If it does not load, please{" "}
-          <a
-            rel="nofollow"
-            aria-label="click here to view the policy"
-            href="https://policies.termageddon.com/api/policy/WVdVNVRHaENhRXczVkUwcmJHYzlQUT09"
-            target="_blank"
-            style={{ color: "oklch(0.45 0.13 242)", textDecoration: "underline" }}
-          >
-            click here to view the policy
-          </a>.
+          {loading && (
+            <div>
+              Please wait while the policy is loaded. If it does not load, please{" "}
+              <a
+                rel="nofollow"
+                aria-label="click here to view the policy"
+                href="https://policies.termageddon.com/api/policy/WVdVNVRHaENhRXczVkUwcmJHYzlQUT09"
+                target="_blank"
+                style={{ color: "oklch(0.45 0.13 242)", textDecoration: "underline" }}
+              >
+                click here to view the policy
+              </a>.
+            </div>
+          )}
+
+          {!loading && error && (
+            <div role="alert" style={{ color: "red" }}>
+              There was an error loading this policy, please{" "}
+              <a
+                href="https://embed.termageddon.com/api/policy/WVdVNVRHaENhRXczVkUwcmJHYzlQUT09"
+                target="_blank"
+                style={{ color: "oklch(0.45 0.13 242)", textDecoration: "underline" }}
+              >
+                click here to view the policy
+              </a>.
+            </div>
+          )}
+
+          {!loading && !error && policyHtml && (
+            <div dangerouslySetInnerHTML={{ __html: policyHtml }} />
+          )}
         </div>
       </div>
     </div>
   );
 }
+
