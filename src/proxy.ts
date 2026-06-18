@@ -7,7 +7,13 @@ export async function proxy(request: NextRequest) {
   const host = request.headers.get("host") || "";
   const baseHost = host.split(":")[0]; // remove port if any
 
-  // 1. Enforce Authentication & Route Authorization
+  // 1. Only run proxy redirects on production domains containing 'icancall.co'
+  // (Prevents iframe cookie-blocking loops in local development & Vercel preview environments)
+  if (!baseHost.includes("icancall.co")) {
+    return NextResponse.next();
+  }
+
+  // 2. Enforce Authentication & Route Authorization
   const isDashboardRoute = url.pathname.startsWith("/dashboard");
   const isSuperAdminRoute = url.pathname.startsWith("/super-admin");
   const isLoginOrSignup = url.pathname.startsWith("/login") || url.pathname.startsWith("/onboarding");
@@ -37,12 +43,6 @@ export async function proxy(request: NextRequest) {
     // Redirect already authenticated users away from login/signup
     url.pathname = session.role === "admin" ? "/super-admin" : "/dashboard";
     return NextResponse.redirect(url);
-  }
-
-  // 2. Production Subdomain Routing
-  // Only run subdomain routing if we are on the production domains containing 'icancall.co'
-  if (!baseHost.includes("icancall.co")) {
-    return NextResponse.next();
   }
 
   const marketingDomain = "icancall.co";
