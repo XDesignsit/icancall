@@ -3764,6 +3764,36 @@ export function AccountView({
                           </div>
                         </div>
                       </div>
+
+                      {/* Pooled Minutes Breakdown & Notice */}
+                      <div style={{ marginTop: 20, paddingTop: 16, borderTop: "1px solid var(--line)", textAlign: "left" }}>
+                        <h4 style={{ fontSize: "0.88rem", fontWeight: 700, margin: "0 0 10px", color: "var(--ink)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                          <span>{lang === "es" ? "Uso por número (Grupo compartido)" : lang === "fr" ? "Usage par numéro (Pool partagé)" : "Usage by Number (Shared Pool)"}</span>
+                          <span style={{ fontSize: "0.78rem", color: "var(--blue)", fontWeight: 500 }}>
+                            {lang === "es" ? "Pool de Minutos Compartido" : lang === "fr" ? "Minutes partagées" : "Shared Minutes Pool"}
+                          </span>
+                        </h4>
+                        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                          {lines.map((l) => (
+                            <div key={l.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: "0.85rem" }}>
+                              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                                <span style={{ width: 8, height: 8, borderRadius: "50%", background: l.color }} />
+                                <span style={{ fontWeight: 600, color: "var(--ink-soft)" }}>{l.label}</span>
+                                <span style={{ color: "var(--ink-faint)", fontSize: "0.78rem" }}>{l.number}</span>
+                              </div>
+                              <span style={{ fontWeight: 700, color: "var(--ink)" }}>{l.minutesUsed || 0} min</span>
+                            </div>
+                          ))}
+                        </div>
+                        <p style={{ fontSize: "0.76rem", color: "var(--ink-faint)", margin: "10px 0 0", lineHeight: "1.4" }}>
+                          ℹ️ {lang === "es"
+                            ? "Todos los números de esta cuenta comparten el mismo fondo de minutos mensuales e incorporados."
+                            : lang === "fr"
+                            ? "Tous les numéros de ce compte partagent le même pool de minutes mensuelles et d'options."
+                            : "All phone numbers on this account share the same pool of plan minutes and add-on minutes."}
+                        </p>
+                      </div>
+
                       <p className="mb-note">
                         <Icon name="check" /> {ext.addonMinNote}
                       </p>
