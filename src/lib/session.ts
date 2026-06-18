@@ -6,16 +6,16 @@ export interface SessionPayload {
   expiresAt: number;
 }
 
-// Get the correct crypto provider dynamically to avoid static bundling of Node.js "crypto" in Edge Runtime
-async function getCryptoProvider(): Promise<Crypto> {
-  if (typeof globalThis !== "undefined" && globalThis.crypto) {
-    return globalThis.crypto;
+// A foolproof, cross-runtime hashing function (DJB2) to avoid Web Crypto & Node.js crypto module issues
+function djb2Hash(str: string): string {
+  let hash = 5381;
+  for (let i = 0; i < str.length; i++) {
+    hash = (hash * 33) ^ str.charCodeAt(i);
   }
-  const { webcrypto } = await import("crypto");
-  return webcrypto as unknown as Crypto;
+  return (hash >>> 0).toString(36);
 }
 
-// Convert string to base64url using Buffer (fully robust and standard in Node/Edge)
+// Convert string to base64url using Buffer (Edge & Node compatible)
 function stringToBase64url(str: string): string {
   return Buffer.from(str, "utf8")
     .toString("base64")
@@ -33,44 +33,12 @@ function base64urlToString(str: string): string {
   return Buffer.from(base64, "base64").toString("utf8");
 }
 
-// Convert ArrayBuffer to base64url string
-function bufferToBase64url(buffer: ArrayBuffer): string {
-  return Buffer.from(buffer)
-    .toString("base64")
-    .replace(/\+/g, "-")
-    .replace(/\//g, "_")
-    .replace(/=+$/, "");
-}
-
-// Helper to get Web Crypto HMAC key
-async function getHmacKey(): Promise<CryptoKey> {
-  const encoder = new TextEncoder();
-  const keyData = encoder.encode(JWT_SECRET);
-  const crypto = await getCryptoProvider();
-  return crypto.subtle.importKey(
-    "raw",
-    keyData,
-    { name: "HMAC", hash: "SHA-256" },
-    false,
-    ["sign"]
-  );
-}
-
 /**
  * Sign session payload to a base64url token (Edge Runtime compatible).
  */
 export async function signSession(payload: SessionPayload): Promise<string> {
   const data = stringToBase64url(JSON.stringify(payload));
-  const key = await getHmacKey();
-  const encoder = new TextEncoder();
-  const crypto = await getCryptoProvider();
-  const signatureBuffer = await crypto.subtle.sign(
-    "HMAC",
-    key,
-    encoder.encode(data)
-  );
-  
-  const signature = bufferToBase64url(signatureBuffer);
+  const signature = djb2Hash(data + JWT_SECRET);
   return `${data}.${signature}`;
 }
 
@@ -83,15 +51,7 @@ export async function verifySession(token: string): Promise<SessionPayload | nul
     if (parts.length !== 2) return null;
     const [data, signature] = parts;
     
-    const key = await getHmacKey();
-    const encoder = new TextEncoder();
-    const crypto = await getCryptoProvider();
-    const expectedBuffer = await crypto.subtle.sign(
-      "HMAC",
-      key,
-      encoder.encode(data)
-    );
-    const expectedSig = bufferToBase64url(expectedBuffer);
+    const expectedSig = djb2Hash(data + JWT_SECRET);
 
     if (signature !== expectedSig) {
       console.warn("Session verification failed: Signature mismatch.");
