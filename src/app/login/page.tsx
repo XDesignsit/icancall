@@ -9,9 +9,16 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // If already logged in, redirect to dashboard automatically
   useEffect(() => {
     if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("unauthorized") === "true") {
+        localStorage.removeItem("isLoggedIn");
+        localStorage.removeItem("isAdminLoggedIn");
+        localStorage.removeItem("userEmail");
+        return;
+      }
+
       if (localStorage.getItem("isAdminLoggedIn") === "true") {
         window.location.href = "/super-admin";
       } else if (localStorage.getItem("isLoggedIn") === "true") {

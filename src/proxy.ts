@@ -37,6 +37,7 @@ export async function proxy(request: NextRequest) {
     if (!session) {
       // Redirect unauthenticated users to login
       url.pathname = "/login";
+      url.searchParams.set("unauthorized", "true");
       // Clear any invalid session cookie if present
       const response = NextResponse.redirect(url);
       response.cookies.delete("session");
