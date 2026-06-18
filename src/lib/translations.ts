@@ -249,7 +249,7 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
       phoneLabel: "Mobile number",
       phonePlaceholder: "(555) 123-4567",
       smsConsentB: "Text me launch updates.",
-      smsConsentText: "I agree to receive occasional SMS messages from iCanCall about early access and launch. Msg & data rates may apply; reply STOP to opt out anytime.",
+      smsConsentText: "I agree to receive occasional SMS messages from iCanCall about early access and launch. Message and data rates may apply; reply STOP to opt out anytime.",
       joinBtn: "Join the waitlist",
       noSpamFine: "No spam, ever. We'll only reach out about your early-access invite — and you can unsubscribe in one tap.",
       successTitle: "You're on the list.",

@@ -450,7 +450,7 @@ export default function ComingSoon() {
                   </span>
                   <span className="ctxt">
                     <b>{t.waitlist?.smsConsentB || "Text me launch updates."}</b>{" "}
-                    {t.waitlist?.smsConsentText || "I agree to receive occasional SMS messages from iCanCall about early access and launch. Msg & data rates may apply; reply STOP to opt out anytime."}
+                    {t.waitlist?.smsConsentText || "I agree to receive occasional SMS messages from iCanCall about early access and launch. Message and data rates may apply; reply STOP to opt out anytime."}
                   </span>
                 </label>
 
