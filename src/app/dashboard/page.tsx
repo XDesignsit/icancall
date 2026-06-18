@@ -546,16 +546,19 @@ function ContactsView({
   showToast,
   d,
   lang,
+  plan,
 }: {
   line: Line;
   setLine: React.Dispatch<React.SetStateAction<Line[]>>;
   showToast: (msg: string) => void;
   d: any;
   lang: string;
+  plan: "essential" | "pro";
 }) {
   const [modal, setModal] = useState<{ edit?: Contact } | null>(null);
   const contacts = line.contacts;
-  const full = contacts.length >= 6;
+  const limit = plan === "pro" ? 6 : 3;
+  const full = contacts.length >= limit;
 
   const move = (idx: number, dir: number) => {
     const j = idx + dir;
@@ -621,7 +624,7 @@ function ContactsView({
               : d.contacts.hintCascade}
           </p>
         </div>
-        <span className="cap-pill">{contacts.length} / 6 {d.contacts.limitPill}</span>
+        <span className="cap-pill">{contacts.length} / {limit} {d.contacts.limitPill}</span>
       </div>
 
       <div className="clist">
@@ -4713,7 +4716,7 @@ export default function DashboardApp() {
             />
           )}
           {view === "contacts" && (
-            <ContactsView line={line} setLine={setLines} showToast={showToast} d={d} lang={lang} />
+            <ContactsView line={line} setLine={setLines} showToast={showToast} d={d} lang={lang} plan={account.plan} />
           )}
           {view === "routing" && (
             <RoutingView line={line} setLine={setLines} showToast={showToast} d={d} lang={lang} />
