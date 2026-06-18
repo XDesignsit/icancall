@@ -7,7 +7,18 @@ export async function proxy(request: NextRequest) {
   const host = request.headers.get("host") || "";
   const baseHost = host.split(":")[0]; // remove port if any
 
-  // 1. Only run proxy redirects on production domains containing 'icancall.co'
+  // 1. Detect if the request is loaded inside an iframe (e.g., in developer preview sandboxes)
+  // where browsers block third-party cookies by default.
+  const referer = request.headers.get("referer") || "";
+  const secFetchDest = request.headers.get("sec-fetch-dest");
+  const isIframe = secFetchDest === "iframe" || secFetchDest === "frame" || (referer && !referer.includes(host));
+
+  if (isIframe) {
+    // Let client-side localStorage checks handle authentication in iframe previews
+    return NextResponse.next();
+  }
+
+  // 2. Only run proxy redirects on production domains containing 'icancall.co'
   // (Prevents iframe cookie-blocking loops in local development & Vercel preview environments)
   if (!baseHost.includes("icancall.co")) {
     return NextResponse.next();
