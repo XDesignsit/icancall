@@ -383,6 +383,8 @@ function PlanStep({ data, set, onNext }: { data: OnboardingData; set: (patch: Pa
 function AccountStep({ data, set, onNext, onBack }: { data: OnboardingData; set: (patch: Partial<OnboardingData>) => void; onNext: () => void; onBack: () => void }) {
   const a = data.account;
   const [touched, setTouched] = useState<Record<string, boolean>>({});
+  const [smsConsent, setSmsConsent] = useState(false);
+  const [smsTouched, setSmsTouched] = useState(false);
   const strength = passwordStrength(a.password || "");
   const s = STRENGTH[strength];
 
@@ -390,14 +392,21 @@ function AccountStep({ data, set, onNext, onBack }: { data: OnboardingData; set:
     name: a.name.trim().length < 2 ? "Please enter your name" : "",
     email: !validEmail(a.email) ? "Enter a valid email address" : "",
     password: (a.password || "").length < 8 ? "Use at least 8 characters" : "",
+    sms: !smsConsent ? "You must agree to receive SMS notifications to continue" : "",
   };
-  const valid = !errs.name && !errs.email && !errs.password;
+  const valid = !errs.name && !errs.email && !errs.password && !errs.sms;
   const upd = (k: string, v: string) => set({ account: { ...a, [k]: v } });
-  const show = (k: "name" | "email" | "password") => touched[k] && errs[k];
+  const show = (k: "name" | "email" | "password" | "sms") => {
+    if (k === "sms") return smsTouched && errs.sms;
+    return touched[k] && errs[k];
+  };
 
   const submit = () => {
     if (valid) onNext();
-    else setTouched({ name: true, email: true, password: true });
+    else {
+      setTouched({ name: true, email: true, password: true });
+      setSmsTouched(true);
+    }
   };
 
   return (
@@ -448,6 +457,24 @@ function AccountStep({ data, set, onNext, onBack }: { data: OnboardingData; set:
           </>
         )}
         <div className={"field-err" + (show("password") ? " show" : "")}>{errs.password}</div>
+      </div>
+
+      <div className="field" style={{ marginTop: 24, marginBottom: 8 }}>
+        <label style={{ display: "flex", gap: 10, cursor: "pointer", alignItems: "flex-start", fontSize: "0.85rem", fontWeight: "normal", color: "var(--ink-soft)" }}>
+          <input
+            type="checkbox"
+            checked={smsConsent}
+            onChange={(e) => {
+              setSmsConsent(e.target.checked);
+              setSmsTouched(true);
+            }}
+            style={{ marginTop: 3, cursor: "pointer" }}
+          />
+          <span>
+            By checking this box, you agree to receive automated SMS alerts and notifications about caregivers, virtual lines, and system status. Message and data rates may apply. Message frequency varies. Text STOP to opt-out, or HELP for support.
+          </span>
+        </label>
+        <div className={"field-err" + (show("sms") ? " show" : "")} style={{ marginLeft: 26, marginTop: 4 }}>{errs.sms}</div>
       </div>
 
       <StepNav onBack={onBack} onNext={submit} nextLabel="Continue" />
