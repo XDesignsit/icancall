@@ -4328,6 +4328,8 @@ export default function DashboardApp() {
     }, 650);
   };
 
+  const [headerRemovalLine, setHeaderRemovalLine] = useState<Line | null>(null);
+
   // 3. Load profile and phone lines from Supabase
   useEffect(() => {
     async function loadData() {
@@ -4757,27 +4759,48 @@ export default function DashboardApp() {
             </button>
             {switchOpen && (
               <div className="numswitch-menu">
-                {lines.map((l) => (
+                 {lines.map((l, index) => (
                   <div
                     key={l.id}
                     className={`numswitch-opt ${l.id === activeLineId ? "sel" : ""}`}
-                    onClick={() => {
-                      setActiveLineId(l.id);
-                      setSwitchOpen(false);
-                    }}
+                    style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}
                   >
-                    <span className="ava" style={{ background: l.color }}>
-                      {initials(l.person)}
-                    </span>
-                    <span className="meta">
-                      <b>{l.label}</b>
-                      <span>{l.number}</span>
-                    </span>
-                    {l.id === activeLineId && (
-                      <span className="tick">
-                        <Icon name="check" style={{ width: 17, height: 17 }} />
+                    <div
+                      style={{ display: "flex", alignItems: "center", gap: 10, flex: 1, cursor: "pointer" }}
+                      onClick={() => {
+                        setActiveLineId(l.id);
+                        setSwitchOpen(false);
+                      }}
+                    >
+                      <span className="ava" style={{ background: l.color }}>
+                        {initials(l.person)}
                       </span>
-                    )}
+                      <span className="meta">
+                        <b>{l.label}</b>
+                        <span>{l.number}</span>
+                      </span>
+                    </div>
+                    
+                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      {l.id === activeLineId && (
+                        <span className="tick">
+                          <Icon name="check" style={{ width: 17, height: 17 }} />
+                        </span>
+                      )}
+                      {index > 0 && (
+                        <button
+                          className="btn-trash"
+                          style={{ background: "transparent", border: "none", cursor: "pointer", color: "oklch(0.6 0.18 22)", padding: 4, display: "flex", alignItems: "center" }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setHeaderRemovalLine(l);
+                          }}
+                          title="Delete Number"
+                        >
+                          <Icon name="trash" style={{ width: 15, height: 15 }} />
+                        </button>
+                      )}
+                    </div>
                   </div>
                 ))}
                 <button
@@ -5021,6 +5044,70 @@ export default function DashboardApp() {
                 </div>
               )}
             </div>
+          </div>
+        </Modal>
+      )}
+
+      {headerRemovalLine && (
+        <Modal
+          title={lang === "es" ? "Eliminar número de teléfono" : lang === "fr" ? "Supprimer le numéro de téléphone" : "Remove Phone Number"}
+          onClose={() => setHeaderRemovalLine(null)}
+          footer={
+            <div style={{ display: "flex", justifyContent: "flex-end", gap: 10, width: "100%" }}>
+              <button className="btn btn-ghost" onClick={() => setHeaderRemovalLine(null)}>
+                {lang === "es" ? "Cancelar" : lang === "fr" ? "Annuler" : "Cancel"}
+              </button>
+              <button
+                className="btn btn-primary"
+                style={{ background: "oklch(0.6 0.18 22)", borderColor: "oklch(0.6 0.18 22)", color: "#fff" }}
+                onClick={() => {
+                  const lineToDelete = headerRemovalLine;
+                  
+                  // Filter out the line
+                  setLines((prev) => {
+                    const nextLines = prev.filter((l) => l.id !== lineToDelete.id);
+                    if (activeLineId === lineToDelete.id && nextLines[0]) {
+                      setActiveLineId(nextLines[0].id);
+                    }
+                    return nextLines;
+                  });
+
+                  // Decrement extraNumbers add-on
+                  setAccount((prev) => {
+                    const updated = {
+                      ...prev,
+                      addons: {
+                        ...(prev.addons || {}),
+                        extraNumbers: Math.max(0, (prev.addons?.extraNumbers || 0) - 1),
+                      } as Account["addons"],
+                    };
+                    return updated;
+                  });
+
+                  setHeaderRemovalLine(null);
+                  showToast(lang === "es" ? "¡Número de teléfono eliminado!" : lang === "fr" ? "Numéro de téléphone supprimé !" : "Phone number removed successfully!");
+                }}
+              >
+                {lang === "es" ? "Eliminar" : lang === "fr" ? "Supprimer" : "Remove Number"}
+              </button>
+            </div>
+          }
+        >
+          <div style={{ padding: "10px 0" }}>
+            <p style={{ margin: "0 0 10px 0", fontSize: "0.95rem", color: "var(--ink)", fontWeight: 500 }}>
+              {lang === "es"
+                ? `¿Está seguro de que desea eliminar la línea "${headerRemovalLine.label}" (${headerRemovalLine.number})?`
+                : lang === "fr"
+                ? `Êtes-vous sûr de vouloir supprimer la ligne "${headerRemovalLine.label}" (${headerRemovalLine.number}) ?`
+                : `Are you sure you want to remove the phone line "${headerRemovalLine.label}" (${headerRemovalLine.number})?`}
+            </p>
+            <p style={{ margin: 0, fontSize: "0.85rem", color: "oklch(0.6 0.18 22)", fontWeight: 500 }}>
+              ⚠️ {lang === "es"
+                ? "Esta acción devolverá este número de forma permanente y eliminará todas sus configuraciones y contactos."
+                : lang === "fr"
+                ? "Cette action restituera définitivement ce numéro et effacera toutes ses configurations."
+                : "This action will permanently return this number and delete all of its configurations and contacts."}
+            </p>
           </div>
         </Modal>
       )}
