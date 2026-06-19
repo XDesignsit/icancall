@@ -855,6 +855,31 @@ export default function Home() {
                 <Link className="btn btn-primary" href={`/onboarding?plan=pro&billing=${billingCycle}`}>{t.pricing.selectPlan}</Link>
               </div>
             </div>
+
+            <div 
+              style={{ 
+                textAlign: "center", 
+                marginTop: "40px", 
+                fontSize: "0.95rem", 
+                color: "oklch(0.50 0.02 240)",
+              }} 
+              className="reveal in"
+            >
+              Organizations & Teams —{" "}
+              <a 
+                href="mailto:support@icancall.co" 
+                style={{ 
+                  color: "oklch(0.45 0.13 242)", 
+                  fontWeight: 600, 
+                  textDecoration: "underline",
+                  transition: "opacity 0.2s"
+                }}
+                onMouseOver={(e) => (e.currentTarget.style.opacity = "0.8")}
+                onMouseOut={(e) => (e.currentTarget.style.opacity = "1")}
+              >
+                contact us
+              </a>
+            </div>
           </div>
         </section>
 
