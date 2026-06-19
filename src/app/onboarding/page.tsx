@@ -665,8 +665,28 @@ function PaymentStep({ data, set, onNext, onBack }: { data: OnboardingData; set:
 
   // Listen to iframe success messages
   useEffect(() => {
-    const handleMsg = (e: MessageEvent) => {
+    const handleMsg = async (e: MessageEvent) => {
       if (e.data && e.data.type === "CREEM_PAYMENT_SUCCESS") {
+        try {
+          // Register the caregiver and seed selected phone numbers in Supabase
+          const res = await fetch("/api/auth/signup", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              email: data.account.email,
+              password: data.account.password,
+              name: data.account.name,
+              numbers: data.numbers,
+            }),
+          });
+          if (!res.ok) {
+            const errData = await res.json();
+            console.error("Failed to register caregiver:", errData.error);
+          }
+        } catch (err) {
+          console.error("Error during Supabase signup registration:", err);
+        }
+
         setTimeout(() => {
           setModalOpen(false);
           onNext(); // Advance to Success step
@@ -675,7 +695,7 @@ function PaymentStep({ data, set, onNext, onBack }: { data: OnboardingData; set:
     };
     window.addEventListener("message", handleMsg);
     return () => window.removeEventListener("message", handleMsg);
-  }, [onNext]);
+  }, [onNext, data]);
 
   return (
     <div className="panel">

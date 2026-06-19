@@ -4,6 +4,7 @@ export interface SessionPayload {
   email: string;
   role: "admin" | "user";
   expiresAt: number;
+  userId?: string;
 }
 
 // A foolproof, cross-runtime hashing function (DJB2) to avoid Web Crypto & Node.js crypto module issues

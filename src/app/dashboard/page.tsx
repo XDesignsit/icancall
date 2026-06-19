@@ -4247,57 +4247,153 @@ export default function DashboardApp() {
 
   const [lang, setLang] = useState<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi" | "pt" | "de" | "it" | "ko">("en");
 
+  // 1. Loading and Syncing States
+  const [loading, setLoading] = useState(true);
+  const [initialLoadComplete, setInitialLoadComplete] = useState(false);
+
+  // 2. Client-side profile to account mapping
+  const mapProfileToAccount = (profile: any): Account => {
+    const settings = profile.settings || {};
+    return {
+      name: profile.name || "",
+      preferred: profile.preferred_name || "",
+      role: settings.role || "Primary caregiver",
+      email: profile.email || "",
+      notifyEmail: settings.notifyEmail || profile.email || "",
+      phone: settings.phone || settings.smsPhone || "",
+      address: settings.address || settings.billingAddr || "",
+      timezone: settings.timezone || "Pacific (PT)",
+      language: settings.language || "English",
+      twoFactor: !!settings.twoFactor,
+      card: settings.card || { brand: "Visa", last4: "4242", exp: "08 / 27" },
+      billingAddr: settings.billingAddr || "",
+      plan: settings.plan || "pro",
+      billingCycle: settings.billingCycle || "monthly",
+      addons: settings.addons || { extraNumbers: 0, minuteBlocks: 0, usedMin: 0, rolloverMin: 0 },
+    };
+  };
+
+  const mapAccountToProfile = (account: Account) => {
+    return {
+      name: account.name,
+      preferred_name: account.preferred,
+      settings: {
+        role: account.role,
+        notifyEmail: account.notifyEmail,
+        phone: account.phone,
+        smsPhone: account.phone,
+        address: account.address,
+        timezone: account.timezone,
+        language: account.language,
+        twoFactor: account.twoFactor,
+        card: account.card,
+        billingAddr: account.billingAddr,
+        plan: account.plan,
+        billingCycle: account.billingCycle,
+        addons: account.addons
+      }
+    };
+  };
+
+  const mapDbLinesToFrontend = (dbLines: any[]): Line[] => {
+    return dbLines.map((row: any) => {
+      const s = row.settings || {};
+      return {
+        id: row.id,
+        number: row.number,
+        label: row.name,
+        person: row.type,
+        contacts: row.contacts || [],
+        color: s.color || "oklch(0.58 0.115 232)",
+        mode: s.mode || "menu",
+        minutesUsed: s.minutesUsed || 0,
+        schedule: s.schedule || [],
+        settings: s.extraSettings || {},
+      };
+    });
+  };
+
+  // 3. Load profile and phone lines from Supabase
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const imp = localStorage.getItem("impersonatingUser");
-      if (!imp) {
-        const savedEmail = localStorage.getItem("userEmail");
-        const savedData = localStorage.getItem("ic_account_data");
-        let initialData: Account | null = null;
-        if (savedData) {
-          try {
-            initialData = JSON.parse(savedData);
-          } catch (_) {}
+    async function loadData() {
+      try {
+        const profileRes = await fetch("/api/caregiver/profile");
+        if (profileRes.status === 401) {
+          localStorage.removeItem("isLoggedIn");
+          window.location.href = "/login?unauthorized=true";
+          return;
         }
-        if (initialData) {
-          setAccount(initialData);
-        } else if (savedEmail) {
-          setAccount((prev) => {
-            const name = savedEmail === "support@icancall.co" ? "Support Demo" : "Maria Delgado";
-            const preferred = savedEmail === "support@icancall.co" ? "Support" : "Maria";
-            return {
-              ...prev,
-              email: savedEmail,
-              notifyEmail: savedEmail,
-              name,
-              preferred,
-            };
-          });
+        const profileData = await profileRes.json();
+
+        const linesRes = await fetch("/api/caregiver/lines");
+        if (linesRes.status === 401) {
+          localStorage.removeItem("isLoggedIn");
+          window.location.href = "/login?unauthorized=true";
+          return;
         }
-        const savedLines = localStorage.getItem("ic_lines_data");
-        if (savedLines) {
-          try {
-            const parsed = JSON.parse(savedLines);
-            if (Array.isArray(parsed) && parsed.length > 0) {
-              setLines(parsed);
-              if (parsed[0]) {
-                setActiveLineId(parsed[0].id);
-              }
-            }
-          } catch (_) {}
+        const linesData = await linesRes.json();
+
+        if (profileRes.ok && profileData.profile) {
+          const acc = mapProfileToAccount(profileData.profile);
+          setAccount(acc);
         }
+
+        if (linesRes.ok && Array.isArray(linesData.lines)) {
+          const mappedLines = mapDbLinesToFrontend(linesData.lines);
+          setLines(mappedLines);
+          if (mappedLines[0]) {
+            setActiveLineId(mappedLines[0].id);
+          }
+        }
+      } catch (err) {
+        console.error("Error loading dashboard data:", err);
+      } finally {
+        setLoading(false);
+        setInitialLoadComplete(true);
       }
     }
+    loadData();
   }, []);
 
+  // 4. Synchronize profile/account updates to Supabase
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const imp = localStorage.getItem("impersonatingUser");
-      if (!imp) {
-        localStorage.setItem("ic_lines_data", JSON.stringify(lines));
+    if (!initialLoadComplete) return;
+    const imp = localStorage.getItem("impersonatingUser");
+    if (imp) return; // Skip updating real user database if impersonating
+
+    async function syncProfile() {
+      try {
+        await fetch("/api/caregiver/profile", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(mapAccountToProfile(account)),
+        });
+      } catch (err) {
+        console.error("Error syncing profile to backend:", err);
       }
     }
-  }, [lines]);
+    syncProfile();
+  }, [account, initialLoadComplete]);
+
+  // 5. Synchronize lines updates to Supabase
+  useEffect(() => {
+    if (!initialLoadComplete) return;
+    const imp = localStorage.getItem("impersonatingUser");
+    if (imp) return; // Skip updating real user database if impersonating
+
+    async function syncLines() {
+      try {
+        await fetch("/api/caregiver/lines", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ lines }),
+        });
+      } catch (err) {
+        console.error("Error syncing phone lines to backend:", err);
+      }
+    }
+    syncLines();
+  }, [lines, initialLoadComplete]);
 
   useEffect(() => {
     const savedLang = localStorage.getItem("lang") as any;
@@ -4470,6 +4566,23 @@ export default function DashboardApp() {
   };
 
   const [t1, t2] = TITLES[view as keyof typeof TITLES] || ["Dashboard", "iCanCall Routing Panel"];
+
+  if (loading) {
+    return (
+      <div style={{ display: "grid", placeItems: "center", minHeight: "100vh", background: "oklch(0.975 0.008 220)" }}>
+        <div style={{ textAlign: "center" }}>
+          <div className="spinner" style={{ border: "4px solid rgba(0,0,0,0.1)", width: "36px", height: "36px", borderRadius: "50%", borderLeftColor: "#4083ae", animation: "spin 1s linear infinite", margin: "0 auto 16px auto" }}></div>
+          <style>{`
+            @keyframes spin {
+              0% { transform: rotate(0deg); }
+              100% { transform: rotate(360deg); }
+            }
+          `}</style>
+          <div style={{ color: "oklch(0.4 0.02 240)", fontSize: "0.95rem", fontWeight: 500 }}>Loading your dashboard...</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
