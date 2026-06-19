@@ -29,7 +29,7 @@ export async function POST(request: Request) {
     const activeNumber = toPhoneNumber ? toPhoneNumber.toString() : '+15005550006';
 
     // 1. Balance verification
-    const account = findAccountByTwilioNumber(activeNumber);
+    const account = await findAccountByTwilioNumber(activeNumber);
     let availableMinutes = 30; // Default fallback if number not in database
     if (account) {
       availableMinutes = getAvailableMinutes(account);

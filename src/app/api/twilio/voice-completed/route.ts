@@ -34,7 +34,7 @@ export async function POST(request: Request) {
     if (toPhoneNumber && durationSeconds > 0) {
       // Billed minutes are rounded up to the nearest minute
       const minutesUsed = Math.ceil(durationSeconds / 60);
-      const updatedAccount = deductMinutes(toPhoneNumber.toString(), minutesUsed);
+      const updatedAccount = await deductMinutes(toPhoneNumber.toString(), minutesUsed);
       if (updatedAccount) {
         console.log(`✅ Deducted ${minutesUsed} min(s) from account ${updatedAccount.name}. New total used: ${updatedAccount.used_minutes} mins.`);
       } else {
