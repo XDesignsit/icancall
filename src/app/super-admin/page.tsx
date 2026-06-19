@@ -674,6 +674,8 @@ export default function SuperAdminApp() {
   const [view, setView] = useState("overview");
   const [searchQuery, setSearchQuery] = useState("");
   const [toast, setToast] = useState<string | null>(null);
+  const [accounts, setAccounts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
   const [profile, setProfile] = useState({
     name: "Alex Delgado",
@@ -702,6 +704,32 @@ export default function SuperAdminApp() {
     }
   }, []);
 
+  useEffect(() => {
+    async function loadAccounts() {
+      try {
+        const res = await fetch("/api/admin/accounts");
+        if (res.status === 401) {
+          localStorage.removeItem("isAdminLoggedIn");
+          window.location.href = "/login?unauthorized=true";
+          return;
+        }
+        const data = await res.json();
+        if (res.ok && Array.isArray(data.accounts)) {
+          setAccounts(data.accounts);
+        }
+      } catch (err) {
+        console.error("Failed to load accounts:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    if (typeof window !== "undefined" && localStorage.getItem("isAdminLoggedIn") === "true") {
+      loadAccounts();
+    } else {
+      setLoading(false);
+    }
+  }, []);
+
   const handleSignOut = () => {
     if (typeof window !== "undefined") {
       localStorage.removeItem("isAdminLoggedIn");
@@ -716,12 +744,29 @@ export default function SuperAdminApp() {
     setTimeout(() => setToast(null), 2500);
   };
 
-  const filteredAccounts = ACCOUNTS.filter(
+  const filteredAccounts = accounts.filter(
     (acc) =>
       acc.owner.toLowerCase().includes(searchQuery.toLowerCase()) ||
       acc.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
       acc.id.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  if (loading) {
+    return (
+      <div style={{ display: "grid", placeItems: "center", minHeight: "100vh", background: "oklch(0.975 0.008 220)" }}>
+        <div style={{ textAlign: "center" }}>
+          <div className="spinner" style={{ border: "4px solid rgba(0,0,0,0.1)", width: "36px", height: "36px", borderRadius: "50%", borderLeftColor: "#4083ae", animation: "spin 1s linear infinite", margin: "0 auto 16px auto" }}></div>
+          <style>{`
+            @keyframes spin {
+              0% { transform: rotate(0deg); }
+              100% { transform: rotate(360deg); }
+            }
+          `}</style>
+          <div style={{ color: "oklch(0.4 0.02 240)", fontSize: "0.95rem", fontWeight: 500 }}>Loading Super Admin Dashboard...</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="admin" style={{ display: "grid", gridTemplateColumns: "260px 1fr", height: "100vh" }}>
@@ -1009,7 +1054,7 @@ export default function SuperAdminApp() {
                 <div className="card-head">
                   <div>
                     <h2>Active Accounts Base Directory</h2>
-                    <p>Showing {filteredAccounts.length} of {ACCOUNTS.length} search records</p>
+                    <p>Showing {filteredAccounts.length} of {accounts.length} search records</p>
                   </div>
                 </div>
                 <div className="card-pad" style={{ padding: 0 }}>
