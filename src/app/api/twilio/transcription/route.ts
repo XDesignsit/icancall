@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { sendVoicemailAlertEmail } from '@/lib/mail';
+import { findAccountByTwilioNumber } from '@/lib/db';
 
 export async function POST(request: Request) {
   try {
@@ -26,16 +27,36 @@ export async function POST(request: Request) {
       ? String(transcriptionText) 
       : 'Recording captured. Audio transcript is currently processing...';
 
-    // Format a nice caller name based on lookup or number
-    let callerLabel = String(fromNumber);
-    if (callerLabel.includes('555-0142')) {
-      callerLabel = 'Eleanor Delgado (Mom)';
-    } else if (callerLabel.includes('555-0188')) {
-      callerLabel = 'Robert Hale (Dad)';
-    }
+    // Parse target phone line To number from query params
+    const url = new URL(request.url);
+    const toPhoneNumber = url.searchParams.get('To');
 
-    // Determine target recipient (using SMTP_FROM_EMAIL as default alert inbox)
-    const alertRecipient = process.env.SMTP_FROM_EMAIL || 'support@icancall.co';
+    let alertRecipient = process.env.SMTP_FROM_EMAIL || 'support@icancall.co';
+    let callerLabel = String(fromNumber);
+
+    if (toPhoneNumber) {
+      const account = await findAccountByTwilioNumber(toPhoneNumber);
+      if (account) {
+        // Set email recipient to caregiver's dynamic profile email
+        alertRecipient = account.notifyEmail || account.email || alertRecipient;
+
+        // Try to match fromNumber in contacts list
+        const fromClean = String(fromNumber).replace(/\D/g, '');
+        if (fromClean.length >= 7) {
+          const contacts = account.line?.contacts || [];
+          const match = contacts.find((c: any) => {
+            if (!c.phone) return false;
+            const cleanPhone = String(c.phone).replace(/\D/g, '');
+            // Match last 10 digits to bypass country prefix matching differences
+            return cleanPhone.endsWith(fromClean.slice(-10));
+          });
+
+          if (match) {
+            callerLabel = `${match.name} (${match.rel || 'Contact'})`;
+          }
+        }
+      }
+    }
 
     // Dispatch the gorgeous Maileroo Voicemail Alert Email instantly!
     const result = await sendVoicemailAlertEmail(
@@ -47,7 +68,7 @@ export async function POST(request: Request) {
     );
 
     if (result.success) {
-      console.log(`✉️ Automated Voicemail Alert email dispatched via Maileroo for call ${callSid}`);
+      console.log(`✉️ Automated Voicemail Alert email dispatched via Maileroo for call ${callSid} to ${alertRecipient}`);
       return NextResponse.json({ success: true, message: 'Voicemail alert dispatched successfully!' });
     } else {
       console.error('❌ Failed to dispatch voicemail email alert:', result.error);
