@@ -13,8 +13,8 @@ export async function POST(request: Request) {
     let emailToAuth = email;
     let passwordToAuth = password;
 
-    // Handle Google Login demo bypass by routing to a seeded demo user
-    if (email === "support@icancall.co" && password === "google_oauth_bypass") {
+    // Handle Google Login or pre-filled form bypass for demo caregiver
+    if (email === "support@icancall.co" && (password === "google_oauth_bypass" || password === "••••••••")) {
       passwordToAuth = "DemoPassword123!";
       
       // Try to sign in. If it fails, sign up dynamically.
@@ -65,6 +65,40 @@ export async function POST(request: Request) {
                 available: true,
               }
             ]
+          });
+        }
+      }
+    }
+
+    // Handle form bypass for admin demo
+    if (email === "admin@icancall.co" && password === "••••••••") {
+      passwordToAuth = "AdminPassword123!";
+
+      // Try to sign in. If it fails, sign up dynamically.
+      let { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+        email: emailToAuth,
+        password: passwordToAuth,
+      });
+
+      if (authError) {
+        // Sign up the admin user
+        const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+          email: emailToAuth,
+          password: passwordToAuth,
+        });
+
+        if (!signUpError && signUpData.user) {
+          // Seed profile
+          await supabase.from("profiles").insert({
+            id: signUpData.user.id,
+            email: emailToAuth,
+            name: "Alex Delgado",
+            preferred_name: "Alex",
+            settings: {
+              role: "admin",
+              notifyEmail: emailToAuth,
+              plan: "pro",
+            }
           });
         }
       }
