@@ -4993,13 +4993,17 @@ export default function DashboardApp() {
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 10 }}>
                   {headerNumbersList.map((num) => (
                     <button
-                      key={num.number}
+                      key={num.id || num.number}
                       className={`btn ${headerSelectedNumber?.number === num.number ? 'btn-primary' : 'btn-secondary'}`}
                       style={{ padding: "12px 8px", fontSize: "0.9rem", display: "flex", flexDirection: "column", alignItems: "center", gap: 4, cursor: "pointer" }}
                       onClick={() => setHeaderSelectedNumber(num)}
                     >
-                      <span style={{ fontWeight: 600 }}>{num.formatted}</span>
-                      <span style={{ fontSize: "0.75rem", opacity: 0.8 }}>{num.city}, {num.state}</span>
+                      <span style={{ fontWeight: 600 }}>{num.number}</span>
+                      {num.memorable ? (
+                        <span style={{ fontSize: "0.72rem", opacity: 0.8 }}>{num.memorable}</span>
+                      ) : (
+                        <span style={{ fontSize: "0.72rem", opacity: 0.8 }}>Standard Number</span>
+                      )}
                     </button>
                   ))}
                 </div>
