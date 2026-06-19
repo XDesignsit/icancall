@@ -4313,6 +4313,21 @@ export default function DashboardApp() {
     });
   };
 
+  // Header Add-on configuration states
+  const [headerAddonModalOpen, setHeaderAddonModalOpen] = useState(false);
+  const [headerAreaCode, setHeaderAreaCode] = useState("415");
+  const [headerNumbersList, setHeaderNumbersList] = useState<any[]>([]);
+  const [headerSelectedNumber, setHeaderSelectedNumber] = useState<any | null>(null);
+  const [headerIsSearching, setHeaderIsSearching] = useState(false);
+
+  const loadHeaderNumbers = (ac: string) => {
+    setHeaderIsSearching(true);
+    setTimeout(() => {
+      setHeaderNumbersList(fetchNumbers(ac, 6));
+      setHeaderIsSearching(false);
+    }, 650);
+  };
+
   // 3. Load profile and phone lines from Supabase
   useEffect(() => {
     async function loadData() {
@@ -4769,7 +4784,13 @@ export default function DashboardApp() {
                   className="add-num"
                   onClick={() => {
                     setSwitchOpen(false);
-                    showToast(d.common.addNumberTip);
+                    if (account.plan === "pro") {
+                      loadHeaderNumbers(headerAreaCode);
+                      setHeaderSelectedNumber(null);
+                      setHeaderAddonModalOpen(true);
+                    } else {
+                      showToast(d.common.addNumberTip);
+                    }
                   }}
                 >
                   <Icon name="plus" style={{ width: 16, height: 16 }} /> {d.common.addAnotherNumber}
@@ -4866,6 +4887,131 @@ export default function DashboardApp() {
           )}
         </div>
       </div>
+
+      {headerAddonModalOpen && (
+        <Modal
+          title={lang === "es" ? "Configurar línea adicional" : lang === "fr" ? "Configurer une ligne supplémentaire" : "Configure Additional Line"}
+          onClose={() => setHeaderAddonModalOpen(false)}
+          footer={
+            <div style={{ display: "flex", justifyContent: "flex-end", gap: 10, width: "100%" }}>
+              <button className="btn btn-ghost" onClick={() => setHeaderAddonModalOpen(false)}>
+                {lang === "es" ? "Cancelar" : lang === "fr" ? "Annuler" : "Cancel"}
+              </button>
+              <button
+                className="btn btn-primary"
+                disabled={!headerSelectedNumber}
+                onClick={() => {
+                  setAccount((prev) => {
+                    const updated = {
+                      ...prev,
+                      addons: {
+                        ...(prev.addons || {}),
+                        extraNumbers: (prev.addons?.extraNumbers || 0) + 1,
+                      } as Account["addons"],
+                    };
+                    return updated;
+                  });
+
+                  const index = lines.length;
+                  const newLine: Line = {
+                    id: "line_" + Date.now() + "_" + index,
+                    label: lang === "es" ? `Línea adicional ${index + 1}` : lang === "fr" ? `Ligne supplémentaire ${index + 1}` : `Additional line ${index + 1}`,
+                    person: lang === "es" ? "Línea del círculo de emergencia" : lang === "fr" ? "Ligne du cercle d'urgence" : "Emergency circle line",
+                    number: headerSelectedNumber.number,
+                    color: AVATAR_COLORS[index % AVATAR_COLORS.length],
+                    mode: "cascade",
+                    minutesUsed: 0,
+                    contacts: lines[0]?.contacts ? JSON.parse(JSON.stringify(lines[0].contacts)) : [],
+                    settings: {
+                      greeting: "",
+                      bilingual: false,
+                      language2: "es",
+                      notifSMS: true,
+                      notifEmail: true,
+                      notifMissed: true,
+                      notifWeekly: false,
+                    },
+                  };
+
+                  setLines((prev) => [...prev, newLine]);
+                  setActiveLineId(newLine.id);
+                  setHeaderAddonModalOpen(false);
+                  showToast(lang === "es" ? "¡Línea adicional configurada!" : lang === "fr" ? "Ligne supplémentaire configurée !" : "Additional line configured!");
+                }}
+              >
+                {lang === "es" ? "Guardar" : lang === "fr" ? "Enregistrer" : "Confirm & Save"}
+              </button>
+            </div>
+          }
+        >
+          <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+            <div>
+              <p style={{ margin: "0 0 10px 0", fontSize: "0.9rem", color: "var(--ink-soft)" }}>
+                {lang === "es"
+                  ? "Seleccione un número para su nueva línea de emergencia."
+                  : lang === "fr"
+                  ? "Sélectionnez un numéro pour votre nouvelle ligne d'urgence."
+                  : "Select a phone number for your new emergency line."}
+              </p>
+
+              {/* Area Code Search */}
+              <div style={{ display: "flex", gap: 10, marginBottom: 16 }}>
+                <input
+                  type="text"
+                  maxLength={3}
+                  value={headerAreaCode}
+                  onChange={(e) => {
+                    const val = e.target.value.replace(/\D/g, "");
+                    setHeaderAreaCode(val);
+                    if (val.length === 3) {
+                      loadHeaderNumbers(val);
+                    }
+                  }}
+                  placeholder="Area Code"
+                  className="input"
+                  style={{ width: 120, height: 38, padding: "0 12px", border: "1px solid var(--border)", borderRadius: "var(--r-md)", background: "var(--bg)", color: "var(--ink)" }}
+                />
+                <button
+                  className="btn btn-secondary"
+                  disabled={headerAreaCode.length !== 3 || headerIsSearching}
+                  onClick={() => loadHeaderNumbers(headerAreaCode)}
+                >
+                  {headerIsSearching ? (
+                    lang === "es" ? "Buscando..." : lang === "fr" ? "Recherche..." : "Searching..."
+                  ) : (
+                    lang === "es" ? "Buscar" : lang === "fr" ? "Rechercher" : "Search"
+                  )}
+                </button>
+              </div>
+
+              {/* Numbers list */}
+              {headerIsSearching ? (
+                <div style={{ display: "flex", justifyContent: "center", padding: "20px 0" }}>
+                  <div className="spinner" style={{ width: 24, height: 24, border: "3px solid var(--border)", borderTopColor: "var(--primary)", borderRadius: "50%", animation: "spin 1s linear infinite" }}></div>
+                </div>
+              ) : headerNumbersList.length > 0 ? (
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 10 }}>
+                  {headerNumbersList.map((num) => (
+                    <button
+                      key={num.number}
+                      className={`btn ${headerSelectedNumber?.number === num.number ? 'btn-primary' : 'btn-secondary'}`}
+                      style={{ padding: "12px 8px", fontSize: "0.9rem", display: "flex", flexDirection: "column", alignItems: "center", gap: 4, cursor: "pointer" }}
+                      onClick={() => setHeaderSelectedNumber(num)}
+                    >
+                      <span style={{ fontWeight: 600 }}>{num.formatted}</span>
+                      <span style={{ fontSize: "0.75rem", opacity: 0.8 }}>{num.city}, {num.state}</span>
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <div style={{ textAlign: "center", padding: "20px 0", color: "var(--ink-soft)" }}>
+                  {lang === "es" ? "Ingrese un código de área para buscar números." : lang === "fr" ? "Entrez un indicatif de zone pour rechercher des numéros." : "Enter a 3-digit area code to search for available numbers."}
+                </div>
+              )}
+            </div>
+          </div>
+        </Modal>
+      )}
 
       <Toast msg={toast} />
       </div>
