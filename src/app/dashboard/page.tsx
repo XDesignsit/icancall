@@ -4787,7 +4787,7 @@ export default function DashboardApp() {
                           <Icon name="check" style={{ width: 17, height: 17 }} />
                         </span>
                       )}
-                      {index > 0 && (
+                      {index >= (account.plan === "pro" ? 2 : 1) && (
                         <button
                           className="btn-trash"
                           style={{ background: "transparent", border: "none", cursor: "pointer", color: "oklch(0.6 0.18 22)", padding: 4, display: "flex", alignItems: "center" }}
