@@ -4954,6 +4954,14 @@ export default function DashboardApp() {
                   : "Select a phone number for your new emergency line."}
               </p>
 
+              <div style={{ background: "oklch(0.96 0.03 220 / 0.4)", border: "1px solid var(--border)", borderRadius: "var(--r-md)", padding: "10px 14px", marginBottom: 16, fontSize: "0.85rem", color: "var(--ink-soft)", lineHeight: 1.4 }}>
+                ℹ️ {lang === "es"
+                  ? "Nota: Esta línea se agregará como un complemento y se cobrará a su tarifa de $6.99/mes inmediatamente al confirmar y guardar."
+                  : lang === "fr"
+                  ? "Remarque : Cette ligne sera ajoutée en tant qu'option et facturée à votre tarif de 6,99 $/mois immédiatement après confirmation."
+                  : "Note: This line will be added as an add-on and billed at your rate of $6.99/mo immediately upon confirming and saving."}
+              </div>
+
               {/* Area Code Search */}
               <div style={{ display: "flex", gap: 10, marginBottom: 16 }}>
                 <input
