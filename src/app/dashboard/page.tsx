@@ -1954,6 +1954,37 @@ function SettingsView({
       <div className="card section-gap">
         <div className="card-head">
           <div>
+            <h2>{lang === "es" ? "Detalles de la línea" : lang === "fr" ? "Détails de la ligne" : "Line Details"}</h2>
+            <p>{lang === "es" ? "Actualice la etiqueta de esta línea y a quién está asignada." : lang === "fr" ? "Mettez à jour le libellé de cette ligne et son destinataire." : "Update this line's label and who it is assigned to."}</p>
+          </div>
+        </div>
+        <div className="card-pad" style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+          <div className="field">
+            <label>{lang === "es" ? "Etiqueta de la línea" : lang === "fr" ? "Libellé de la ligne" : "Line Label"}</label>
+            <input
+              type="text"
+              value={line.label}
+              onChange={(e) => setLine((prev) => prev.map((l) => l.id === line.id ? { ...l, label: e.target.value } : l))}
+              className="w-full p-3 rounded-lg border border-line focus:outline-none focus:border-accent bg-surface"
+              placeholder="e.g. Robert's line"
+            />
+          </div>
+          <div className="field">
+            <label>{lang === "es" ? "Asignado a (Persona)" : lang === "fr" ? "Assigné à (Personne)" : "Assigned To (Person)"}</label>
+            <input
+              type="text"
+              value={line.person}
+              onChange={(e) => setLine((prev) => prev.map((l) => l.id === line.id ? { ...l, person: e.target.value } : l))}
+              className="w-full p-3 rounded-lg border border-line focus:outline-none focus:border-accent bg-surface"
+              placeholder="e.g. Robert Hale · Dad"
+            />
+          </div>
+        </div>
+      </div>
+
+      <div className="card section-gap">
+        <div className="card-head">
+          <div>
             <h2>{d.settings.greetingVoicemail}</h2>
             <p>{d.settings.ttsGreetingSub}</p>
           </div>
