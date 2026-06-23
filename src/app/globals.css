@@ -543,7 +543,7 @@ h3 { font-size: clamp(1.25rem, 2vw, 1.6rem); }
 }
 .rail > * { position: relative; z-index: 1; }
 .rail-head { margin-bottom: 48px; }
-.rail-lede { margin-top: auto; }
+.rail-lede { margin-top: 0; }
 .rail-lede h2 { font-size: 1.9rem; line-height: 1.1; letter-spacing: -0.03em; font-weight: 700; color: #fff; }
 .rail-lede .accent-line { color: oklch(0.84 0.09 198); }
 .rail-lede p { margin-top: 16px; color: oklch(0.88 0.03 225); font-size: 1.02rem; line-height: 1.55; max-width: 34ch; }
@@ -562,7 +562,7 @@ h3 { font-size: clamp(1.25rem, 2vw, 1.6rem); }
 .vstep.done { color: #fff; }
 .vstep .vnum svg { width: 16px; height: 16px; stroke-width: 3px; }
 
-.rail-foot { margin-top: 28px; display: flex; align-items: center; gap: 9px; font-size: 0.86rem; color: oklch(0.82 0.03 220); }
+.rail-foot { margin-top: auto; display: flex; align-items: center; gap: 9px; font-size: 0.86rem; color: oklch(0.82 0.03 220); padding-top: 32px; }
 .rail-foot svg { width: 16px; height: 16px; opacity: 0.85; }
 
 /* content side */
