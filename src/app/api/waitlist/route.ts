@@ -33,6 +33,7 @@ export async function POST(request: Request) {
 
     if (phone) {
       const cleanPhone = phone.trim();
+      formData.append('merge_fields[mobile]', cleanPhone);
       formData.append('merge_fields[phone]', cleanPhone);
       formData.append('merge_fields[telefono]', cleanPhone);
     }
