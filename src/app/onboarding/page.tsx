@@ -468,7 +468,7 @@ function AccountStep({ data, set, onNext, onBack }: { data: OnboardingData; set:
               setSmsConsent(e.target.checked);
               setSmsTouched(true);
             }}
-            style={{ marginTop: 3, cursor: "pointer" }}
+            style={{ width: "16px", height: "16px", flexShrink: 0, marginTop: 3, cursor: "pointer" }}
           />
           <span>
             I agree to receive SMS messages from ICanCall including account alerts, billing notifications, and service updates. Msg & data rates may apply. Reply STOP to opt out.
