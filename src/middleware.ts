@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { verifySession } from "@/lib/session";
 
-export async function proxy(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const url = request.nextUrl.clone();
   const host = request.headers.get("host") || "";
   const baseHost = host.split(":")[0]; // remove port if any
@@ -24,10 +24,10 @@ export async function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // 2. Enforce Authentication & Route Authorization
+  // 3. Enforce Authentication & Route Authorization
   const isDashboardRoute = url.pathname.startsWith("/dashboard");
   const isSuperAdminRoute = url.pathname.startsWith("/super-admin");
-  const isLoginOrSignup = url.pathname.startsWith("/login") || url.pathname.startsWith("/onboarding");
+  const isOnboarding = url.pathname.startsWith("/onboarding");
 
   // Read session cookie
   const sessionCookie = request.cookies.get("session")?.value;
@@ -51,10 +51,17 @@ export async function proxy(request: NextRequest) {
     }
   }
 
-  if (isLoginOrSignup && session) {
-    // Redirect already authenticated users away from login/signup
+  // Only redirect away from onboarding if already logged in (never redirect away from /login)
+  if (isOnboarding && session) {
     url.pathname = session.role === "admin" ? "/super-admin" : "/dashboard";
     return NextResponse.redirect(url);
+  }
+
+  // Clear session cookie when visiting login page to prevent auto-login
+  if (url.pathname.startsWith("/login") && sessionCookie) {
+    const response = NextResponse.next();
+    response.cookies.delete("session");
+    return response;
   }
 
   const marketingDomain = "icancall.co";

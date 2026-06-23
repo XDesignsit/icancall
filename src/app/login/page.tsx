@@ -13,13 +13,9 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const params = new URLSearchParams(window.location.search);
-      if (params.get("unauthorized") === "true") {
-        localStorage.removeItem("isLoggedIn");
-        localStorage.removeItem("isAdminLoggedIn");
-        localStorage.removeItem("userEmail");
-        return;
-      }
+      localStorage.removeItem("isLoggedIn");
+      localStorage.removeItem("isAdminLoggedIn");
+      localStorage.removeItem("userEmail");
     }
   }, []);
 
