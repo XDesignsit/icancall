@@ -93,6 +93,7 @@ export default function ComingSoon() {
   const [emailInvalid, setEmailInvalid] = useState(false);
   const [phoneInvalid, setPhoneInvalid] = useState(false);
   const [consentInvalid, setConsentInvalid] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   // Demo animation state
   const [demoStatus, setDemoStatus] = useState("Incoming call");
@@ -179,8 +180,10 @@ export default function ComingSoon() {
     return () => { isMounted = false; };
   }, []);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (submitting) return;
+
     setEmailInvalid(false);
     setPhoneInvalid(false);
     setConsentInvalid(false);
@@ -201,14 +204,42 @@ export default function ComingSoon() {
       return;
     }
 
-    try {
-      const entry = { email: emailInput.trim(), phone: phoneInput.trim(), sms: true, at: new Date().toISOString() };
-      const list = JSON.parse(localStorage.getItem('ic_waitlist') || '[]');
-      list.push(entry);
-      localStorage.setItem('ic_waitlist', JSON.stringify(list));
-    } catch (_) {}
+    setSubmitting(true);
 
-    setFormDone(true);
+    try {
+      // Local storage fallback for redundancy
+      try {
+        const entry = { email: emailInput.trim(), phone: phoneInput.trim(), sms: true, at: new Date().toISOString() };
+        const list = JSON.parse(localStorage.getItem('ic_waitlist') || '[]');
+        list.push(entry);
+        localStorage.setItem('ic_waitlist', JSON.stringify(list));
+      } catch (_) {}
+
+      // Call our API proxy to register with Acumbamail
+      const response = await fetch('/api/waitlist', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: emailInput.trim(),
+          phone: phoneInput.trim(),
+        }),
+      });
+
+      if (!response.ok) {
+        const errData = await response.json().catch(() => ({}));
+        throw new Error(errData.error || "Failed to register with the mailing list.");
+      }
+
+      setFormDone(true);
+    } catch (err: any) {
+      console.error("Waitlist submit error:", err);
+      setErrorMsg(err.message || "An unexpected error occurred. Please try again.");
+      setShowError(true);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -324,6 +355,18 @@ export default function ComingSoon() {
         .expect-card h3 { font-size: 1.14rem; margin-bottom: 8px; text-align: left; }
         .expect-card p { color: var(--ink-soft); font-size: 0.96rem; text-align: left; }
         @media (max-width: 820px) { .expect { grid-template-columns: 1fr; } }
+        @keyframes wl-spin {
+          to { transform: rotate(360deg); }
+        }
+        .wl-spinner {
+          animation: wl-spin 0.8s linear infinite;
+          display: inline-block;
+          width: 16px;
+          height: 16px;
+          border: 2.5px solid currentColor;
+          border-top-color: transparent;
+          border-radius: 50%;
+        }
       ` }} />
 
       {/* ============== HEADER ============== */}
@@ -418,6 +461,7 @@ export default function ComingSoon() {
                         value={emailInput}
                         onChange={(e) => { setEmailInput(e.target.value); setEmailInvalid(false); }}
                         required
+                        disabled={submitting}
                       />
                     </div>
                     <div className="wl-field">
@@ -430,18 +474,20 @@ export default function ComingSoon() {
                         value={phoneInput}
                         onChange={(e) => { setPhoneInput(e.target.value); setPhoneInvalid(false); }}
                         required
+                        disabled={submitting}
                       />
                     </div>
                   </div>
                 </div>
 
-                <label className={`wl-consent ${consentInvalid ? "invalid" : ""}`} id="wl-consent">
+                <label className={`wl-consent ${consentInvalid ? "invalid" : ""}`} id="wl-consent" style={{ cursor: submitting ? "not-allowed" : "pointer" }}>
                   <input
                     type="checkbox"
                     id="wl-sms"
                     checked={smsConsent}
                     onChange={(e) => { setSmsConsent(e.target.checked); setConsentInvalid(false); }}
                     required
+                    disabled={submitting}
                   />
                   <span className="box">
                     <svg viewBox="0 0 24 24" fill="none" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
@@ -454,8 +500,41 @@ export default function ComingSoon() {
                   </span>
                 </label>
 
-                <button className="btn btn-primary btn-lg btn-submit" type="submit">
-                  {t.waitlist?.joinBtn || "Join the waitlist"}
+                <button 
+                  className="btn btn-primary btn-lg btn-submit" 
+                  type="submit"
+                  disabled={submitting}
+                  style={{ 
+                    opacity: submitting ? 0.8 : 1, 
+                    cursor: submitting ? "not-allowed" : "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "8px"
+                  }}
+                >
+                  {submitting ? (
+                    <>
+                      <span className="wl-spinner"></span>
+                      <span>
+                        {{
+                          en: "Joining...",
+                          es: "Uniéndose...",
+                          fr: "Rejoindre...",
+                          ja: "参加中...",
+                          zh: "加入中...",
+                          ar: "جاري الانضمام...",
+                          hi: "शामिल हो रहे हैं...",
+                          pt: "Participando...",
+                          de: "Beitritt...",
+                          it: "Registrazione...",
+                          ko: "참여 중..."
+                        }[lang] || "Joining..."}
+                      </span>
+                    </>
+                  ) : (
+                    t.waitlist?.joinBtn || "Join the waitlist"
+                  )}
                 </button>
 
                 <p className={`wl-error ${showError ? "show" : ""}`} id="wl-error">
