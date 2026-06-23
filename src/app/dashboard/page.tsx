@@ -4387,6 +4387,7 @@ export default function DashboardApp() {
         if (profileRes.ok && profileData.profile) {
           const acc = mapProfileToAccount(profileData.profile);
           setAccount(acc);
+          localStorage.setItem("isLoggedIn", "true");
         }
 
         if (linesRes.ok && Array.isArray(linesData.lines)) {
@@ -4511,11 +4512,6 @@ export default function DashboardApp() {
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      if (localStorage.getItem("isLoggedIn") !== "true") {
-        window.location.href = "/login";
-        return;
-      }
-
       // Check if session is impersonated
       const imp = localStorage.getItem("impersonatingUser");
       if (imp) {
