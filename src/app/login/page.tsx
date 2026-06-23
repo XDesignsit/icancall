@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 
 export default function LoginPage() {
-  const [email, setEmail] = useState("support@icancall.co");
+  const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
   const [step, setStep] = useState<"email" | "otp">("email");
   const [isLoading, setIsLoading] = useState(false);
@@ -19,12 +19,6 @@ export default function LoginPage() {
         localStorage.removeItem("isAdminLoggedIn");
         localStorage.removeItem("userEmail");
         return;
-      }
-
-      if (localStorage.getItem("isAdminLoggedIn") === "true") {
-        window.location.href = "/super-admin";
-      } else if (localStorage.getItem("isLoggedIn") === "true") {
-        window.location.href = "/dashboard";
       }
     }
   }, []);
