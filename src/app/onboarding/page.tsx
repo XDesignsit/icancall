@@ -471,7 +471,7 @@ function AccountStep({ data, set, onNext, onBack }: { data: OnboardingData; set:
             style={{ marginTop: 3, cursor: "pointer" }}
           />
           <span>
-            By checking this box, you agree to receive automated SMS alerts and notifications about caregivers, virtual lines, and system status. Message and data rates may apply. Message frequency varies. Text STOP to opt-out, or HELP for support.
+            I agree to receive SMS messages from ICanCall including account alerts, billing notifications, and service updates. Msg & data rates may apply. Reply STOP to opt out.
           </span>
         </label>
         <div className={"field-err" + (show("sms") ? " show" : "")} style={{ marginLeft: 26, marginTop: 4 }}>{errs.sms}</div>
