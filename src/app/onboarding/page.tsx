@@ -239,7 +239,7 @@ const Ico = {
 /* ============ INTERNAL COMPONENTS ============ */
 function BrandMark({ dark }: { dark?: boolean }) {
   return (
-    <Link href="/" className={"obrand" + (dark ? " on-dark" : "")} style={{ display: "block" }}>
+    <Link href="/" className={"obrand" + (dark ? " on-dark" : "")}>
       <svg className="logo-main" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 553.0305" style={{ height: "32px", width: "auto", display: "block" }}>
           <style>{`
             .logo-main .cls-1 { fill: #1c2530; }
