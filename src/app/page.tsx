@@ -490,7 +490,10 @@ export default function Home() {
               <h1><span className="block mb-2">{t.hero.titleAccent}.</span><span className="accent">{t.hero.titleRest}</span></h1>
               <p className="lead">{t.hero.lead}</p>
               <div className="hero-actions">
-                <a className="btn btn-primary btn-lg" href="#pricing">{t.hero.getStarted}</a>
+                <div className="hero-cta-wrapper">
+                  <a className="btn btn-primary btn-lg" href="#pricing">{t.hero.getStarted}</a>
+                  <span className="hero-trust-line">{t.hero.trustLine}</span>
+                </div>
                 <a className="btn btn-ghost btn-lg" href="#how">{t.hero.seeHow}</a>
               </div>
               <div className="hero-note"><span className="dot"></span> {t.ui.noHardware}</div>
@@ -827,6 +830,7 @@ export default function Home() {
                   <li><Ico.check className="w-[19px] h-[19px]" /> {t.pricing.eFeat4}</li>
                   <li><Ico.check className="w-[19px] h-[19px]" /> {t.pricing.eFeat5}</li>
                   <li><Ico.check className="w-[19px] h-[19px]" /> {t.ui.worksOnAnyPhoneNoApp}</li>
+                  <li><Ico.check className="w-[19px] h-[19px]" /> {t.pricing.shortGuarantee}</li>
                 </ul>
                 <Link className="btn btn-ghost" href={`/onboarding?plan=essential&billing=${billingCycle}`}>{t.pricing.selectPlan}</Link>
               </div>
@@ -851,9 +855,18 @@ export default function Home() {
                   <li><Ico.check className="w-[19px] h-[19px]" /> {t.pricing.pFeat4}</li>
                   <li><Ico.check className="w-[19px] h-[19px]" /> {t.pricing.pFeat5}</li>
                   <li><Ico.check className="w-[19px] h-[19px]" /> {t.ui.worksOnAnyPhoneNoApp}</li>
+                  <li><Ico.check className="w-[19px] h-[19px]" /> {t.pricing.shortGuarantee}</li>
                 </ul>
                 <Link className="btn btn-primary" href={`/onboarding?plan=pro&billing=${billingCycle}`}>{t.pricing.selectPlan}</Link>
               </div>
+            </div>
+
+            <div className="pricing-guarantee reveal in">
+              <div className="pricing-guarantee-icon">
+                <Ico.shield className="w-[22px] h-[22px]" />
+              </div>
+              <h4>{t.pricing.guaranteeTitle}</h4>
+              <p>{t.pricing.guaranteeDesc}</p>
             </div>
 
             <div 

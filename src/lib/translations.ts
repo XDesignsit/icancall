@@ -47,6 +47,7 @@ export interface HomepageTranslations {
     seeHow: string;
     guarantee: string;
     secure: string;
+    trustLine: string;
   };
   stats: {
     routed: string;
@@ -145,6 +146,9 @@ export interface HomepageTranslations {
     pFeat4: string;
     pFeat5: string;
     pFeat6: string;
+    guaranteeTitle: string;
+    guaranteeDesc: string;
+    shortGuarantee: string;
   };
   testimonials: {
     stars: string;
@@ -290,7 +294,8 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "getStarted": "Get Started",
     "seeHow": "See how it works",
     "guarantee": "30-day money-back guarantee",
-    "secure": "Secure and private routing"
+    "secure": "Secure and private routing",
+    "trustLine": "30-day money-back guarantee · Cancel anytime · No contracts"
   },
   "stats": {
     "routed": "Calls Routed",
@@ -388,7 +393,10 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "pFeat3": "Cascade & Caller Menu (IVR)",
     "pFeat4": "Time-of-day Scheduling",
     "pFeat5": "Instant Voicemail Email Transcriptions",
-    "pFeat6": "Bilingual Greeting Options"
+    "pFeat6": "Bilingual Greeting Options",
+    "guaranteeTitle": "30-Day Money-Back Guarantee",
+    "guaranteeDesc": "Try ICanCall risk-free for 30 days. If it's not the right fit for your family, we'll refund you in full — no questions asked, no restocking fees, no hardware to return.",
+    "shortGuarantee": "30-day money-back guarantee"
   },
   "testimonials": {
     "stars": "★★★★★",
@@ -532,7 +540,8 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "getStarted": "Comenzar",
     "seeHow": "Ver cómo funciona",
     "guarantee": "Garantía de reembolso de 30 días",
-    "secure": "Enrutamiento seguro y privado"
+    "secure": "Enrutamiento seguro y privado",
+    "trustLine": "Garantía de devolución de 30 días · Cancele en cualquier momento · Sin contratos"
   },
   "stats": {
     "routed": "Llamadas Enrutadas",
@@ -630,7 +639,10 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "pFeat3": "Cascada y Menú de Opciones (IVR)",
     "pFeat4": "Enrutamiento por Horario del Día",
     "pFeat5": "Transcripciones de Voz por Correo al Instante",
-    "pFeat6": "Opciones de Saludo Bilingües"
+    "pFeat6": "Opciones de Saludo Bilingües",
+    "guaranteeTitle": "Garantía de Devolución de Dinero de 30 Días",
+    "guaranteeDesc": "Pruebe ICanCall sin riesgos durante 30 días. Si no es la opción adecuada para su familia, le devolveremos el importe completo: sin preguntas, sin tarifas de reposición y sin hardware que devolver.",
+    "shortGuarantee": "Garantía de devolución de 30 días"
   },
   "testimonials": {
     "stars": "★★★★★",
@@ -774,7 +786,8 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "getStarted": "Démarrer",
     "seeHow": "Voir le fonctionnement",
     "guarantee": "Garantie de remboursement de 30 jours",
-    "secure": "Routage sécurisé et privé"
+    "secure": "Routage sécurisé et privé",
+    "trustLine": "Garantie satisfait ou remboursé de 30 jours · Annulation à tout moment · Sans engagement"
   },
   "stats": {
     "routed": "Appels acheminés",
@@ -872,7 +885,10 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "pFeat3": "Cascade & Menu Vocal (SVI)",
     "pFeat4": "Planification horaire avancée",
     "pFeat5": "Transcriptions instantanées de messagerie par e-mail",
-    "pFeat6": "Options d'accueil bilingues"
+    "pFeat6": "Options d'accueil bilingues",
+    "guaranteeTitle": "Garantie Satisfait ou Remboursé de 30 Jours",
+    "guaranteeDesc": "Essayez ICanCall sans risque pendant 30 jours. Si cela ne convient pas à votre famille, nous vous rembourserons intégralement — sans poser de questions, sans frais de restockage et sans matériel à renvoyer.",
+    "shortGuarantee": "Garantie de remboursement de 30 jours"
   },
   "testimonials": {
     "stars": "★★★★★",
@@ -1016,7 +1032,8 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "getStarted": "今すぐ始める",
     "seeHow": "仕組みを見る",
     "guarantee": "30日間返金保証付き",
-    "secure": "プライバシーに配慮した安全な接続"
+    "secure": "プライバシーに配慮した安全な接続",
+    "trustLine": "30日間返金保証 · いつでもキャンセル可能 · 契約期間の縛りなし"
   },
   "stats": {
     "routed": "転送された通話",
@@ -1114,7 +1131,10 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "pFeat3": "カスケード転送 ＆ 音声メニュー",
     "pFeat4": "時間帯別スケジュール転送",
     "pFeat5": "留守電の自動テキスト化メール送信",
-    "pFeat6": "バイリンガル音声ガイダンス対応"
+    "pFeat6": "バイリンガル音声ガイダンス対応",
+    "guaranteeTitle": "30日間返金保証",
+    "guaranteeDesc": "ICanCallを30日間リスクフリーでお試しください。ご家族に合わない場合は全額返金いたします。理由の確認、手数料の発生、機器の返却などは一切ありません。",
+    "shortGuarantee": "30日間の返金保証"
   },
   "testimonials": {
     "stars": "★★★★★",
@@ -1258,7 +1278,8 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "getStarted": "立即体验",
     "seeHow": "了解工作原理",
     "guarantee": "30天无忧退款保证",
-    "secure": "隐私安全的私密路由"
+    "secure": "隐私安全的私密路由",
+    "trustLine": "30天退款保证 · 随时取消 · 免签合同"
   },
   "stats": {
     "routed": "累计转接呼叫",
@@ -1356,7 +1377,10 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "pFeat3": "级联顺次转发 ＆ 语音按键菜单",
     "pFeat4": "时间段排班转发规则",
     "pFeat5": "语音留言自动文本化并同步发送邮件",
-    "pFeat6": "支持双语欢迎致辞选项"
+    "pFeat6": "支持双语欢迎致辞选项",
+    "guaranteeTitle": "30天无忧退款保证",
+    "guaranteeDesc": "无风险试用 ICanCall 30 天。如果它不适合您的家庭，我们将全额退款 —— 无需任何理由，无重新上架费，无需退回硬件。",
+    "shortGuarantee": "30天退款保证"
   },
   "testimonials": {
     "stars": "★★★★★",
@@ -1500,7 +1524,8 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "getStarted": "ابدأ الآن",
     "seeHow": "اكتشف كيف يعمل",
     "guarantee": "ضمان استرداد الأموال لمدة 30 يوماً",
-    "secure": "توجيه آمن وخاص للمكالمات"
+    "secure": "توجيه آمن وخاص للمكالمات",
+    "trustLine": "ضمان استرداد الأموال لمدة 30 يومًا · إلغاء في أي وقت · بدون عقود"
   },
   "stats": {
     "routed": "مكالمات موجهة",
@@ -1598,7 +1623,10 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "pFeat3": "الرنين المتتالي وقائمة خيارات المتصل (IVR)",
     "pFeat4": "جدولة المكالمات حسب الوقت من اليوم",
     "pFeat5": "تحويل البريد الصوتي إلى نص وإرساله عبر البريد فوراً",
-    "pFeat6": "خيارات رسائل الترحيب الصوتية ثنائية اللغة"
+    "pFeat6": "خيارات رسائل الترحيب الصوتية ثنائية اللغة",
+    "guaranteeTitle": "ضمان استرداد الأموال لمدة 30 يومًا",
+    "guaranteeDesc": "جرب ICanCall الخالي من المخاطر لمدة 30 يومًا. إذا لم يكن مناسبًا لعائلتك، فسنقوم برد المبلغ بالكامل — دون طرح أسئلة، ودون رسوم إعادة تخزين، ودون أجهزة لإعادتها.",
+    "shortGuarantee": "ضمان استرداد الأموال لمدة 30 يومًا"
   },
   "testimonials": {
     "stars": "★★★★★",
@@ -1742,7 +1770,8 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "getStarted": "शुरू करें",
     "seeHow": "देखें यह कैसे काम करता है",
     "guarantee": "30-दिन की मनी-बैक गारंटी",
-    "secure": "सुरक्षित और निजी कॉल रूटिंग"
+    "secure": "सुरक्षित और निजी कॉल रूटिंग",
+    "trustLine": "30-दिनों की मनी-बैक गारंटी · किसी भी समय रद्द करें · कोई अनुबंध नहीं"
   },
   "stats": {
     "routed": "रूट की गई कॉल",
@@ -1840,7 +1869,10 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "pFeat3": "कैस्केड कॉल + कॉलर मेनू (IVR)",
     "pFeat4": "समय-सारणी के अनुसार रूटिंग",
     "pFeat5": "वॉयस मेल का तुरंत टेक्स्ट रूपांतरण ईमेल",
-    "pFeat6": "द्विभाषी अभिवादन के विकल्प"
+    "pFeat6": "द्विभाषी अभिवादन के विकल्प",
+    "guaranteeTitle": "30-दिनों की मनी-बैक गारंटी",
+    "guaranteeDesc": "30 दिनों तक जोखिम-मुक्त ICanCall आज़माएं। यदि यह आपके परिवार के लिए सही नहीं है, तो हम आपको पूरा रिफंड कर देंगे — बिना किसी सवाल के, कोई रीस्टॉकिंग शुल्क नहीं, कोई हार्डवेयर वापस नहीं करना है।",
+    "shortGuarantee": "30-दिनों की मनी-बैक गारंटी"
   },
   "testimonials": {
     "stars": "★★★★★",
@@ -1984,7 +2016,8 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "getStarted": "Começar agora",
     "seeHow": "Como funciona",
     "guarantee": "30 dias de garantia de reembolso",
-    "secure": "Encaminhamento seguro e privado"
+    "secure": "Encaminhamento seguro e privado",
+    "trustLine": "Garantia de reembolso de 30 dias · Cancele a qualquer momento · Sem contratos"
   },
   "stats": {
     "routed": "Ligações completadas",
@@ -2082,7 +2115,10 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "pFeat3": "Cascada e Menu de Opções (URA)",
     "pFeat4": "Escala e Programação de Horários",
     "pFeat5": "Transcrição Instantânea de Mensagens de Voz por E-mail",
-    "pFeat6": "Mensagens de Saudação Bilingues"
+    "pFeat6": "Mensagens de Saudação Bilingues",
+    "guaranteeTitle": "Garantia de Reembolso de 30 Dias",
+    "guaranteeDesc": "Experimente o ICanCall sem riscos durante 30 dias. Se não for a escolha certa para a sua família, reembolsaremos o valor total — sem perguntas, sem taxas de devolução e sem hardware para devolver.",
+    "shortGuarantee": "Garantia de reembolso de 30 dias"
   },
   "testimonials": {
     "stars": "★★★★★",
@@ -2226,7 +2262,8 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "getStarted": "Jetzt starten",
     "seeHow": "Wie es funktioniert",
     "guarantee": "30 Tage Geld-zurück-Garantie",
-    "secure": "Sichere und private Weiterleitung"
+    "secure": "Sichere und private Weiterleitung",
+    "trustLine": "30 Tage Geld-zurück-Garantie · Jederzeit kündbar · Keine Verträge"
   },
   "stats": {
     "routed": "Anrufe weitergeleitet",
@@ -2324,7 +2361,10 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "pFeat3": "Kaskadenweiterleitung & Sprachmenü",
     "pFeat4": "Zeitgesteuerte Rufweiterleitung",
     "pFeat5": "Sofortige Transkription von Mailbox-Aufnahmen per E-Mail",
-    "pFeat6": "Zweisprachige Ansagen möglich"
+    "pFeat6": "Zweisprachige Ansagen möglich",
+    "guaranteeTitle": "30-tägige Geld-zurück-Garantie",
+    "guaranteeDesc": "Testen Sie ICanCall 30 Tage lang risikofrei. Wenn es nicht das Richtige für Ihre Familie ist, erstatten wir Ihnen den vollen Betrag zurück – ohne Fragen, ohne Wiedereinlagerungsgebühren und ohne Hardware, die zurückgegeben werden muss.",
+    "shortGuarantee": "30 Tage Geld-zurück-Garantie"
   },
   "testimonials": {
     "stars": "★★★★★",
@@ -2468,7 +2508,8 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "getStarted": "Inizia ora",
     "seeHow": "Scopri come funziona",
     "guarantee": "30 giorni di garanzia soddisfatti o rimborsati",
-    "secure": "Inoltro sicuro e privato"
+    "secure": "Inoltro sicuro e privato",
+    "trustLine": "Garanzia di rimborso di 30 giorni · Cancella in qualsiasi momento · Nessun vincolo"
   },
   "stats": {
     "routed": "Chiamate inoltrate",
@@ -2566,7 +2607,10 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "pFeat3": "Cascata & Menu Scelta Rapida (IVR)",
     "pFeat4": "Pianificazione oraria avanzata",
     "pFeat5": "Trascrizioni istantanee dei messaggi vocali via e-mail",
-    "pFeat6": "Messaggio di benvenuto bilingue a scelta"
+    "pFeat6": "Messaggio di benvenuto bilingue a scelta",
+    "guaranteeTitle": "Garanzia di Rimborso di 30 Giorni",
+    "guaranteeDesc": "Prova ICanCall senza rischi per 30 giorni. Se non fa al caso vostro, vi rimborseremo l'intero importo: senza domande, senza costi di riassortimento e nessun hardware da restituire.",
+    "shortGuarantee": "Garanzia di rimborso di 30 giorni"
   },
   "testimonials": {
     "stars": "★★★★★",
@@ -2710,7 +2754,8 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "getStarted": "지금 시작하기",
     "seeHow": "이용 방법 보기",
     "guarantee": "30일 안심 환불 보장",
-    "secure": "개인정보 보호 및 안전한 통화 라우팅"
+    "secure": "개인정보 보호 및 안전한 통화 라우팅",
+    "trustLine": "30일 환불 보장 · 언제든지 해지 가능 · 위약금/약정 없음"
   },
   "stats": {
     "routed": "연결 완료된 전화",
@@ -2808,7 +2853,10 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "pFeat3": "순차 라우팅 ＆ 안내 다이얼 메뉴 탑재 (IVR)",
     "pFeat4": "시간대별 자동 당번 라우팅 설정",
     "pFeat5": "음성 메시지 자동 텍스트 변환 알림 이메일 전송",
-    "pFeat6": "다국어 웰컴 안내 멘트 옵션 선택 가능"
+    "pFeat6": "다국어 웰컴 안내 멘트 옵션 선택 가능",
+    "guaranteeTitle": "30일 이내 100% 환불 보장",
+    "guaranteeDesc": "ICanCall을 30일 동안 수수료나 위험 부담 없이 체험해 보세요. 귀하의 가족에게 맞지 않는다면 전액 환불해 드립니다 — 묻지도 따지지도 않고, 어떠한 반품 수수료나 하드웨어 반납 절차도 없습니다.",
+    "shortGuarantee": "30일 이내 환불 보장"
   },
   "testimonials": {
     "stars": "★★★★★",
