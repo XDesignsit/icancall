@@ -18,7 +18,33 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // 2. Only run proxy redirects on production domains containing 'icancall.co'
+  // 2. Handle Preview Bypass Cookie and Parameters
+  const hasPreviewParam = url.searchParams.get("preview") === "hellionz";
+  const hasPreviewCookie = request.cookies.get("icancall_preview")?.value === "hellionz";
+  const hasPreviewBypass = hasPreviewParam || hasPreviewCookie;
+
+  if (hasPreviewParam) {
+    url.searchParams.delete("preview");
+    const response = NextResponse.redirect(url);
+    response.cookies.set("icancall_preview", "hellionz", {
+      maxAge: 60 * 60 * 24 * 30, // 30 days
+      path: "/",
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+    });
+    return response;
+  }
+
+  // 3. Enforce redirect to coming soon page for visitors on production/preview domains
+  const isProduction = baseHost.includes("icancall.co") || baseHost.includes("vercel.app");
+  if (isProduction && !hasPreviewBypass) {
+    if (url.pathname !== "/coming-soon") {
+      url.pathname = "/coming-soon";
+      return NextResponse.redirect(url);
+    }
+  }
+
+  // 4. Only run proxy redirects on production domains containing 'icancall.co'
   // (Prevents iframe cookie-blocking loops in local development & Vercel preview environments)
   if (!baseHost.includes("icancall.co")) {
     return NextResponse.next();
