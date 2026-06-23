@@ -3,6 +3,7 @@
 import React, { useState, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
+import { translations } from "@/lib/translations";
 
 /* ============ TYPES ============ */
 type Plan = "essential" | "pro";
@@ -79,21 +80,6 @@ const VANITY_WORDS = [
   { word: "CALL", digits: "2255" },
   { word: "LOVE", digits: "5683" },
   { word: "FAMI", digits: "3264" },
-];
-
-const STEPS = [
-  { key: "plan",    label: "Plan" },
-  { key: "account", label: "Account" },
-  { key: "number",  label: "Number" },
-  { key: "payment", label: "Payment" },
-];
-
-const STRENGTH = [
-  { label: "", color: "transparent", w: "0%" },
-  { label: "Weak", color: "var(--rose)", w: "25%" },
-  { label: "Fair", color: "oklch(0.72 0.14 75)", w: "55%" },
-  { label: "Good", color: "oklch(0.70 0.13 140)", w: "80%" },
-  { label: "Strong", color: "var(--green)", w: "100%" },
 ];
 
 function pad(n: number, len: number) { return String(n).padStart(len, "0"); }
@@ -236,10 +222,153 @@ const Ico = {
   ),
 };
 
+/* ============ TRANSLATION MANUALLY MAPPED DICTIONARIES ============ */
+const SIGNIN_PROMPTS: Record<string, { text: string; link: string }> = {
+  en: { text: "Already have an account?", link: "Sign in" },
+  es: { text: "¿Ya tienes una cuenta?", link: "Iniciar sesión" },
+  fr: { text: "Vous avez déjà un compte ?", link: "Se connecter" },
+  ja: { text: "すでにアカウントをお持ちですか？", link: "ログイン" },
+  zh: { text: "已经有账号？", link: "登录" },
+  ar: { text: "هل لديك حساب بالفعل؟", link: "تسجيل الدخول" },
+  hi: { text: "क्या आपके पास पहले से एक खाता है?", link: "लॉगिन करें" },
+  pt: { text: "Já tem uma conta?", link: "Entrar" },
+  de: { text: "Bereits ein Konto?", link: "Anmelden" },
+  it: { text: "Hai già un account?", link: "Accedi" },
+  ko: { text: "이미 계정이 있으신가요?", link: "로그인" },
+};
+
+const STRENGTH_LABELS: Record<string, string> = {
+  en: "Password strength:",
+  es: "Seguridad de la contraseña:",
+  fr: "Force du mot de passe :",
+  ja: "パスワード強度:",
+  zh: "密码强度：",
+  ar: "قوة كلمة المرور:",
+  hi: "पासवर्ड की ताकत:",
+  pt: "Força da senha:",
+  de: "Passwortstärke:",
+  it: "Forza della password:",
+  ko: "비밀번호 수준:"
+};
+
+const DISCLAIMERS: Record<string, { text: string; privacy: string; terms: string }> = {
+  en: {
+    text: "By creating an account, you consent to receive transactional SMS messages from ICanCall at the mobile number provided. Message frequency varies by account activity. Reply STOP to unsubscribe at any time, or HELP for assistance. For more information, see our",
+    privacy: "Privacy Policy",
+    terms: "Terms of Service"
+  },
+  es: {
+    text: "Al crear una cuenta, acepta recibir mensajes SMS transaccionales de ICanCall en el número móvil provisto. La frecuencia varía según la actividad de la cuenta. Responda STOP para darse de baja o HELP para ayuda. Para más información, consulte nuestra",
+    privacy: "Política de Privacidad",
+    terms: "Términos de Servicio"
+  },
+  fr: {
+    text: "En créant un compte, vous acceptez de recevoir des SMS transactionnels d'ICanCall au numéro fourni. La fréquence varie selon l'activité. Répondez STOP pour vous désabonner ou HELP pour assistance. Pour plus d'informations, consultez notre",
+    privacy: "Politique de Confidentialité",
+    terms: "Conditions d'Utilisation"
+  },
+  ja: {
+    text: "アカウントを作成することにより、提供された携帯電話番号でのICanCallからのトランザクションSMSメッセージの受信に同意したことになります。メッセージの頻度はアカウントのアクティビティによって異なります。いつでもSTOPと返信して購読を解除するか、HELPでサポートを求めてください。詳細については、以下を参照してください。",
+    privacy: "プライバシーポリシー",
+    terms: "利用規約"
+  },
+  zh: {
+    text: "通过创建账户，您同意在提供的手机号码上接收来自 ICanCall 的事务性短信。短信频率因账户活动而异。随时回复 STOP 退订，或回复 HELP 获取帮助。欲了解更多信息，请参阅我们的",
+    privacy: "隐私政策",
+    terms: "服务条款"
+  },
+  ar: {
+    text: "بإنشاء حساب، فإنك توافق على تلقي رسائل SMS المتعلقة بالمعاملات من ICanCall على رقم الهاتف المحمول المقدم. يختلف تكرار الرسائل حسب نشاط الحساب. أرسل STOP لإلغاء الاشتراك في أي وقت، أو HELP للحصول على المساعدة. لمزيد من المعلومات، راجع",
+    privacy: "سياسة الخصوصية",
+    terms: "شروط الخدمة"
+  },
+  hi: {
+    text: "खाता बनाकर, आप प्रदान किए गए मोबाइल नंबर पर ICanCall से लेन-देन संबंधी SMS प्राप्त करने की सहमति देते हैं। संदेश की आवृत्ति खाता गतिविधि के आधार पर भिन्न होती है। किसी भी समय सदस्यता समाप्त करने के लिए STOP लिखें, या सहायता के लिए HELP। अधिक जानकारी के लिए, हमारी देखें",
+    privacy: "गोपनीयता नीति",
+    terms: "सेवा की शर्तें"
+  },
+  pt: {
+    text: "Ao criar uma conta, você consente em receber SMS transacionais do ICanCall no número móvel fornecido. A frequência das mensagens varia com a atividade da conta. Responda STOP para cancelar a assinatura a qualquer momento, ou HELP para assistência. Para mais informações, consulte nossos",
+    privacy: "Política de Privacidade",
+    terms: "Termos de Serviço"
+  },
+  de: {
+    text: "Mit der Erstellung eines Kontos stimmen Sie dem Empfang von transaktionsbezogenen SMS von ICanCall unter der angegebenen Mobiltelefonnummer zu. Die Häufigkeit hängt von der Kontoaktivität ab. Antworten Sie jederzeit mit STOP, um sich abzumelden, oder mit HELP, um Unterstützung zu erhalten. Weitere Informationen finden Sie in unserer",
+    privacy: "Datenschutzerklärung",
+    terms: "Nutzungsbedingungen"
+  },
+  it: {
+    text: "Creando un account, acconsenti a ricevere SMS transazionali da ICanCall al numero fornito. La frequenza varia in base all'attività dell'account. Rispondi STOP per annullare l'iscrizione o HELP per assistenza. Per maggiori informazioni, consulta la nostra",
+    privacy: "Informativa sulla Privacy",
+    terms: "Termini di Servizio"
+  },
+  ko: {
+    text: "계정을 생성함으로써 귀하는 제공된 휴대폰 번호로 ICanCall의 거래 관련 SMS 메시지를 수신하는 데 동의하게 됩니다. 메시지 빈도는 계정 활동에 따라 다릅니다. 언제든지 STOP을 입력하여 수신 거부하거나, HELP를 입력하여 지원을 받으십시오. 자세한 내용은 다음을 참조하십시오.",
+    privacy: "개인정보 처리방침",
+    terms: "서비스 약관"
+  }
+};
+
+const SPELLS_DICT: Record<string, string> = {
+  en: "Spells {word}",
+  es: "Deletrea {word}",
+  fr: "Écrit {word}",
+  ja: "「{word}」を表します",
+  zh: "拼作 {word}",
+  ar: "تهجئة {word}",
+  hi: "स्पेल {word}",
+  pt: "Soletra {word}",
+  de: "Bedeutet {word}",
+  it: "Compone {word}",
+  ko: "「{word}」을(를) 나타냅니다"
+};
+
+const MEMORABLE_LABELS: Record<string, Record<string, string>> = {
+  en: { "Repeating": "Repeating", "Sequence": "Sequence", "Mirror": "Mirror", "Easy recall": "Easy recall" },
+  es: { "Repeating": "Repetido", "Sequence": "Secuencia", "Mirror": "Espejo", "Easy recall": "Fácil de recordar" },
+  fr: { "Repeating": "Répété", "Sequence": "Séquence", "Mirror": "Miroir", "Easy recall": "Rappel facile" },
+  ja: { "Repeating": "繰り返し", "Sequence": "連番", "Mirror": "ミラー", "Easy recall": "覚えやすい" },
+  zh: { "Repeating": "重复", "Sequence": "顺序", "Mirror": "镜像", "Easy recall": "易记" },
+  ar: { "Repeating": "مكرر", "Sequence": "تسلسل", "Mirror": "مرآة", "Easy recall": "سهل التذكر" },
+  hi: { "Repeating": "दोहराया", "Sequence": "अनुक्रम", "Mirror": "दर्पण", "Easy recall": "याद रखना आसान" },
+  pt: { "Repeating": "Repetido", "Sequence": "Sequência", "Mirror": "Espelho", "Easy recall": "Fácil recall" },
+  de: { "Repeating": "Wiederholend", "Sequence": "Sequenz", "Mirror": "Spiegel", "Easy recall": "Einfach zu merken" },
+  it: { "Repeating": "Ripetuto", "Sequence": "Sequenza", "Mirror": "Specchio", "Easy recall": "Facile da ricordare" },
+  ko: { "Repeating": "반복", "Sequence": "일련번호", "Mirror": "대칭", "Easy recall": "기억하기 쉬움" }
+};
+
+const MORE_NUMBERS: Record<string, string> = {
+  en: "+{count} more · ",
+  es: "+{count} más · ",
+  fr: "+{count} de plus · ",
+  ja: "他+{count}個 · ",
+  zh: "另有 +{count} 个 · ",
+  ar: "+{count} إضافي · ",
+  hi: "+{count} और · ",
+  pt: "+{count} mais · ",
+  de: "+{count} weitere · ",
+  it: "+{count} in più · ",
+  ko: "+{count}개 추가 · "
+};
+
+const PAYMENT_BANNER_SUB: Record<string, string> = {
+  en: "Set up in minutes · Cancel anytime from your dashboard.",
+  es: "Configuración en minutos · Cancele en cualquier momento desde su panel.",
+  fr: "Configuration en quelques minutes · Annulez à tout moment depuis votre tableau de bord.",
+  ja: "数分でセットアップ完了 · ダッシュボードからいつでもキャンセル可能。",
+  zh: "几分钟内完成设置 · 随时在控制台取消。",
+  ar: "الإعداد في دقائق · يمكنك الإلغاء في أي وقت من لوحة التحكم الخاصة بك.",
+  hi: "मिनटों में सेटअप · अपने डैशबोर्ड से कभी भी रद्द करें।",
+  pt: "Configure em minutos · Cancele a qualquer momento no seu painel.",
+  de: "In wenigen Minuten eingerichtet · Jederzeit über Ihr Dashboard kündbar.",
+  it: "Configurazione in pochi minuti · Annulla in qualsiasi momento dalla tua dashboard.",
+  ko: "몇 분 만에 설정 완료 · 대시보드에서 언제든지 취소 가능."
+};
+
 /* ============ INTERNAL COMPONENTS ============ */
-function BrandMark({ dark }: { dark?: boolean }) {
+function BrandMark({ dark, lang }: { dark?: boolean; lang: string }) {
   return (
-    <Link href="/" className={"obrand" + (dark ? " on-dark" : "")}>
+    <Link href={lang ? `/?lang=${lang}` : "/"} className={"obrand" + (dark ? " on-dark" : "")}>
       <svg className="logo-main" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 553.0305" style={{ height: "32px", width: "auto", display: "block" }}>
           <style>{`
             .logo-main .cls-1 { fill: #1c2530; }
@@ -256,10 +385,16 @@ function BrandMark({ dark }: { dark?: boolean }) {
   );
 }
 
-function VSteps({ stepIndex }: { stepIndex: number }) {
+function VSteps({ stepIndex, t }: { stepIndex: number; t: any }) {
+  const steps = [
+    { key: "plan",    label: t.onboarding.stepPlan },
+    { key: "account", label: t.onboarding.stepAccount },
+    { key: "number",  label: t.onboarding.stepNumber },
+    { key: "payment", label: t.onboarding.stepPayment },
+  ];
   return (
     <div className="vsteps">
-      {STEPS.map((s, i) => {
+      {steps.map((s, i) => {
         const cls = i < stepIndex ? "done" : i === stepIndex ? "active" : "";
         return (
           <div key={s.key} className={"vstep " + cls}>
@@ -272,10 +407,16 @@ function VSteps({ stepIndex }: { stepIndex: number }) {
   );
 }
 
-function HSteps({ stepIndex }: { stepIndex: number }) {
+function HSteps({ stepIndex, t }: { stepIndex: number; t: any }) {
+  const steps = [
+    { key: "plan",    label: t.onboarding.stepPlan },
+    { key: "account", label: t.onboarding.stepAccount },
+    { key: "number",  label: t.onboarding.stepNumber },
+    { key: "payment", label: t.onboarding.stepPayment },
+  ];
   return (
     <div className="hsteps">
-      {STEPS.map((s, i) => (
+      {steps.map((s, i) => (
         <React.Fragment key={s.key}>
           {i > 0 && <span className={"hstep-bar" + (i <= stepIndex ? " filled" : "")} />}
           <div className={"hstep " + (i < stepIndex ? "done" : i === stepIndex ? "active" : "")}>
@@ -288,81 +429,108 @@ function HSteps({ stepIndex }: { stepIndex: number }) {
   );
 }
 
-function Rail({ stepIndex }: { stepIndex: number }) {
+function Rail({ stepIndex, t, lang }: { stepIndex: number; t: any; lang: string }) {
   return (
     <aside className="rail">
-      <div className="rail-head"><BrandMark dark /></div>
+      <div className="rail-head"><BrandMark dark lang={lang} /></div>
       <div className="rail-lede">
-        <h2>One number.<br /><span className="accent-line">Always answered.</span></h2>
-        <p>You're minutes away from giving your family the certainty of always getting through.</p>
-        <VSteps stepIndex={stepIndex} />
+        <h2>{t.onboarding.oneNumber}<br /><span className="accent-line">{t.onboarding.alwaysAnswered}</span></h2>
+        <p>{t.onboarding.railSubtitle}</p>
+        <VSteps stepIndex={stepIndex} t={t} />
       </div>
       <div className="rail-foot">
-        <Ico.lock className="w-[16px] h-[16px] opacity-85" /> Encrypted end to end · Switch plans or cancel anytime
+        <Ico.lock className="w-[16px] h-[16px] opacity-85" /> {t.onboarding.railFooter}
       </div>
     </aside>
   );
 }
 
-function Shell({ layout, stepIndex, hideChrome, children }: { layout: string; stepIndex: number; hideChrome: boolean; children: React.ReactNode }) {
+function Shell({ layout, stepIndex, hideChrome, lang, t, children }: { layout: string; stepIndex: number; hideChrome: boolean; lang: string; t: any; children: React.ReactNode }) {
   const split = layout === "split" && !hideChrome;
+  const prompt = SIGNIN_PROMPTS[lang] || SIGNIN_PROMPTS.en;
   return (
     <div className={"shell " + (split ? "split" : "centered")}>
-      {split && <Rail stepIndex={stepIndex} />}
+      {split && <Rail stepIndex={stepIndex} t={t} lang={lang} />}
       <div className="content">
         <div className="content-top">
-          <BrandMark />
-          <div className="signin">Already have an account? <Link href="/login">Sign in</Link></div>
+          <BrandMark lang={lang} />
+          <div className="signin">{prompt.text} <Link href={`/login?lang=${lang}`}>{prompt.link}</Link></div>
         </div>
-        {!hideChrome && <HSteps stepIndex={stepIndex} />}
+        {!hideChrome && <HSteps stepIndex={stepIndex} t={t} />}
         <div className="content-body">{children}</div>
       </div>
     </div>
   );
 }
 
-function StepNav({ onBack, onNext, nextLabel, nextDisabled, backLabel }: { onBack?: () => void; onNext: () => void; nextLabel?: string; nextDisabled?: boolean; backLabel?: string }) {
+function StepNav({ onBack, onNext, nextLabel, nextDisabled, backLabel, t }: { onBack?: () => void; onNext: () => void; nextLabel?: string; nextDisabled?: boolean; backLabel?: string; t: any }) {
   return (
     <div className="step-nav">
-      {onBack && <button className="btn-text" onClick={onBack}><Ico.arrowL className="w-[17px] h-[17px]" /> {backLabel || "Back"}</button>}
+      {onBack && <button className="btn-text" onClick={onBack}><Ico.arrowL className="w-[17px] h-[17px]" /> {backLabel || t.onboarding.btnBack}</button>}
       <span className="spacer" />
       <button className="btn btn-primary btn-lg" disabled={nextDisabled} onClick={onNext}>
-        {nextLabel || "Continue"} <Ico.arrowR className="w-[18px] h-[18px]" />
+        {nextLabel || t.onboarding.btnContinue} <Ico.arrowR className="w-[18px] h-[18px]" />
       </button>
     </div>
   );
 }
 
 /* ============ STEP 1 — Plan ============ */
-function PlanStep({ data, set, onNext }: { data: OnboardingData; set: (patch: Partial<OnboardingData>) => void; onNext: () => void }) {
+function PlanStep({ data, set, onNext, t, lang }: { data: OnboardingData; set: (patch: Partial<OnboardingData>) => void; onNext: () => void; t: any; lang: string }) {
   const { plan, billing } = data;
+
+  const essentialFeats = [
+    t.pricing.eFeat1,
+    t.pricing.eFeat2,
+    t.pricing.eFeat3,
+    t.pricing.eFeat4,
+    t.pricing.eFeat5,
+  ].filter(Boolean);
+
+  const proFeats = [
+    t.pricing.pFeat1,
+    t.pricing.pFeat2,
+    t.pricing.pFeat3,
+    t.pricing.pFeat4,
+    t.pricing.pFeat5,
+  ].filter(Boolean);
+
   return (
     <div className="panel">
-      <span className="step-eyebrow">Step 1 of 4 · Choose a plan</span>
-      <h1>Pick the plan that fits your family.</h1>
-      <p className="sub">Both plans include cascade routing, the caller menu, and 24/7 reliability. Switch or cancel anytime.</p>
+      <span className="step-eyebrow">{t.onboarding.step1Eyebrow}</span>
+      <h1>{t.onboarding.step1Title}</h1>
+      <p className="sub">{t.onboarding.step1Subtitle}</p>
 
       <div className="bill-toggle">
-        <button className={billing === "monthly" ? "active" : ""} onClick={() => set({ billing: "monthly" })}>Monthly</button>
-        <button className={billing === "yearly" ? "active" : ""} onClick={() => set({ billing: "yearly" })}>Annual <em>Save 17%</em></button>
+        <button className={billing === "monthly" ? "active" : ""} onClick={() => set({ billing: "monthly" })}>{t.onboarding.monthly}</button>
+        <button className={billing === "yearly" ? "active" : ""} onClick={() => set({ billing: "yearly" })}>
+          {t.onboarding.annual} <em>{t.onboarding.save17}</em>
+        </button>
       </div>
 
       <div className="plan-cards">
         {PLANS.map((p) => {
           const price = billing === "yearly" ? p.annual : p.monthly;
           const sel = plan === p.id;
+          const planName = p.id === "pro" ? t.pricing.proTitle : t.pricing.essentialTitle;
+          const planDesc = p.id === "pro" ? t.pricing.proDesc : t.pricing.essentialDesc;
+          const planTag = p.id === "pro" ? t.pricing.mostPopular : null;
+          const planFeats = p.id === "pro" ? proFeats : essentialFeats;
+          const perSuffix = billing === "yearly" ? t.ui.perYear : t.ui.perMonth;
+          const noteText = p.id === "pro" ? t.ui.justPriceAnnualPro : t.ui.justPriceAnnualEssential;
+
           return (
             <button key={p.id} className={"plan-card" + (sel ? " sel" : "")} onClick={() => set({ plan: p.id })}>
               <span className="radio" />
-              <span className="pname">{p.name}{p.tag && <span className="ptag">{p.tag}</span>}</span>
+              <span className="pname">{planName}{planTag && <span className="ptag">{planTag}</span>}</span>
               <span className="pprice">
                 <b>{price.label}</b>
-                <span>{price.per}</span>
-                {billing === "yearly" && <span className="yearly">{price.note}</span>}
+                <span>{perSuffix}</span>
+                {billing === "yearly" && <span className="yearly">{noteText}</span>}
               </span>
-              <span className="pdesc">{p.desc}</span>
+              <span className="pdesc">{planDesc}</span>
               <ul className="plan-feats">
-                {p.feats.map((f, i) => (
+                {planFeats.map((f, i) => (
                   <li key={i}>
                     <Ico.check className="w-[15px] h-[15px] text-green-500" /> {f}
                   </li>
@@ -373,26 +541,34 @@ function PlanStep({ data, set, onNext }: { data: OnboardingData; set: (patch: Pa
         })}
       </div>
 
-      <div className="trust-row"><Ico.shield className="w-[17px] h-[17px]" /> No setup fees · Switch plans or cancel anytime</div>
-      <StepNav onNext={onNext} nextLabel="Continue" />
+      <div className="trust-row"><Ico.shield className="w-[17px] h-[17px]" /> {t.onboarding.trustRow}</div>
+      <StepNav onNext={onNext} t={t} />
     </div>
   );
 }
 
 /* ============ STEP 2 — Account ============ */
-function AccountStep({ data, set, onNext, onBack }: { data: OnboardingData; set: (patch: Partial<OnboardingData>) => void; onNext: () => void; onBack: () => void }) {
+function AccountStep({ data, set, onNext, onBack, t, lang }: { data: OnboardingData; set: (patch: Partial<OnboardingData>) => void; onNext: () => void; onBack: () => void; t: any; lang: string }) {
   const a = data.account;
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   const [smsConsent, setSmsConsent] = useState(false);
   const [smsTouched, setSmsTouched] = useState(false);
   const strength = passwordStrength(a.password || "");
+
+  const STRENGTH = [
+    { label: "", color: "transparent", w: "0%" },
+    { label: t.onboarding.pwdWeak, color: "var(--rose)", w: "25%" },
+    { label: t.onboarding.pwdMedium, color: "oklch(0.72 0.14 75)", w: "55%" },
+    { label: t.onboarding.pwdMedium, color: "oklch(0.70 0.13 140)", w: "80%" },
+    { label: t.onboarding.pwdStrong, color: "var(--green)", w: "100%" },
+  ];
   const s = STRENGTH[strength];
 
   const errs = {
-    name: a.name.trim().length < 2 ? "Please enter your name" : "",
-    email: !validEmail(a.email) ? "Enter a valid email address" : "",
-    password: (a.password || "").length < 8 ? "Use at least 8 characters" : "",
-    sms: !smsConsent ? "You must agree to receive SMS notifications to continue" : "",
+    name: a.name.trim().length < 2 ? t.onboarding.errName : "",
+    email: !validEmail(a.email) ? t.onboarding.errEmail : "",
+    password: (a.password || "").length < 8 ? t.onboarding.errPassword : "",
+    sms: !smsConsent ? t.onboarding.errSms : "",
   };
   const valid = !errs.name && !errs.email && !errs.password && !errs.sms;
   const upd = (k: string, v: string) => set({ account: { ...a, [k]: v } });
@@ -409,22 +585,25 @@ function AccountStep({ data, set, onNext, onBack }: { data: OnboardingData; set:
     }
   };
 
+  const strengthLabel = STRENGTH_LABELS[lang] || STRENGTH_LABELS.en;
+  const discObj = DISCLAIMERS[lang] || DISCLAIMERS.en;
+
   return (
     <div className="panel">
-      <span className="step-eyebrow">Step 2 of 4 · Your account</span>
-      <h1>Let's set up your account.</h1>
-      <p className="sub">This is the account that manages the number and trusted circle. Your family doesn't need an account.</p>
+      <span className="step-eyebrow">{t.onboarding.step2Eyebrow}</span>
+      <h1>{t.onboarding.step2Title}</h1>
+      <p className="sub">{t.onboarding.step2Subtitle}</p>
 
       <button className="btn btn-google btn-block" style={{ marginTop: 22 }} onClick={onNext}>
-        <Ico.google className="w-[19px] h-[19px]" /> Continue with Google
+        <Ico.google className="w-[19px] h-[19px]" /> {t.onboarding.btnGoogle}
       </button>
-      <div className="auth-divider">or sign up with email</div>
+      <div className="auth-divider">{t.onboarding.dividerOr}</div>
 
       <div className="field">
-        <label>Full name</label>
+        <label>{t.onboarding.labelName}</label>
         <div className="input-icon">
           <Ico.user className="ico" />
-          <input className={"input" + (show("name") ? " error" : "")} placeholder="Maria Delgado"
+          <input className={"input" + (show("name") ? " error" : "")} placeholder={t.onboarding.placeholderName}
             value={a.name} onChange={(e) => upd("name", e.target.value)}
             onBlur={() => setTouched((t) => ({ ...t, name: true }))} />
         </div>
@@ -432,10 +611,10 @@ function AccountStep({ data, set, onNext, onBack }: { data: OnboardingData; set:
       </div>
 
       <div className="field">
-        <label>Email address</label>
+        <label>{t.onboarding.labelEmail}</label>
         <div className="input-icon">
           <Ico.mail className="ico" />
-          <input className={"input" + (show("email") ? " error" : "")} type="email" placeholder="you@example.com"
+          <input className={"input" + (show("email") ? " error" : "")} type="email" placeholder={t.onboarding.placeholderEmail}
             value={a.email} onChange={(e) => upd("email", e.target.value)}
             onBlur={() => setTouched((t) => ({ ...t, email: true }))} />
         </div>
@@ -443,17 +622,17 @@ function AccountStep({ data, set, onNext, onBack }: { data: OnboardingData; set:
       </div>
 
       <div className="field">
-        <label>Create a password</label>
+        <label>{t.onboarding.labelPassword}</label>
         <div className="input-icon">
           <Ico.lock className="ico" />
-          <input className={"input" + (show("password") ? " error" : "")} type="password" placeholder="At least 8 characters"
+          <input className={"input" + (show("password") ? " error" : "")} type="password" placeholder={t.onboarding.placeholderPassword}
             value={a.password || ""} onChange={(e) => upd("password", e.target.value)}
             onBlur={() => setTouched((t) => ({ ...t, password: true }))} />
         </div>
         {a.password && (
           <>
             <div className="pw-meter"><i style={{ width: s.w, background: s.color }} /></div>
-            <div className="pw-note">Password strength: {s.label || "—"}</div>
+            <div className="pw-note">{strengthLabel} {s.label || "—"}</div>
           </>
         )}
         <div className={"field-err" + (show("password") ? " show" : "")}>{errs.password}</div>
@@ -470,24 +649,22 @@ function AccountStep({ data, set, onNext, onBack }: { data: OnboardingData; set:
             }}
             style={{ width: "16px", height: "16px", flexShrink: 0, marginTop: 3, cursor: "pointer" }}
           />
-          <span>
-            I agree to receive SMS messages from ICanCall including account alerts, billing notifications, and service updates. Msg & data rates may apply. Reply STOP to opt out.
-          </span>
+          <span>{t.onboarding.smsText}</span>
         </label>
         <div className={"field-err" + (show("sms") ? " show" : "")} style={{ marginLeft: 26, marginTop: 4 }}>{errs.sms}</div>
       </div>
 
       <p style={{ fontSize: "0.76rem", color: "var(--ink-faint)", marginTop: 12, marginBottom: 16, lineHeight: 1.45 }}>
-        By creating an account, you consent to receive transactional SMS messages from ICanCall at the mobile number provided. Message frequency varies by account activity. Reply STOP to unsubscribe at any time, or HELP for assistance. For more information, see our <Link href="/privacy-policy" style={{ textDecoration: "underline", color: "var(--blue)" }} target="_blank">Privacy Policy</Link> and <Link href="/terms-of-service" style={{ textDecoration: "underline", color: "var(--blue)" }} target="_blank">Terms of Service</Link>.
+        {discObj.text} <Link href={`/privacy-policy?lang=${lang}`} style={{ textDecoration: "underline", color: "var(--blue)" }} target="_blank">{discObj.privacy}</Link> and <Link href={`/terms-of-service?lang=${lang}`} style={{ textDecoration: "underline", color: "var(--blue)" }} target="_blank">{discObj.terms}</Link>.
       </p>
 
-      <StepNav onBack={onBack} onNext={submit} nextLabel="Continue" />
+      <StepNav onBack={onBack} onNext={submit} t={t} />
     </div>
   );
 }
 
 /* ============ STEP 3 — Number ============ */
-function NumberStep({ data, set, onNext, onBack }: { data: OnboardingData; set: (patch: Partial<OnboardingData>) => void; onNext: () => void; onBack: () => void }) {
+function NumberStep({ data, set, onNext, onBack, t, lang }: { data: OnboardingData; set: (patch: Partial<OnboardingData>) => void; onNext: () => void; onBack: () => void; t: any; lang: string }) {
   const need = planById(data.plan).numbers;
   const selected = data.numbers;
   const [area, setArea] = useState("415");
@@ -518,15 +695,33 @@ function NumberStep({ data, set, onNext, onBack }: { data: OnboardingData; set: 
 
   const search = () => { const ac = area.replace(/\D/g, "").slice(0, 3); if (ac.length === 3) load(ac); };
 
+  const getTranslatedMemo = (memo: string | null) => {
+    if (!memo) return null;
+    if (memo.startsWith("Spells ")) {
+      const word = memo.replace("Spells ", "");
+      const template = SPELLS_DICT[lang] || SPELLS_DICT.en;
+      return template.replace("{word}", word);
+    }
+    const dict = MEMORABLE_LABELS[lang] || MEMORABLE_LABELS.en;
+    return dict[memo] || memo;
+  };
+
+  const planNameTrans = data.plan === "pro" ? t.pricing.proTitle : t.pricing.essentialTitle;
+  const statusTemplate = need > 1 ? t.onboarding.statusText : t.onboarding.statusTextSingle;
+  const statusTextStr = statusTemplate
+    .replace("{planName}", planNameTrans)
+    .replace("{need}", String(need))
+    .replace("{selected}", String(selected.length));
+
   return (
     <div className="panel wide">
-      <span className="step-eyebrow">Step 3 of 4 · Your number</span>
-      <h1>{need > 1 ? `Choose your ${need} numbers.` : "Choose your number."}</h1>
-      <p className="sub">Numbers are provided through our carrier network. Search any area code to find one that's local — or memorable.</p>
+      <span className="step-eyebrow">{t.onboarding.step3Eyebrow}</span>
+      <h1>{need > 1 ? t.onboarding.chooseMultiple : t.onboarding.chooseSingle}</h1>
+      <p className="sub">{t.onboarding.step3Subtitle}</p>
 
       <div className="num-need">
         <Ico.phone className="w-[18px] h-[18px] text-indigo-500" />
-        <span>Your <b>{planById(data.plan).name}</b> plan includes <b>{need} number{need > 1 ? "s" : ""}</b>. You've selected <b>{selected.length} of {need}</b>.</span>
+        <span dangerouslySetInnerHTML={{ __html: statusTextStr }} />
       </div>
 
       {selected.length > 0 && (
@@ -542,14 +737,14 @@ function NumberStep({ data, set, onNext, onBack }: { data: OnboardingData; set: 
 
       <div className="search-bar">
         <div className="area-wrap">
-          <span className="prefix">Area code</span>
+          <span className="prefix">{t.onboarding.labelAreaCode}</span>
           <input className="input" inputMode="numeric" maxLength={3} placeholder="415"
             value={area}
             onChange={(e) => setArea(e.target.value.replace(/\D/g, "").slice(0, 3))}
             onKeyDown={(e) => e.key === "Enter" && search()} />
         </div>
         <button className="btn btn-ghost" onClick={search} disabled={area.replace(/\D/g, "").length !== 3}>
-          <Ico.search className="w-[18px] h-[18px]" /> Search
+          <Ico.search className="w-[18px] h-[18px]" /> {t.onboarding.btnSearch}
         </button>
       </div>
       <div className="area-suggest">
@@ -563,7 +758,7 @@ function NumberStep({ data, set, onNext, onBack }: { data: OnboardingData; set: 
       <div className="results-head">
         <span className="rh-title">Available in <b>({area || "—"})</b></span>
         <button className={"refresh-btn" + (spin ? " spin" : "")} onClick={() => load(area)} disabled={loading}>
-          <Ico.refresh className="w-[15px] h-[15px]" /> Show more
+          <Ico.refresh className="w-[15px] h-[15px]" /> {t.onboarding.refreshBtn}
         </button>
       </div>
 
@@ -576,23 +771,27 @@ function NumberStep({ data, set, onNext, onBack }: { data: OnboardingData; set: 
           {results.map((n) => {
             const sel = isSel(n);
             const disabled = !sel && full;
+            const memoLabelTrans = getTranslatedMemo(n.memorable);
             return (
               <button key={n.id} className={"num-opt" + (sel ? " sel" : "") + (disabled ? " disabled" : "")} onClick={() => toggle(n)}>
                 <span className="tick">{sel && <Ico.check className="w-[13px] h-[13px]" />}</span>
                 <span className="nlabel">
                   <span className="nnum">{n.number}</span>
-                  {n.memorable && <span className="memorable">{n.memorable}</span>}
-                  {!n.memorable && <span className="nmeta">Local number</span>}
+                  {memoLabelTrans && <span className="memorable">{memoLabelTrans}</span>}
+                  {!memoLabelTrans && <span className="nmeta">{t.onboarding.metaLocal}</span>}
                 </span>
               </button>
             );
           })}
         </div>
       ) : (
-        <div className="num-empty"><Ico.search className="w-[30px] h-[30px] mx-auto mb-2" /><div>No numbers found for that area code. Try another.</div></div>
+        <div className="num-empty">
+          <Ico.search className="w-[30px] h-[30px] mx-auto mb-2" />
+          <div>{t.onboarding.errNoNumbers}</div>
+        </div>
       )}
 
-      <StepNav onBack={onBack} onNext={onNext} nextLabel="Continue" nextDisabled={selected.length !== need} />
+      <StepNav onBack={onBack} onNext={onNext} nextDisabled={selected.length !== need} t={t} />
     </div>
   );
 }
@@ -602,9 +801,10 @@ interface CheckoutModalProps {
   isOpen: boolean;
   checkoutUrl: string;
   onClose: () => void;
+  t: any;
 }
 
-function CheckoutModal({ isOpen, checkoutUrl, onClose }: CheckoutModalProps) {
+function CheckoutModal({ isOpen, checkoutUrl, onClose, t }: CheckoutModalProps) {
   const [loading, setLoading] = useState(true);
 
   if (!isOpen) return null;
@@ -623,7 +823,7 @@ function CheckoutModal({ isOpen, checkoutUrl, onClose }: CheckoutModalProps) {
         <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4 bg-slate-50">
           <div className="flex items-center gap-2">
             <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[#10b981] text-white font-bold text-xs">✓</span>
-            <span className="font-semibold text-slate-800 text-sm">Secure Payment</span>
+            <span className="font-semibold text-slate-800 text-sm">{t.onboarding.checkoutSecure}</span>
           </div>
           <button 
             onClick={onClose} 
@@ -637,7 +837,7 @@ function CheckoutModal({ isOpen, checkoutUrl, onClose }: CheckoutModalProps) {
         {loading && (
           <div className="absolute inset-x-0 bottom-0 top-[53px] flex flex-col items-center justify-center bg-white z-20">
             <div className="h-9 w-9 animate-spin rounded-full border-3 border-[#10b981] border-t-transparent" />
-            <p className="mt-4 text-xs text-slate-500 font-medium">Securing payment channel...</p>
+            <p className="mt-4 text-xs text-slate-500 font-medium">{t.onboarding.checkoutSecuring}</p>
           </div>
         )}
 
@@ -654,15 +854,15 @@ function CheckoutModal({ isOpen, checkoutUrl, onClose }: CheckoutModalProps) {
 }
 
 /* ============ STEP 4 — Payment ============ */
-function PaymentStep({ data, set, onNext, onBack }: { data: OnboardingData; set: (patch: Partial<OnboardingData>) => void; onNext: () => void; onBack: () => void }) {
+function PaymentStep({ data, set, onNext, onBack, t, lang }: { data: OnboardingData; set: (patch: Partial<OnboardingData>) => void; onNext: () => void; onBack: () => void; t: any; lang: string }) {
   const plan = planById(data.plan);
   const price = data.billing === "yearly" ? plan.annual : plan.monthly;
   const [modalOpen, setModalOpen] = useState(false);
   const [checkoutUrl, setCheckoutUrl] = useState("");
 
   const handleStartPayment = () => {
-    // Generate checkout URL with plan query details
-    const url = `/onboarding/creem-checkout?plan=${data.plan}&billing=${data.billing}`;
+    // Generate checkout URL with plan query details and language code
+    const url = `/onboarding/creem-checkout?plan=${data.plan}&billing=${data.billing}&lang=${lang}`;
     setCheckoutUrl(url);
     setModalOpen(true);
   };
@@ -701,46 +901,60 @@ function PaymentStep({ data, set, onNext, onBack }: { data: OnboardingData; set:
     return () => window.removeEventListener("message", handleMsg);
   }, [onNext, data]);
 
+  const translatedPlanName = data.plan === "pro" ? t.pricing.proTitle : t.pricing.essentialTitle;
+  const billingName = data.billing === "yearly" ? t.onboarding.annual : t.onboarding.monthly;
+  const orderPlanStr = t.onboarding.orderPlan
+    .replace("{planName}", translatedPlanName)
+    .replace("{billingName}", billingName);
+
+  const orderNumberStr = plan.numbers > 1
+    ? t.onboarding.orderNumberPlural.replace("{count}", String(plan.numbers))
+    : t.onboarding.orderNumberSingle;
+
+  const perSuffix = data.billing === "yearly" ? t.ui.perYear : t.ui.perMonth;
+  const billedPeriodTrans = data.billing === "yearly" ? t.onboarding.billedYearly : t.onboarding.billedMonthly;
+  const bannerSubStr = PAYMENT_BANNER_SUB[lang] || PAYMENT_BANNER_SUB.en;
+
   return (
     <div className="panel">
-      <span className="step-eyebrow">Step 4 of 4 · Confirm</span>
-      <h1>Confirm your subscription</h1>
-      <p className="sub">Review your plan details to proceed to secure checkout.</p>
+      <span className="step-eyebrow">{t.onboarding.step4Eyebrow}</span>
+      <h1>{t.onboarding.step4Title}</h1>
+      <p className="sub">{t.onboarding.step4Subtitle}</p>
 
       <div className="trial-banner">
         <span className="ti"><Ico.check className="w-[19px] h-[19px] text-white" /></span>
         <div>
-          <b>{price.label}{price.per}, billed {data.billing === "yearly" ? "yearly" : "monthly"}</b>
-          <p>Set up in minutes · Cancel anytime from your dashboard.</p>
+          <b>{price.label}{perSuffix}, billed {billedPeriodTrans}</b>
+          <p>{bannerSubStr}</p>
         </div>
       </div>
 
       <div className="order-sum mt-6">
         <div className="os-row">
-          <span>{plan.name} plan &middot; {data.billing === "yearly" ? "Annual" : "Monthly"}</span>
-          <b>{price.label}{price.per}</b>
+          <span>{orderPlanStr}</span>
+          <b>{price.label}{perSuffix}</b>
         </div>
         <div className="os-row">
-          <span>{plan.numbers} phone number{plan.numbers > 1 ? "s" : ""}</span>
-          <span>Included</span>
+          <span>{orderNumberStr}</span>
+          <span>{t.onboarding.included}</span>
         </div>
         <div className="os-row total">
-          <span>Due today</span>
+          <span>{t.onboarding.dueToday}</span>
           <span>{price.label}</span>
         </div>
       </div>
 
       <div className="trust-row mt-6">
         <Ico.lock className="w-[17px] h-[17px] text-teal-600" />
-        Secured with bank-level encryption. Checkout will open in a secure window.
+        {t.onboarding.orderSecured}
       </div>
 
       <div className="step-nav mt-8">
-        <button className="btn btn-ghost" onClick={onBack}>Back</button>
+        <button className="btn btn-ghost" onClick={onBack}>{t.onboarding.btnBack}</button>
         <div className="spacer" />
         <button className="btn btn-primary" onClick={handleStartPayment}>
           <Ico.lock className="w-[17px] h-[17px] text-white mr-1.5" />
-          Complete setup &amp; pay
+          {t.onboarding.btnPay}
         </button>
       </div>
 
@@ -748,54 +962,77 @@ function PaymentStep({ data, set, onNext, onBack }: { data: OnboardingData; set:
         isOpen={modalOpen} 
         checkoutUrl={checkoutUrl} 
         onClose={() => setModalOpen(false)} 
+        t={t}
       />
     </div>
   );
 }
 
 /* ============ STEP 5 — Success ============ */
-function SuccessStep({ data }: { data: OnboardingData }) {
+function SuccessStep({ data, t, lang }: { data: OnboardingData; t: any; lang: string }) {
   const plan = planById(data.plan);
   const contactCap = plan.id === "pro" ? 6 : 3;
   const shown = Math.min(contactCap, 4);
   const ownerFirst = (data.account.name || "You").trim().split(/\s+/)[0];
 
+  const translatedPlanName = data.plan === "pro" ? t.pricing.proTitle : t.pricing.essentialTitle;
+
+  const successTitleStr = t.onboarding.successTitle.replace("{name}", ownerFirst);
+  const successSubStr = (plan.numbers > 1 ? t.onboarding.successSubtitlePlural : t.onboarding.successSubtitle)
+    .replace("{planName}", translatedPlanName);
+
+  const moreStr = data.numbers.length > 1
+    ? (MORE_NUMBERS[lang] || MORE_NUMBERS.en).replace("{count}", String(data.numbers.length - 1))
+    : "";
+  const readyStr = `${moreStr}${t.onboarding.ncStatusReady}`;
+
+  const circleLabelStr = t.onboarding.circleLabel.replace("{count}", String(contactCap));
+  const moreSlotsStr = t.onboarding.moreSlots.replace("{count}", String(contactCap - shown));
+  const confirmationStr = t.onboarding.confirmationSent.replace("{email}", data.account.email || "your email");
+
   return (
     <div className="panel">
       <div className="success-wrap">
         <div className="success-mark"><Ico.check className="w-[40px] h-[40px] text-white" /></div>
-        <h1>You're all set, {ownerFirst}!</h1>
-        <p className="sub">Your {plan.name} plan is active and your {plan.numbers > 1 ? "numbers are" : "number is"} live. One last thing: build your trusted circle so calls always reach someone.</p>
+        <h1>{successTitleStr}</h1>
+        <p className="sub">{successSubStr}</p>
 
         <div className="next-card">
           <div className="nc-head">
             <span className="num-badge">{data.numbers[0] ? data.numbers[0].number : "(415) 555-0100"}</span>
-            <span className="nc-ttl"><span style={{ whiteSpace: "nowrap" }}>{data.numbers.length > 1 ? "Your iCanCall numbers" : "Your iCanCall number"}</span><span>{data.numbers.length > 1 ? `+${data.numbers.length - 1} more · ` : ""}Ready to receive calls</span></span>
+            <span className="nc-ttl">
+              <span style={{ whiteSpace: "nowrap" }}>
+                {data.numbers.length > 1 ? t.onboarding.ncNumberPlural : t.onboarding.ncNumberSingle}
+              </span>
+              <span>{readyStr}</span>
+            </span>
           </div>
 
           <div className="circle-preview">
-            <div className="cp-label">Set up your circle · up to {contactCap} contacts</div>
+            <div className="cp-label">{circleLabelStr}</div>
             <div className="cp-slots">
               <div className="cp-slot filled">
                 <span className="ava" style={{ background: "var(--blue)" }}>{initials(data.account.name)}</span>
-                <span className="cp-who"><b>{data.account.name || "You"}</b><span>Account owner · you</span></span>
-                <span className="cp-order">Added</span>
+                <span className="cp-who"><b>{data.account.name || "You"}</b><span>{t.onboarding.ownerLabel}</span></span>
+                <span className="cp-order">{t.onboarding.added}</span>
               </div>
               {Array.from({ length: shown - 1 }).map((_, i) => (
                 <div key={i} className="cp-slot">
                   <span className="ava empty"><Ico.plus className="w-[18px] h-[18px] text-zinc-400" /></span>
-                  <span className="cp-who"><b>Add a trusted contact</b><span>Family, neighbor, caregiver or doctor</span></span>
+                  <span className="cp-who"><b>{t.onboarding.addContact}</b><span>{t.onboarding.addContactDesc}</span></span>
                   <span className="cp-order">#{i + 2}</span>
                 </div>
               ))}
-              {contactCap > shown && <div className="pw-note" style={{ textAlign: "center" }}>+ {contactCap - shown} more slots in your dashboard</div>}
+              {contactCap > shown && <div className="pw-note" style={{ textAlign: "center" }}>{moreSlotsStr}</div>}
             </div>
           </div>
         </div>
 
         <div className="success-actions">
-          <Link className="btn btn-primary btn-lg btn-block" href="/dashboard">Go to dashboard <Ico.arrowR className="w-[18px] h-[18px]" /></Link>
-          <span className="sa-note">A confirmation has been sent to {data.account.email || "your email"}.</span>
+          <Link className="btn btn-primary btn-lg btn-block" href={`/dashboard?lang=${lang}`}>
+            {t.onboarding.btnDashboard} <Ico.arrowR className="w-[18px] h-[18px]" />
+          </Link>
+          <span className="sa-note">{confirmationStr}</span>
         </div>
       </div>
     </div>
@@ -806,6 +1043,29 @@ function SuccessStep({ data }: { data: OnboardingData }) {
 function OnboardingContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
+
+  // Onboarding Page Language State Hook
+  const [lang, setLang] = useState<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi" | "pt" | "de" | "it" | "ko">("en");
+
+  useEffect(() => {
+    const validLangs = ["en", "es", "fr", "ja", "zh", "ar", "hi", "pt", "de", "it", "ko"];
+    const paramLang = searchParams.get("lang");
+    if (paramLang && validLangs.includes(paramLang)) {
+      setLang(paramLang as any);
+      localStorage.setItem("lang", paramLang);
+    } else {
+      const savedLang = localStorage.getItem("lang") as any;
+      if (validLangs.includes(savedLang)) {
+        setLang(savedLang);
+      }
+    }
+  }, [searchParams]);
+
+  useEffect(() => {
+    document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
+  }, [lang]);
+
+  const t = translations[lang];
 
   // Tweak State Simulation (split layout)
   const [step, setStep] = useState(0); // 0..4
@@ -844,12 +1104,12 @@ function OnboardingContent() {
   const success = step === 4;
 
   return (
-    <Shell layout="split" stepIndex={Math.min(step, 3)} hideChrome={success}>
-      {step === 0 && <PlanStep data={data} set={set} onNext={next} />}
-      {step === 1 && <AccountStep data={data} set={set} onNext={next} onBack={back} />}
-      {step === 2 && <NumberStep data={data} set={set} onNext={next} onBack={back} />}
-      {step === 3 && <PaymentStep data={data} set={set} onNext={next} onBack={back} />}
-      {step === 4 && <SuccessStep data={data} />}
+    <Shell layout="split" stepIndex={Math.min(step, 3)} hideChrome={success} lang={lang} t={t}>
+      {step === 0 && <PlanStep data={data} set={set} onNext={next} t={t} lang={lang} />}
+      {step === 1 && <AccountStep data={data} set={set} onNext={next} onBack={back} t={t} lang={lang} />}
+      {step === 2 && <NumberStep data={data} set={set} onNext={next} onBack={back} t={t} lang={lang} />}
+      {step === 3 && <PaymentStep data={data} set={set} onNext={next} onBack={back} t={t} lang={lang} />}
+      {step === 4 && <SuccessStep data={data} t={t} lang={lang} />}
     </Shell>
   );
 }
