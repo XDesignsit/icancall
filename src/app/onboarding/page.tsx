@@ -477,6 +477,10 @@ function AccountStep({ data, set, onNext, onBack }: { data: OnboardingData; set:
         <div className={"field-err" + (show("sms") ? " show" : "")} style={{ marginLeft: 26, marginTop: 4 }}>{errs.sms}</div>
       </div>
 
+      <p style={{ fontSize: "0.76rem", color: "var(--ink-faint)", marginTop: 12, marginBottom: 16, lineHeight: 1.45 }}>
+        By creating an account, you consent to receive transactional SMS messages from ICanCall at the mobile number provided. Message frequency varies by account activity. Reply STOP to unsubscribe at any time, or HELP for assistance. For more information, see our <Link href="/privacy-policy" style={{ textDecoration: "underline", color: "var(--blue)" }} target="_blank">Privacy Policy</Link> and <Link href="/terms-of-service" style={{ textDecoration: "underline", color: "var(--blue)" }} target="_blank">Terms of Service</Link>.
+      </p>
+
       <StepNav onBack={onBack} onNext={submit} nextLabel="Continue" />
     </div>
   );
