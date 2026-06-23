@@ -911,6 +911,14 @@ export default function Home() {
                   a: t.faq.a4
                 },
                 {
+                  q: t.faq.q5,
+                  a: t.faq.a5
+                },
+                {
+                  q: t.faq.q6,
+                  a: t.faq.a6
+                },
+                {
                   q: "Is my family's information private?",
                   a: "Always. Personal numbers stay hidden behind your single iCanCall line, all routing is encrypted, and we never sell your data."
                 },
