@@ -339,7 +339,7 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "smsConsentB": "Text me launch updates.",
     "smsConsentText": "I agree to receive occasional SMS messages from iCanCall about early access and launch. If you do not consent to receiving SMS messages, you will only receive email notifications. Message and data rates may apply; reply STOP to opt out anytime.",
     "joinBtn": "Join the waitlist",
-    "noSpamFine": "No spam, ever. We'll only reach out about your early-access invite — and you can unsubscribe in one tap. If you don't consent to SMS opt-in, you will only receive email notifications.",
+    "noSpamFine": "No spam, ever. We'll only reach out about your early-access invite — and you can unsubscribe in one tap. If you do not consent to receiving SMS messages, you will only receive email notifications.",
     "successTitle": "You're on the list.",
     "successBody": "We saved your spot under email_here. The moment iCanCall goes live, you'll get your early-access invite and first pick of a memorable number.",
     "demoSub": "One number, always answered",
