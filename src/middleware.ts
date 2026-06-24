@@ -36,13 +36,13 @@ export async function middleware(request: NextRequest) {
   }
 
   // 3. Enforce redirect to coming soon page for visitors on production/preview domains
-  const isProduction = baseHost.includes("icancall.co") || baseHost.includes("vercel.app");
-  if (isProduction && !hasPreviewBypass) {
-    if (url.pathname !== "/coming-soon") {
-      url.pathname = "/coming-soon";
-      return NextResponse.redirect(url);
-    }
-  }
+  // const isProduction = baseHost.includes("icancall.co") || baseHost.includes("vercel.app");
+  // if (isProduction && !hasPreviewBypass) {
+  //   if (url.pathname !== "/coming-soon") {
+  //     url.pathname = "/coming-soon";
+  //     return NextResponse.redirect(url);
+  //   }
+  // }
 
   // 4. Only run proxy redirects on production domains containing 'icancall.co'
   // (Prevents iframe cookie-blocking loops in local development & Vercel preview environments)
