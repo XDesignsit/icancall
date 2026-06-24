@@ -1,8 +1,12 @@
 import { supabase } from "@/lib/supabase";
 import { NextResponse } from "next/server";
 
-export async function GET() {
-  const redirectTo = `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/api/auth/callback`;
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const next = searchParams.get("next") || "/dashboard";
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+  
+  const redirectTo = `${appUrl}/api/auth/callback?next=${encodeURIComponent(next)}`;
   
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "google",

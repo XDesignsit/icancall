@@ -5,6 +5,7 @@ import { signSession } from "@/lib/session";
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const code = searchParams.get("code");
+  const next = searchParams.get("next") || "/dashboard";
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
   
   if (!code) {
@@ -52,7 +53,7 @@ export async function GET(request: Request) {
     const expiresAt = Date.now() + 7 * 24 * 60 * 60 * 1000; // 7 days
 
     const sessionToken = await signSession({ email: email || "", role, expiresAt, userId });
-    const response = NextResponse.redirect(`${appUrl}/dashboard`);
+    const response = NextResponse.redirect(`${appUrl}${next}`);
 
     // Set secure HTTP-only session cookie
     response.cookies.set("session", sessionToken, {

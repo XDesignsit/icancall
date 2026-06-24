@@ -594,7 +594,9 @@ function AccountStep({ data, set, onNext, onBack, t, lang }: { data: OnboardingD
       <h1>{t.onboarding.step2Title}</h1>
       <p className="sub">{t.onboarding.step2Subtitle}</p>
 
-      <button className="btn btn-google btn-block" style={{ marginTop: 22 }} onClick={onNext}>
+      <button className="btn btn-google btn-block" style={{ marginTop: 22 }} onClick={() => {
+        window.location.href = `/api/auth/google?next=${encodeURIComponent("/onboarding?google=true")}`;
+      }}>
         <Ico.google className="w-[19px] h-[19px]" /> {t.onboarding.btnGoogle}
       </button>
       <div className="auth-divider">{t.onboarding.dividerOr}</div>
@@ -1088,6 +1090,35 @@ function OnboardingContent() {
       plan: planParam === "pro" ? "pro" : "essential",
       billing: billingParam === "annual" ? "yearly" : "monthly"
     });
+  }, [searchParams]);
+
+  // If redirected back from Google OAuth, fetch caregiver profile details and auto-advance
+  useEffect(() => {
+    const isGoogle = searchParams.get("google") === "true";
+    if (isGoogle) {
+      async function loadGoogleProfile() {
+        try {
+          const res = await fetch("/api/caregiver/profile");
+          if (res.ok) {
+            const result = await res.json();
+            if (result.profile) {
+              setData((d) => ({
+                ...d,
+                account: {
+                  name: result.profile.name || "Google User",
+                  email: result.profile.email || "",
+                  password: "google_oauth_bypass", // Bypass password constraint in step-1 validation
+                },
+              }));
+              setStep(2); // Auto-advance to step 2 (Number selection)
+            }
+          }
+        } catch (err) {
+          console.error("Failed to load Google profile in onboarding:", err);
+        }
+      }
+      loadGoogleProfile();
+    }
   }, [searchParams]);
 
   // Adjust selected numbers cap when plan shifts

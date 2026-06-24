@@ -1,61 +1,103 @@
 import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
 import { supabase } from "@/lib/supabase";
+import { verifySession } from "@/lib/session";
 
 export async function POST(request: Request) {
   try {
     const { email, password, name, preferredName, numbers } = await request.json();
 
-    if (!email || !password || !name) {
-      return NextResponse.json({ error: "Name, email, and password are required" }, { status: 400 });
+    // 1. Check if user already has an active session cookie (e.g. logged in via Google)
+    const cookieStore = await cookies();
+    const sessionToken = cookieStore.get("session")?.value;
+    let userId: string | null = null;
+
+    if (sessionToken) {
+      const payload = await verifySession(sessionToken);
+      userId = payload?.userId || null;
     }
 
-    if (!email.includes("@")) {
-      return NextResponse.json({ error: "Please enter a valid email address." }, { status: 400 });
-    }
+    if (userId) {
+      // User is already logged in (Google OAuth path). Update profile with onboarding details.
+      const { error: profileError } = await supabase
+        .from("profiles")
+        .update({
+          name,
+          preferred_name: preferredName || name.split(" ")[0],
+          settings: {
+            notifyEmail: email,
+            smsConsent: true,
+            smsPhone: "",
+            twoFactor: false,
+            card: { brand: "Visa", last4: "4242", exp: "12 / 28" },
+            billingAddr: "123 Main St, Oakland, CA 94607",
+            plan: numbers && numbers.length > 0 ? "pro" : "essential",
+            billingCycle: "monthly",
+            addons: { extraNumbers: 0, minuteBlocks: 0, usedMin: 0, rolloverMin: 0 },
+          }
+        })
+        .eq("id", userId);
 
-    if (password.length < 6) {
-      return NextResponse.json({ error: "Password must be at least 6 characters." }, { status: 400 });
-    }
+      if (profileError) {
+        console.error("Failed to update profile for logged-in user:", profileError);
+      }
+    } else {
+      // Normal email/password signup path
+      if (!email || !password || !name) {
+        return NextResponse.json({ error: "Name, email, and password are required" }, { status: 400 });
+      }
 
-    // 1. Sign up the user in Supabase Auth
-    const { data: authData, error: authError } = await supabase.auth.signUp({
-      email,
-      password,
-    });
+      if (!email.includes("@")) {
+        return NextResponse.json({ error: "Please enter a valid email address." }, { status: 400 });
+      }
 
-    if (authError || !authData.user) {
-      return NextResponse.json({ error: authError?.message || "Failed to create user account." }, { status: 400 });
-    }
+      if (password.length < 6) {
+        return NextResponse.json({ error: "Password must be at least 6 characters." }, { status: 400 });
+      }
 
-    const userId = authData.user.id;
-
-    // 2. Insert profile record in profiles table
-    const { error: profileError } = await supabase
-      .from("profiles")
-      .insert({
-        id: userId,
+      // Sign up the user in Supabase Auth
+      const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
-        name,
-        preferred_name: preferredName || name.split(" ")[0],
-        settings: {
-          notifyEmail: email,
-          smsConsent: true,
-          smsPhone: "",
-          twoFactor: false,
-          card: { brand: "Visa", last4: "4242", exp: "12 / 28" },
-          billingAddr: "123 Main St, Oakland, CA 94607",
-          plan: numbers && numbers.length > 0 ? "pro" : "essential",
-          billingCycle: "monthly",
-          addons: { extraNumbers: 0, minuteBlocks: 0, usedMin: 0, rolloverMin: 0 },
-        }
+        password,
       });
 
-    if (profileError) {
-      console.error("Failed to create profile:", profileError);
+      if (authError || !authData.user) {
+        return NextResponse.json({ error: authError?.message || "Failed to create user account." }, { status: 400 });
+      }
+
+      userId = authData.user.id;
+
+      // Insert profile record in profiles table
+      const { error: profileError } = await supabase
+        .from("profiles")
+        .insert({
+          id: userId,
+          email,
+          name,
+          preferred_name: preferredName || name.split(" ")[0],
+          settings: {
+            notifyEmail: email,
+            smsConsent: true,
+            smsPhone: "",
+            twoFactor: false,
+            card: { brand: "Visa", last4: "4242", exp: "12 / 28" },
+            billingAddr: "123 Main St, Oakland, CA 94607",
+            plan: numbers && numbers.length > 0 ? "pro" : "essential",
+            billingCycle: "monthly",
+            addons: { extraNumbers: 0, minuteBlocks: 0, usedMin: 0, rolloverMin: 0 },
+          }
+        });
+
+      if (profileError) {
+        console.error("Failed to create profile:", profileError);
+      }
     }
 
-    // 3. Seed selected phone lines
-    if (Array.isArray(numbers) && numbers.length > 0) {
+    // 2. Seed selected phone lines for the user
+    if (userId && Array.isArray(numbers) && numbers.length > 0) {
+      // First clear any existing seeded phone lines to avoid duplicates
+      await supabase.from("phone_lines").delete().eq("user_id", userId);
+
       const phoneLinesRows = numbers.map((num: any) => ({
         user_id: userId,
         number: num.number || num,
