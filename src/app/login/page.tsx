@@ -81,32 +81,10 @@ export default function LoginPage() {
     }
   };
 
-  const handleGoogleLogin = async () => {
+  const handleGoogleLogin = () => {
     setIsLoading(true);
     setError(null);
-
-    try {
-      // Direct login simulation using the caregiver demo account details via OTP api
-      const res = await fetch("/api/auth/otp", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "verify", email: "support@icancall.co", token: "123456" }),
-      });
-
-      const data = await res.json();
-      if (!res.ok) {
-        setError(data.error || "Google sign-in failed.");
-        setIsLoading(false);
-        return;
-      }
-
-      localStorage.setItem("isLoggedIn", "true");
-      localStorage.setItem("userEmail", "support@icancall.co");
-      window.location.href = "/dashboard";
-    } catch (err) {
-      setError("An unexpected error occurred during Google sign-in.");
-      setIsLoading(false);
-    }
+    window.location.href = "/api/auth/google";
   };
 
   return (

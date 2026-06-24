@@ -191,12 +191,10 @@ export default function ComingSoon() {
 
     const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailInput.trim());
     const phoneOk = phoneInput.replace(/\D/g, '').length >= 10;
-    const consentOk = smsConsent;
 
     const problems = [];
     if (!emailOk) { setEmailInvalid(true); problems.push("a valid email"); }
     if (!phoneOk) { setPhoneInvalid(true); problems.push("a valid mobile number"); }
-    if (!consentOk) { setConsentInvalid(true); problems.push("SMS consent"); }
 
     if (problems.length) {
       setErrorMsg("Please add " + problems.join(", ") + " to continue.");
@@ -209,7 +207,7 @@ export default function ComingSoon() {
     try {
       // Local storage fallback for redundancy
       try {
-        const entry = { email: emailInput.trim(), phone: phoneInput.trim(), sms: true, at: new Date().toISOString() };
+        const entry = { email: emailInput.trim(), phone: phoneInput.trim(), sms: smsConsent, at: new Date().toISOString() };
         const list = JSON.parse(localStorage.getItem('ic_waitlist') || '[]');
         list.push(entry);
         localStorage.setItem('ic_waitlist', JSON.stringify(list));
@@ -486,7 +484,6 @@ export default function ComingSoon() {
                     id="wl-sms"
                     checked={smsConsent}
                     onChange={(e) => { setSmsConsent(e.target.checked); setConsentInvalid(false); }}
-                    required
                     disabled={submitting}
                   />
                   <span className="box">
