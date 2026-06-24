@@ -600,7 +600,7 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "placeholderEmail": "you@example.com",
     "labelPassword": "Create a password",
     "placeholderPassword": "At least 8 characters",
-    "smsText": "Text me launch updates. I agree to receive occasional SMS messages from iCanCall about early access and launch. Message and data rates may apply; reply STOP to opt out anytime.",
+    "smsText": "Text me launch updates. I agree to receive occasional SMS messages from iCanCall about early access and launch. If you do not consent to receiving SMS messages, you will only receive email notifications. Message and data rates may apply; reply STOP to opt out anytime.",
     "errName": "Please enter your name",
     "errEmail": "Enter a valid email address",
     "errPassword": "Use at least 8 characters",

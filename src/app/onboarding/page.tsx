@@ -253,7 +253,7 @@ const STRENGTH_LABELS: Record<string, string> = {
 
 const DISCLAIMERS: Record<string, { text: string; privacy: string; terms: string }> = {
   en: {
-    text: "By creating an account, you consent to receive transactional SMS messages from ICanCall at the mobile number provided. Message frequency varies by account activity. Reply STOP to unsubscribe at any time, or HELP for assistance. For more information, see our",
+    text: "By creating an account, you consent to receive transactional SMS messages from ICanCall at the mobile number provided. If you don't consent to SMS opt-in, you will only receive email notifications. Message frequency varies by account activity. Reply STOP to unsubscribe at any time, or HELP for assistance. For more information, see our",
     privacy: "Privacy Policy",
     terms: "Terms of Service"
   },
@@ -568,9 +568,9 @@ function AccountStep({ data, set, onNext, onBack, t, lang }: { data: OnboardingD
     name: a.name.trim().length < 2 ? t.onboarding.errName : "",
     email: !validEmail(a.email) ? t.onboarding.errEmail : "",
     password: (a.password || "").length < 8 ? t.onboarding.errPassword : "",
-    sms: !smsConsent ? t.onboarding.errSms : "",
+    sms: "",
   };
-  const valid = !errs.name && !errs.email && !errs.password && !errs.sms;
+  const valid = !errs.name && !errs.email && !errs.password;
   const upd = (k: string, v: string) => set({ account: { ...a, [k]: v } });
   const show = (k: "name" | "email" | "password" | "sms") => {
     if (k === "sms") return smsTouched && errs.sms;
