@@ -402,9 +402,9 @@ h3 { font-size: clamp(1.25rem, 2vw, 1.6rem); }
   overflow: hidden;
 }
 .usecase .ph img { width: 100%; height: 100%; object-fit: cover; }
-.usecase .ph img.img-child { object-position: center 75%; }
-.usecase .ph img.img-senior { object-position: center 60%; }
-.usecase .ph img.img-special { object-position: center 50%; }
+.usecase .ph img.img-child { object-position: center 85%; }
+.usecase .ph img.img-senior { object-position: center 70%; }
+.usecase .ph img.img-special { object-position: center 60%; }
 .usecase .ph span { font-family: var(--mono); font-size: 0.74rem; color: var(--ink-faint); background: oklch(1 0 0 / 0.7); padding: 5px 10px; border-radius: 6px; }
 .usecase .body { padding: 24px 24px 28px; }
 .usecase h3 { font-size: 1.22rem; margin-bottom: 9px; }
