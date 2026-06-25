@@ -776,21 +776,27 @@ export default function Home() {
             </div>
             <div className="usecases">
               <article className="usecase reveal in">
-                <div className="ph"><span>photo · aging parent</span></div>
+                <div className="ph">
+                  <img src="/usecases/aging-parent.png" alt="Aging parents" />
+                </div>
                 <div className="body">
                   <h3>{t.usecases.u1Title}</h3>
                   <p>{t.usecases.u1Desc}</p>
                 </div>
               </article>
               <article className="usecase reveal in">
-                <div className="ph"><span>photo · child calling home</span></div>
+                <div className="ph">
+                  <img src="/usecases/child-calling.png" alt="Young children" />
+                </div>
                 <div className="body">
                   <h3>{t.usecases.u2Title}</h3>
                   <p>{t.usecases.u2Desc}</p>
                 </div>
               </article>
               <article className="usecase reveal in">
-                <div className="ph"><span>photo · special-abilities care</span></div>
+                <div className="ph">
+                  <img src="/usecases/special-abilities.png" alt="Special abilities & caregivers" />
+                </div>
                 <div className="body">
                   <h3>{t.usecases.u3Title}</h3>
                   <p>{t.usecases.u3Desc}</p>
