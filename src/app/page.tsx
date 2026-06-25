@@ -784,7 +784,7 @@ export default function Home() {
                       width: '100%',
                       height: '100%',
                       objectFit: 'cover',
-                      transform: 'scale(1.4)',
+                      transform: 'scale(1.25)',
                       transformOrigin: 'center bottom',
                       objectPosition: 'center bottom'
                     }}
