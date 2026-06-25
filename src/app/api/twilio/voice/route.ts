@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { findAccountByTwilioNumber, getAvailableMinutes } from '@/lib/db';
+import { supabase } from '@/lib/supabase';
 
 export async function POST(request: Request) {
   try {
@@ -55,6 +56,7 @@ export async function POST(request: Request) {
     const lineMode = account?.line?.mode || 'menu';
     const customGreeting = account?.line?.settings?.greeting;
     const greetingText = customGreeting || "Thank you for calling the iCanCall emergency safety line.";
+    const contacts = account?.line?.contacts || [];
 
     // If caller dialed cascade mode directly or pressed '1'
     if (lineMode === 'cascade' && !digits) {
@@ -63,8 +65,41 @@ export async function POST(request: Request) {
 
     if (!digits) {
       // 2. Initial Call Greeting & Interactive IVR Menu
-      twiml += `
-        <Say voice="Polly.Amy">${greetingText}</Say>
+      twiml += `\n  <Say voice="Polly.Amy">${greetingText}</Say>`;
+
+      if (lineMode === 'menu') {
+        // Construct Caller Menu Routing options dynamically
+        // Using Promise.all to fetch signed URLs in parallel for low latency
+        const menuPrompts = await Promise.all(
+          contacts.map(async (c: any, index: number) => {
+            const digit = index + 1;
+            let voiceUrl = null;
+            if (c.voicePath) {
+              try {
+                const { data } = await supabase.storage
+                  .from('voice-prompts')
+                  .createSignedUrl(c.voicePath, 60);
+                voiceUrl = data?.signedUrl;
+              } catch (err) {
+                console.warn('Error creating signed URL for contact:', c.name, err);
+              }
+            }
+
+            if (voiceUrl) {
+              return `\n      <Say voice="Polly.Amy">Press ${digit} for</Say>\n      <Play>${voiceUrl}</Play>`;
+            } else {
+              return `\n      <Say voice="Polly.Amy">Press ${digit} for ${c.name}.</Say>`;
+            }
+          })
+        );
+
+        twiml += `\n  <Gather numDigits="1" action="/api/twilio/voice?To=${encodeURIComponent(activeNumber)}" method="POST" timeout="8">`;
+        twiml += menuPrompts.join('');
+        twiml += `\n      <Say voice="Polly.Amy">Or press 9 to leave a voice message.</Say>\n  </Gather>`;
+        twiml += `\n  <!-- Default fallback to leaving a voicemail if they wait and enter nothing -->\n  <Redirect method="POST">/api/twilio/voice?Digits=9&amp;To=${encodeURIComponent(activeNumber)}</Redirect>`;
+      } else {
+        // Cascade mode prompt
+        twiml += `
         <Gather numDigits="1" action="/api/twilio/voice?To=${encodeURIComponent(activeNumber)}" method="POST" timeout="8">
           <Say voice="Polly.Amy">
             Press 1 to cascade ring the family emergency circle.
@@ -73,29 +108,39 @@ export async function POST(request: Request) {
         </Gather>
         <!-- If gather times out or caller presses nothing, default to leaving a voicemail -->
         <Redirect method="POST">/api/twilio/voice?Digits=2&amp;To=${encodeURIComponent(activeNumber)}</Redirect>
-      `;
-    } else if (digits === '1') {
-      // 3. Sequential / Simultaneous Dialing to available contacts
-      const availableContacts = account?.line?.contacts?.filter((c: any) => c.available && c.phone) || [];
+        `;
+      }
+    } else if (lineMode === 'menu') {
+      // 3. Process digits for Menu Routing mode
+      const d = parseInt(digits.toString(), 10);
+      const timeLimitSeconds = Math.floor(availableMinutes * 60);
 
-      if (availableContacts.length > 0) {
-        const timeLimitSeconds = Math.floor(availableMinutes * 60);
+      if (d >= 1 && d <= contacts.length) {
+        const contact = contacts[d - 1];
+        if (contact && contact.phone) {
+          twiml += `
+            <Say voice="Polly.Amy">Connecting you to ${contact.name}. Please stand by.</Say>
+            <Dial 
+              timeout="15" 
+              action="/api/twilio/voice-completed?To=${encodeURIComponent(activeNumber)}" 
+              method="POST" 
+              timeLimit="${timeLimitSeconds}"
+            >
+              <Number>${contact.phone}</Number>
+            </Dial>
+            <Redirect method="POST">/api/twilio/voice?Digits=no-answer&amp;To=${encodeURIComponent(activeNumber)}</Redirect>
+          `;
+        } else {
+          twiml += `
+            <Say voice="Polly.Amy">That contact is currently unavailable.</Say>
+            <Redirect method="POST">/api/twilio/voice?To=${encodeURIComponent(activeNumber)}</Redirect>
+          `;
+        }
+      } else if (digits === '9' || digits === 'no-answer') {
+        if (digits === 'no-answer') {
+          twiml += `<Say voice="Polly.Amy">The contact is currently unavailable.</Say>`;
+        }
         twiml += `
-          <Say voice="Polly.Amy">Connecting you to the primary emergency contacts. Please stand by.</Say>
-          <Dial 
-            timeout="15" 
-            action="/api/twilio/voice-completed?To=${encodeURIComponent(activeNumber)}" 
-            method="POST" 
-            timeLimit="${timeLimitSeconds}"
-          >`;
-        availableContacts.forEach((c: any) => {
-          twiml += `\n            <Number>${c.phone}</Number>`;
-        });
-        twiml += `\n          </Dial>`;
-      } else {
-        // Fallback to voicemail if no contacts are available/online
-        twiml += `
-          <Say voice="Polly.Amy">The primary emergency contacts are currently unavailable.</Say>
           <Say voice="Polly.Amy">Please leave your message after the tone. When you are finished, you can hang up.</Say>
           <Record 
             action="/api/twilio/transcription?To=${encodeURIComponent(activeNumber)}" 
@@ -103,29 +148,66 @@ export async function POST(request: Request) {
             transcribeCallback="/api/twilio/transcription?To=${encodeURIComponent(activeNumber)}"
             maxLength="120"
             playBeep="true"
-          />`;
+          />
+        `;
+      } else {
+        twiml += `
+          <Say voice="Polly.Amy">Invalid selection.</Say>
+          <Redirect method="POST">/api/twilio/voice?To=${encodeURIComponent(activeNumber)}</Redirect>
+        `;
       }
-    } else if (digits === '2' || digits === 'no-answer') {
-      // 4. Record Voicemail with Automatic Transcribe Callback configured
-      if (digits === 'no-answer') {
-        twiml += `<Say voice="Polly.Amy">The primary contacts are currently unavailable.</Say>`;
-      }
-      twiml += `
-        <Say voice="Polly.Amy">Please leave your message after the tone. When you are finished, you can hang up.</Say>
-        <Record 
-          action="/api/twilio/transcription?To=${encodeURIComponent(activeNumber)}" 
-          transcribe="true" 
-          transcribeCallback="/api/twilio/transcription?To=${encodeURIComponent(activeNumber)}"
-          maxLength="120"
-          playBeep="true"
-        />
-      `;
     } else {
-      // Invalid input fallback
-      twiml += `
-        <Say voice="Polly.Amy">Invalid selection.</Say>
-        <Redirect method="POST">/api/twilio/voice?To=${encodeURIComponent(activeNumber)}</Redirect>
-      `;
+      // 4. Process digits for Cascade mode
+      if (digits === '1') {
+        const availableContacts = contacts.filter((c: any) => c.available && c.phone) || [];
+
+        if (availableContacts.length > 0) {
+          const timeLimitSeconds = Math.floor(availableMinutes * 60);
+          twiml += `
+            <Say voice="Polly.Amy">Connecting you to the primary emergency contacts. Please stand by.</Say>
+            <Dial 
+              timeout="15" 
+              action="/api/twilio/voice-completed?To=${encodeURIComponent(activeNumber)}" 
+              method="POST" 
+              timeLimit="${timeLimitSeconds}"
+            >`;
+          availableContacts.forEach((c: any) => {
+            twiml += `\n            <Number>${c.phone}</Number>`;
+          });
+          twiml += `\n          </Dial>`;
+        } else {
+          // Fallback to voicemail if no contacts are available/online
+          twiml += `
+            <Say voice="Polly.Amy">The primary emergency contacts are currently unavailable.</Say>
+            <Say voice="Polly.Amy">Please leave your message after the tone. When you are finished, you can hang up.</Say>
+            <Record 
+              action="/api/twilio/transcription?To=${encodeURIComponent(activeNumber)}" 
+              transcribe="true" 
+              transcribeCallback="/api/twilio/transcription?To=${encodeURIComponent(activeNumber)}"
+              maxLength="120"
+              playBeep="true"
+            />`;
+        }
+      } else if (digits === '2' || digits === 'no-answer') {
+        if (digits === 'no-answer') {
+          twiml += `<Say voice="Polly.Amy">The primary contacts are currently unavailable.</Say>`;
+        }
+        twiml += `
+          <Say voice="Polly.Amy">Please leave your message after the tone. When you are finished, you can hang up.</Say>
+          <Record 
+            action="/api/twilio/transcription?To=${encodeURIComponent(activeNumber)}" 
+            transcribe="true" 
+            transcribeCallback="/api/twilio/transcription?To=${encodeURIComponent(activeNumber)}"
+            maxLength="120"
+            playBeep="true"
+          />
+        `;
+      } else {
+        twiml += `
+          <Say voice="Polly.Amy">Invalid selection.</Say>
+          <Redirect method="POST">/api/twilio/voice?To=${encodeURIComponent(activeNumber)}</Redirect>
+        `;
+      }
     }
 
     twiml += '\n</Response>';

@@ -33,6 +33,7 @@ interface Contact {
   phone: string;
   color: string;
   available: boolean;
+  voicePath?: string;
 }
 
 interface CoverageSlot {
@@ -457,16 +458,89 @@ function ContactModal({
   const [phone, setPhone] = useState(initial?.phone || "");
   const [color, setColor] = useState(initial?.color || AVATAR_COLORS[order % AVATAR_COLORS.length]);
 
-  const save = () => {
+  // Web Audio recording states
+  const [recording, setRecording] = useState(false);
+  const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
+  const [voicePath, setVoicePath] = useState<string | null>(initial?.voicePath || null);
+  const [isUploading, setIsUploading] = useState(false);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const chunksRef = useRef<Blob[]>([]);
+
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+      mediaRecorderRef.current = mediaRecorder;
+      chunksRef.current = [];
+
+      mediaRecorder.ondataavailable = (e) => {
+        if (e.data && e.data.size > 0) {
+          chunksRef.current.push(e.data);
+        }
+      };
+
+      mediaRecorder.onstop = () => {
+        const blob = new Blob(chunksRef.current, { type: 'audio/webm' });
+        setAudioBlob(blob);
+        const url = URL.createObjectURL(blob);
+        setAudioUrl(url);
+      };
+
+      mediaRecorder.start();
+      setRecording(true);
+    } catch (err) {
+      console.error('Failed to start recording:', err);
+    }
+  };
+
+  const stopRecording = () => {
+    if (mediaRecorderRef.current && recording) {
+      mediaRecorderRef.current.stop();
+      mediaRecorderRef.current.stream.getTracks().forEach((track) => track.stop());
+      setRecording(false);
+    }
+  };
+
+  const save = async () => {
     if (!name.trim()) return;
+    setIsUploading(true);
+
+    let currentVoicePath = voicePath;
+    const contactId = initial?.id || "c" + Date.now();
+
+    if (audioBlob) {
+      try {
+        const formData = new FormData();
+        formData.append('audio', audioBlob, 'name.webm');
+        formData.append('contactId', contactId);
+
+        const res = await fetch('/api/caregiver/upload-recording', {
+          method: 'POST',
+          body: formData,
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          currentVoicePath = data.filePath;
+        } else {
+          console.error('Failed to upload recording');
+        }
+      } catch (err) {
+        console.error('Upload error:', err);
+      }
+    }
+
     onSave({
-      id: initial?.id || "c" + Date.now(),
+      id: contactId,
       name: name.trim(),
       rel: rel.trim(),
       phone: phone.trim(),
       color,
       available: initial?.available ?? true,
+      voicePath: currentVoicePath || undefined,
     });
+    setIsUploading(false);
   };
 
   return (
@@ -475,11 +549,11 @@ function ContactModal({
       onClose={onClose}
       footer={
         <>
-          <button className="btn btn-ghost" onClick={onClose}>
+          <button className="btn btn-ghost" onClick={onClose} disabled={isUploading}>
             {d.contacts.cancel}
           </button>
-          <button className="btn btn-primary" onClick={save}>
-            {editing ? d.contacts.saveChanges : d.contacts.addContact}
+          <button className="btn btn-primary" onClick={save} disabled={isUploading || recording}>
+            {isUploading ? "Uploading..." : editing ? d.contacts.saveChanges : d.contacts.addContact}
           </button>
         </>
       }
@@ -492,6 +566,7 @@ function ContactModal({
           placeholder="e.g. Maria Delgado"
           autoFocus
           maxLength={28}
+          disabled={isUploading}
         />
       </div>
       <div className="field">
@@ -503,6 +578,7 @@ function ContactModal({
               onChange={(e) => setRel(e.target.value)}
               placeholder="Daughter"
               maxLength={28}
+              disabled={isUploading}
             />
           </div>
           <div>
@@ -512,8 +588,43 @@ function ContactModal({
               onChange={(e) => setPhone(e.target.value)}
               placeholder="(415) 555-0100"
               maxLength={20}
+              disabled={isUploading}
             />
           </div>
+        </div>
+      </div>
+      <div className="field">
+        <label>Voice Name Recording (for Caller Menu Routing)</label>
+        <div style={{ display: 'flex', gap: 10, alignItems: 'center', marginTop: 8 }}>
+          {recording ? (
+            <button className="btn btn-rose btn-sm" onClick={stopRecording} type="button" style={{ background: 'var(--rose)', color: '#fff', border: 'none', padding: '6px 12px', borderRadius: 4, cursor: 'pointer' }}>
+              🛑 Stop Recording
+            </button>
+          ) : (
+            <button className="btn btn-secondary btn-sm" onClick={startRecording} type="button" disabled={isUploading} style={{ padding: '6px 12px', borderRadius: 4, cursor: 'pointer' }}>
+              🎙️ Record Name
+            </button>
+          )}
+          
+          {audioUrl && (
+            <button 
+              className="btn btn-ghost btn-sm" 
+              onClick={() => {
+                const audio = new Audio(audioUrl);
+                audio.play();
+              }}
+              type="button"
+              style={{ padding: '6px 12px', borderRadius: 4, cursor: 'pointer' }}
+            >
+              ▶️ Play Preview
+            </button>
+          )}
+
+          {voicePath && !audioUrl && (
+            <span style={{ fontSize: '0.82rem', color: 'oklch(0.55 0.18 140)', fontWeight: 600 }}>
+              ✅ Saved Voice Prompt
+            </span>
+          )}
         </div>
       </div>
       <div className="field" style={{ marginBottom: 0 }}>
@@ -528,10 +639,10 @@ function ContactModal({
                 height: 24,
                 borderRadius: "50%",
                 background: c,
-                cursor: "pointer",
+                cursor: isUploading ? "default" : "pointer",
                 border: c === color ? "2.5px solid var(--accent)" : "1px solid var(--line)",
               }}
-              onClick={() => setColor(c)}
+              onClick={() => { if (!isUploading) setColor(c); }}
             />
           ))}
         </div>
