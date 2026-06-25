@@ -777,7 +777,18 @@ export default function Home() {
             <div className="usecases">
               <article className="usecase reveal in">
                 <div className="ph">
-                  <img src="/usecases/child-calling.png" alt="Young children" className="img-child" />
+                  <img 
+                    src="/usecases/child-calling.png" 
+                    alt="Young children" 
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'cover',
+                      transform: 'scale(1.35)',
+                      transformOrigin: 'center bottom',
+                      objectPosition: 'center bottom'
+                    }}
+                  />
                 </div>
                 <div className="body">
                   <h3>{t.usecases.u1Title}</h3>
@@ -786,7 +797,18 @@ export default function Home() {
               </article>
               <article className="usecase reveal in">
                 <div className="ph">
-                  <img src="/usecases/aging-parent.png" alt="Aging parents" className="img-senior" />
+                  <img 
+                    src="/usecases/aging-parent.png" 
+                    alt="Aging parents" 
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'cover',
+                      transform: 'scale(1.4)',
+                      transformOrigin: 'center center',
+                      objectPosition: 'center center'
+                    }}
+                  />
                 </div>
                 <div className="body">
                   <h3>{t.usecases.u2Title}</h3>
@@ -795,7 +817,18 @@ export default function Home() {
               </article>
               <article className="usecase reveal in">
                 <div className="ph">
-                  <img src="/usecases/special-abilities.png" alt="Special abilities & caregivers" className="img-special" />
+                  <img 
+                    src="/usecases/special-abilities.png" 
+                    alt="Special abilities & caregivers" 
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'cover',
+                      transform: 'scale(1.4)',
+                      transformOrigin: 'center center',
+                      objectPosition: 'center 55%'
+                    }}
+                  />
                 </div>
                 <div className="body">
                   <h3>{t.usecases.u3Title}</h3>
