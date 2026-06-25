@@ -470,7 +470,19 @@ function ContactModal({
   const startRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+      
+      let options = {};
+      if (typeof MediaRecorder !== 'undefined') {
+        if (MediaRecorder.isTypeSupported('audio/webm')) {
+          options = { mimeType: 'audio/webm' };
+        } else if (MediaRecorder.isTypeSupported('audio/mp4')) {
+          options = { mimeType: 'audio/mp4' };
+        } else if (MediaRecorder.isTypeSupported('audio/aac')) {
+          options = { mimeType: 'audio/aac' };
+        }
+      }
+
+      const mediaRecorder = new MediaRecorder(stream, options);
       mediaRecorderRef.current = mediaRecorder;
       chunksRef.current = [];
 
@@ -481,7 +493,8 @@ function ContactModal({
       };
 
       mediaRecorder.onstop = () => {
-        const blob = new Blob(chunksRef.current, { type: 'audio/webm' });
+        const mimeType = mediaRecorder?.mimeType || 'audio/webm';
+        const blob = new Blob(chunksRef.current, { type: mimeType });
         setAudioBlob(blob);
         const url = URL.createObjectURL(blob);
         setAudioUrl(url);
@@ -489,8 +502,9 @@ function ContactModal({
 
       mediaRecorder.start();
       setRecording(true);
-    } catch (err) {
+    } catch (err: any) {
       console.error('Failed to start recording:', err);
+      alert('Could not start recording: ' + (err.message || 'Microphone permissions denied.'));
     }
   };
 
@@ -610,8 +624,16 @@ function ContactModal({
             <button 
               className="btn btn-ghost btn-sm" 
               onClick={() => {
-                const audio = new Audio(audioUrl);
-                audio.play();
+                try {
+                  const audio = new Audio(audioUrl);
+                  audio.play().catch((playErr: any) => {
+                    console.error('Audio play error:', playErr);
+                    alert('Playback error: ' + (playErr.message || 'Your browser blocked media playback or does not support this audio format.'));
+                  });
+                } catch (createErr: any) {
+                  console.error('Audio object creation error:', createErr);
+                  alert('Audio initialization error: ' + (createErr.message || 'Unknown error.'));
+                }
               }}
               type="button"
               style={{ padding: '6px 12px', borderRadius: 4, cursor: 'pointer' }}
