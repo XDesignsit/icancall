@@ -777,7 +777,7 @@ export default function Home() {
             <div className="usecases">
               <article className="usecase reveal in">
                 <div className="ph">
-                  <img src="/usecases/child-calling.png" alt="Young children" />
+                  <img src="/usecases/child-calling.png" alt="Young children" className="img-child" />
                 </div>
                 <div className="body">
                   <h3>{t.usecases.u1Title}</h3>
@@ -786,7 +786,7 @@ export default function Home() {
               </article>
               <article className="usecase reveal in">
                 <div className="ph">
-                  <img src="/usecases/aging-parent.png" alt="Aging parents" />
+                  <img src="/usecases/aging-parent.png" alt="Aging parents" className="img-senior" />
                 </div>
                 <div className="body">
                   <h3>{t.usecases.u2Title}</h3>
@@ -795,7 +795,7 @@ export default function Home() {
               </article>
               <article className="usecase reveal in">
                 <div className="ph">
-                  <img src="/usecases/special-abilities.png" alt="Special abilities & caregivers" />
+                  <img src="/usecases/special-abilities.png" alt="Special abilities & caregivers" className="img-special" />
                 </div>
                 <div className="body">
                   <h3>{t.usecases.u3Title}</h3>
