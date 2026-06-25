@@ -471,7 +471,7 @@ function ContactModal({
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       
-      // Let the browser choose its native supported format (guarantees error-free encoding/decoding)
+      // Let the browser choose its native supported format
       const mediaRecorder = new MediaRecorder(stream);
       mediaRecorderRef.current = mediaRecorder;
       chunksRef.current = [];
@@ -485,12 +485,20 @@ function ContactModal({
       mediaRecorder.onstop = () => {
         const mimeType = mediaRecorder?.mimeType || 'audio/webm';
         const blob = new Blob(chunksRef.current, { type: mimeType });
+        
+        console.log("Recorded Audio Blob Size:", blob.size, "MIME:", blob.type);
+        if (blob.size === 0) {
+          alert("Error: Recorded audio size is 0 bytes. Your microphone may not be capturing audio. Please try again.");
+          return;
+        }
+
         setAudioBlob(blob);
         const url = URL.createObjectURL(blob);
         setAudioUrl(url);
       };
 
-      mediaRecorder.start();
+      // Start recording with 100ms timeslices to force continuous dataavailable events (vital for Safari)
+      mediaRecorder.start(100);
       setRecording(true);
     } catch (err: any) {
       console.error('Failed to start recording:', err);
@@ -500,6 +508,14 @@ function ContactModal({
 
   const stopRecording = () => {
     if (mediaRecorderRef.current && recording) {
+      try {
+        if (mediaRecorderRef.current.state === 'recording') {
+          // Force flush any remaining audio bytes before stopping
+          mediaRecorderRef.current.requestData();
+        }
+      } catch (err) {
+        console.warn('requestData failed:', err);
+      }
       mediaRecorderRef.current.stop();
       mediaRecorderRef.current.stream.getTracks().forEach((track) => track.stop());
       setRecording(false);
