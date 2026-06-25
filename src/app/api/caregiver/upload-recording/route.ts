@@ -31,7 +31,11 @@ export async function POST(request: Request) {
     
     // File type detection
     const contentType = file.type || 'audio/webm';
-    const extension = contentType.split('/')[1] || 'webm';
+    const baseType = contentType.split(';')[0]; // Strip codecs like ;codecs=opus
+    let extension = baseType.split('/')[1] || 'webm';
+    if (extension === 'x-caf') {
+      extension = 'caf';
+    }
     
     const filePath = `${userId}/${contactId}.${extension}`;
 

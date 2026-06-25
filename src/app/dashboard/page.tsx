@@ -471,18 +471,8 @@ function ContactModal({
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       
-      let options = {};
-      if (typeof MediaRecorder !== 'undefined') {
-        if (MediaRecorder.isTypeSupported('audio/webm')) {
-          options = { mimeType: 'audio/webm' };
-        } else if (MediaRecorder.isTypeSupported('audio/mp4')) {
-          options = { mimeType: 'audio/mp4' };
-        } else if (MediaRecorder.isTypeSupported('audio/aac')) {
-          options = { mimeType: 'audio/aac' };
-        }
-      }
-
-      const mediaRecorder = new MediaRecorder(stream, options);
+      // Let the browser choose its native supported format (guarantees error-free encoding/decoding)
+      const mediaRecorder = new MediaRecorder(stream);
       mediaRecorderRef.current = mediaRecorder;
       chunksRef.current = [];
 
