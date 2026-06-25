@@ -5,10 +5,11 @@ export async function POST() {
     const response = NextResponse.json({ success: true });
 
     // Clear the HTTP-only cookie by setting its maxAge to 0 and an expired date
+    // Use the exact same SameSite=None and Secure attributes to ensure deletion across all browsers
     response.cookies.set("session", "", {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
+      secure: true,
+      sameSite: "none",
       maxAge: 0,
       expires: new Date(0),
       path: "/",

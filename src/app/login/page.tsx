@@ -357,9 +357,21 @@ export default function LoginPage() {
 
         <div style={{ textAlign: "center", marginTop: 24, fontSize: "0.84rem", color: "oklch(0.46 0.022 245)" }}>
           Don't have an account?{" "}
-          <Link href="/onboarding" style={{ color: "oklch(0.58 0.115 232)", textDecoration: "none", fontWeight: 600 }}>
+          <span 
+            onClick={async () => {
+              try {
+                await fetch("/api/auth/logout", { method: "POST" });
+              } catch (e) {
+                console.error(e);
+              }
+              window.location.href = "/onboarding";
+            }}
+            style={{ color: "oklch(0.58 0.115 232)", cursor: "pointer", fontWeight: 600 }}
+            onMouseEnter={(e) => e.currentTarget.style.textDecoration = "underline"}
+            onMouseLeave={(e) => e.currentTarget.style.textDecoration = "none"}
+          >
             Sign up
-          </Link>
+          </span>
         </div>
       </div>
     </div>
