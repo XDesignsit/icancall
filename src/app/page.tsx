@@ -826,7 +826,7 @@ export default function Home() {
                       objectFit: 'cover',
                       transform: 'scale(1.4)',
                       transformOrigin: 'center center',
-                      objectPosition: 'center 55%'
+                      objectPosition: 'center 62%'
                     }}
                   />
                 </div>
