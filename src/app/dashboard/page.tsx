@@ -611,25 +611,9 @@ function ContactModal({
           )}
           
           {audioUrl && (
-            <button 
-              className="btn btn-ghost btn-sm" 
-              onClick={() => {
-                try {
-                  const audio = new Audio(audioUrl);
-                  audio.play().catch((playErr: any) => {
-                    console.error('Audio play error:', playErr);
-                    alert('Playback error: ' + (playErr.message || 'Your browser blocked media playback or does not support this audio format.'));
-                  });
-                } catch (createErr: any) {
-                  console.error('Audio object creation error:', createErr);
-                  alert('Audio initialization error: ' + (createErr.message || 'Unknown error.'));
-                }
-              }}
-              type="button"
-              style={{ padding: '6px 12px', borderRadius: 4, cursor: 'pointer' }}
-            >
-              ▶️ Play Preview
-            </button>
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              <audio src={audioUrl} controls style={{ width: 220, height: 32, borderRadius: 4 }} />
+            </div>
           )}
 
           {voicePath && !audioUrl && (
