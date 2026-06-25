@@ -804,7 +804,7 @@ export default function Home() {
                       width: '100%',
                       height: '100%',
                       objectFit: 'cover',
-                      transform: 'scale(1.4)',
+                      transform: 'scale(1.15)',
                       transformOrigin: 'center center',
                       objectPosition: 'center center'
                     }}
@@ -824,9 +824,9 @@ export default function Home() {
                       width: '100%',
                       height: '100%',
                       objectFit: 'cover',
-                      transform: 'scale(1.4)',
+                      transform: 'scale(1.15)',
                       transformOrigin: 'center center',
-                      objectPosition: 'center 62%'
+                      objectPosition: 'center 64%'
                     }}
                   />
                 </div>
