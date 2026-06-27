@@ -57,8 +57,8 @@ function App() {
 
   return (
     <Shell layout={t.layout} stepIndex={Math.min(step, 3)} hideChrome={success}>
-      {step === 0 && <PlanStep data={data} set={set} onNext={next} />}
-      {step === 1 && <AccountStep data={data} set={set} onNext={next} onBack={back} />}
+      {step === 0 && <AccountStep data={data} set={set} onNext={next} />}
+      {step === 1 && <PlanStep data={data} set={set} onNext={next} onBack={back} />}
       {step === 2 && <NumberStep data={data} set={set} onNext={next} onBack={back} />}
       {step === 3 && <PaymentStep data={data} set={set} onNext={next} onBack={back} />}
       {step === 4 && <SuccessStep data={data} />}

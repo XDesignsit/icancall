@@ -16,11 +16,11 @@ function StepNav({ onBack, onNext, nextLabel, nextDisabled, backLabel }) {
 }
 
 /* ============ STEP 1 — Plan ============ */
-function PlanStep({ data, set, onNext }) {
+function PlanStep({ data, set, onNext, onBack }) {
   const { plan, billing } = data;
   return (
     <div className="panel">
-      <span className="step-eyebrow">Step 1 of 4 · Choose a plan</span>
+      <span className="step-eyebrow">Step 2 of 4 · Choose a plan</span>
       <h1>Pick the plan that fits your family.</h1>
       <p className="sub">Both plans include cascade routing, the caller menu, and 24/7 reliability. Switch or cancel anytime.</p>
 
@@ -52,7 +52,7 @@ function PlanStep({ data, set, onNext }) {
       </div>
 
       <div className="trust-row"><Ico.shield /> No setup fees · Switch plans or cancel anytime</div>
-      <StepNav onNext={onNext} nextLabel="Continue" />
+      <StepNav onBack={onBack} onNext={onNext} nextLabel="Continue" />
     </div>
   );
 }
@@ -80,7 +80,7 @@ function AccountStep({ data, set, onNext, onBack }) {
 
   return (
     <div className="panel">
-      <span className="step-eyebrow">Step 2 of 4 · Your account</span>
+      <span className="step-eyebrow">Step 1 of 4 · Your account</span>
       <h1>Let's set up your account.</h1>
       <p className="sub">This is the account that manages the number and trusted circle. Your family doesn't need an account.</p>
 

@@ -387,8 +387,8 @@ function BrandMark({ dark, lang }: { dark?: boolean; lang: string }) {
 
 function VSteps({ stepIndex, t }: { stepIndex: number; t: any }) {
   const steps = [
-    { key: "plan",    label: t.onboarding.stepPlan },
     { key: "account", label: t.onboarding.stepAccount },
+    { key: "plan",    label: t.onboarding.stepPlan },
     { key: "number",  label: t.onboarding.stepNumber },
     { key: "payment", label: t.onboarding.stepPayment },
   ];
@@ -409,8 +409,8 @@ function VSteps({ stepIndex, t }: { stepIndex: number; t: any }) {
 
 function HSteps({ stepIndex, t }: { stepIndex: number; t: any }) {
   const steps = [
-    { key: "plan",    label: t.onboarding.stepPlan },
     { key: "account", label: t.onboarding.stepAccount },
+    { key: "plan",    label: t.onboarding.stepPlan },
     { key: "number",  label: t.onboarding.stepNumber },
     { key: "payment", label: t.onboarding.stepPayment },
   ];
@@ -476,7 +476,7 @@ function StepNav({ onBack, onNext, nextLabel, nextDisabled, backLabel, t }: { on
 }
 
 /* ============ STEP 1 — Plan ============ */
-function PlanStep({ data, set, onNext, t, lang }: { data: OnboardingData; set: (patch: Partial<OnboardingData>) => void; onNext: () => void; t: any; lang: string }) {
+function PlanStep({ data, set, onNext, onBack, t, lang }: { data: OnboardingData; set: (patch: Partial<OnboardingData>) => void; onNext: () => void; onBack?: () => void; t: any; lang: string }) {
   const { plan, billing } = data;
 
   const essentialFeats = [
@@ -497,9 +497,9 @@ function PlanStep({ data, set, onNext, t, lang }: { data: OnboardingData; set: (
 
   return (
     <div className="panel">
-      <span className="step-eyebrow">{t.onboarding.step1Eyebrow}</span>
-      <h1>{t.onboarding.step1Title}</h1>
-      <p className="sub">{t.onboarding.step1Subtitle}</p>
+      <span className="step-eyebrow">{t.onboarding.step2Eyebrow}</span>
+      <h1>{t.onboarding.step2Title}</h1>
+      <p className="sub">{t.onboarding.step2Subtitle}</p>
 
       <div className="bill-toggle">
         <button className={billing === "monthly" ? "active" : ""} onClick={() => set({ billing: "monthly" })}>{t.onboarding.monthly}</button>
@@ -542,13 +542,13 @@ function PlanStep({ data, set, onNext, t, lang }: { data: OnboardingData; set: (
       </div>
 
       <div className="trust-row"><Ico.shield className="w-[17px] h-[17px]" /> {t.onboarding.trustRow}</div>
-      <StepNav onNext={onNext} t={t} />
+      <StepNav onBack={onBack} onNext={onNext} t={t} />
     </div>
   );
 }
 
 /* ============ STEP 2 — Account ============ */
-function AccountStep({ data, set, onNext, onBack, t, lang }: { data: OnboardingData; set: (patch: Partial<OnboardingData>) => void; onNext: () => void; onBack: () => void; t: any; lang: string }) {
+function AccountStep({ data, set, onNext, onBack, t, lang }: { data: OnboardingData; set: (patch: Partial<OnboardingData>) => void; onNext: () => void; onBack?: () => void; t: any; lang: string }) {
   const a = data.account;
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   const [smsConsent, setSmsConsent] = useState(false);
@@ -590,9 +590,9 @@ function AccountStep({ data, set, onNext, onBack, t, lang }: { data: OnboardingD
 
   return (
     <div className="panel">
-      <span className="step-eyebrow">{t.onboarding.step2Eyebrow}</span>
-      <h1>{t.onboarding.step2Title}</h1>
-      <p className="sub">{t.onboarding.step2Subtitle}</p>
+      <span className="step-eyebrow">{t.onboarding.step1Eyebrow}</span>
+      <h1>{t.onboarding.step1Title}</h1>
+      <p className="sub">{t.onboarding.step1Subtitle}</p>
 
       <button className="btn btn-google btn-block" style={{ marginTop: 22 }} onClick={() => {
         window.location.href = `/api/auth/google?next=${encodeURIComponent("/onboarding?google=true")}`;
@@ -1110,7 +1110,7 @@ function OnboardingContent() {
                   password: "google_oauth_bypass", // Bypass password constraint in step-1 validation
                 },
               }));
-              setStep(2); // Auto-advance to step 2 (Number selection)
+              setStep(1); // Auto-advance to step 2 (Plan selection)
             }
           }
         } catch (err) {
@@ -1136,8 +1136,8 @@ function OnboardingContent() {
 
   return (
     <Shell layout="split" stepIndex={Math.min(step, 3)} hideChrome={success} lang={lang} t={t}>
-      {step === 0 && <PlanStep data={data} set={set} onNext={next} t={t} lang={lang} />}
-      {step === 1 && <AccountStep data={data} set={set} onNext={next} onBack={back} t={t} lang={lang} />}
+      {step === 0 && <AccountStep data={data} set={set} onNext={next} t={t} lang={lang} />}
+      {step === 1 && <PlanStep data={data} set={set} onNext={next} onBack={back} t={t} lang={lang} />}
       {step === 2 && <NumberStep data={data} set={set} onNext={next} onBack={back} t={t} lang={lang} />}
       {step === 3 && <PaymentStep data={data} set={set} onNext={next} onBack={back} t={t} lang={lang} />}
       {step === 4 && <SuccessStep data={data} t={t} lang={lang} />}

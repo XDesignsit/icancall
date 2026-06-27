@@ -123,8 +123,8 @@ const STRENGTH = [
 const validEmail = (e) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test((e || '').trim());
 
 const STEPS = [
-  { key: 'plan',    label: 'Plan' },
   { key: 'account', label: 'Account' },
+  { key: 'plan',    label: 'Plan' },
   { key: 'number',  label: 'Number' },
   { key: 'payment', label: 'Payment' },
 ];
