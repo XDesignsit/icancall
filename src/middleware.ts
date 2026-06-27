@@ -53,7 +53,7 @@ export async function middleware(request: NextRequest) {
   // 3. Enforce Authentication & Route Authorization
   const isDashboardRoute = url.pathname.startsWith("/dashboard");
   const isSuperAdminRoute = url.pathname.startsWith("/super-admin");
-  const isOnboarding = url.pathname.startsWith("/onboarding");
+  const isSignup = url.pathname.startsWith("/signup");
 
   // Read session cookie
   const sessionCookie = request.cookies.get("session")?.value;
@@ -84,8 +84,8 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // Only redirect away from onboarding if already logged in (never redirect away from /login)
-  if (isOnboarding && session) {
+  // Only redirect away from signup if already logged in (never redirect away from /login)
+  if (isSignup && session) {
     url.pathname = session.role === "admin" ? "/super-admin" : "/dashboard";
     return NextResponse.redirect(url);
   }
@@ -107,7 +107,7 @@ export async function middleware(request: NextRequest) {
   const marketingDomain = "icancall.co";
   const appDomain = "app.icancall.co";
 
-  const isAppRoute = isDashboardRoute || isSuperAdminRoute || url.pathname.startsWith("/login") || url.pathname.startsWith("/onboarding");
+  const isAppRoute = isDashboardRoute || isSuperAdminRoute || url.pathname.startsWith("/login") || url.pathname.startsWith("/signup");
 
   // Redirect marketing domain accessing app routes to the app subdomain
   if ((baseHost === marketingDomain || baseHost === "www.icancall.co") && isAppRoute) {

@@ -595,7 +595,7 @@ function AccountStep({ data, set, onNext, onBack, t, lang }: { data: OnboardingD
       <p className="sub">{t.onboarding.step1Subtitle}</p>
 
       <button className="btn btn-google btn-block" style={{ marginTop: 22 }} onClick={() => {
-        window.location.href = `/api/auth/google?next=${encodeURIComponent("/onboarding?google=true")}`;
+        window.location.href = `/api/auth/google?next=${encodeURIComponent("/signup?google=true")}`;
       }}>
         <Ico.google className="w-[19px] h-[19px]" /> {t.onboarding.btnGoogle}
       </button>

@@ -6,7 +6,7 @@ const filesToExtract = [
   'iCanCall 404 (standalone).html',
   'iCanCall Dashboard (standalone).html',
   'iCanCall Landing Page (standalone).html',
-  'iCanCall Onboarding (standalone).html',
+  'iCanCall Signup (standalone).html',
   'iCanCall Super Admin (standalone).html',
   'iCanCall Coming Soon (standalone).html'
 ];

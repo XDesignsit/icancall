@@ -1150,7 +1150,7 @@ export default function ComparisonChartPage() {
               <h2 style={{ color: "#fff", fontSize: "clamp(1.8rem, 4vw, 2.6rem)", fontWeight: 700 }} id="ctaTitle">{c.ctaTitle}</h2>
               <p style={{ color: "oklch(0.90 0.012 225)", marginTop: "14px" }} id="ctaDesc">{c.ctaDesc}</p>
               <div className="actions" style={{ marginTop: "32px", display: "flex", justifyContent: "center", gap: "16px", flexWrap: "wrap" }}>
-                <Link className="btn btn-primary btn-lg" href="/onboarding">{c.ctaBtnPrimary}</Link>
+                <Link className="btn btn-primary btn-lg" href="/signup">{c.ctaBtnPrimary}</Link>
                 <Link className="btn btn-ghost btn-lg" href="/" style={{ color: "#fff", borderColor: "rgba(255, 255, 255, 0.5)" }}>{c.ctaBtnGhost}</Link>
               </div>
               <p className="fine" style={{ color: "oklch(0.80 0.012 225)", fontSize: "13px", marginTop: "20px" }} id="ctaFine">{c.ctaFine}</p>

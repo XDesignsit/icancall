@@ -364,7 +364,7 @@ export default function LoginPage() {
               } catch (e) {
                 console.error(e);
               }
-              window.location.href = "/onboarding";
+              window.location.href = "/signup";
             }}
             style={{ color: "oklch(0.58 0.115 232)", cursor: "pointer", fontWeight: 600 }}
             onMouseEnter={(e) => e.currentTarget.style.textDecoration = "underline"}

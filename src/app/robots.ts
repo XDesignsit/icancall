@@ -21,7 +21,7 @@ export default async function robots(): Promise<MetadataRoute.Robots> {
     rules: {
       userAgent: "*",
       allow: "/",
-      disallow: ["/dashboard", "/super-admin", "/onboarding", "/login"],
+      disallow: ["/dashboard", "/super-admin", "/signup", "/login"],
     },
     sitemap: "https://icancall.co/sitemap.xml",
   };

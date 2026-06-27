@@ -871,7 +871,7 @@ export default function Home() {
                   <li><Ico.check className="w-[19px] h-[19px]" /> {t.ui.worksOnAnyPhoneNoApp}</li>
                   <li><Ico.check className="w-[19px] h-[19px]" /> {t.pricing.shortGuarantee}</li>
                 </ul>
-                <Link className="btn btn-ghost" href={`/onboarding?plan=essential&billing=${billingCycle}&lang=${lang}`}>{t.pricing.selectPlan}</Link>
+                <Link className="btn btn-ghost" href={`/signup?plan=essential&billing=${billingCycle}&lang=${lang}`}>{t.pricing.selectPlan}</Link>
               </div>
  
               {/* Pro Card */}
@@ -896,7 +896,7 @@ export default function Home() {
                   <li><Ico.check className="w-[19px] h-[19px]" /> {t.ui.worksOnAnyPhoneNoApp}</li>
                   <li><Ico.check className="w-[19px] h-[19px]" /> {t.pricing.shortGuarantee}</li>
                 </ul>
-                <Link className="btn btn-primary" href={`/onboarding?plan=pro&billing=${billingCycle}&lang=${lang}`}>{t.pricing.selectPlan}</Link>
+                <Link className="btn btn-primary" href={`/signup?plan=pro&billing=${billingCycle}&lang=${lang}`}>{t.pricing.selectPlan}</Link>
               </div>
             </div>
 
