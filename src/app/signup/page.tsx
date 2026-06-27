@@ -251,61 +251,83 @@ const STRENGTH_LABELS: Record<string, string> = {
   ko: "비밀번호 수준:"
 };
 
-const DISCLAIMERS: Record<string, { text: string; privacy: string; terms: string }> = {
+const DISCLAIMERS: Record<string, { prefix: string; privacy: string; and: string; terms: string; suffix: string }> = {
   en: {
-    text: "By creating an account, you consent to receive transactional SMS messages from ICanCall at the mobile number provided. If you don't consent to SMS opt-in, you will only receive email notifications. Message frequency varies by account activity. Reply STOP to unsubscribe at any time, or HELP for assistance. For more information, see our",
+    prefix: "For more information, see our",
     privacy: "Privacy Policy",
-    terms: "Terms of Service"
+    and: "and",
+    terms: "Terms of Service",
+    suffix: "."
   },
   es: {
-    text: "Al crear una cuenta, acepta recibir mensajes SMS transaccionales de ICanCall en el número móvil provisto. La frecuencia varía según la actividad de la cuenta. Responda STOP para darse de baja o HELP para ayuda. Para más información, consulte nuestra",
+    prefix: "Para más información, consulte nuestra",
     privacy: "Política de Privacidad",
-    terms: "Términos de Servicio"
+    and: "y",
+    terms: "Términos de Servicio",
+    suffix: "."
   },
   fr: {
-    text: "En créant un compte, vous acceptez de recevoir des SMS transactionnels d'ICanCall au numéro fourni. La fréquence varie selon l'activité. Répondez STOP pour vous désabonner ou HELP pour assistance. Pour plus d'informations, consultez notre",
+    prefix: "Pour plus d'informations, consultez notre",
     privacy: "Politique de Confidentialité",
-    terms: "Conditions d'Utilisation"
+    and: "et",
+    terms: "Conditions d'Utilisation",
+    suffix: "."
   },
   ja: {
-    text: "アカウントを作成することにより、提供された携帯電話番号でのICanCallからのトランザクションSMSメッセージの受信に同意したことになります。メッセージの頻度はアカウントのアクティビティによって異なります。いつでもSTOPと返信して購読を解除するか、HELPでサポートを求めてください。詳細については、以下を参照してください。",
+    prefix: "詳細については、",
     privacy: "プライバシーポリシー",
-    terms: "利用規約"
+    and: "と",
+    terms: "利用規約",
+    suffix: "を参照してください。"
   },
   zh: {
-    text: "通过创建账户，您同意在提供的手机号码上接收来自 ICanCall 的事务性短信。短信频率因账户活动而异。随时回复 STOP 退订，或回复 HELP 获取帮助。欲了解更多信息，请参阅我们的",
+    prefix: "欲了解更多信息，请参阅我们的",
     privacy: "隐私政策",
-    terms: "服务条款"
+    and: "和",
+    terms: "服务条款",
+    suffix: "。"
   },
   ar: {
-    text: "بإنشاء حساب، فإنك توافق على تلقي رسائل SMS المتعلقة بالمعاملات من ICanCall على رقم الهاتف المحمول المقدم. يختلف تكرار الرسائل حسب نشاط الحساب. أرسل STOP لإلغاء الاشتراك في أي وقت، أو HELP للحصول على المساعدة. لمزيد من المعلومات، راجع",
+    prefix: "لمزيد من المعلومات، راجع",
     privacy: "سياسة الخصوصية",
-    terms: "شروط الخدمة"
+    and: "و",
+    terms: "شروط الخدمة",
+    suffix: "."
   },
   hi: {
-    text: "खाता बनाकर, आप प्रदान किए गए मोबाइल नंबर पर ICanCall से लेन-देन संबंधी SMS प्राप्त करने की सहमति देते हैं। संदेश की आवृत्ति खाता गतिविधि के आधार पर भिन्न होती है। किसी भी समय सदस्यता समाप्त करने के लिए STOP लिखें, या सहायता के लिए HELP। अधिक जानकारी के लिए, हमारी देखें",
+    prefix: "अधिक जानकारी के लिए, हमारी",
     privacy: "गोपनीयता नीति",
-    terms: "सेवा की शर्तें"
+    and: "और",
+    terms: "सेवा की शर्तें",
+    suffix: " देखें।"
   },
   pt: {
-    text: "Ao criar uma conta, você consente em receber SMS transacionais do ICanCall no número móvel fornecido. A frequência das mensagens varia com a atividade da conta. Responda STOP para cancelar a assinatura a qualquer momento, ou HELP para assistência. Para mais informações, consulte nossos",
+    prefix: "Para mais informações, consulte nossos",
     privacy: "Política de Privacidade",
-    terms: "Termos de Serviço"
+    and: "e",
+    terms: "Termos de Serviço",
+    suffix: "."
   },
   de: {
-    text: "Mit der Erstellung eines Kontos stimmen Sie dem Empfang von transaktionsbezogenen SMS von ICanCall unter der angegebenen Mobiltelefonnummer zu. Die Häufigkeit hängt von der Kontoaktivität ab. Antworten Sie jederzeit mit STOP, um sich abzumelden, oder mit HELP, um Unterstützung zu erhalten. Weitere Informationen finden Sie in unserer",
+    prefix: "Weitere Informationen finden Sie in unserer",
     privacy: "Datenschutzerklärung",
-    terms: "Nutzungsbedingungen"
+    and: "und",
+    terms: "Nutzungsbedingungen",
+    suffix: "."
   },
   it: {
-    text: "Creando un account, acconsenti a ricevere SMS transazionali da ICanCall al numero fornito. La frequenza varia in base all'attività dell'account. Rispondi STOP per annullare l'iscrizione o HELP per assistenza. Per maggiori informazioni, consulta la nostra",
+    prefix: "Per maggiori informazioni, consulta la nostra",
     privacy: "Informativa sulla Privacy",
-    terms: "Termini di Servizio"
+    and: "e",
+    terms: "Termini di Servizio",
+    suffix: "."
   },
   ko: {
-    text: "계정을 생성함으로써 귀하는 제공된 휴대폰 번호로 ICanCall의 거래 관련 SMS 메시지를 수신하는 데 동의하게 됩니다. 메시지 빈도는 계정 활동에 따라 다릅니다. 언제든지 STOP을 입력하여 수신 거부하거나, HELP를 입력하여 지원을 받으십시오. 자세한 내용은 다음을 참조하십시오.",
+    prefix: "자세한 내용은 ",
     privacy: "개인정보 처리방침",
-    terms: "서비스 약관"
+    and: " 및 ",
+    terms: "서비스 약관",
+    suffix: "을 참조하십시오."
   }
 };
 
@@ -651,14 +673,21 @@ function AccountStep({ data, set, onNext, onBack, t, lang }: { data: OnboardingD
             }}
             style={{ width: "16px", height: "16px", flexShrink: 0, marginTop: 3, cursor: "pointer" }}
           />
-          <span>{t.onboarding.smsText}</span>
+          <span>
+            {t.onboarding.smsText}{" "}
+            {discObj.prefix}{" "}
+            <Link href={`/privacy-policy?lang=${lang}`} style={{ textDecoration: "underline", color: "var(--blue)" }} target="_blank">
+              {discObj.privacy}
+            </Link>{" "}
+            {discObj.and}{" "}
+            <Link href={`/terms-of-service?lang=${lang}`} style={{ textDecoration: "underline", color: "var(--blue)" }} target="_blank">
+              {discObj.terms}
+            </Link>
+            {discObj.suffix}
+          </span>
         </label>
         <div className={"field-err" + (show("sms") ? " show" : "")} style={{ marginLeft: 26, marginTop: 4 }}>{errs.sms}</div>
       </div>
-
-      <p style={{ fontSize: "0.76rem", color: "var(--ink-faint)", marginTop: 12, marginBottom: 16, lineHeight: 1.45 }}>
-        {discObj.text} <Link href={`/privacy-policy?lang=${lang}`} style={{ textDecoration: "underline", color: "var(--blue)" }} target="_blank">{discObj.privacy}</Link> and <Link href={`/terms-of-service?lang=${lang}`} style={{ textDecoration: "underline", color: "var(--blue)" }} target="_blank">{discObj.terms}</Link>.
-      </p>
 
       <StepNav onBack={onBack} onNext={submit} t={t} />
     </div>
