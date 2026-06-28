@@ -18,3 +18,9 @@ This version has breaking changes — APIs, conventions, and file structure may 
   3. Run a link-patching script to parse and update links/routes in both raw HTML and script-embedded template JSON strings (`<script type="__bundler/template">`) inside the standalone pages.
   4. If modifying compiled React stepper flows (like the Signup page), run the compression/repacking script to compress and inject the updated base64 JS assets back into the manifest blocks of the standalone HTML pages.
 
+## Security Headers & Browser APIs
+- When configuring or modifying security headers in `vercel.json` (such as `Permissions-Policy` or `Content-Security-Policy`):
+  1. **Audit API Usage**: Always search the codebase first for HTML5 browser APIs and hardware features (e.g., searching for `getUserMedia`, `navigator.geolocation`, `payment`, `usb`) to identify what capabilities the application genuinely requires.
+  2. **Tailor Policies**: Never use empty allowlists `()` for active browser features. For instance, since the dashboard uses microphone recording, configure `microphone=(self)` to preserve local audio functionality while restricting unused capabilities like `camera=()`.
+
+
