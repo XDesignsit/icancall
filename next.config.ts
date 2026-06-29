@@ -10,8 +10,8 @@ const nextConfig: NextConfig = {
 };
 
 export default withSentryConfig(nextConfig, {
-  org: "icancall",
-  project: "icancall-nextjs",
+  org: "xdesignsit",
+  project: "icancall",
   silent: !process.env.CI,
   widenClientFileUpload: true,
   sourcemaps: { deleteSourcemapsAfterUpload: true },
