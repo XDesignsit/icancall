@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { sendVoicemailAlertEmail } from '@/lib/mail';
 import { findAccountByTwilioNumber } from '@/lib/db';
 
+export const preferredRegion = 'iad1';
+
 export async function POST(request: Request) {
   try {
     const formData = await request.formData();

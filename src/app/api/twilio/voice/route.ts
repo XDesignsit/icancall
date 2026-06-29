@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { findAccountByTwilioNumber, getAvailableMinutes } from '@/lib/db';
 import { supabase } from '@/lib/supabase';
 
+export const preferredRegion = 'iad1';
+
 export async function POST(request: Request) {
   try {
     let digits = null;

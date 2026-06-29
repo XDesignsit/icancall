@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { deductMinutes } from '@/lib/db';
 
+export const preferredRegion = 'iad1';
+
 export async function POST(request: Request) {
   try {
     let toPhoneNumber = null;
