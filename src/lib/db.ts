@@ -24,7 +24,8 @@ interface CacheEntry<T> {
 }
 
 const accountCache = new Map<string, CacheEntry<Account | undefined>>();
-const CACHE_TTL_MS = 60000; // Cache TTL set to 60 seconds
+const CACHE_TTL_MS = 60000;
+const CACHE_MAX_SIZE = 500;
 
 function getCachedAccount(phoneNumber: string): Account | undefined | null {
   const entry = accountCache.get(phoneNumber);
@@ -38,6 +39,11 @@ function getCachedAccount(phoneNumber: string): Account | undefined | null {
 }
 
 function setCachedAccount(phoneNumber: string, account: Account | undefined) {
+  if (accountCache.size >= CACHE_MAX_SIZE) {
+    // Evict the oldest entry (Map preserves insertion order)
+    const oldestKey = accountCache.keys().next().value;
+    if (oldestKey !== undefined) accountCache.delete(oldestKey);
+  }
   accountCache.set(phoneNumber, {
     data: account,
     expiry: Date.now() + CACHE_TTL_MS,

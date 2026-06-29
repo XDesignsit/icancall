@@ -1,12 +1,27 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
+import { z } from "zod";
 import { supabase } from "@/lib/supabase";
 import { verifySession } from "@/lib/session";
 import { verifyTurnstile } from "@/lib/rateLimit";
 
+const signupSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(8).optional(),
+  name: z.string().min(1).optional(),
+  preferredName: z.string().optional(),
+  numbers: z.array(z.string()).optional(),
+  captchaToken: z.string().optional(),
+});
+
 export async function POST(request: Request) {
   try {
-    const { email, password, name, preferredName, numbers, captchaToken } = await request.json();
+    const body = await request.json();
+    const parsed = signupSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json({ error: "Invalid request data" }, { status: 400 });
+    }
+    const { email, password, name, preferredName, numbers, captchaToken } = parsed.data;
 
     // 1. Check if user already has an active session cookie (e.g. logged in via Google)
     const cookieStore = await cookies();
@@ -24,7 +39,7 @@ export async function POST(request: Request) {
         .from("profiles")
         .update({
           name,
-          preferred_name: preferredName || name.split(" ")[0],
+          preferred_name: preferredName || (name ?? "").split(" ")[0],
           settings: {
             notifyEmail: email,
             smsConsent: true,
@@ -81,7 +96,7 @@ export async function POST(request: Request) {
           id: userId,
           email,
           name,
-          preferred_name: preferredName || name.split(" ")[0],
+          preferred_name: preferredName || (name ?? "").split(" ")[0],
           settings: {
             notifyEmail: email,
             smsConsent: true,

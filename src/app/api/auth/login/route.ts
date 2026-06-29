@@ -1,14 +1,21 @@
 import { NextResponse } from "next/server";
+import { z } from "zod";
 import { signSession } from "@/lib/session";
 import { supabase } from "@/lib/supabase";
 
+const loginSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(1),
+});
+
 export async function POST(request: Request) {
   try {
-    const { email, password } = await request.json();
-
-    if (!email || !password) {
+    const body = await request.json();
+    const parsed = loginSchema.safeParse(body);
+    if (!parsed.success) {
       return NextResponse.json({ error: "Email and password are required" }, { status: 400 });
     }
+    const { email, password } = parsed.data;
 
     let userId: string | null = null;
     const isDemoCaregiver = email === "support@icancall.co" && (password === "google_oauth_bypass" || password === "••••••••");

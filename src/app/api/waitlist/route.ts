@@ -1,12 +1,19 @@
 import { NextResponse } from 'next/server';
+import { z } from 'zod';
+
+const waitlistSchema = z.object({
+  email: z.string().email(),
+  phone: z.string().optional(),
+});
 
 export async function POST(request: Request) {
   try {
-    const { email, phone } = await request.json();
-
-    if (!email) {
+    const body = await request.json();
+    const parsed = waitlistSchema.safeParse(body);
+    if (!parsed.success) {
       return NextResponse.json({ error: 'Email is required' }, { status: 400 });
     }
+    const { email, phone } = parsed.data;
 
     const authToken = process.env.ACUMBAMAIL_AUTH_TOKEN;
     const listId = process.env.ACUMBAMAIL_LIST_ID;
