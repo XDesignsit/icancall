@@ -56,21 +56,8 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: "Password must be at least 6 characters." }, { status: 400 });
       }
 
-      // Verify captchaToken if TURNSTILE_SECRET_KEY is configured
+      // CAPTCHA verification is bypassed on signup since the flow requires a successful paid Creem checkout, preventing automated spam registration.
       const ip = request.headers.get("x-forwarded-for")?.split(",")[0] || "127.0.0.1";
-      const host = request.headers.get("host") || "";
-      const isProductionHost = host === "icancall.co" || host === "www.icancall.co" || host === "app.icancall.co";
-
-      if (isProductionHost && process.env.TURNSTILE_SECRET_KEY && !captchaToken) {
-        return NextResponse.json({ error: "CAPTCHA token is required." }, { status: 400 });
-      }
-
-      if (isProductionHost && captchaToken && captchaToken !== "blocked_bypass") {
-        const isValid = await verifyTurnstile(captchaToken, ip);
-        if (!isValid) {
-          return NextResponse.json({ error: "Invalid CAPTCHA validation." }, { status: 400 });
-        }
-      }
 
       // Sign up the user in Supabase Auth
       const { data: authData, error: authError } = await supabase.auth.signUp({
