@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { translations } from "@/lib/translations";
+import type { HomepageTranslations } from "@/lib/translations";
 
 /* ============ TYPES ============ */
 interface Contact {
@@ -106,6 +106,7 @@ const Ico = {
 
 export default function Home() {
   const [lang, setLang] = useState<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi" | "pt" | "de" | "it" | "ko">("en");
+  const [t, setT] = useState<HomepageTranslations | null>(null);
 
   useEffect(() => {
     const savedLang = localStorage.getItem("lang") as any;
@@ -116,6 +117,10 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
+    import(`@/lib/translations/${lang}`).then((mod) => setT(mod.default));
+  }, [lang]);
+
+  useEffect(() => {
     document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
   }, [lang]);
 
@@ -124,8 +129,6 @@ export default function Home() {
     localStorage.setItem("lang", newLang);
     window.dispatchEvent(new Event("storage"));
   };
-
-  const t = translations[lang];
 
   const [scrolled, setScrolled] = useState(false);
   const [billingCycle, setBillingCycle] = useState<"monthly" | "annual">("monthly");
@@ -414,6 +417,8 @@ export default function Home() {
   useEffect(() => {
     resetSimScreen();
   }, [simMode]); // eslint-disable-line
+
+  if (!t) return null;
 
   return (
     <div className="min-h-screen selection:bg-teal-500 selection:text-white overflow-x-hidden">
