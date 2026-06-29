@@ -1,0 +1,60 @@
+{
+  "profiles": [
+    {
+      "id": "mock-user-support-icancall-co",
+      "email": "support@icancall.co",
+      "name": "Support Demo",
+      "preferred_name": "Support",
+      "settings": {
+        "role": "Primary caregiver",
+        "notifyEmail": "support@icancall.co",
+        "phone": "",
+        "smsPhone": "",
+        "address": "123 Main St, Oakland, CA 94607",
+        "timezone": "Pacific (PT)",
+        "language": "English",
+        "twoFactor": false,
+        "card": {
+          "brand": "Visa",
+          "last4": "4242",
+          "exp": "12 / 28"
+        },
+        "billingAddr": "123 Main St, Oakland, CA 94607",
+        "plan": "pro",
+        "billingCycle": "monthly",
+        "addons": {
+          "extraNumbers": 0,
+          "minuteBlocks": 0,
+          "usedMin": 0,
+          "rolloverMin": 0
+        }
+      },
+      "updated_at": "2026-06-29T20:26:54.982Z"
+    }
+  ],
+  "phone_lines": [
+    {
+      "user_id": "mock-user-support-icancall-co",
+      "number": "+15005550006",
+      "name": "Emergency cascaded line",
+      "type": "seniors",
+      "contacts": [
+        {
+          "id": 1,
+          "name": "Support Demo",
+          "phone": "+14155550192",
+          "rel": "Primary Caregiver",
+          "available": true
+        }
+      ],
+      "id": "mock-row-n2ai2tnh0",
+      "settings": {
+        "color": "oklch(0.58 0.115 232)",
+        "mode": "menu",
+        "minutesUsed": 0,
+        "schedule": [],
+        "extraSettings": {}
+      }
+    }
+  ]
+}

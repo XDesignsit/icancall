@@ -111,13 +111,13 @@ export async function POST(request: Request) {
     }
 
     // 3. Delete any lines that were removed from the UI
-    const activeIds = updatedLines.map((l) => l.id);
+    const activeIds = (updatedLines || []).map((l: any) => l.id);
     if (activeIds.length > 0) {
       await supabase
         .from("phone_lines")
         .delete()
         .eq("user_id", userId)
-        .not("id", "in", `(${activeIds.map(id => `'${id}'`).join(",")})`);
+        .not("id", "in", `(${activeIds.map((id: any) => `'${id}'`).join(",")})`);
     } else {
       await supabase
         .from("phone_lines")

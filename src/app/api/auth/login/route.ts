@@ -26,9 +26,7 @@ export async function POST(request: Request) {
       try {
         const { data: { users }, error: listError } = await supabase.auth.admin.listUsers();
         if (listError) throw listError;
-
-        const existingUser = users?.find(u => u.email === email);
-
+        const existingUser = (users || []).find((u: any) => u.email === email);
         if (existingUser) {
           userId = existingUser.id;
         } else {
@@ -124,7 +122,7 @@ export async function POST(request: Request) {
     const role = email === "admin@icancall.co" ? "admin" : "user";
     const expiresAt = Date.now() + 7 * 24 * 60 * 60 * 1000; // 7 days
 
-    const token = await signSession({ email, role, expiresAt, userId });
+    const token = await signSession({ email, role, expiresAt, userId: userId || undefined });
 
     const response = NextResponse.json({ success: true, role });
 

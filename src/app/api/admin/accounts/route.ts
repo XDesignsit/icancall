@@ -39,9 +39,9 @@ export async function GET() {
     }
 
     // 3. Map into the ACCOUNTS frontend format
-    const formattedAccounts = profiles.map((p) => {
+    const formattedAccounts = (profiles || []).map((p: any) => {
       const settings = p.settings || {};
-      const userLines = lines.filter((l) => l.user_id === p.id);
+      const userLines = (lines || []).filter((l: any) => l.user_id === p.id);
       
       const mappedLines = userLines.map((row: any) => {
         const s = row.settings || {};
@@ -55,11 +55,11 @@ export async function GET() {
         };
       });
 
-      const totalCalls30 = userLines.reduce((acc) => {
+      const totalCalls30 = userLines.reduce((acc: number) => {
         return acc + 10; 
       }, 0);
 
-      const totalMinutesUsed = userLines.reduce((acc, current) => {
+      const totalMinutesUsed = userLines.reduce((acc: number, current: any) => {
         const s = current.settings || {};
         return acc + (s.minutesUsed || 0);
       }, 0);
@@ -77,7 +77,7 @@ export async function GET() {
         city: settings.billingAddr ? settings.billingAddr.split(",")[1]?.trim() || "San Francisco" : "San Francisco",
         area: "415",
         numbers: userLines.length,
-        contacts: userLines.reduce((acc, l) => acc + (l.contacts || []).length, 0),
+        contacts: userLines.reduce((acc: number, l: any) => acc + (l.contacts || []).length, 0),
         calls30: totalCalls30 || 5,
         connect: 95.0,
         vmRate: 5.0,
