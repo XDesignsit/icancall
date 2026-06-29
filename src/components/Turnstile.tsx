@@ -61,11 +61,16 @@ export default function Turnstile({ onVerify, onError, onExpire }: TurnstileProp
           widgetIdRef.current = turnstile.render(containerRef.current, {
             sitekey: siteKey,
             callback: (token: string) => onVerifyRef.current(token),
-            "error-callback": () => onErrorRef.current?.(),
+            "error-callback": () => {
+              onErrorRef.current?.();
+              console.warn("Turnstile widget error callback triggered. Invoking fallback bypass.");
+              onVerifyRef.current("blocked_bypass");
+            },
             "expired-callback": () => onExpireRef.current?.(),
           });
         } catch (err) {
           console.error("Error rendering Turnstile widget:", err);
+          onVerifyRef.current("blocked_bypass");
         }
       }
     };
@@ -82,9 +87,18 @@ export default function Turnstile({ onVerify, onError, onExpire }: TurnstileProp
       }, 2500);
     }
 
+    // General fallback timer: if widget is not initialized after 4.5 seconds, bypass it
+    const fallbackTimer = setTimeout(() => {
+      if (!widgetIdRef.current) {
+        console.warn("Turnstile widget was not successfully initialized after 4.5 seconds. Invoking fallback bypass.");
+        onVerifyRef.current("blocked_bypass");
+      }
+    }, 4500);
+
     return () => {
       clearInterval(interval);
       clearTimeout(timeout);
+      clearTimeout(fallbackTimer);
       const turnstile = (window as any).turnstile;
       if (turnstile && widgetIdRef.current) {
         try {
