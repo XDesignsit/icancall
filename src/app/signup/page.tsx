@@ -603,13 +603,21 @@ function AccountStep({ data, set, onNext, onBack, t, lang }: { data: OnboardingD
   };
   const errCaptchaText = captchaErrors[lang] || captchaErrors.en;
   const isGoogle = a.password === "google_oauth_bypass";
+  const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || "1x00000000000000000000AA";
+  const isDummyCaptcha = siteKey === "1x00000000000000000000AA";
+  const isProductionDomain = typeof window !== "undefined" && (
+    window.location.hostname === "icancall.co" ||
+    window.location.hostname === "www.icancall.co" ||
+    window.location.hostname === "app.icancall.co"
+  );
+  const captchaBypass = isGoogle || isDummyCaptcha || !isProductionDomain;
 
   const errs = {
     name: a.name.trim().length < 2 ? t.onboarding.errName : "",
     email: !validEmail(a.email) ? t.onboarding.errEmail : "",
     password: (a.password || "").length < 8 ? t.onboarding.errPassword : "",
     sms: "",
-    captcha: (!isGoogle && !a.captchaToken) ? errCaptchaText : "",
+    captcha: (!captchaBypass && !a.captchaToken) ? errCaptchaText : "",
   };
   const valid = !errs.name && !errs.email && !errs.password && !errs.captcha;
   const upd = (k: string, v: string) => set({ account: { ...a, [k]: v } });

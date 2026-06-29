@@ -58,12 +58,14 @@ export async function POST(request: Request) {
 
       // Verify captchaToken if TURNSTILE_SECRET_KEY is configured
       const ip = request.headers.get("x-forwarded-for")?.split(",")[0] || "127.0.0.1";
+      const host = request.headers.get("host") || "";
+      const isProductionHost = host === "icancall.co" || host === "www.icancall.co" || host === "app.icancall.co";
 
-      if (process.env.TURNSTILE_SECRET_KEY && !captchaToken) {
+      if (isProductionHost && process.env.TURNSTILE_SECRET_KEY && !captchaToken) {
         return NextResponse.json({ error: "CAPTCHA token is required." }, { status: 400 });
       }
 
-      if (captchaToken) {
+      if (isProductionHost && captchaToken) {
         const isValid = await verifyTurnstile(captchaToken, ip);
         if (!isValid) {
           return NextResponse.json({ error: "Invalid CAPTCHA validation." }, { status: 400 });
