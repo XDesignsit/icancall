@@ -40,11 +40,13 @@ export default function Turnstile({ onVerify, onError, onExpire }: TurnstileProp
 
     // 2. Poll/wait until turnstile is available in global scope, then render
     let interval: NodeJS.Timeout;
+    let timeout: NodeJS.Timeout;
     
     const initialize = () => {
       const turnstile = (window as any).turnstile;
       if (turnstile && containerRef.current) {
         clearInterval(interval);
+        clearTimeout(timeout);
         
         // Clean up previous widget if it exists
         if (widgetIdRef.current) {
@@ -72,10 +74,17 @@ export default function Turnstile({ onVerify, onError, onExpire }: TurnstileProp
       initialize();
     } else {
       interval = setInterval(initialize, 100);
+      // Auto-bypass if Turnstile is blocked by adblockers after 2.5 seconds
+      timeout = setTimeout(() => {
+        clearInterval(interval);
+        console.warn("Turnstile script failed to load (possibly blocked by content blocker). Invoking fallback bypass.");
+        onVerifyRef.current("blocked_bypass");
+      }, 2500);
     }
 
     return () => {
       clearInterval(interval);
+      clearTimeout(timeout);
       const turnstile = (window as any).turnstile;
       if (turnstile && widgetIdRef.current) {
         try {
