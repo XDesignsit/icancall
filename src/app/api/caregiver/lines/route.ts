@@ -100,8 +100,6 @@ export async function POST(request: Request) {
       };
     });
 
-    console.log("ROWS TO UPSERT:", JSON.stringify(rows, null, 2));
-
     // 2. Upsert the lines
     const { data: updatedLines, error: upsertError } = await supabase
       .from("phone_lines")
