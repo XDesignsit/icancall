@@ -602,6 +602,7 @@ function AccountStep({ data, set, onNext, onBack, t, lang }: { data: OnboardingD
     ko: "보안 검사를 완료하십시오."
   };
   const errCaptchaText = captchaErrors[lang] || captchaErrors.en;
+  const isGoogle = a.password === "google_oauth_bypass";
 
   const errs = {
     name: a.name.trim().length < 2 ? t.onboarding.errName : "",
@@ -610,7 +611,6 @@ function AccountStep({ data, set, onNext, onBack, t, lang }: { data: OnboardingD
     sms: "",
     captcha: (!isGoogle && !a.captchaToken) ? errCaptchaText : "",
   };
-  const isGoogle = a.password === "google_oauth_bypass";
   const valid = !errs.name && !errs.email && !errs.password && !errs.captcha;
   const upd = (k: string, v: string) => set({ account: { ...a, [k]: v } });
   const show = (k: "name" | "email" | "password" | "sms" | "captcha") => {
