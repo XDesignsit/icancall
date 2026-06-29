@@ -936,7 +936,7 @@ function PaymentStep({ data, set, onNext, onBack, t, lang }: { data: OnboardingD
 
   const handleStartPayment = () => {
     // Generate checkout URL with plan query details and language code
-    const url = `/onboarding/creem-checkout?plan=${data.plan}&billing=${data.billing}&lang=${lang}`;
+    const url = `/signup/creem-checkout?plan=${data.plan}&billing=${data.billing}&lang=${lang}`;
     setCheckoutUrl(url);
     setModalOpen(true);
   };
