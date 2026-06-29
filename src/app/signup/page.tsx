@@ -588,27 +588,45 @@ function AccountStep({ data, set, onNext, onBack, t, lang }: { data: OnboardingD
   ];
   const s = STRENGTH[strength];
 
+  const captchaErrors: Record<string, string> = {
+    en: "Please complete the security check.",
+    es: "Por favor, complete la comprobación de seguridad.",
+    fr: "Veuillez effectuer le contrôle de sécurité.",
+    ja: "セキュリティチェックを完了してください。",
+    zh: "请完成安全检查。",
+    ar: "يرجى إكمال فحص الأمان.",
+    hi: "कृपया सुरक्षा जांच पूरी करें।",
+    pt: "Por favor, conclua a verificação de segurança.",
+    de: "Bitte füllen Sie die Sicherheitsprüfung aus.",
+    it: "Si prega di completare il controllo di sicurezza.",
+    ko: "보안 검사를 완료하십시오."
+  };
+  const errCaptchaText = captchaErrors[lang] || captchaErrors.en;
+
   const errs = {
     name: a.name.trim().length < 2 ? t.onboarding.errName : "",
     email: !validEmail(a.email) ? t.onboarding.errEmail : "",
     password: (a.password || "").length < 8 ? t.onboarding.errPassword : "",
     sms: "",
+    captcha: (!isGoogle && !a.captchaToken) ? errCaptchaText : "",
   };
   const isGoogle = a.password === "google_oauth_bypass";
-  const valid = !errs.name && !errs.email && !errs.password && (isGoogle || !!a.captchaToken);
+  const valid = !errs.name && !errs.email && !errs.password && !errs.captcha;
   const upd = (k: string, v: string) => set({ account: { ...a, [k]: v } });
-  const show = (k: "name" | "email" | "password" | "sms") => {
+  const show = (k: "name" | "email" | "password" | "sms" | "captcha") => {
     if (k === "sms") return smsTouched && errs.sms;
+    if (k === "captcha") return touched.captcha && errs.captcha;
     return touched[k] && errs[k];
   };
 
   const submit = () => {
     if (valid) onNext();
     else {
-      setTouched({ name: true, email: true, password: true });
+      setTouched({ name: true, email: true, password: true, captcha: true });
       setSmsTouched(true);
     }
   };
+
 
   const strengthLabel = STRENGTH_LABELS[lang] || STRENGTH_LABELS.en;
   const discObj = DISCLAIMERS[lang] || DISCLAIMERS.en;
@@ -693,16 +711,26 @@ function AccountStep({ data, set, onNext, onBack, t, lang }: { data: OnboardingD
       </div>
 
       {!isGoogle && (
-        <div style={{ display: "flex", justifyContent: "center", marginTop: 20, marginBottom: 20 }}>
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", marginTop: 20, marginBottom: 20 }}>
           <Turnstile
             onVerify={(token) => set({ account: { ...a, captchaToken: token } })}
             onError={() => set({ account: { ...a, captchaToken: undefined } })}
             onExpire={() => set({ account: { ...a, captchaToken: undefined } })}
           />
+          <div className={"field-err" + (show("captcha") ? " show" : "")} style={{ marginTop: 8 }}>{errs.captcha}</div>
         </div>
       )}
 
-      <StepNav onBack={onBack} onNext={submit} nextDisabled={!valid} t={t} />
+      <StepNav 
+        onBack={onBack} 
+        onNext={submit} 
+        nextDisabled={
+          (touched.name && !!errs.name) || 
+          (touched.email && !!errs.email) || 
+          (touched.password && !!errs.password)
+        } 
+        t={t} 
+      />
     </div>
   );
 }
