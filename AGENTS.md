@@ -23,4 +23,9 @@ This version has breaking changes — APIs, conventions, and file structure may 
   1. **Audit API Usage**: Always search the codebase first for HTML5 browser APIs and hardware features (e.g., searching for `getUserMedia`, `navigator.geolocation`, `payment`, `usb`) to identify what capabilities the application genuinely requires.
   2. **Tailor Policies**: Never use empty allowlists `()` for active browser features. For instance, since the dashboard uses microphone recording, configure `microphone=(self)` to preserve local audio functionality while restricting unused capabilities like `camera=()`.
 
+## CAPTCHA & Turnstile Implementation Guidelines
+- **Stable CAPTCHA Callbacks in React**: Always store CAPTCHA callback props (`onVerify`, `onError`, `onExpire`) in mutable refs (`useRef`) and invoke them via the ref. Do NOT pass callbacks directly into the `useEffect` dependency array. This prevents the widget from constantly re-rendering and losing its token when parent states update on keystrokes.
+- **Paid Flow CAPTCHA Redundancy**: Avoid forcing blocking CAPTCHA verifications on signup/onboarding forms that require a successful paid checkout (e.g., Stripe, Creem, PayPal). Paid checkouts are naturally bot-proof, so CAPTCHA adds redundant friction.
+- **Fail-Open Fallback**: If a CAPTCHA is required, always implement a fail-open loading fallback (e.g., a 4.5-second mount timeout) and catch rendering/error callbacks to automatically trigger a bypass token (`blocked_bypass`). This ensures real users with adblockers, strict privacy firewalls, or testing on non-whitelisted staging/preview domains are never blocked.
+
 
