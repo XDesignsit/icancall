@@ -14,6 +14,16 @@ export default function Turnstile({ onVerify, onError, onExpire }: TurnstileProp
 
   const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || "1x00000000000000000000AA";
 
+  const onVerifyRef = useRef(onVerify);
+  const onErrorRef = useRef(onError);
+  const onExpireRef = useRef(onExpire);
+
+  useEffect(() => {
+    onVerifyRef.current = onVerify;
+    onErrorRef.current = onError;
+    onExpireRef.current = onExpire;
+  });
+
   useEffect(() => {
     // 1. Ensure the script is loaded
     const scriptId = "cloudflare-turnstile-script";
@@ -48,9 +58,9 @@ export default function Turnstile({ onVerify, onError, onExpire }: TurnstileProp
         try {
           widgetIdRef.current = turnstile.render(containerRef.current, {
             sitekey: siteKey,
-            callback: onVerify,
-            "error-callback": onError,
-            "expired-callback": onExpire,
+            callback: (token: string) => onVerifyRef.current(token),
+            "error-callback": () => onErrorRef.current?.(),
+            "expired-callback": () => onExpireRef.current?.(),
           });
         } catch (err) {
           console.error("Error rendering Turnstile widget:", err);
@@ -75,7 +85,7 @@ export default function Turnstile({ onVerify, onError, onExpire }: TurnstileProp
         }
       }
     };
-  }, [siteKey, onVerify, onError, onExpire]);
+  }, [siteKey]);
 
   return <div ref={containerRef} className="cf-turnstile" />;
 }
