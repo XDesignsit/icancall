@@ -95,93 +95,135 @@ class MockSupabaseClient {
       db[table] = [];
     }
 
-    let currentData = [...db[table]];
+    let action: 'select' | 'insert' | 'update' | 'upsert' | 'delete' = 'select';
+    let actionPayload: any = null;
+    const filters: { type: 'eq' | 'not'; column: string; value: any; operator?: string }[] = [];
 
     const builder = {
       select: (columns: string = '*') => {
-        return builder;
-      },
-      eq: (column: string, value: any) => {
-        currentData = currentData.filter((item: any) => item[column] === value);
-        return builder;
-      },
-      not: (column: string, operator: string, value: string) => {
-        if (operator === 'in') {
-          const ids = value.replace(/[()']/g, '').split(',').map(s => s.trim());
-          currentData = currentData.filter((item: any) => !ids.includes(item[column]));
+        if (action !== 'insert' && action !== 'update' && action !== 'upsert' && action !== 'delete') {
+          action = 'select';
         }
         return builder;
       },
-      maybeSingle: async () => {
-        return { data: currentData[0] || null, error: null };
-      },
-      single: async () => {
-        return { data: currentData[0] || null, error: currentData[0] ? null : new Error("No row found") };
-      },
-      insert: async (rowOrRows: any) => {
-        const rows = Array.isArray(rowOrRows) ? rowOrRows : [rowOrRows];
-        const added: any[] = [];
-        rows.forEach((r: any) => {
-          const newRow = { ...r };
-          if (!newRow.id) {
-            newRow.id = `mock-row-${Math.random().toString(36).substring(2, 11)}`;
-          }
-          db[table].push(newRow);
-          added.push(newRow);
-        });
-        this.writeDb(db);
-        currentData = added;
+      eq: (column: string, value: any) => {
+        filters.push({ type: 'eq', column, value });
         return builder;
       },
-      update: async (updates: any) => {
-        const updatedIds = currentData.map((item: any) => item.id);
-        db[table] = db[table].map((item: any) => {
-          if (updatedIds.includes(item.id)) {
-            const updatedItem = { ...item, ...updates, updated_at: new Date().toISOString() };
-            currentData = currentData.map((cd: any) => cd.id === item.id ? updatedItem : cd);
-            return updatedItem;
-          }
-          return item;
-        });
-        this.writeDb(db);
+      not: (column: string, operator: string, value: string) => {
+        filters.push({ type: 'not', column, value, operator });
         return builder;
       },
-      upsert: async (rowOrRows: any) => {
-        const rows = Array.isArray(rowOrRows) ? rowOrRows : [rowOrRows];
-        const upserted: any[] = [];
-        rows.forEach((r: any) => {
-          let existingIdx = -1;
-          if (r.id) {
-            existingIdx = db[table].findIndex((item: any) => item.id === r.id);
-          } else if (r.user_id && r.number) {
-            existingIdx = db[table].findIndex((item: any) => item.user_id === r.user_id && item.number === r.number);
-          }
-
-          const targetRow = { ...r };
-          if (!targetRow.id) {
-            targetRow.id = `mock-row-${Math.random().toString(36).substring(2, 11)}`;
-          }
-
-          if (existingIdx > -1) {
-            db[table][existingIdx] = { ...db[table][existingIdx], ...targetRow };
-            upserted.push(db[table][existingIdx]);
-          } else {
-            db[table].push(targetRow);
-            upserted.push(targetRow);
-          }
-        });
-        this.writeDb(db);
-        currentData = upserted;
+      insert: (rowOrRows: any) => {
+        action = 'insert';
+        actionPayload = rowOrRows;
+        return builder;
+      },
+      update: (updates: any) => {
+        action = 'update';
+        actionPayload = updates;
+        return builder;
+      },
+      upsert: (rowOrRows: any) => {
+        action = 'upsert';
+        actionPayload = rowOrRows;
         return builder;
       },
       delete: () => {
-        const idsToDelete = currentData.map((item: any) => item.id);
-        db[table] = db[table].filter((item: any) => !idsToDelete.includes(item.id));
-        this.writeDb(db);
+        action = 'delete';
         return builder;
       },
+
+      execute: () => {
+        let data = [...db[table]];
+
+        // 1. Apply filters
+        filters.forEach(f => {
+          if (f.type === 'eq') {
+            data = data.filter((item: any) => item[f.column] === f.value);
+          } else if (f.type === 'not' && f.operator === 'in') {
+            const ids = f.value.replace(/[()']/g, '').split(',').map((s: string) => s.trim());
+            data = data.filter((item: any) => !ids.includes(item[f.column]));
+          }
+        });
+
+        // 2. Perform action
+        if (action === 'insert') {
+          const rows = Array.isArray(actionPayload) ? actionPayload : [actionPayload];
+          const added: any[] = [];
+          rows.forEach((r: any) => {
+            const newRow = { ...r };
+            if (!newRow.id) {
+              newRow.id = `mock-row-${Math.random().toString(36).substring(2, 11)}`;
+            }
+            db[table].push(newRow);
+            added.push(newRow);
+          });
+          this.writeDb(db);
+          return { data: added, error: null };
+        } 
+        
+        if (action === 'update') {
+          const matchingIds = data.map((item: any) => item.id);
+          db[table] = db[table].map((item: any) => {
+            if (matchingIds.includes(item.id)) {
+              return { ...item, ...actionPayload, updated_at: new Date().toISOString() };
+            }
+            return item;
+          });
+          this.writeDb(db);
+          const updated = db[table].filter((item: any) => matchingIds.includes(item.id));
+          return { data: updated, error: null };
+        }
+
+        if (action === 'upsert') {
+          const rows = Array.isArray(actionPayload) ? actionPayload : [actionPayload];
+          const upserted: any[] = [];
+          rows.forEach((r: any) => {
+            let existingIdx = -1;
+            if (r.id) {
+              existingIdx = db[table].findIndex((item: any) => item.id === r.id);
+            } else if (r.user_id && r.number) {
+              existingIdx = db[table].findIndex((item: any) => item.user_id === r.user_id && item.number === r.number);
+            }
+
+            const targetRow = { ...r };
+            if (!targetRow.id) {
+              targetRow.id = `mock-row-${Math.random().toString(36).substring(2, 11)}`;
+            }
+
+            if (existingIdx > -1) {
+              db[table][existingIdx] = { ...db[table][existingIdx], ...targetRow };
+              upserted.push(db[table][existingIdx]);
+            } else {
+              db[table].push(targetRow);
+              upserted.push(targetRow);
+            }
+          });
+          this.writeDb(db);
+          return { data: upserted, error: null };
+        }
+
+        if (action === 'delete') {
+          const matchingIds = data.map((item: any) => item.id);
+          db[table] = db[table].filter((item: any) => !matchingIds.includes(item.id));
+          this.writeDb(db);
+          return { data, error: null };
+        }
+
+        return { data, error: null };
+      },
+
+      maybeSingle: async () => {
+        const { data, error } = builder.execute();
+        return { data: data ? data[0] || null : null, error };
+      },
+      single: async () => {
+        const { data, error } = builder.execute();
+        return { data: data ? data[0] || null : null, error: data && data[0] ? null : (error || new Error("No row found")) };
+      },
       then: (onfulfilled?: (value: any) => any) => {
-        const promise = Promise.resolve({ data: currentData, error: null });
+        const promise = Promise.resolve(builder.execute());
         return promise.then(onfulfilled);
       }
     };

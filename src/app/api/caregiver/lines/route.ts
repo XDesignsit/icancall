@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { verifySession } from "@/lib/session";
 import { supabase } from "@/lib/supabase";
+import { invalidateCachedAccount } from "@/lib/db";
 
 async function getAuthenticatedUserId() {
   const cookieStore = await cookies();
@@ -99,6 +100,8 @@ export async function POST(request: Request) {
       };
     });
 
+    console.log("ROWS TO UPSERT:", JSON.stringify(rows, null, 2));
+
     // 2. Upsert the lines
     const { data: updatedLines, error: upsertError } = await supabase
       .from("phone_lines")
@@ -109,6 +112,13 @@ export async function POST(request: Request) {
       console.error("Failed to upsert phone lines:", upsertError);
       return NextResponse.json({ error: "Failed to save phone lines" }, { status: 500 });
     }
+
+    // Invalidate cached account details to reflect the updated settings immediately
+    (updatedLines || []).forEach((l: any) => {
+      if (l.number) {
+        invalidateCachedAccount(l.number);
+      }
+    });
 
     // 3. Delete any lines that were removed from the UI
     const activeIds = (updatedLines || []).map((l: any) => l.id);

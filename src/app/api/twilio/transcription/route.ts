@@ -39,6 +39,14 @@ export async function POST(request: Request) {
     if (toPhoneNumber) {
       const account = await findAccountByTwilioNumber(toPhoneNumber);
       if (account) {
+        // Check if Missed Call Notifications toggle is enabled
+        const lineSettings = account.line?.settings || {};
+        const notifMissed = lineSettings.notifMissed ?? true;
+        if (!notifMissed) {
+          console.log(`✉️ Voicemail email notification skipped for call ${callSid} to ${account.email} because Missed Call Notifications toggle is disabled.`);
+          return NextResponse.json({ success: true, message: 'Voicemail alert skipped (disabled in settings)' });
+        }
+
         // Set email recipient to caregiver's dynamic profile email
         alertRecipient = account.notifyEmail || account.email || alertRecipient;
 
