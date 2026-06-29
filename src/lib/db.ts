@@ -18,9 +18,45 @@ export interface Account {
   };
 }
 
+interface CacheEntry<T> {
+  data: T;
+  expiry: number;
+}
+
+const accountCache = new Map<string, CacheEntry<Account | undefined>>();
+const CACHE_TTL_MS = 60000; // Cache TTL set to 60 seconds
+
+function getCachedAccount(phoneNumber: string): Account | undefined | null {
+  const entry = accountCache.get(phoneNumber);
+  if (entry && entry.expiry > Date.now()) {
+    return entry.data;
+  }
+  if (entry) {
+    accountCache.delete(phoneNumber);
+  }
+  return null; // Cache miss
+}
+
+function setCachedAccount(phoneNumber: string, account: Account | undefined) {
+  accountCache.set(phoneNumber, {
+    data: account,
+    expiry: Date.now() + CACHE_TTL_MS,
+  });
+}
+
+export function invalidateCachedAccount(phoneNumber: string) {
+  const normalized = phoneNumber.replace(/\s+/g, '');
+  accountCache.delete(normalized);
+}
+
 // Find an account (caregiver profile) and line details by the dialed Twilio phone number
 export async function findAccountByTwilioNumber(phoneNumber: string): Promise<Account | undefined> {
   const normalizedSearch = phoneNumber.replace(/\s+/g, '');
+
+  const cached = getCachedAccount(normalizedSearch);
+  if (cached !== null) {
+    return cached;
+  }
 
   try {
     // 1. Find the phone line row
@@ -32,6 +68,7 @@ export async function findAccountByTwilioNumber(phoneNumber: string): Promise<Ac
 
     if (lineError || !line) {
       console.warn('Failed to query phone line from Supabase or line not found:', lineError || 'No match');
+      setCachedAccount(normalizedSearch, undefined);
       return undefined;
     }
 
@@ -44,6 +81,7 @@ export async function findAccountByTwilioNumber(phoneNumber: string): Promise<Ac
 
     if (profileError || !profile) {
       console.warn('Failed to query profile from Supabase or profile not found:', profileError || 'No match');
+      setCachedAccount(normalizedSearch, undefined);
       return undefined;
     }
 
@@ -55,7 +93,7 @@ export async function findAccountByTwilioNumber(phoneNumber: string): Promise<Ac
 
     const lineSettings = line.settings || {};
 
-    return {
+    const account: Account = {
       id: profile.id,
       name: profile.name || 'Caregiver',
       email: profile.email,
@@ -72,6 +110,9 @@ export async function findAccountByTwilioNumber(phoneNumber: string): Promise<Ac
         settings: lineSettings.extraSettings || {},
       }
     };
+
+    setCachedAccount(normalizedSearch, account);
+    return account;
   } catch (err) {
     console.error('findAccountByTwilioNumber error:', err);
     return undefined;
@@ -80,6 +121,10 @@ export async function findAccountByTwilioNumber(phoneNumber: string): Promise<Ac
 
 // Deduct minutes consumed by a call
 export async function deductMinutes(twilioPhoneNumber: string, minutes: number): Promise<Account | null> {
+  const normalizedSearch = twilioPhoneNumber.replace(/\s+/g, '');
+  // Invalidate any existing cache entry before performing database updates to prevent stale reads
+  invalidateCachedAccount(normalizedSearch);
+
   try {
     const account = await findAccountByTwilioNumber(twilioPhoneNumber);
     if (!account) return null;
@@ -112,10 +157,14 @@ export async function deductMinutes(twilioPhoneNumber: string, minutes: number):
       return null;
     }
 
-    return {
+    const updatedAccount: Account = {
       ...account,
       used_minutes: newUsed,
     };
+
+    // Cache the updated account state immediately
+    setCachedAccount(normalizedSearch, updatedAccount);
+    return updatedAccount;
   } catch (err) {
     console.error('deductMinutes error:', err);
     return null;
