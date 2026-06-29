@@ -27,8 +27,18 @@ configs = [
         'targets': ['public/caregivers.html', 'iCanCall Caregivers Landing (standalone).html']
     }
 ]
+def get_concord_project_id():
+    env_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), '.env.local')
+    if os.path.exists(env_path):
+        with open(env_path, 'r', encoding='utf-8') as f:
+            for line in f:
+                if line.strip().startswith('NEXT_PUBLIC_CONCORD_PROJECT_ID='):
+                    return line.strip().split('=', 1)[1].strip()
+    return None
 
 def repack_all():
+    concord_id = get_concord_project_id()
+    
     for config in configs:
         name = config['name']
         js_uuid = config['js_uuid']
@@ -48,6 +58,15 @@ def repack_all():
         # 2. Read the template HTML
         with open(template_file, 'r', encoding='utf-8') as f:
             template_html = f.read()
+
+        # Inject/remove Concord Cookie Consent script
+        concord_pattern = r'<!-- CONCORD_COOKIE_CONSENT_START -->[\s\S]*?<!-- CONCORD_COOKIE_CONSENT_END -->'
+        if concord_id and concord_id != 'YOUR_CONCORD_PROJECT_ID' and concord_id != '':
+            replacement = f'<script src="https://api.concord.tech/site-v1/{concord_id}/site-client"></script>'
+            template_html = re.sub(concord_pattern, replacement, template_html)
+        else:
+            template_html = re.sub(concord_pattern, '', template_html)
+
 
         for target in targets:
             if not os.path.exists(target):

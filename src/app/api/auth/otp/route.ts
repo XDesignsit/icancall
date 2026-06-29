@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
 import { signSession } from "@/lib/session";
 import { supabase } from "@/lib/supabase";
+import { verifyTurnstile } from "@/lib/rateLimit";
 
 export async function POST(request: Request) {
   try {
-    const { action, email, token } = await request.json();
+    const { action, email, token, captchaToken } = await request.json();
 
     if (!email) {
       return NextResponse.json({ error: "Email is required" }, { status: 400 });
@@ -23,10 +24,25 @@ export async function POST(request: Request) {
         return NextResponse.json({ success: true, message: "Demo OTP simulated successfully" });
       }
 
+      const ip = request.headers.get("x-forwarded-for")?.split(",")[0] || "127.0.0.1";
+
+      // Verify captchaToken if TURNSTILE_SECRET_KEY is configured
+      if (process.env.TURNSTILE_SECRET_KEY && !captchaToken) {
+        return NextResponse.json({ error: "CAPTCHA token is required." }, { status: 400 });
+      }
+
+      if (captchaToken) {
+        const isValid = await verifyTurnstile(captchaToken, ip);
+        if (!isValid) {
+          return NextResponse.json({ error: "Invalid CAPTCHA validation." }, { status: 400 });
+        }
+      }
+
       const { error: otpError } = await supabase.auth.signInWithOtp({
         email,
         options: {
           shouldCreateUser: true, // Auto-create user if they don't exist yet
+          captchaToken: captchaToken || undefined,
         },
       });
 

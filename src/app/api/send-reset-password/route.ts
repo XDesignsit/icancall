@@ -27,6 +27,11 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Email is required' }, { status: 400, headers });
     }
 
+    // Verify captchaToken if TURNSTILE_SECRET_KEY is configured
+    if (process.env.TURNSTILE_SECRET_KEY && !captchaToken) {
+      return NextResponse.json({ error: 'CAPTCHA token is required.' }, { status: 400, headers });
+    }
+
     if (captchaToken) {
       const isValidCaptcha = await verifyTurnstile(captchaToken, ip);
       if (!isValidCaptcha) {

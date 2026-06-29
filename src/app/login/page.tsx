@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import Turnstile from "@/components/Turnstile";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -10,6 +11,9 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+
+  const isDemo = email === "support@icancall.co" || email === "admin@icancall.co";
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -29,7 +33,7 @@ export default function LoginPage() {
       const res = await fetch("/api/auth/otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "send", email }),
+        body: JSON.stringify({ action: "send", email, captchaToken }),
       });
 
       const data = await res.json();
@@ -198,9 +202,17 @@ export default function LoginPage() {
               />
             </div>
 
+            <div style={{ display: "flex", justifyContent: "center", marginTop: 4, marginBottom: 4 }}>
+              <Turnstile
+                onVerify={(token) => setCaptchaToken(token)}
+                onError={() => setCaptchaToken(null)}
+                onExpire={() => setCaptchaToken(null)}
+              />
+            </div>
+
             <button
               type="submit"
-              disabled={isLoading}
+              disabled={isLoading || (!captchaToken && !isDemo)}
               style={{
                 width: "100%",
                 padding: "12px",
@@ -208,12 +220,12 @@ export default function LoginPage() {
                 fontWeight: 600,
                 borderRadius: 8,
                 border: "none",
-                background: "oklch(0.58 0.115 232)",
-                color: "#ffffff",
-                cursor: "pointer",
+                background: (isLoading || (!captchaToken && !isDemo)) ? "oklch(0.85 0.01 220)" : "oklch(0.58 0.115 232)",
+                color: (isLoading || (!captchaToken && !isDemo)) ? "oklch(0.6 0.01 220)" : "#ffffff",
+                cursor: (isLoading || (!captchaToken && !isDemo)) ? "not-allowed" : "pointer",
                 marginTop: 6,
-                boxShadow: "0 4px 10px oklch(0.58 0.115 232 / 0.2)",
-                transition: "background 0.15s",
+                boxShadow: (isLoading || (!captchaToken && !isDemo)) ? "none" : "0 4px 10px oklch(0.58 0.115 232 / 0.2)",
+                transition: "background 0.15s, color 0.15s, box-shadow 0.15s",
               }}
             >
               {isLoading ? "Sending PIN..." : "Send Login PIN"}

@@ -2,10 +2,11 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { supabase } from "@/lib/supabase";
 import { verifySession } from "@/lib/session";
+import { verifyTurnstile } from "@/lib/rateLimit";
 
 export async function POST(request: Request) {
   try {
-    const { email, password, name, preferredName, numbers } = await request.json();
+    const { email, password, name, preferredName, numbers, captchaToken } = await request.json();
 
     // 1. Check if user already has an active session cookie (e.g. logged in via Google)
     const cookieStore = await cookies();
@@ -55,10 +56,27 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: "Password must be at least 6 characters." }, { status: 400 });
       }
 
+      // Verify captchaToken if TURNSTILE_SECRET_KEY is configured
+      const ip = request.headers.get("x-forwarded-for")?.split(",")[0] || "127.0.0.1";
+
+      if (process.env.TURNSTILE_SECRET_KEY && !captchaToken) {
+        return NextResponse.json({ error: "CAPTCHA token is required." }, { status: 400 });
+      }
+
+      if (captchaToken) {
+        const isValid = await verifyTurnstile(captchaToken, ip);
+        if (!isValid) {
+          return NextResponse.json({ error: "Invalid CAPTCHA validation." }, { status: 400 });
+        }
+      }
+
       // Sign up the user in Supabase Auth
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
         password,
+        options: {
+          captchaToken: captchaToken || undefined,
+        },
       });
 
       if (authError || !authData.user) {

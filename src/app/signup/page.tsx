@@ -4,6 +4,7 @@ import React, { useState, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { translations } from "@/lib/translations";
+import Turnstile from "@/components/Turnstile";
 
 /* ============ TYPES ============ */
 type Plan = "essential" | "pro";
@@ -13,6 +14,7 @@ interface AccountData {
   name: string;
   email: string;
   password?: string;
+  captchaToken?: string;
 }
 
 interface NumberData {
@@ -592,7 +594,8 @@ function AccountStep({ data, set, onNext, onBack, t, lang }: { data: OnboardingD
     password: (a.password || "").length < 8 ? t.onboarding.errPassword : "",
     sms: "",
   };
-  const valid = !errs.name && !errs.email && !errs.password;
+  const isGoogle = a.password === "google_oauth_bypass";
+  const valid = !errs.name && !errs.email && !errs.password && (isGoogle || !!a.captchaToken);
   const upd = (k: string, v: string) => set({ account: { ...a, [k]: v } });
   const show = (k: "name" | "email" | "password" | "sms") => {
     if (k === "sms") return smsTouched && errs.sms;
@@ -689,7 +692,17 @@ function AccountStep({ data, set, onNext, onBack, t, lang }: { data: OnboardingD
         <div className={"field-err" + (show("sms") ? " show" : "")} style={{ marginLeft: 26, marginTop: 4 }}>{errs.sms}</div>
       </div>
 
-      <StepNav onBack={onBack} onNext={submit} t={t} />
+      {!isGoogle && (
+        <div style={{ display: "flex", justifyContent: "center", marginTop: 20, marginBottom: 20 }}>
+          <Turnstile
+            onVerify={(token) => set({ account: { ...a, captchaToken: token } })}
+            onError={() => set({ account: { ...a, captchaToken: undefined } })}
+            onExpire={() => set({ account: { ...a, captchaToken: undefined } })}
+          />
+        </div>
+      )}
+
+      <StepNav onBack={onBack} onNext={submit} nextDisabled={!valid} t={t} />
     </div>
   );
 }
@@ -912,6 +925,7 @@ function PaymentStep({ data, set, onNext, onBack, t, lang }: { data: OnboardingD
               password: data.account.password,
               name: data.account.name,
               numbers: data.numbers,
+              captchaToken: data.account.captchaToken,
             }),
           });
           if (!res.ok) {

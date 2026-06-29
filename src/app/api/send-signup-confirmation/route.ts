@@ -29,6 +29,10 @@ export async function POST(request: Request) {
     }
 
     // Verify Turnstile CAPTCHA token if it is provided or required
+    if (process.env.TURNSTILE_SECRET_KEY && !captchaToken) {
+      return NextResponse.json({ error: 'CAPTCHA token is required.' }, { status: 400, headers });
+    }
+
     if (captchaToken) {
       const isValidCaptcha = await verifyTurnstile(captchaToken, ip);
       if (!isValidCaptcha) {
