@@ -47,7 +47,6 @@ export async function POST(req: NextRequest) {
       product_id: productId,
       success_url: successUrl,
     };
-    if (email) body.customer_email = email;
     if (quantity && quantity > 1) body.units = quantity;
 
     const res = await fetch(`${CREEM_API}/checkouts`, {
