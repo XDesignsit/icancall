@@ -839,7 +839,7 @@ function AccountStep({ data, set, onNext, onBack, t, lang }: { data: OnboardingD
                   disabled={emailLoading} />
               </div>
               {!smsConsent && (
-                <button type="button" className="btn btn-soft btn-sm" style={{ whiteSpace: "nowrap", minWidth: 90 }}
+                <button type="button" className="btn btn-primary btn-sm" style={{ whiteSpace: "nowrap", minWidth: 90 }}
                   onClick={sendEmailCode} disabled={emailLoading || !validEmail(a.email)}>
                   {emailLoading && !emailCodeSent ? "…" : emailCodeSent ? t.onboarding.btnResend : t.onboarding.btnSendCode}
                 </button>
@@ -941,7 +941,7 @@ function AccountStep({ data, set, onNext, onBack, t, lang }: { data: OnboardingD
                     disabled={phoneLoading}
                   />
                 </div>
-                <button type="button" className="btn btn-soft btn-sm" style={{ whiteSpace: "nowrap", minWidth: 90 }}
+                <button type="button" className="btn btn-primary btn-sm" style={{ whiteSpace: "nowrap", minWidth: 90 }}
                   onClick={sendPhoneCode} disabled={phoneLoading || !phoneValid}>
                   {phoneLoading && !phoneCodeSent ? "…" : phoneCodeSent ? t.onboarding.btnResend : t.onboarding.btnSendCode}
                 </button>
