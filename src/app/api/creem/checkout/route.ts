@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const CREEM_API = "https://api.creem.io/v1";
+const CREEM_API = process.env.CREEM_API_KEY?.startsWith("creem_test_")
+  ? "https://test-api.creem.io/v1"
+  : "https://api.creem.io/v1";
 
 const PLAN_PRODUCT_IDS: Record<string, Record<string, string>> = {
   essential: {

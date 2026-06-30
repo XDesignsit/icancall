@@ -3,7 +3,9 @@ import { cookies } from "next/headers";
 import { verifySession } from "@/lib/session";
 import { supabase } from "@/lib/supabase";
 
-const CREEM_API = "https://api.creem.io/v1";
+const CREEM_API = process.env.CREEM_API_KEY?.startsWith("creem_test_")
+  ? "https://test-api.creem.io/v1"
+  : "https://api.creem.io/v1";
 
 export async function POST(req: NextRequest) {
   // Verify the logged-in user
