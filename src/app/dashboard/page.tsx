@@ -3905,7 +3905,9 @@ export function AccountView({
 
           {(() => {
             const ad = a.addons || {};
-            const purchased = (ad.minuteBlocks || 0) * 30;
+            const planBaseMinutes = a.plan === "pro" ? 60 : 30;
+            const addonMinutes = (ad.minuteBlocks || 0) * 30;
+            const purchased = planBaseMinutes + addonMinutes;
             const rollover = ad.rolloverMin || 0;
             const total = purchased + rollover;
             const used = Math.min(ad.usedMin || 0, total);
@@ -3957,7 +3959,7 @@ export function AccountView({
                             <b>{purchased} {lang === "es" ? "min" : lang === "fr" ? "min" : lang === "ja" ? "分" : lang === "zh" ? "分钟" : lang === "ar" ? "دقيقة" : lang === "hi" ? "मिनट" : lang === "pt" ? "min" : lang === "de" ? "Min" : lang === "it" ? "min" : lang === "ko" ? "분" : "min"}</b>
                             <span>
                               {ext.thisCycleTopup}
-                              {ad.minuteBlocks ? ` · ${ad.minuteBlocks} × 30 ${lang === "es" ? "min" : lang === "fr" ? "min" : lang === "ja" ? "分" : lang === "zh" ? "分钟" : lang === "ar" ? "دقيقة" : lang === "hi" ? "मिनट" : lang === "pt" ? "min" : lang === "de" ? "Min" : lang === "it" ? "min" : lang === "ko" ? "분" : "min"}` : ""}
+                              {` · ${planBaseMinutes} ${lang === "es" ? "min del plan" : lang === "fr" ? "min du forfait" : "plan min"}${ad.minuteBlocks ? ` + ${ad.minuteBlocks} × 30 ${lang === "es" ? "min adicionales" : lang === "fr" ? "min supplémentaires" : "add-on min"}` : ""}`}
                             </span>
                           </div>
                         </div>
