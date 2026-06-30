@@ -28,33 +28,27 @@ export async function POST(req: NextRequest) {
 
     let productId: string;
     let successUrl: string;
-    let cancelUrl: string;
 
     if (addon) {
-      // Add-on purchase from dashboard
       productId = ADDON_PRODUCT_IDS[addon];
       if (!productId) {
         return NextResponse.json({ error: "Invalid add-on type" }, { status: 400 });
       }
       successUrl = `${appUrl}/dashboard/addon-success?addon=${addon}&qty=${quantity || 1}`;
-      cancelUrl  = `${appUrl}/dashboard/addon-success?cancelled=1`;
     } else {
-      // Plan subscription from signup
       productId = PLAN_PRODUCT_IDS[plan]?.[billing];
       if (!productId) {
         return NextResponse.json({ error: "Invalid plan or billing cycle" }, { status: 400 });
       }
       successUrl = `${appUrl}/signup/creem-checkout?status=success`;
-      cancelUrl  = `${appUrl}/signup/creem-checkout?status=cancel`;
     }
 
     const body: Record<string, unknown> = {
       product_id: productId,
       success_url: successUrl,
-      cancel_url:  cancelUrl,
     };
     if (email) body.customer_email = email;
-    if (quantity && quantity > 1) body.quantity = quantity;
+    if (quantity && quantity > 1) body.units = quantity;
 
     const res = await fetch(`${CREEM_API}/checkouts`, {
       method: "POST",
