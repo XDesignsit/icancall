@@ -717,7 +717,7 @@ function AccountStep({ data, set, onNext, onBack, t, lang }: { data: OnboardingD
     setEmailApiErr("");
     setEmailSuccessMsg("");
     try {
-      const res = await fetch("/api/auth/otp", {
+      const res = await fetch("/api/auth/verify-email", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "send", email: a.email }),
@@ -742,10 +742,10 @@ function AccountStep({ data, set, onNext, onBack, t, lang }: { data: OnboardingD
     setEmailLoading(true);
     setEmailApiErr("");
     try {
-      const res = await fetch("/api/auth/otp", {
+      const res = await fetch("/api/auth/verify-email", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "verify", email: a.email, token: trimmed }),
+        body: JSON.stringify({ action: "verify", email: a.email, code: trimmed }),
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || "Verification failed.");
@@ -845,18 +845,16 @@ function AccountStep({ data, set, onNext, onBack, t, lang }: { data: OnboardingD
               </button>
             )}
             {emailSuccessMsg && <div style={{ fontSize: "0.82rem", color: "oklch(0.45 0.12 140)", marginTop: 4 }}>{emailSuccessMsg}</div>}
+            {emailApiErr && <div style={{ fontSize: "0.82rem", color: "var(--rose)", marginTop: 6 }}>{emailApiErr}</div>}
             {!smsConsent && emailCodeSent && (
-              <>
-                <OtpCodeRow
-                  value={emailOtp}
-                  onChange={(v) => { setEmailOtp(v); setEmailApiErr(""); }}
-                  onVerify={verifyEmailCode}
-                  loading={emailLoading}
-                  touched={emailCodeTouched}
-                  onBlur={() => setEmailCodeTouched(true)}
-                />
-                {emailApiErr && <div style={{ fontSize: "0.82rem", color: "var(--rose)", marginTop: 6 }}>{emailApiErr}</div>}
-              </>
+              <OtpCodeRow
+                value={emailOtp}
+                onChange={(v) => { setEmailOtp(v); setEmailApiErr(""); }}
+                onVerify={verifyEmailCode}
+                loading={emailLoading}
+                touched={emailCodeTouched}
+                onBlur={() => setEmailCodeTouched(true)}
+              />
             )}
           </>
         )}
@@ -946,18 +944,16 @@ function AccountStep({ data, set, onNext, onBack, t, lang }: { data: OnboardingD
               </div>
               <div className={"field-err" + (show("phone") ? " show" : "")}>{errs.phone}</div>
               {phoneSuccessMsg && <div style={{ fontSize: "0.82rem", color: "oklch(0.45 0.12 140)", marginTop: 4 }}>{phoneSuccessMsg}</div>}
+              {phoneApiErr && <div style={{ fontSize: "0.82rem", color: "var(--rose)", marginTop: 4 }}>{phoneApiErr}</div>}
               {phoneCodeSent && (
-                <>
-                  <OtpCodeRow
-                    value={phoneOtp}
-                    onChange={(v) => { setPhoneOtp(v); setPhoneApiErr(""); }}
-                    onVerify={verifyPhoneCode}
-                    loading={phoneLoading}
-                    touched={phoneCodeTouched}
-                    onBlur={() => setPhoneCodeTouched(true)}
-                  />
-                  {phoneApiErr && <div style={{ fontSize: "0.82rem", color: "var(--rose)", marginTop: 6 }}>{phoneApiErr}</div>}
-                </>
+                <OtpCodeRow
+                  value={phoneOtp}
+                  onChange={(v) => { setPhoneOtp(v); setPhoneApiErr(""); }}
+                  onVerify={verifyPhoneCode}
+                  loading={phoneLoading}
+                  touched={phoneCodeTouched}
+                  onBlur={() => setPhoneCodeTouched(true)}
+                />
               )}
             </>
           )}
