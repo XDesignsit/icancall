@@ -3150,7 +3150,12 @@ export function AccountView({
                         return;
                       }
 
-                      // Open Creem checkout for the first add-on (sequential popups if both)
+                      // Open popup immediately (must be synchronous within user gesture)
+                      const w = 520, h = 720;
+                      const left = Math.round(window.screenX + (window.outerWidth - w) / 2);
+                      const top  = Math.round(window.screenY + (window.outerHeight - h) / 2);
+                      const popup = window.open("about:blank", "creem_addon_checkout", `width=${w},height=${h},left=${left},top=${top},resizable=yes,scrollbars=yes`);
+
                       setAddonCheckoutLoading(true);
                       addonPendingAction.current = applyAddons;
 
@@ -3164,12 +3169,15 @@ export function AccountView({
                         if (!res.ok) throw new Error("checkout_failed");
                         const { checkoutUrl } = await res.json();
 
-                        const w = 520, h = 720;
-                        const left = Math.round(window.screenX + (window.outerWidth - w) / 2);
-                        const top  = Math.round(window.screenY + (window.outerHeight - h) / 2);
-                        window.open(checkoutUrl, "creem_addon_checkout", `width=${w},height=${h},left=${left},top=${top},resizable=yes,scrollbars=yes`);
+                        if (popup) {
+                          popup.location.href = checkoutUrl;
+                        } else {
+                          window.open(checkoutUrl, "_blank");
+                        }
                       } catch {
                         console.error("Failed to create add-on checkout");
+                        popup?.close();
+                        showToast("Could not start checkout. Please try again.");
                       } finally {
                         setAddonCheckoutLoading(false);
                       }

@@ -1171,6 +1171,12 @@ function PaymentStep({ data, set, onNext, onBack, t, lang }: { data: OnboardingD
   const [checkoutLoading, setCheckoutLoading] = useState(false);
 
   const handleStartPayment = async () => {
+    // Open popup immediately — must be synchronous within the user gesture
+    const w = 520, h = 720;
+    const left = Math.round(window.screenX + (window.outerWidth - w) / 2);
+    const top  = Math.round(window.screenY + (window.outerHeight - h) / 2);
+    const popup = window.open("about:blank", "creem_checkout", `width=${w},height=${h},left=${left},top=${top},resizable=yes,scrollbars=yes`);
+
     setCheckoutLoading(true);
     try {
       const res = await fetch("/api/creem/checkout", {
@@ -1181,14 +1187,15 @@ function PaymentStep({ data, set, onNext, onBack, t, lang }: { data: OnboardingD
       if (!res.ok) throw new Error("checkout_failed");
       const { checkoutUrl: url } = await res.json();
       setCheckoutUrl(url);
-      // Open Creem's hosted checkout in a centered popup
-      const w = 520, h = 720;
-      const left = Math.round(window.screenX + (window.outerWidth - w) / 2);
-      const top  = Math.round(window.screenY + (window.outerHeight - h) / 2);
-      window.open(url, "creem_checkout", `width=${w},height=${h},left=${left},top=${top},resizable=yes,scrollbars=yes`);
+      if (popup) {
+        popup.location.href = url;
+      } else {
+        window.open(url, "_blank");
+      }
       setModalOpen(true);
     } catch {
       console.error("Failed to create Creem checkout session");
+      popup?.close();
     } finally {
       setCheckoutLoading(false);
     }
