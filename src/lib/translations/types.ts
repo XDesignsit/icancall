@@ -158,7 +158,10 @@ export interface HomepageTranslations {
     placeholderCode: string;
     btnVerify: string;
     phoneVerified: string;
+    emailVerified: string;
     codeSent: string;
+    emailCodeSent: string;
+    btnChange: string;
     errPhone: string;
     errCode: string;
     errName: string;

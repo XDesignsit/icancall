@@ -17,6 +17,7 @@ interface AccountData {
   captchaToken?: string;
   smsPhone?: string;
   phoneVerified?: boolean;
+  emailVerified?: boolean;
 }
 
 interface NumberData {
@@ -582,12 +583,20 @@ function AccountStep({ data, set, onNext, onBack, t, lang }: { data: OnboardingD
 
   // Phone OTP state
   const [phoneTouched, setPhoneTouched] = useState(false);
-  const [codeSent, setCodeSent] = useState(false);
-  const [otpCode, setOtpCode] = useState("");
-  const [codeTouched, setCodeTouched] = useState(false);
+  const [phoneCodeSent, setPhoneCodeSent] = useState(false);
+  const [phoneOtp, setPhoneOtp] = useState("");
+  const [phoneCodeTouched, setPhoneCodeTouched] = useState(false);
   const [phoneLoading, setPhoneLoading] = useState(false);
   const [phoneApiErr, setPhoneApiErr] = useState("");
-  const [codeSuccessMsg, setCodeSuccessMsg] = useState("");
+  const [phoneSuccessMsg, setPhoneSuccessMsg] = useState("");
+
+  // Email OTP state
+  const [emailCodeSent, setEmailCodeSent] = useState(false);
+  const [emailOtp, setEmailOtp] = useState("");
+  const [emailCodeTouched, setEmailCodeTouched] = useState(false);
+  const [emailLoading, setEmailLoading] = useState(false);
+  const [emailApiErr, setEmailApiErr] = useState("");
+  const [emailSuccessMsg, setEmailSuccessMsg] = useState("");
 
   const strength = passwordStrength(a.password || "");
 
@@ -621,21 +630,22 @@ function AccountStep({ data, set, onNext, onBack, t, lang }: { data: OnboardingD
   const phoneDigits = (a.smsPhone || "").replace(/\D/g, "");
   const phoneValid = phoneDigits.length === 10 || (phoneDigits.length === 11 && phoneDigits.startsWith("1"));
 
+  // Verified = phone verified (SMS consent) OR email verified (no SMS consent)
+  const isVerified = smsConsent ? !!a.phoneVerified : !!a.emailVerified;
+
   const errs = {
     name: a.name.trim().length < 2 ? t.onboarding.errName : "",
     email: !validEmail(a.email) ? t.onboarding.errEmail : "",
     password: (a.password || "").length < 8 ? t.onboarding.errPassword : "",
     phone: !phoneValid ? t.onboarding.errPhone : "",
-    code: codeSent && !a.phoneVerified && otpCode.replace(/\D/g, "").length !== 6 ? t.onboarding.errCode : "",
-    sms: "",
     captcha: (!captchaBypass && !a.captchaToken) ? errCaptchaText : "",
+    sms: "",
   };
-  const valid = !errs.name && !errs.email && !errs.password && !errs.captcha && !!a.phoneVerified;
+  const valid = !errs.name && !errs.email && !errs.password && !errs.captcha && isVerified;
   const upd = (k: string, v: string) => set({ account: { ...a, [k]: v } });
 
-  const show = (k: "name" | "email" | "password" | "phone" | "code" | "sms" | "captcha") => {
+  const show = (k: "name" | "email" | "password" | "phone" | "sms" | "captcha") => {
     if (k === "phone") return phoneTouched && errs.phone;
-    if (k === "code") return codeTouched && errs.code;
     if (k === "sms") return smsTouched && errs.sms;
     if (k === "captcha") return touched.captcha && errs.captcha;
     return touched[k] && errs[k];
@@ -650,12 +660,13 @@ function AccountStep({ data, set, onNext, onBack, t, lang }: { data: OnboardingD
     }
   };
 
-  const sendCode = async () => {
+  // ── Phone OTP ──────────────────────────────────────────────────────────────
+  const sendPhoneCode = async () => {
     setPhoneTouched(true);
     if (!phoneValid) return;
     setPhoneLoading(true);
     setPhoneApiErr("");
-    setCodeSuccessMsg("");
+    setPhoneSuccessMsg("");
     try {
       const res = await fetch("/api/auth/verify-phone", {
         method: "POST",
@@ -664,10 +675,10 @@ function AccountStep({ data, set, onNext, onBack, t, lang }: { data: OnboardingD
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || "Failed to send code.");
-      setCodeSent(true);
-      setOtpCode("");
+      setPhoneCodeSent(true);
+      setPhoneOtp("");
       set({ account: { ...a, phoneVerified: false } });
-      setCodeSuccessMsg(t.onboarding.codeSent);
+      setPhoneSuccessMsg(t.onboarding.codeSent);
     } catch (e: any) {
       setPhoneApiErr(e.message);
     } finally {
@@ -675,9 +686,9 @@ function AccountStep({ data, set, onNext, onBack, t, lang }: { data: OnboardingD
     }
   };
 
-  const verifyCode = async () => {
-    setCodeTouched(true);
-    const trimmed = otpCode.replace(/\D/g, "");
+  const verifyPhoneCode = async () => {
+    setPhoneCodeTouched(true);
+    const trimmed = phoneOtp.replace(/\D/g, "");
     if (trimmed.length !== 6) return;
     setPhoneLoading(true);
     setPhoneApiErr("");
@@ -690,7 +701,7 @@ function AccountStep({ data, set, onNext, onBack, t, lang }: { data: OnboardingD
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || "Verification failed.");
       set({ account: { ...a, phoneVerified: true } });
-      setCodeSuccessMsg("");
+      setPhoneSuccessMsg("");
     } catch (e: any) {
       setPhoneApiErr(e.message);
     } finally {
@@ -698,8 +709,91 @@ function AccountStep({ data, set, onNext, onBack, t, lang }: { data: OnboardingD
     }
   };
 
+  // ── Email OTP ──────────────────────────────────────────────────────────────
+  const sendEmailCode = async () => {
+    setTouched((prev) => ({ ...prev, email: true }));
+    if (!validEmail(a.email)) return;
+    setEmailLoading(true);
+    setEmailApiErr("");
+    setEmailSuccessMsg("");
+    try {
+      const res = await fetch("/api/auth/otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "send", email: a.email }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || "Failed to send code.");
+      setEmailCodeSent(true);
+      setEmailOtp("");
+      set({ account: { ...a, emailVerified: false } });
+      setEmailSuccessMsg(t.onboarding.emailCodeSent);
+    } catch (e: any) {
+      setEmailApiErr(e.message);
+    } finally {
+      setEmailLoading(false);
+    }
+  };
+
+  const verifyEmailCode = async () => {
+    setEmailCodeTouched(true);
+    const trimmed = emailOtp.trim();
+    if (trimmed.length !== 6) return;
+    setEmailLoading(true);
+    setEmailApiErr("");
+    try {
+      const res = await fetch("/api/auth/otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "verify", email: a.email, token: trimmed }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || "Verification failed.");
+      set({ account: { ...a, emailVerified: true } });
+      setEmailSuccessMsg("");
+    } catch (e: any) {
+      setEmailApiErr(e.message);
+    } finally {
+      setEmailLoading(false);
+    }
+  };
+
   const strengthLabel = STRENGTH_LABELS[lang] || STRENGTH_LABELS.en;
   const discObj = DISCLAIMERS[lang] || DISCLAIMERS.en;
+
+  const VerifiedBadge = ({ label, onClear }: { label: string; onClear: () => void }) => (
+    <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 14px", borderRadius: 8, background: "oklch(0.97 0.03 140)", border: "1px solid oklch(0.85 0.10 140)", color: "oklch(0.40 0.12 140)", fontSize: "0.9rem", fontWeight: 500 }}>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+      {label}
+      <button type="button" onClick={onClear} style={{ marginLeft: "auto", background: "none", border: "none", cursor: "pointer", fontSize: "0.8rem", color: "oklch(0.50 0.10 140)", textDecoration: "underline" }}>
+        {t.onboarding.btnChange}
+      </button>
+    </div>
+  );
+
+  const OtpCodeRow = ({ value, onChange, onVerify, loading, touched: ct, onBlur }: { value: string; onChange: (v: string) => void; onVerify: () => void; loading: boolean; touched: boolean; onBlur: () => void }) => (
+    <div style={{ marginTop: 12 }}>
+      <label style={{ fontSize: "0.85rem", fontWeight: 500, display: "block", marginBottom: 6 }}>{t.onboarding.labelCode}</label>
+      <div style={{ display: "flex", gap: 8 }}>
+        <input
+          className={"input" + (ct && value.length > 0 && value.length !== 6 ? " error" : "")}
+          type="text"
+          inputMode="numeric"
+          placeholder={t.onboarding.placeholderCode}
+          value={value}
+          maxLength={6}
+          onChange={(e) => onChange(e.target.value.replace(/\D/g, ""))}
+          onBlur={onBlur}
+          style={{ flex: 1, letterSpacing: "0.2em" }}
+          disabled={loading}
+        />
+        <button type="button" className="btn btn-primary btn-sm" style={{ minWidth: 80 }}
+          onClick={onVerify} disabled={loading || value.replace(/\D/g, "").length !== 6}>
+          {loading ? "…" : t.onboarding.btnVerify}
+        </button>
+      </div>
+    </div>
+  );
 
   return (
     <div className="panel">
@@ -725,15 +819,49 @@ function AccountStep({ data, set, onNext, onBack, t, lang }: { data: OnboardingD
         <div className={"field-err" + (show("name") ? " show" : "")}>{errs.name}</div>
       </div>
 
+      {/* ── Email field + optional email OTP (when no SMS consent) ── */}
       <div className="field">
         <label>{t.onboarding.labelEmail}</label>
-        <div className="input-icon">
-          <Ico.mail className="ico" />
-          <input className={"input" + (show("email") ? " error" : "")} type="email" placeholder={t.onboarding.placeholderEmail}
-            value={a.email} onChange={(e) => upd("email", e.target.value)}
-            onBlur={() => setTouched((t) => ({ ...t, email: true }))} />
-        </div>
-        <div className={"field-err" + (show("email") ? " show" : "")}>{errs.email}</div>
+        {!smsConsent && a.emailVerified ? (
+          <VerifiedBadge
+            label={`${t.onboarding.emailVerified} — ${a.email}`}
+            onClear={() => { set({ account: { ...a, emailVerified: false } }); setEmailCodeSent(false); setEmailOtp(""); setEmailCodeTouched(false); setEmailApiErr(""); setEmailSuccessMsg(""); }}
+          />
+        ) : (
+          <>
+            <div style={{ display: "flex", gap: 8 }}>
+              <div className="input-icon" style={{ flex: 1 }}>
+                <Ico.mail className="ico" />
+                <input className={"input" + (show("email") ? " error" : "")} type="email" placeholder={t.onboarding.placeholderEmail}
+                  value={a.email}
+                  onChange={(e) => { upd("email", e.target.value); setEmailCodeSent(false); set({ account: { ...a, email: e.target.value, emailVerified: false } }); setEmailApiErr(""); setEmailSuccessMsg(""); }}
+                  onBlur={() => setTouched((prev) => ({ ...prev, email: true }))}
+                  disabled={emailLoading} />
+              </div>
+              {!smsConsent && (
+                <button type="button" className="btn btn-soft btn-sm" style={{ whiteSpace: "nowrap", minWidth: 90 }}
+                  onClick={sendEmailCode} disabled={emailLoading || !validEmail(a.email)}>
+                  {emailLoading && !emailCodeSent ? "…" : emailCodeSent ? t.onboarding.btnResend : t.onboarding.btnSendCode}
+                </button>
+              )}
+            </div>
+            <div className={"field-err" + (show("email") ? " show" : "")}>{errs.email}</div>
+            {emailSuccessMsg && <div style={{ fontSize: "0.82rem", color: "oklch(0.45 0.12 140)", marginTop: 4 }}>{emailSuccessMsg}</div>}
+            {!smsConsent && emailCodeSent && (
+              <>
+                <OtpCodeRow
+                  value={emailOtp}
+                  onChange={(v) => { setEmailOtp(v); setEmailApiErr(""); }}
+                  onVerify={verifyEmailCode}
+                  loading={emailLoading}
+                  touched={emailCodeTouched}
+                  onBlur={() => setEmailCodeTouched(true)}
+                />
+                {emailApiErr && <div style={{ fontSize: "0.82rem", color: "var(--rose)", marginTop: 6 }}>{emailApiErr}</div>}
+              </>
+            )}
+          </>
+        )}
       </div>
 
       <div className="field">
@@ -753,70 +881,7 @@ function AccountStep({ data, set, onNext, onBack, t, lang }: { data: OnboardingD
         <div className={"field-err" + (show("password") ? " show" : "")}>{errs.password}</div>
       </div>
 
-      {/* ── Phone verification ── */}
-      <div className="field">
-        <label>{t.onboarding.labelPhone}</label>
-        {a.phoneVerified ? (
-          <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 14px", borderRadius: 8, background: "oklch(0.97 0.03 140)", border: "1px solid oklch(0.85 0.10 140)", color: "oklch(0.40 0.12 140)", fontSize: "0.9rem", fontWeight: 500 }}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-            {t.onboarding.phoneVerified} — {a.smsPhone}
-            <button type="button" onClick={() => { set({ account: { ...a, phoneVerified: false, smsPhone: "" } }); setCodeSent(false); setOtpCode(""); setPhoneTouched(false); setCodeTouched(false); setPhoneApiErr(""); setCodeSuccessMsg(""); }}
-              style={{ marginLeft: "auto", background: "none", border: "none", cursor: "pointer", fontSize: "0.8rem", color: "oklch(0.50 0.10 140)", textDecoration: "underline" }}>
-              Change
-            </button>
-          </div>
-        ) : (
-          <>
-            <div style={{ display: "flex", gap: 8 }}>
-              <div className="input-icon" style={{ flex: 1 }}>
-                <Ico.phone className="ico" />
-                <input
-                  className={"input" + (show("phone") ? " error" : "")}
-                  type="tel"
-                  placeholder={t.onboarding.placeholderPhone}
-                  value={a.smsPhone || ""}
-                  onChange={(e) => { upd("smsPhone", e.target.value); setCodeSent(false); set({ account: { ...a, smsPhone: e.target.value, phoneVerified: false } }); setPhoneApiErr(""); setCodeSuccessMsg(""); }}
-                  onBlur={() => setPhoneTouched(true)}
-                  disabled={phoneLoading}
-                />
-              </div>
-              <button type="button" className="btn btn-soft btn-sm" style={{ whiteSpace: "nowrap", minWidth: 90 }}
-                onClick={sendCode} disabled={phoneLoading || !phoneValid}>
-                {phoneLoading && !codeSent ? "…" : codeSent ? t.onboarding.btnResend : t.onboarding.btnSendCode}
-              </button>
-            </div>
-            <div className={"field-err" + (show("phone") ? " show" : "")}>{errs.phone}</div>
-            {codeSuccessMsg && <div style={{ fontSize: "0.82rem", color: "oklch(0.45 0.12 140)", marginTop: 4 }}>{codeSuccessMsg}</div>}
-
-            {codeSent && (
-              <div style={{ marginTop: 12 }}>
-                <label style={{ fontSize: "0.85rem", fontWeight: 500, display: "block", marginBottom: 6 }}>{t.onboarding.labelCode}</label>
-                <div style={{ display: "flex", gap: 8 }}>
-                  <input
-                    className={"input" + (show("code") ? " error" : "")}
-                    type="text"
-                    inputMode="numeric"
-                    placeholder={t.onboarding.placeholderCode}
-                    value={otpCode}
-                    maxLength={6}
-                    onChange={(e) => { setOtpCode(e.target.value.replace(/\D/g, "")); setPhoneApiErr(""); }}
-                    onBlur={() => setCodeTouched(true)}
-                    style={{ flex: 1, letterSpacing: "0.2em" }}
-                    disabled={phoneLoading}
-                  />
-                  <button type="button" className="btn btn-primary btn-sm" style={{ minWidth: 80 }}
-                    onClick={verifyCode} disabled={phoneLoading || otpCode.replace(/\D/g, "").length !== 6}>
-                    {phoneLoading ? "…" : t.onboarding.btnVerify}
-                  </button>
-                </div>
-                <div className={"field-err" + (show("code") ? " show" : "")}>{errs.code}</div>
-              </div>
-            )}
-            {phoneApiErr && <div style={{ fontSize: "0.82rem", color: "var(--rose)", marginTop: 6 }}>{phoneApiErr}</div>}
-          </>
-        )}
-      </div>
-
+      {/* ── SMS consent checkbox ── */}
       <div className="field" style={{ marginTop: 24, marginBottom: 8 }}>
         <label style={{ display: "flex", gap: 10, cursor: "pointer", alignItems: "flex-start", fontSize: "0.85rem", fontWeight: "normal", color: "var(--ink-soft)" }}>
           <input
@@ -825,6 +890,14 @@ function AccountStep({ data, set, onNext, onBack, t, lang }: { data: OnboardingD
             onChange={(e) => {
               setSmsConsent(e.target.checked);
               setSmsTouched(true);
+              // Reset whichever verification path is now inactive
+              if (e.target.checked) {
+                set({ account: { ...a, emailVerified: false } });
+                setEmailCodeSent(false); setEmailOtp(""); setEmailApiErr(""); setEmailSuccessMsg("");
+              } else {
+                set({ account: { ...a, phoneVerified: false } });
+                setPhoneCodeSent(false); setPhoneOtp(""); setPhoneApiErr(""); setPhoneSuccessMsg("");
+              }
             }}
             style={{ width: "16px", height: "16px", flexShrink: 0, marginTop: 3, cursor: "pointer" }}
           />
@@ -843,6 +916,55 @@ function AccountStep({ data, set, onNext, onBack, t, lang }: { data: OnboardingD
         </label>
         <div className={"field-err" + (show("sms") ? " show" : "")} style={{ marginLeft: 26, marginTop: 4 }}>{errs.sms}</div>
       </div>
+
+      {/* ── Phone verification (SMS consent path) ── */}
+      {smsConsent && (
+        <div className="field">
+          <label>{t.onboarding.labelPhone}</label>
+          {a.phoneVerified ? (
+            <VerifiedBadge
+              label={`${t.onboarding.phoneVerified} — ${a.smsPhone}`}
+              onClear={() => { set({ account: { ...a, phoneVerified: false, smsPhone: "" } }); setPhoneCodeSent(false); setPhoneOtp(""); setPhoneTouched(false); setPhoneCodeTouched(false); setPhoneApiErr(""); setPhoneSuccessMsg(""); }}
+            />
+          ) : (
+            <>
+              <div style={{ display: "flex", gap: 8 }}>
+                <div className="input-icon" style={{ flex: 1 }}>
+                  <Ico.phone className="ico" />
+                  <input
+                    className={"input" + (show("phone") ? " error" : "")}
+                    type="tel"
+                    placeholder={t.onboarding.placeholderPhone}
+                    value={a.smsPhone || ""}
+                    onChange={(e) => { setPhoneCodeSent(false); set({ account: { ...a, smsPhone: e.target.value, phoneVerified: false } }); setPhoneApiErr(""); setPhoneSuccessMsg(""); }}
+                    onBlur={() => setPhoneTouched(true)}
+                    disabled={phoneLoading}
+                  />
+                </div>
+                <button type="button" className="btn btn-soft btn-sm" style={{ whiteSpace: "nowrap", minWidth: 90 }}
+                  onClick={sendPhoneCode} disabled={phoneLoading || !phoneValid}>
+                  {phoneLoading && !phoneCodeSent ? "…" : phoneCodeSent ? t.onboarding.btnResend : t.onboarding.btnSendCode}
+                </button>
+              </div>
+              <div className={"field-err" + (show("phone") ? " show" : "")}>{errs.phone}</div>
+              {phoneSuccessMsg && <div style={{ fontSize: "0.82rem", color: "oklch(0.45 0.12 140)", marginTop: 4 }}>{phoneSuccessMsg}</div>}
+              {phoneCodeSent && (
+                <>
+                  <OtpCodeRow
+                    value={phoneOtp}
+                    onChange={(v) => { setPhoneOtp(v); setPhoneApiErr(""); }}
+                    onVerify={verifyPhoneCode}
+                    loading={phoneLoading}
+                    touched={phoneCodeTouched}
+                    onBlur={() => setPhoneCodeTouched(true)}
+                  />
+                  {phoneApiErr && <div style={{ fontSize: "0.82rem", color: "var(--rose)", marginTop: 6 }}>{phoneApiErr}</div>}
+                </>
+              )}
+            </>
+          )}
+        </div>
+      )}
 
       {!isGoogle && (
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", marginTop: 20, marginBottom: 20 }}>
@@ -1280,7 +1402,7 @@ function OnboardingContent() {
   const [data, setData] = useState<OnboardingData>({
     plan: "essential",
     billing: "monthly",
-    account: { name: "", email: "", password: "", smsPhone: "", phoneVerified: false },
+    account: { name: "", email: "", password: "", smsPhone: "", phoneVerified: false, emailVerified: false },
     numbers: [],
     payment: { name: "", card: "", exp: "", cvc: "" },
   });
