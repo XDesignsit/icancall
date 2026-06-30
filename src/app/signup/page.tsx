@@ -574,6 +574,45 @@ function PlanStep({ data, set, onNext, onBack, t, lang }: { data: OnboardingData
   );
 }
 
+/* ── Shared sub-components (must be defined outside AccountStep to avoid remount on every render) ── */
+function VerifiedBadge({ label, onClear, btnChange }: { label: string; onClear: () => void; btnChange: string }) {
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 14px", borderRadius: 8, background: "oklch(0.97 0.03 140)", border: "1px solid oklch(0.85 0.10 140)", color: "oklch(0.40 0.12 140)", fontSize: "0.9rem", fontWeight: 500 }}>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+      {label}
+      <button type="button" onClick={onClear} style={{ marginLeft: "auto", background: "none", border: "none", cursor: "pointer", fontSize: "0.8rem", color: "oklch(0.50 0.10 140)", textDecoration: "underline" }}>
+        {btnChange}
+      </button>
+    </div>
+  );
+}
+
+function OtpCodeRow({ value, onChange, onVerify, loading, touched: ct, onBlur, labelCode, placeholderCode, btnVerify }: { value: string; onChange: (v: string) => void; onVerify: () => void; loading: boolean; touched: boolean; onBlur: () => void; labelCode: string; placeholderCode: string; btnVerify: string }) {
+  return (
+    <div style={{ marginTop: 12 }}>
+      <label style={{ fontSize: "0.85rem", fontWeight: 500, display: "block", marginBottom: 6 }}>{labelCode}</label>
+      <div style={{ display: "flex", gap: 8 }}>
+        <input
+          className={"input" + (ct && value.length > 0 && value.length !== 6 ? " error" : "")}
+          type="text"
+          inputMode="numeric"
+          placeholder={placeholderCode}
+          value={value}
+          maxLength={6}
+          onChange={(e) => onChange(e.target.value.replace(/\D/g, ""))}
+          onBlur={onBlur}
+          style={{ flex: 1, letterSpacing: "0.2em" }}
+          disabled={loading}
+        />
+        <button type="button" className="btn btn-primary" style={{ padding: "10px 18px", fontSize: "0.9rem", minWidth: 80 }}
+          onClick={onVerify} disabled={loading || value.replace(/\D/g, "").length !== 6}>
+          {loading ? "…" : btnVerify}
+        </button>
+      </div>
+    </div>
+  );
+}
+
 /* ============ STEP 2 — Account ============ */
 function AccountStep({ data, set, onNext, onBack, t, lang }: { data: OnboardingData; set: (patch: Partial<OnboardingData>) => void; onNext: () => void; onBack?: () => void; t: any; lang: string }) {
   const a = data.account;
@@ -761,39 +800,6 @@ function AccountStep({ data, set, onNext, onBack, t, lang }: { data: OnboardingD
   const strengthLabel = STRENGTH_LABELS[lang] || STRENGTH_LABELS.en;
   const discObj = DISCLAIMERS[lang] || DISCLAIMERS.en;
 
-  const VerifiedBadge = ({ label, onClear }: { label: string; onClear: () => void }) => (
-    <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 14px", borderRadius: 8, background: "oklch(0.97 0.03 140)", border: "1px solid oklch(0.85 0.10 140)", color: "oklch(0.40 0.12 140)", fontSize: "0.9rem", fontWeight: 500 }}>
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-      {label}
-      <button type="button" onClick={onClear} style={{ marginLeft: "auto", background: "none", border: "none", cursor: "pointer", fontSize: "0.8rem", color: "oklch(0.50 0.10 140)", textDecoration: "underline" }}>
-        {t.onboarding.btnChange}
-      </button>
-    </div>
-  );
-
-  const OtpCodeRow = ({ value, onChange, onVerify, loading, touched: ct, onBlur }: { value: string; onChange: (v: string) => void; onVerify: () => void; loading: boolean; touched: boolean; onBlur: () => void }) => (
-    <div style={{ marginTop: 12 }}>
-      <label style={{ fontSize: "0.85rem", fontWeight: 500, display: "block", marginBottom: 6 }}>{t.onboarding.labelCode}</label>
-      <div style={{ display: "flex", gap: 8 }}>
-        <input
-          className={"input" + (ct && value.length > 0 && value.length !== 6 ? " error" : "")}
-          type="text"
-          inputMode="numeric"
-          placeholder={t.onboarding.placeholderCode}
-          value={value}
-          maxLength={6}
-          onChange={(e) => onChange(e.target.value.replace(/\D/g, ""))}
-          onBlur={onBlur}
-          style={{ flex: 1, letterSpacing: "0.2em" }}
-          disabled={loading}
-        />
-        <button type="button" className="btn btn-primary" style={{ padding: "10px 18px", fontSize: "0.9rem", minWidth: 80 }}
-          onClick={onVerify} disabled={loading || value.replace(/\D/g, "").length !== 6}>
-          {loading ? "…" : t.onboarding.btnVerify}
-        </button>
-      </div>
-    </div>
-  );
 
   return (
     <div className="panel">
@@ -826,6 +832,7 @@ function AccountStep({ data, set, onNext, onBack, t, lang }: { data: OnboardingD
           <VerifiedBadge
             label={`${t.onboarding.emailVerified} — ${a.email}`}
             onClear={() => { set({ account: { ...a, emailVerified: false } }); setEmailCodeSent(false); setEmailOtp(""); setEmailCodeTouched(false); setEmailApiErr(""); setEmailSuccessMsg(""); }}
+            btnChange={t.onboarding.btnChange}
           />
         ) : (
           <>
@@ -854,6 +861,9 @@ function AccountStep({ data, set, onNext, onBack, t, lang }: { data: OnboardingD
                 loading={emailLoading}
                 touched={emailCodeTouched}
                 onBlur={() => setEmailCodeTouched(true)}
+                labelCode={t.onboarding.labelCode}
+                placeholderCode={t.onboarding.placeholderCode}
+                btnVerify={t.onboarding.btnVerify}
               />
             )}
           </>
@@ -921,6 +931,7 @@ function AccountStep({ data, set, onNext, onBack, t, lang }: { data: OnboardingD
             <VerifiedBadge
               label={`${t.onboarding.phoneVerified} — ${a.smsPhone}`}
               onClear={() => { set({ account: { ...a, phoneVerified: false, smsPhone: "" } }); setPhoneCodeSent(false); setPhoneOtp(""); setPhoneTouched(false); setPhoneCodeTouched(false); setPhoneApiErr(""); setPhoneSuccessMsg(""); }}
+              btnChange={t.onboarding.btnChange}
             />
           ) : (
             <>
@@ -953,6 +964,9 @@ function AccountStep({ data, set, onNext, onBack, t, lang }: { data: OnboardingD
                   loading={phoneLoading}
                   touched={phoneCodeTouched}
                   onBlur={() => setPhoneCodeTouched(true)}
+                  labelCode={t.onboarding.labelCode}
+                  placeholderCode={t.onboarding.placeholderCode}
+                  btnVerify={t.onboarding.btnVerify}
                 />
               )}
             </>
