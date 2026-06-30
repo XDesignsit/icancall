@@ -6,9 +6,13 @@
       "name": "Support Demo",
       "preferred_name": "Support",
       "settings": {
+        "role": "Primary caregiver",
         "notifyEmail": "support@icancall.co",
-        "smsConsent": true,
+        "phone": "",
         "smsPhone": "",
+        "address": "123 Main St, Oakland, CA 94607",
+        "timezone": "Pacific (PT)",
+        "language": "English",
         "twoFactor": false,
         "card": {
           "brand": "Visa",
@@ -24,7 +28,8 @@
           "usedMin": 0,
           "rolloverMin": 0
         }
-      }
+      },
+      "updated_at": "2026-06-30T04:28:00.807Z"
     }
   ],
   "phone_lines": [
@@ -42,7 +47,7 @@
           "available": true
         }
       ],
-      "id": "mock-row-vezx93oic",
+      "id": "mock-row-h0ia3svd6",
       "settings": {
         "color": "oklch(0.58 0.115 232)",
         "mode": "menu",
