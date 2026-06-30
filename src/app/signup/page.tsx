@@ -787,7 +787,7 @@ function AccountStep({ data, set, onNext, onBack, t, lang }: { data: OnboardingD
           style={{ flex: 1, letterSpacing: "0.2em" }}
           disabled={loading}
         />
-        <button type="button" className="btn btn-primary btn-sm" style={{ minWidth: 80 }}
+        <button type="button" className="btn btn-primary" style={{ padding: "10px 18px", fontSize: "0.9rem", minWidth: 80 }}
           onClick={onVerify} disabled={loading || value.replace(/\D/g, "").length !== 6}>
           {loading ? "…" : t.onboarding.btnVerify}
         </button>
@@ -839,7 +839,7 @@ function AccountStep({ data, set, onNext, onBack, t, lang }: { data: OnboardingD
             </div>
             <div className={"field-err" + (show("email") ? " show" : "")}>{errs.email}</div>
             {!smsConsent && (
-              <button type="button" className="btn btn-primary btn-sm" style={{ marginTop: 8, width: "100%" }}
+              <button type="button" className="btn btn-primary" style={{ marginTop: 8, width: "100%", padding: "10px 20px", fontSize: "0.9rem" }}
                 onClick={sendEmailCode} disabled={emailLoading || !validEmail(a.email)}>
                 {emailLoading && !emailCodeSent ? "…" : emailCodeSent ? t.onboarding.btnResend : t.onboarding.btnSendCode}
               </button>
@@ -939,7 +939,7 @@ function AccountStep({ data, set, onNext, onBack, t, lang }: { data: OnboardingD
                     disabled={phoneLoading}
                   />
                 </div>
-                <button type="button" className="btn btn-primary btn-sm" style={{ whiteSpace: "nowrap", minWidth: 90 }}
+                <button type="button" className="btn btn-primary" style={{ whiteSpace: "nowrap", padding: "10px 18px", fontSize: "0.9rem", minWidth: 90 }}
                   onClick={sendPhoneCode} disabled={phoneLoading || !phoneValid}>
                   {phoneLoading && !phoneCodeSent ? "…" : phoneCodeSent ? t.onboarding.btnResend : t.onboarding.btnSendCode}
                 </button>
