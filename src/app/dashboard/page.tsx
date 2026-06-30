@@ -2309,6 +2309,8 @@ export function AccountView({
     setTempExtraNumbers(a.addons?.extraNumbers || 0);
   }
   const [addonModalOpen, setAddonModalOpen] = useState(false);
+  const [addonCheckoutLoading, setAddonCheckoutLoading] = useState(false);
+  const addonPendingAction = useRef<(() => void) | null>(null);
   const [addonRemovalModalOpen, setAddonRemovalModalOpen] = useState(false);
   const [minuteBlocksConfirmOpen, setMinuteBlocksConfirmOpen] = useState(false);
   const [annualBillingConfirmOpen, setAnnualBillingConfirmOpen] = useState(false);
@@ -2371,6 +2373,18 @@ export function AccountView({
       setTempCycle(account.billingCycle || "monthly");
     }
   }, [planModalOpen, account.plan, account.billingCycle]);
+
+  useEffect(() => {
+    const handleAddonMsg = (e: MessageEvent) => {
+      if (e.origin !== window.location.origin) return;
+      if (e.data?.type === "CREEM_ADDON_SUCCESS" && addonPendingAction.current) {
+        addonPendingAction.current();
+        addonPendingAction.current = null;
+      }
+    };
+    window.addEventListener("message", handleAddonMsg);
+    return () => window.removeEventListener("message", handleAddonMsg);
+  }, []);
 
   const getModalButtonText = () => {
     const isCurrentPlan = tempPlan === account.plan;
@@ -3087,47 +3101,83 @@ export function AccountView({
                   </button>
                   <button
                     className="btn btn-primary"
-                    disabled={addedNumbersConfig.some(c => !c.selectedNumber)}
-                    onClick={() => {
-                      // Update account addons
-                      setAccount((prev) => {
-                        const updated = {
-                          ...prev,
-                          addons: {
-                            ...(prev.addons || {}),
-                            extraNumbers: tempExtraNumbers,
-                            minuteBlocks: (prev.addons?.minuteBlocks || 0) + tempMinuteBlocks,
-                          } as Account["addons"],
-                        };
-                        localStorage.setItem("ic_account_data", JSON.stringify(updated));
-                        return updated;
-                      });
-                      setTempMinuteBlocks(0);
+                    disabled={addedNumbersConfig.some(c => !c.selectedNumber) || addonCheckoutLoading}
+                    onClick={async () => {
+                      const newExtraNumbers = tempExtraNumbers - (account.addons?.extraNumbers || 0);
+                      const newMinuteBlocks = tempMinuteBlocks;
 
-                      // Construct and add the new phone lines
-                      const newLines = addedNumbersConfig.map((config, index) => {
-                        const newLine: Line = {
+                      // Determine which add-ons need checkout
+                      const checkouts: Array<{ addon: string; quantity: number }> = [];
+                      if (newExtraNumbers > 0) checkouts.push({ addon: "phone_number", quantity: newExtraNumbers });
+                      if (newMinuteBlocks > 0) checkouts.push({ addon: "voice_minutes", quantity: newMinuteBlocks });
+
+                      // Save the local state action for after payment(s) succeed
+                      const applyAddons = () => {
+                        setAccount((prev) => {
+                          const updated = {
+                            ...prev,
+                            addons: {
+                              ...(prev.addons || {}),
+                              extraNumbers: tempExtraNumbers,
+                              minuteBlocks: (prev.addons?.minuteBlocks || 0) + newMinuteBlocks,
+                            } as Account["addons"],
+                          };
+                          localStorage.setItem("ic_account_data", JSON.stringify(updated));
+                          return updated;
+                        });
+                        setTempMinuteBlocks(0);
+
+                        const newLines = addedNumbersConfig.map((config, index) => ({
                           id: "line_" + Date.now() + "_" + index,
                           label: lang === "es" ? `Línea adicional ${index + 1}` : lang === "fr" ? `Ligne supplémentaire ${index + 1}` : `Additional line ${index + 1}`,
                           person: lang === "es" ? "Línea del círculo de emergencia" : lang === "fr" ? "Ligne du cercle d'urgence" : "Emergency circle line",
                           number: config.selectedNumber.number,
                           color: AVATAR_COLORS[(lines.length + index) % AVATAR_COLORS.length],
-                          mode: "cascade",
+                          mode: "cascade" as const,
                           minutesUsed: 0,
                           contacts: lines[0]?.contacts ? JSON.parse(JSON.stringify(lines[0].contacts)) : [],
-                        };
-                        return newLine;
-                      });
+                        }));
 
-                      const nextLines = [...lines, ...newLines];
-                      setLines(nextLines);
-                      localStorage.setItem("ic_lines_data", JSON.stringify(nextLines));
+                        const nextLines = [...lines, ...newLines];
+                        setLines(nextLines);
+                        localStorage.setItem("ic_lines_data", JSON.stringify(nextLines));
+                        setAddonModalOpen(false);
+                        showToast(ext.addonsUpdatedToast);
+                      };
 
-                      setAddonModalOpen(false);
-                      showToast(ext.addonsUpdatedToast);
+                      if (checkouts.length === 0) {
+                        applyAddons();
+                        return;
+                      }
+
+                      // Open Creem checkout for the first add-on (sequential popups if both)
+                      setAddonCheckoutLoading(true);
+                      addonPendingAction.current = applyAddons;
+
+                      try {
+                        const first = checkouts[0];
+                        const res = await fetch("/api/creem/checkout", {
+                          method: "POST",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({ addon: first.addon, quantity: first.quantity, email: account.email }),
+                        });
+                        if (!res.ok) throw new Error("checkout_failed");
+                        const { checkoutUrl } = await res.json();
+
+                        const w = 520, h = 720;
+                        const left = Math.round(window.screenX + (window.outerWidth - w) / 2);
+                        const top  = Math.round(window.screenY + (window.outerHeight - h) / 2);
+                        window.open(checkoutUrl, "creem_addon_checkout", `width=${w},height=${h},left=${left},top=${top},resizable=yes,scrollbars=yes`);
+                      } catch {
+                        console.error("Failed to create add-on checkout");
+                      } finally {
+                        setAddonCheckoutLoading(false);
+                      }
                     }}
                   >
-                    {lang === "es" ? "Aprobar y guardar" : lang === "fr" ? "Approuver et enregistrer" : "Approve & Save Add-ons"}
+                    {addonCheckoutLoading
+                      ? <><div style={{ width: 14, height: 14, border: "2px solid #fff", borderTopColor: "transparent", borderRadius: "50%", display: "inline-block", animation: "spin 0.7s linear infinite", marginRight: 6 }} />Processing…</>
+                      : (lang === "es" ? "Aprobar y pagar" : lang === "fr" ? "Approuver et payer" : "Approve & Pay")}
                   </button>
                 </div>
               }
@@ -3986,7 +4036,24 @@ export function AccountView({
                 </div>
                 <button
                   className="btn btn-ghost btn-sm"
-                  onClick={() => showToast(lang === "es" ? "Abriendo el formulario de tarjeta seguro…" : lang === "fr" ? "Ouverture du formulaire de carte sécurisé…" : lang === "ja" ? "セキュアなカード入力フォームを開いています…" : lang === "zh" ? "正在打开安全信用卡表单…" : lang === "ar" ? "جاري فتح نموذج البطاقة الآمن…" : lang === "hi" ? "सुरक्षित कार्ड फ़ॉर्म खोला जा रहा है…" : lang === "pt" ? "Abrindo formulário seguro de cartão…" : lang === "de" ? "Sicheres Kartenformular wird geöffnet…" : lang === "it" ? "Apertura del modulo sicuro della carta…" : lang === "ko" ? "보안 카드 양식을 여는 중…" : "Opening secure card form…")}
+                  onClick={async () => {
+                    showToast(lang === "es" ? "Abriendo el portal de facturación…" : lang === "fr" ? "Ouverture du portail de facturation…" : "Opening billing portal…");
+                    try {
+                      const res = await fetch("/api/creem/portal", { method: "POST" });
+                      if (!res.ok) {
+                        const err = await res.json();
+                        showToast(err.error || "Could not open billing portal.");
+                        return;
+                      }
+                      const { portalUrl } = await res.json();
+                      const w = 560, h = 700;
+                      const left = Math.round(window.screenX + (window.outerWidth - w) / 2);
+                      const top  = Math.round(window.screenY + (window.outerHeight - h) / 2);
+                      window.open(portalUrl, "creem_portal", `width=${w},height=${h},left=${left},top=${top},resizable=yes,scrollbars=yes`);
+                    } catch {
+                      showToast("Could not open billing portal.");
+                    }
+                  }}
                 >
                   <Icon name="card" /> {ext.updateCard}
                 </button>

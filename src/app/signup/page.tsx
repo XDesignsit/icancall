@@ -1143,49 +1143,20 @@ interface CheckoutModalProps {
 }
 
 function CheckoutModal({ isOpen, checkoutUrl, onClose, t }: CheckoutModalProps) {
-  const [loading, setLoading] = useState(true);
-
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      {/* Backdrop blur */}
-      <div 
-        className="absolute inset-0 bg-[#0f172a]/60 backdrop-blur-md transition-opacity" 
-        onClick={onClose} 
-      />
-
-      {/* Modal Container */}
-      <div className="relative z-10 w-full max-w-lg overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl transition-all h-[640px] flex flex-col animate-in fade-in zoom-in-95 duration-200">
-        {/* Modal Header */}
-        <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4 bg-slate-50">
-          <div className="flex items-center gap-2">
-            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[#10b981] text-white font-bold text-xs">✓</span>
-            <span className="font-semibold text-slate-800 text-sm">{t.onboarding.checkoutSecure}</span>
-          </div>
-          <button 
-            onClick={onClose} 
-            className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition"
-          >
-            ✕
-          </button>
+      <div className="absolute inset-0 bg-[#0f172a]/60 backdrop-blur-md" onClick={onClose} />
+      <div className="relative z-10 w-full max-w-sm overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl animate-in fade-in zoom-in-95 duration-200 p-8 flex flex-col items-center text-center gap-4">
+        <div className="h-10 w-10 animate-spin rounded-full border-[3px] border-[#10b981] border-t-transparent" />
+        <div>
+          <p className="font-semibold text-slate-800 text-sm">{t.onboarding.checkoutSecure}</p>
+          <p className="text-xs text-slate-500 mt-1">{t.onboarding.checkoutSecuring}</p>
         </div>
-
-        {/* Loading channel spinner */}
-        {loading && (
-          <div className="absolute inset-x-0 bottom-0 top-[53px] flex flex-col items-center justify-center bg-white z-20">
-            <div className="h-9 w-9 animate-spin rounded-full border-3 border-[#10b981] border-t-transparent" />
-            <p className="mt-4 text-xs text-slate-500 font-medium">{t.onboarding.checkoutSecuring}</p>
-          </div>
-        )}
-
-        {/* Iframe */}
-        <iframe
-          src={checkoutUrl}
-          className="w-full flex-1 border-none"
-          onLoad={() => setLoading(false)}
-          allow="payment"
-        />
+        <button onClick={onClose} className="mt-2 text-xs text-slate-400 hover:text-slate-600 underline underline-offset-2 transition">
+          Cancel
+        </button>
       </div>
     </div>
   );
@@ -1197,12 +1168,30 @@ function PaymentStep({ data, set, onNext, onBack, t, lang }: { data: OnboardingD
   const price = data.billing === "yearly" ? plan.annual : plan.monthly;
   const [modalOpen, setModalOpen] = useState(false);
   const [checkoutUrl, setCheckoutUrl] = useState("");
+  const [checkoutLoading, setCheckoutLoading] = useState(false);
 
-  const handleStartPayment = () => {
-    // Generate checkout URL with plan query details and language code
-    const url = `/signup/creem-checkout?plan=${data.plan}&billing=${data.billing}&lang=${lang}`;
-    setCheckoutUrl(url);
-    setModalOpen(true);
+  const handleStartPayment = async () => {
+    setCheckoutLoading(true);
+    try {
+      const res = await fetch("/api/creem/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ plan: data.plan, billing: data.billing, email: data.account.email }),
+      });
+      if (!res.ok) throw new Error("checkout_failed");
+      const { checkoutUrl: url } = await res.json();
+      setCheckoutUrl(url);
+      // Open Creem's hosted checkout in a centered popup
+      const w = 520, h = 720;
+      const left = Math.round(window.screenX + (window.outerWidth - w) / 2);
+      const top  = Math.round(window.screenY + (window.outerHeight - h) / 2);
+      window.open(url, "creem_checkout", `width=${w},height=${h},left=${left},top=${top},resizable=yes,scrollbars=yes`);
+      setModalOpen(true);
+    } catch {
+      console.error("Failed to create Creem checkout session");
+    } finally {
+      setCheckoutLoading(false);
+    }
   };
 
   // Listen to iframe success messages
@@ -1292,8 +1281,10 @@ function PaymentStep({ data, set, onNext, onBack, t, lang }: { data: OnboardingD
       <div className="step-nav mt-8">
         <button className="btn btn-ghost" onClick={onBack}>{t.onboarding.btnBack}</button>
         <div className="spacer" />
-        <button className="btn btn-primary" onClick={handleStartPayment}>
-          <Ico.lock className="w-[17px] h-[17px] text-white mr-1.5" />
+        <button className="btn btn-primary" onClick={handleStartPayment} disabled={checkoutLoading}>
+          {checkoutLoading
+            ? <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-1.5" />
+            : <Ico.lock className="w-[17px] h-[17px] text-white mr-1.5" />}
           {t.onboarding.btnPay}
         </button>
       </div>
