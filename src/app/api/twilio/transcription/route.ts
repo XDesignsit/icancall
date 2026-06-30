@@ -35,9 +35,10 @@ export async function POST(request: Request) {
 
     let alertRecipient = process.env.SMTP_FROM_EMAIL || 'support@icancall.co';
     let callerLabel = String(fromNumber);
+    let account = null;
 
     if (toPhoneNumber) {
-      const account = await findAccountByTwilioNumber(toPhoneNumber);
+      account = await findAccountByTwilioNumber(toPhoneNumber);
       if (account) {
         // Check if Missed Call Notifications toggle is enabled
         const lineSettings = account.line?.settings || {};
@@ -79,6 +80,29 @@ export async function POST(request: Request) {
 
     if (result.success) {
       console.log(`✉️ Automated Voicemail Alert email dispatched via Maileroo for call ${callSid} to ${alertRecipient}`);
+
+      // Try sending SMS alert if notifSMS is enabled
+      if (account) {
+        const lineSettings = account.line?.settings || {};
+        const notifSMS = lineSettings.notifSMS ?? true;
+        const smsPhone = account.smsPhone;
+
+        if (notifSMS && smsPhone) {
+          try {
+            const { sendSms } = await import('@/lib/twilio');
+            // Clean/truncate transcript to fit nicely in an SMS if it's very long
+            const cleanTranscript = transcript.length > 120
+              ? `${transcript.substring(0, 117)}...`
+              : transcript;
+            const smsBody = `iCanCall Voicemail Alert: New message from ${callerLabel} (${recordingDuration}s). Transcript: "${cleanTranscript}"`;
+            await sendSms(smsPhone, smsBody);
+            console.log(`💬 Automated Voicemail Alert SMS sent to ${smsPhone}`);
+          } catch (smsError) {
+            console.error('❌ Failed to dispatch voicemail SMS alert:', smsError);
+          }
+        }
+      }
+
       return NextResponse.json({ success: true, message: 'Voicemail alert dispatched successfully!' });
     } else {
       console.error('❌ Failed to dispatch voicemail email alert:', result.error);

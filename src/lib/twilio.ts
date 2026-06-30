@@ -43,4 +43,28 @@ export async function purchaseNumber(phoneNumber: string) {
   return client.incomingPhoneNumbers.create({ phoneNumber });
 }
 
+/**
+ * Sends an SMS message using the configured A2P-compliant Twilio number
+ */
+export async function sendSms(to: string, body: string) {
+  if (!client) {
+    console.warn('⚠️ Twilio client is not initialized. Cannot send SMS.');
+    return null;
+  }
+
+  const fromNumber = process.env.TWILIO_PHONE_NUMBER || '+18542262250';
+  
+  try {
+    const message = await client.messages.create({
+      to,
+      from: fromNumber,
+      body,
+    });
+    return message;
+  } catch (error) {
+    console.error(`❌ Twilio SMS dispatch to ${to} failed:`, error);
+    throw error;
+  }
+}
+
 export default client;

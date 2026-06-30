@@ -25,6 +25,11 @@ export async function sendEmail({ to, subject, text, html }: SendEmailArgs) {
   const fromEmail = process.env.SMTP_FROM_EMAIL || 'noreply@yourdomain.com';
   const fromName = process.env.SMTP_FROM_NAME || 'iCanCall Support';
 
+  if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
+    console.warn(`✉️ [MOCK] SMTP credentials not set. Simulating email dispatch to ${to}: "${subject}"`);
+    return { success: true, messageId: `mock-msg-${Date.now()}` };
+  }
+
   try {
     const info = await transporter.sendMail({
       from: `"${fromName}" <${fromEmail}>`,

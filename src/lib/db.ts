@@ -5,6 +5,7 @@ export interface Account {
   name: string;
   email: string;
   notifyEmail: string;
+  smsPhone?: string;
   plan: string;
   used_minutes: number;
   allotted_minutes: number;
@@ -104,6 +105,7 @@ export async function findAccountByTwilioNumber(phoneNumber: string): Promise<Ac
       name: profile.name || 'Caregiver',
       email: profile.email,
       notifyEmail: settings.notifyEmail || profile.email,
+      smsPhone: settings.smsPhone || settings.phone || profile.phone || '',
       plan,
       used_minutes: used,
       allotted_minutes: allotted,
