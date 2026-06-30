@@ -28,4 +28,10 @@ This version has breaking changes — APIs, conventions, and file structure may 
 - **Paid Flow CAPTCHA Redundancy**: Avoid forcing blocking CAPTCHA verifications on signup/onboarding forms that require a successful paid checkout (e.g., Stripe, Creem, PayPal). Paid checkouts are naturally bot-proof, so CAPTCHA adds redundant friction.
 - **Fail-Open Fallback**: If a CAPTCHA is required, always implement a fail-open loading fallback (e.g., a 4.5-second mount timeout) and catch rendering/error callbacks to automatically trigger a bypass token (`blocked_bypass`). This ensures real users with adblockers, strict privacy firewalls, or testing on non-whitelisted staging/preview domains are never blocked.
 
+## Mocking Database Clients in Local Development
+When creating local mock shims for database clients (such as Supabase) to support unconfigured or offline local development:
+- **Deferred Chain Execution**: Emulate the synchronous/asynchronous mechanics of the target library's builder chain. Chained action and filter methods (e.g., `select`, `eq`, `not`, `insert`, `update`, `upsert`, `delete`) must return the query builder object synchronously. Defer actual execution (such as reading/writing local JSON files) to the builder's `then()` method (which acts as the awaitable Promise hook). This prevents subsequent chained methods from throwing `TypeError: ... is not a function`.
+- **Immediate Cache Invalidation**: Ensure that any endpoint or controller modifying settings or lines explicitly invalidates the associated cache key to prevent webhooks or background processes from reading stale cache values.
+
+
 
