@@ -56,5 +56,53 @@ export async function POST(req: NextRequest) {
     }
   }
 
+  if (event.type === "subscription.renewed") {
+    const sub = event.data as {
+      id?: string;
+      customer?: { id?: string; email?: string };
+    };
+
+    const email = sub.customer?.email;
+    console.log(`Creem subscription.renewed — email: ${email}`);
+
+    if (email) {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("id, settings")
+        .eq("email", email)
+        .single();
+
+      if (profile) {
+        const addons = profile.settings?.addons || {};
+        const plan: "essential" | "pro" = profile.settings?.plan || "essential";
+        const planBaseMinutes = plan === "pro" ? 60 : 30;
+
+        const addonMinutes = (addons.minuteBlocks || 0) * 30;
+        const totalPool = planBaseMinutes + addonMinutes + (addons.rolloverMin || 0);
+        const usedMin = Math.min(addons.usedMin || 0, totalPool);
+
+        // Only unused add-on minutes roll over — base plan minutes do not
+        const unusedAddonMin = Math.max(0, addonMinutes - Math.max(0, usedMin - planBaseMinutes));
+        const newRolloverMin = (addons.rolloverMin || 0) + unusedAddonMin;
+
+        await supabase
+          .from("profiles")
+          .update({
+            settings: {
+              ...profile.settings,
+              addons: {
+                ...addons,
+                usedMin: 0,
+                rolloverMin: newRolloverMin,
+              },
+            },
+          })
+          .eq("id", profile.id);
+
+        console.log(`Billing reset for ${email}: rollover=${newRolloverMin} min (unused addon: ${unusedAddonMin})`);
+      }
+    }
+  }
+
   return NextResponse.json({ received: true });
 }
