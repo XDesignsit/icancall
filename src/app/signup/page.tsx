@@ -829,23 +829,21 @@ function AccountStep({ data, set, onNext, onBack, t, lang }: { data: OnboardingD
           />
         ) : (
           <>
-            <div style={{ display: "flex", gap: 8 }}>
-              <div className="input-icon" style={{ flex: 1 }}>
-                <Ico.mail className="ico" />
-                <input className={"input" + (show("email") ? " error" : "")} type="email" placeholder={t.onboarding.placeholderEmail}
-                  value={a.email}
-                  onChange={(e) => { upd("email", e.target.value); setEmailCodeSent(false); set({ account: { ...a, email: e.target.value, emailVerified: false } }); setEmailApiErr(""); setEmailSuccessMsg(""); }}
-                  onBlur={() => setTouched((prev) => ({ ...prev, email: true }))}
-                  disabled={emailLoading} />
-              </div>
-              {!smsConsent && (
-                <button type="button" className="btn btn-primary btn-sm" style={{ whiteSpace: "nowrap", minWidth: 90 }}
-                  onClick={sendEmailCode} disabled={emailLoading || !validEmail(a.email)}>
-                  {emailLoading && !emailCodeSent ? "…" : emailCodeSent ? t.onboarding.btnResend : t.onboarding.btnSendCode}
-                </button>
-              )}
+            <div className="input-icon">
+              <Ico.mail className="ico" />
+              <input className={"input" + (show("email") ? " error" : "")} type="email" placeholder={t.onboarding.placeholderEmail}
+                value={a.email}
+                onChange={(e) => { upd("email", e.target.value); setEmailCodeSent(false); set({ account: { ...a, email: e.target.value, emailVerified: false } }); setEmailApiErr(""); setEmailSuccessMsg(""); }}
+                onBlur={() => setTouched((prev) => ({ ...prev, email: true }))}
+                disabled={emailLoading} />
             </div>
             <div className={"field-err" + (show("email") ? " show" : "")}>{errs.email}</div>
+            {!smsConsent && (
+              <button type="button" className="btn btn-primary btn-sm" style={{ marginTop: 8, width: "100%" }}
+                onClick={sendEmailCode} disabled={emailLoading || !validEmail(a.email)}>
+                {emailLoading && !emailCodeSent ? "…" : emailCodeSent ? t.onboarding.btnResend : t.onboarding.btnSendCode}
+              </button>
+            )}
             {emailSuccessMsg && <div style={{ fontSize: "0.82rem", color: "oklch(0.45 0.12 140)", marginTop: 4 }}>{emailSuccessMsg}</div>}
             {!smsConsent && emailCodeSent && (
               <>
