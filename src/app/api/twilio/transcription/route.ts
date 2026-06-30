@@ -91,10 +91,13 @@ export async function POST(request: Request) {
           try {
             const { sendSms } = await import('@/lib/twilio');
             // Clean/truncate transcript to fit nicely in an SMS if it's very long
-            const cleanTranscript = transcript.length > 120
-              ? `${transcript.substring(0, 117)}...`
+            const cleanTranscript = transcript.length > 100
+              ? `${transcript.substring(0, 97)}...`
               : transcript;
-            const smsBody = `iCanCall Voicemail Alert: New message from ${callerLabel} (${recordingDuration}s). Transcript: "${cleanTranscript}"`;
+            const host = request.headers.get('x-forwarded-host') || request.headers.get('host') || 'icancall.com';
+            const protocol = host.startsWith('localhost') ? 'http' : 'https';
+            const dashboardUrl = `${protocol}://${host}/dashboard?view=log`;
+            const smsBody = `iCanCall Voicemail Alert: New message from ${callerLabel} (${recordingDuration}s). Transcript: "${cleanTranscript}" View call log: ${dashboardUrl}`;
             await sendSms(smsPhone, smsBody);
             console.log(`💬 Automated Voicemail Alert SMS sent to ${smsPhone}`);
           } catch (smsError) {

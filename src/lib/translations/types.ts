@@ -150,6 +150,17 @@ export interface HomepageTranslations {
     labelPassword: string;
     placeholderPassword: string;
     smsText: string;
+    labelPhone: string;
+    placeholderPhone: string;
+    btnSendCode: string;
+    btnResend: string;
+    labelCode: string;
+    placeholderCode: string;
+    btnVerify: string;
+    phoneVerified: string;
+    codeSent: string;
+    errPhone: string;
+    errCode: string;
     errName: string;
     errEmail: string;
     errPassword: string;

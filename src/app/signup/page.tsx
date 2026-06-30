@@ -15,6 +15,8 @@ interface AccountData {
   email: string;
   password?: string;
   captchaToken?: string;
+  smsPhone?: string;
+  phoneVerified?: boolean;
 }
 
 interface NumberData {
@@ -577,6 +579,16 @@ function AccountStep({ data, set, onNext, onBack, t, lang }: { data: OnboardingD
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   const [smsConsent, setSmsConsent] = useState(false);
   const [smsTouched, setSmsTouched] = useState(false);
+
+  // Phone OTP state
+  const [phoneTouched, setPhoneTouched] = useState(false);
+  const [codeSent, setCodeSent] = useState(false);
+  const [otpCode, setOtpCode] = useState("");
+  const [codeTouched, setCodeTouched] = useState(false);
+  const [phoneLoading, setPhoneLoading] = useState(false);
+  const [phoneApiErr, setPhoneApiErr] = useState("");
+  const [codeSuccessMsg, setCodeSuccessMsg] = useState("");
+
   const strength = passwordStrength(a.password || "");
 
   const STRENGTH = [
@@ -606,16 +618,24 @@ function AccountStep({ data, set, onNext, onBack, t, lang }: { data: OnboardingD
   // CAPTCHA check is optional/bypassed on the signup page since the flow ends in a paid credit card checkout (zero spam bot risk)
   const captchaBypass = true;
 
+  const phoneDigits = (a.smsPhone || "").replace(/\D/g, "");
+  const phoneValid = phoneDigits.length === 10 || (phoneDigits.length === 11 && phoneDigits.startsWith("1"));
+
   const errs = {
     name: a.name.trim().length < 2 ? t.onboarding.errName : "",
     email: !validEmail(a.email) ? t.onboarding.errEmail : "",
     password: (a.password || "").length < 8 ? t.onboarding.errPassword : "",
+    phone: !phoneValid ? t.onboarding.errPhone : "",
+    code: codeSent && !a.phoneVerified && otpCode.replace(/\D/g, "").length !== 6 ? t.onboarding.errCode : "",
     sms: "",
     captcha: (!captchaBypass && !a.captchaToken) ? errCaptchaText : "",
   };
-  const valid = !errs.name && !errs.email && !errs.password && !errs.captcha;
+  const valid = !errs.name && !errs.email && !errs.password && !errs.captcha && !!a.phoneVerified;
   const upd = (k: string, v: string) => set({ account: { ...a, [k]: v } });
-  const show = (k: "name" | "email" | "password" | "sms" | "captcha") => {
+
+  const show = (k: "name" | "email" | "password" | "phone" | "code" | "sms" | "captcha") => {
+    if (k === "phone") return phoneTouched && errs.phone;
+    if (k === "code") return codeTouched && errs.code;
     if (k === "sms") return smsTouched && errs.sms;
     if (k === "captcha") return touched.captcha && errs.captcha;
     return touched[k] && errs[k];
@@ -625,10 +645,58 @@ function AccountStep({ data, set, onNext, onBack, t, lang }: { data: OnboardingD
     if (valid) onNext();
     else {
       setTouched({ name: true, email: true, password: true, captcha: true });
+      setPhoneTouched(true);
       setSmsTouched(true);
     }
   };
 
+  const sendCode = async () => {
+    setPhoneTouched(true);
+    if (!phoneValid) return;
+    setPhoneLoading(true);
+    setPhoneApiErr("");
+    setCodeSuccessMsg("");
+    try {
+      const res = await fetch("/api/auth/verify-phone", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "send", phone: a.smsPhone }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || "Failed to send code.");
+      setCodeSent(true);
+      setOtpCode("");
+      set({ account: { ...a, phoneVerified: false } });
+      setCodeSuccessMsg(t.onboarding.codeSent);
+    } catch (e: any) {
+      setPhoneApiErr(e.message);
+    } finally {
+      setPhoneLoading(false);
+    }
+  };
+
+  const verifyCode = async () => {
+    setCodeTouched(true);
+    const trimmed = otpCode.replace(/\D/g, "");
+    if (trimmed.length !== 6) return;
+    setPhoneLoading(true);
+    setPhoneApiErr("");
+    try {
+      const res = await fetch("/api/auth/verify-phone", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "verify", phone: a.smsPhone, code: trimmed }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || "Verification failed.");
+      set({ account: { ...a, phoneVerified: true } });
+      setCodeSuccessMsg("");
+    } catch (e: any) {
+      setPhoneApiErr(e.message);
+    } finally {
+      setPhoneLoading(false);
+    }
+  };
 
   const strengthLabel = STRENGTH_LABELS[lang] || STRENGTH_LABELS.en;
   const discObj = DISCLAIMERS[lang] || DISCLAIMERS.en;
@@ -685,6 +753,70 @@ function AccountStep({ data, set, onNext, onBack, t, lang }: { data: OnboardingD
         <div className={"field-err" + (show("password") ? " show" : "")}>{errs.password}</div>
       </div>
 
+      {/* ── Phone verification ── */}
+      <div className="field">
+        <label>{t.onboarding.labelPhone}</label>
+        {a.phoneVerified ? (
+          <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 14px", borderRadius: 8, background: "oklch(0.97 0.03 140)", border: "1px solid oklch(0.85 0.10 140)", color: "oklch(0.40 0.12 140)", fontSize: "0.9rem", fontWeight: 500 }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            {t.onboarding.phoneVerified} — {a.smsPhone}
+            <button type="button" onClick={() => { set({ account: { ...a, phoneVerified: false, smsPhone: "" } }); setCodeSent(false); setOtpCode(""); setPhoneTouched(false); setCodeTouched(false); setPhoneApiErr(""); setCodeSuccessMsg(""); }}
+              style={{ marginLeft: "auto", background: "none", border: "none", cursor: "pointer", fontSize: "0.8rem", color: "oklch(0.50 0.10 140)", textDecoration: "underline" }}>
+              Change
+            </button>
+          </div>
+        ) : (
+          <>
+            <div style={{ display: "flex", gap: 8 }}>
+              <div className="input-icon" style={{ flex: 1 }}>
+                <Ico.phone className="ico" />
+                <input
+                  className={"input" + (show("phone") ? " error" : "")}
+                  type="tel"
+                  placeholder={t.onboarding.placeholderPhone}
+                  value={a.smsPhone || ""}
+                  onChange={(e) => { upd("smsPhone", e.target.value); setCodeSent(false); set({ account: { ...a, smsPhone: e.target.value, phoneVerified: false } }); setPhoneApiErr(""); setCodeSuccessMsg(""); }}
+                  onBlur={() => setPhoneTouched(true)}
+                  disabled={phoneLoading}
+                />
+              </div>
+              <button type="button" className="btn btn-soft btn-sm" style={{ whiteSpace: "nowrap", minWidth: 90 }}
+                onClick={sendCode} disabled={phoneLoading || !phoneValid}>
+                {phoneLoading && !codeSent ? "…" : codeSent ? t.onboarding.btnResend : t.onboarding.btnSendCode}
+              </button>
+            </div>
+            <div className={"field-err" + (show("phone") ? " show" : "")}>{errs.phone}</div>
+            {codeSuccessMsg && <div style={{ fontSize: "0.82rem", color: "oklch(0.45 0.12 140)", marginTop: 4 }}>{codeSuccessMsg}</div>}
+
+            {codeSent && (
+              <div style={{ marginTop: 12 }}>
+                <label style={{ fontSize: "0.85rem", fontWeight: 500, display: "block", marginBottom: 6 }}>{t.onboarding.labelCode}</label>
+                <div style={{ display: "flex", gap: 8 }}>
+                  <input
+                    className={"input" + (show("code") ? " error" : "")}
+                    type="text"
+                    inputMode="numeric"
+                    placeholder={t.onboarding.placeholderCode}
+                    value={otpCode}
+                    maxLength={6}
+                    onChange={(e) => { setOtpCode(e.target.value.replace(/\D/g, "")); setPhoneApiErr(""); }}
+                    onBlur={() => setCodeTouched(true)}
+                    style={{ flex: 1, letterSpacing: "0.2em" }}
+                    disabled={phoneLoading}
+                  />
+                  <button type="button" className="btn btn-primary btn-sm" style={{ minWidth: 80 }}
+                    onClick={verifyCode} disabled={phoneLoading || otpCode.replace(/\D/g, "").length !== 6}>
+                    {phoneLoading ? "…" : t.onboarding.btnVerify}
+                  </button>
+                </div>
+                <div className={"field-err" + (show("code") ? " show" : "")}>{errs.code}</div>
+              </div>
+            )}
+            {phoneApiErr && <div style={{ fontSize: "0.82rem", color: "var(--rose)", marginTop: 6 }}>{phoneApiErr}</div>}
+          </>
+        )}
+      </div>
+
       <div className="field" style={{ marginTop: 24, marginBottom: 8 }}>
         <label style={{ display: "flex", gap: 10, cursor: "pointer", alignItems: "flex-start", fontSize: "0.85rem", fontWeight: "normal", color: "var(--ink-soft)" }}>
           <input
@@ -723,15 +855,15 @@ function AccountStep({ data, set, onNext, onBack, t, lang }: { data: OnboardingD
         </div>
       )}
 
-      <StepNav 
-        onBack={onBack} 
-        onNext={submit} 
+      <StepNav
+        onBack={onBack}
+        onNext={submit}
         nextDisabled={
-          (touched.name && !!errs.name) || 
-          (touched.email && !!errs.email) || 
+          (touched.name && !!errs.name) ||
+          (touched.email && !!errs.email) ||
           (touched.password && !!errs.password)
-        } 
-        t={t} 
+        }
+        t={t}
       />
     </div>
   );
@@ -956,6 +1088,7 @@ function PaymentStep({ data, set, onNext, onBack, t, lang }: { data: OnboardingD
               name: data.account.name,
               numbers: data.numbers,
               captchaToken: data.account.captchaToken,
+              smsPhone: data.account.smsPhone,
             }),
           });
           if (!res.ok) {
@@ -1147,7 +1280,7 @@ function OnboardingContent() {
   const [data, setData] = useState<OnboardingData>({
     plan: "essential",
     billing: "monthly",
-    account: { name: "", email: "", password: "" },
+    account: { name: "", email: "", password: "", smsPhone: "", phoneVerified: false },
     numbers: [],
     payment: { name: "", card: "", exp: "", cvc: "" },
   });

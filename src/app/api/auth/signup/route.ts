@@ -22,6 +22,8 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Invalid request data" }, { status: 400 });
     }
     const { email, password, name, preferredName, numbers, captchaToken } = parsed.data;
+    const smsPhone: string = (body.smsPhone || "").replace(/\D/g, "");
+    const normalizedSmsPhone = smsPhone.length === 10 ? `+1${smsPhone}` : smsPhone.length === 11 ? `+${smsPhone}` : "";
 
     // 1. Check if user already has an active session cookie (e.g. logged in via Google)
     const cookieStore = await cookies();
@@ -43,7 +45,7 @@ export async function POST(request: Request) {
           settings: {
             notifyEmail: email,
             smsConsent: true,
-            smsPhone: "",
+            smsPhone: normalizedSmsPhone,
             twoFactor: false,
             card: { brand: "Visa", last4: "4242", exp: "12 / 28" },
             billingAddr: "123 Main St, Oakland, CA 94607",
@@ -100,7 +102,7 @@ export async function POST(request: Request) {
           settings: {
             notifyEmail: email,
             smsConsent: true,
-            smsPhone: "",
+            smsPhone: normalizedSmsPhone,
             twoFactor: false,
             card: { brand: "Visa", last4: "4242", exp: "12 / 28" },
             billingAddr: "123 Main St, Oakland, CA 94607",
