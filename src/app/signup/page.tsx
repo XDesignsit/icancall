@@ -846,10 +846,12 @@ function AccountStep({ data, set, onNext, onBack, t, lang }: { data: OnboardingD
             </div>
             <div className={"field-err" + (show("email") ? " show" : "")}>{errs.email}</div>
             {!smsConsent && (
-              <button type="button" className="btn btn-primary" style={{ marginTop: 8, width: "100%", padding: "10px 20px", fontSize: "0.9rem" }}
-                onClick={sendEmailCode} disabled={emailLoading || !validEmail(a.email)}>
-                {emailLoading && !emailCodeSent ? "…" : emailCodeSent ? t.onboarding.btnResend : t.onboarding.btnSendCode}
-              </button>
+              <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 8 }}>
+                <button type="button" className="btn btn-primary" style={{ padding: "10px 24px", fontSize: "0.9rem" }}
+                  onClick={sendEmailCode} disabled={emailLoading || !validEmail(a.email)}>
+                  {emailLoading && !emailCodeSent ? "…" : emailCodeSent ? t.onboarding.btnResend : t.onboarding.btnSendCode}
+                </button>
+              </div>
             )}
             {emailSuccessMsg && <div style={{ fontSize: "0.82rem", color: "oklch(0.45 0.12 140)", marginTop: 4 }}>{emailSuccessMsg}</div>}
             {emailApiErr && <div style={{ fontSize: "0.82rem", color: "var(--rose)", marginTop: 6 }}>{emailApiErr}</div>}
