@@ -4019,15 +4019,7 @@ export function AccountView({
                           ? `-$${Math.abs(numCost).toFixed(2)}/${lang === "es" ? "mes" : lang === "fr" ? "mois" : "mo"}` 
                           : `$0.00/${lang === "es" ? "mes" : lang === "fr" ? "mois" : "mo"}`}
                       </span>
-                      {a.addons?.extraNumbers && a.addons.extraNumbers > 0 ? (
-                        <div style={{ fontSize: "0.78rem", color: "var(--ink-faint)", marginTop: 6, textAlign: "right" }}>
-                          ℹ️ {lang === "es" 
-                            ? `Ya posee ${a.addons.extraNumbers} línea(s) adicional(es) activa(s)` 
-                            : lang === "fr" 
-                            ? `Vous possédez déjà ${a.addons.extraNumbers} ligne(s) supplémentaire(s) active(s)` 
-                            : `You already own ${a.addons.extraNumbers} active additional line(s)`}
-                        </div>
-                      ) : null}
+
                     </div>
                   </div>
 
