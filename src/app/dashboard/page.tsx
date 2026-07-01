@@ -2375,36 +2375,32 @@ export function AccountView({
   }, [planModalOpen, account.plan, account.billingCycle]);
 
   useEffect(() => {
-    const handleAddonMsg = (e: MessageEvent) => {
-      if (e.origin !== window.location.origin) return;
-      if (e.data?.type === "CREEM_ADDON_SUCCESS" && addonPendingAction.current) {
-        addonPendingAction.current();
-        addonPendingAction.current = null;
-      }
-    };
-
-    const checkAddonSuccess = () => {
+    const fireAddon = () => {
       if (!addonPendingAction.current) return;
-      const raw = localStorage.getItem("creem_addon_success");
-      if (!raw) return;
-      try {
-        const { ts } = JSON.parse(raw);
-        // Only act on a fresh success (within last 30 seconds)
-        if (Date.now() - ts < 30000) {
-          localStorage.removeItem("creem_addon_success");
-          addonPendingAction.current();
-          addonPendingAction.current = null;
-        }
-      } catch {}
+      addonPendingAction.current();
+      addonPendingAction.current = null;
+      localStorage.removeItem("creem_addon_success");
     };
 
-    window.addEventListener("message", handleAddonMsg);
-    window.addEventListener("focus", checkAddonSuccess);
-    window.addEventListener("storage", checkAddonSuccess);
+    // Primary: BroadcastChannel (reliable same-origin cross-window)
+    let bc: BroadcastChannel | null = null;
+    try {
+      bc = new BroadcastChannel("creem_addon");
+      bc.onmessage = (e) => {
+        if (e.data?.type === "CREEM_ADDON_SUCCESS") fireAddon();
+      };
+    } catch {}
+
+    // Secondary: postMessage from opener
+    const handleMsg = (e: MessageEvent) => {
+      if (e.origin !== window.location.origin) return;
+      if (e.data?.type === "CREEM_ADDON_SUCCESS") fireAddon();
+    };
+    window.addEventListener("message", handleMsg);
+
     return () => {
-      window.removeEventListener("message", handleAddonMsg);
-      window.removeEventListener("focus", checkAddonSuccess);
-      window.removeEventListener("storage", checkAddonSuccess);
+      bc?.close();
+      window.removeEventListener("message", handleMsg);
     };
   }, []);
 
