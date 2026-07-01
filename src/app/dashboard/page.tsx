@@ -3759,7 +3759,8 @@ export function AccountView({
             const maxBlocks = 10;
 
             const proceedWithSaveAddons = (delta: number, minBlocksToSave: number) => {
-              if (delta > 0 || minBlocksToSave > 0) {
+              const newExtraNumbers = tempExtraNumbers - (a.addons?.extraNumbers || 0);
+              if (delta > 0 || newExtraNumbers > 0 || minBlocksToSave > 0) {
                 if (delta > 0) {
                   // Initialize configuration slots for the newly added numbers
                   const initialConfig: AddonNumberSlotConfig[] = Array.from({ length: delta }).map((_, idx) => ({
