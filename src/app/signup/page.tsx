@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, Suspense } from "react";
+import React, { useState, useEffect, Suspense, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { translations } from "@/lib/translations";
@@ -1169,6 +1169,7 @@ function PaymentStep({ data, set, onNext, onBack, t, lang }: { data: OnboardingD
   const [modalOpen, setModalOpen] = useState(false);
   const [checkoutUrl, setCheckoutUrl] = useState("");
   const [checkoutLoading, setCheckoutLoading] = useState(false);
+  const checkoutPopupRef = useRef<Window | null>(null);
 
   const handleStartPayment = async () => {
     // Open popup immediately — must be synchronous within the user gesture
@@ -1177,6 +1178,7 @@ function PaymentStep({ data, set, onNext, onBack, t, lang }: { data: OnboardingD
     const top  = Math.round(window.screenY + (window.outerHeight - h) / 2);
     const popup = window.open("about:blank", "creem_checkout", `width=${w},height=${h},left=${left},top=${top},resizable=yes,scrollbars=yes`);
 
+    checkoutPopupRef.current = popup;
     setCheckoutLoading(true);
     try {
       const res = await fetch("/api/creem/checkout", {
@@ -1195,7 +1197,10 @@ function PaymentStep({ data, set, onNext, onBack, t, lang }: { data: OnboardingD
       setModalOpen(true);
     } catch {
       console.error("Failed to create Creem checkout session");
-      popup?.close();
+      try { popup?.close(); } catch {}
+      if (checkoutPopupRef.current === popup) {
+        checkoutPopupRef.current = null;
+      }
     } finally {
       setCheckoutLoading(false);
     }
@@ -1205,6 +1210,10 @@ function PaymentStep({ data, set, onNext, onBack, t, lang }: { data: OnboardingD
   useEffect(() => {
     const handleMsg = async (e: MessageEvent) => {
       if (e.data && e.data.type === "CREEM_PAYMENT_SUCCESS") {
+        if (checkoutPopupRef.current) {
+          try { checkoutPopupRef.current.close(); } catch {}
+          checkoutPopupRef.current = null;
+        }
         try {
           // Register the caregiver and seed selected phone numbers in Supabase
           const res = await fetch("/api/auth/signup", {

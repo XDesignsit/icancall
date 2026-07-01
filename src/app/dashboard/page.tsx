@@ -2311,6 +2311,7 @@ export function AccountView({
   const [addonModalOpen, setAddonModalOpen] = useState(false);
   const [addonCheckoutLoading, setAddonCheckoutLoading] = useState(false);
   const addonPendingAction = useRef<(() => void) | null>(null);
+  const addonPopupRef = useRef<Window | null>(null);
   const [addonRemovalModalOpen, setAddonRemovalModalOpen] = useState(false);
   const [minuteBlocksConfirmOpen, setMinuteBlocksConfirmOpen] = useState(false);
   const [annualBillingConfirmOpen, setAnnualBillingConfirmOpen] = useState(false);
@@ -2377,6 +2378,14 @@ export function AccountView({
   useEffect(() => {
     const fireAddon = () => {
       if (!addonPendingAction.current) return;
+      if (addonPopupRef.current) {
+        try {
+          addonPopupRef.current.close();
+        } catch (err) {
+          console.error("Failed to close addon popup:", err);
+        }
+        addonPopupRef.current = null;
+      }
       addonPendingAction.current();
       addonPendingAction.current = null;
       localStorage.removeItem("creem_addon_success");
@@ -3174,6 +3183,9 @@ export function AccountView({
                       const top  = Math.round(window.screenY + (window.outerHeight - h) / 2);
                       const popup = window.open("about:blank", "creem_addon_checkout", `width=${w},height=${h},left=${left},top=${top},resizable=yes,scrollbars=yes`);
 
+                      addonPopupRef.current = popup;
+                      addonPendingAction.current = applyAddons;
+
                       // Clear any stale success flag before starting
                       localStorage.removeItem("creem_addon_success");
 
@@ -3204,6 +3216,10 @@ export function AccountView({
                               if (Date.now() - ts < 60000) {
                                 clearInterval(poll);
                                 localStorage.removeItem("creem_addon_success");
+                                try { popup?.close(); } catch {}
+                                if (addonPopupRef.current === popup) {
+                                  addonPopupRef.current = null;
+                                }
                                 applyAddons();
                               }
                             } catch {}
@@ -3214,7 +3230,11 @@ export function AccountView({
                         setTimeout(() => clearInterval(poll), 600000);
                       } catch {
                         console.error("Failed to create add-on checkout");
-                        popup?.close();
+                        try { popup?.close(); } catch {}
+                        if (addonPopupRef.current === popup) {
+                          addonPopupRef.current = null;
+                        }
+                        addonPendingAction.current = null;
                         showToast("Could not start checkout. Please try again.");
                       } finally {
                         setAddonCheckoutLoading(false);
