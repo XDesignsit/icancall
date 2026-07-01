@@ -5,26 +5,53 @@ export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
-    // Try to fetch the seeded test account from the Supabase accounts table
-    const account = await findAccountByTwilioNumber('+15005550006');
-    
-    if (account) {
-      return NextResponse.json({
-        success: true,
-        message: 'Database connection successful! Supabase is active and returning data.',
-        data: account,
-      });
-    } else {
-      return NextResponse.json({
-        success: false,
-        message: 'Connected to Supabase, but the test account (+15005550006) was not found. Please verify you ran the SQL seed query to insert the test account.',
-      });
+    // Let's fetch the first profile to get a valid user_id
+    const { data: profile, error: profileErr } = await supabase
+      .from('profiles')
+      .select('id')
+      .limit(1)
+      .maybeSingle();
+
+    if (profileErr) {
+      return NextResponse.json({ success: false, error: 'profile_fetch_err', details: profileErr });
     }
-  } catch (error: any) {
+
+    if (!profile) {
+      return NextResponse.json({ success: false, error: "No profiles found in database to test with" });
+    }
+
+    const testNum = "+19999999999";
+
+    // Try a test upsert using { onConflict: "number" }
+    const { data: upserted, error: upsertError } = await supabase
+      .from('phone_lines')
+      .upsert({
+        user_id: profile.id,
+        number: testNum,
+        name: "Test Number",
+        type: "seniors",
+        contacts: []
+      }, { onConflict: 'number' })
+      .select();
+
+    // Clean up
+    if (upserted && upserted.length > 0) {
+      await supabase
+        .from('phone_lines')
+        .delete()
+        .eq('number', testNum);
+    }
+
+    return NextResponse.json({
+      success: true,
+      profileId: profile.id,
+      upsertResult: upserted,
+      upsertError: upsertError
+    });
+  } catch (err: any) {
     return NextResponse.json({
       success: false,
-      message: 'Failed to connect to Supabase database. Verify environment variables.',
-      error: error.message || error,
-    }, { status: 500 });
+      error: err.message || err
+    });
   }
 }
