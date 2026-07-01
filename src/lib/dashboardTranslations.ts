@@ -150,7 +150,7 @@ export const dashboardTranslations: Record<
     nav: {
       manage: "Manage",
       activity: "Activity",
-      configure: "Configure",
+      configure: "Settings",
       overview: "Overview",
       contacts: "Contacts",
       routing: "Routing",
@@ -300,7 +300,7 @@ export const dashboardTranslations: Record<
     nav: {
       manage: "Gestionar",
       activity: "Actividad",
-      configure: "Configurar",
+      configure: "Ajustes",
       overview: "Resumen",
       contacts: "Contactos",
       routing: "Enrutamiento",
@@ -450,7 +450,7 @@ export const dashboardTranslations: Record<
     nav: {
       manage: "Gérer",
       activity: "Activité",
-      configure: "Configurer",
+      configure: "Paramètres",
       overview: "Aperçu",
       contacts: "Contacts",
       routing: "Routage",
@@ -750,7 +750,7 @@ export const dashboardTranslations: Record<
     nav: {
       manage: "管理",
       activity: "活动",
-      configure: "配置",
+      configure: "设置",
       overview: "仪表板",
       contacts: "联系人列表",
       routing: "呼叫转接规则",
@@ -1050,7 +1050,7 @@ export const dashboardTranslations: Record<
     nav: {
       manage: "प्रबंधन",
       activity: "गतिविधि",
-      configure: "कॉन्फ़िगर",
+      configure: "सेटिंग्स",
       overview: "डैशबोर्ड",
       contacts: "सदस्य सूची",
       routing: "कॉल रूटिंग",
@@ -1200,7 +1200,7 @@ export const dashboardTranslations: Record<
     nav: {
       manage: "Gerenciar",
       activity: "Atividade",
-      configure: "Configurar",
+      configure: "Configurações",
       overview: "Visão Geral",
       contacts: "Contatos",
       routing: "Encaminhamento",
@@ -1350,7 +1350,7 @@ export const dashboardTranslations: Record<
     nav: {
       manage: "Verwalten",
       activity: "Aktivität",
-      configure: "Konfigurieren",
+      configure: "Einstellungen",
       overview: "Übersicht",
       contacts: "Kontakte",
       routing: "Weiterleitung",
@@ -1500,7 +1500,7 @@ export const dashboardTranslations: Record<
     nav: {
       manage: "Gestisci",
       activity: "Attività",
-      configure: "Configura",
+      configure: "Impostazioni",
       overview: "Panoramica",
       contacts: "Contatti",
       routing: "Inoltro",

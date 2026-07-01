@@ -64,6 +64,7 @@ interface Line {
     notifMissed?: boolean;
     notifWeekly?: boolean;
     greetingAudioPath?: string;
+    voiceId?: string;
   };
 }
 
@@ -460,12 +461,14 @@ function ContactModal({
   onSave,
   onClose,
   d,
+  voiceId,
 }: {
   initial?: Contact;
   order: number;
   onSave: (c: Contact) => void;
   onClose: () => void;
   d: any;
+  voiceId?: string;
 }) {
   const editing = !!initial;
   const [name, setName] = useState(initial?.name || "");
@@ -497,6 +500,7 @@ function ContactModal({
         body: JSON.stringify({
           text: name.trim(),
           contactId,
+          voiceId: voiceId || '21m00Tcm4TlvDq8ikWAM',
         }),
       });
 
@@ -859,6 +863,7 @@ function ContactsView({
           onSave={save}
           onClose={() => setModal(null)}
           d={d}
+          voiceId={line.settings?.voiceId}
         />
       )}
     </div>
@@ -2167,6 +2172,7 @@ function SettingsView({
         body: JSON.stringify({
           text: greeting.trim(),
           contactId,
+          voiceId: s.voiceId || '21m00Tcm4TlvDq8ikWAM',
         }),
       });
 
@@ -2242,6 +2248,34 @@ function SettingsView({
                 </span>
               )}
             </div>
+          </div>
+          <div className="set-row" style={{ borderBottom: '1px solid var(--line-faint)' }}>
+            <div className="txt">
+              <b>ElevenLabs AI Voice</b>
+              <p>Choose the voice used for all system prompts and generated greetings.</p>
+            </div>
+            <select
+              value={s.voiceId || "21m00Tcm4TlvDq8ikWAM"}
+              onChange={(e) => set({ voiceId: e.target.value })}
+              className="p-2 rounded border border-line focus:outline-none focus:border-accent bg-surface"
+              style={{
+                padding: '6px 12px',
+                borderRadius: 6,
+                border: '1px solid var(--line)',
+                outline: 'none',
+                background: 'var(--surface)',
+                color: 'var(--ink)'
+              }}
+            >
+              <option value="21m00Tcm4TlvDq8ikWAM">Rachel (Female, Warm)</option>
+              <option value="29vD33N1CtxCmqQRPOHJ">Drew (Male, Professional)</option>
+              <option value="2EiwWnXF2V4j29thjbwy">Clyde (Male, Friendly)</option>
+              <option value="5Q0t7uMcgp8Aagzh1ZQQ">Paul (Male, Deep)</option>
+              <option value="pNInz6obpgmx5142qiA7">Adam (Male, Narrator)</option>
+              <option value="cgSgspJ2msm6clMCxT41">Jessica (Female, Storyteller)</option>
+              <option value="nPczCjzI2devA2R17O2Y">Brian (Male, Deep)</option>
+              <option value="EXAVITQu4vr4xnSDxMaL">Sarah (Female, Soft)</option>
+            </select>
           </div>
           <div className="set-row" style={{ paddingTop: 4 }}>
             <div className="txt">
@@ -4342,7 +4376,7 @@ const NAV = [
     items: [{ id: "log", label: "Call log", icon: "log" as keyof typeof ICONS, badge: true }],
   },
   {
-    group: "Configure",
+    group: "Settings",
     items: [
       { id: "settings", label: "Greetings & alerts", icon: "settings" as keyof typeof ICONS },
       { id: "account", label: "Account & billing", icon: "user" as keyof typeof ICONS },

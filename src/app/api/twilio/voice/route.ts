@@ -35,13 +35,24 @@ export async function POST(request: Request) {
     const account = await findAccountByTwilioNumber(activeNumber);
     let availableMinutes = 30; // Default fallback if number not in database
     
+    // Dynamic ElevenLabs setup based on account settings
+    const voiceId = account?.line?.settings?.voiceId || '21m00Tcm4TlvDq8ikWAM';
+    const requestUrl = new URL(request.url);
+    const baseUrl = `${requestUrl.protocol}//${requestUrl.host}`;
+    
+    // Helper to generate dynamic ElevenLabs TTS play tags
+    const getTtsPlayTag = (text: string) => {
+      const escapedText = encodeURIComponent(text.trim());
+      return `<Play>${baseUrl}/api/twilio/tts?text=${escapedText}&amp;voiceId=${voiceId}</Play>`;
+    };
+
     if (account) {
       availableMinutes = getAvailableMinutes(account);
       if (availableMinutes <= 0) {
         return new NextResponse(
           `<?xml version="1.0" encoding="UTF-8"?>
 <Response>
-  <Say voice="Polly.Amy">We are sorry, this number has run out of voice minutes. Please log in to your dashboard to top up.</Say>
+  ${getTtsPlayTag("We are sorry, this number has run out of voice minutes. Please log in to your dashboard to top up.")}
   <Hangup />
 </Response>`,
           {
@@ -83,7 +94,7 @@ export async function POST(request: Request) {
       if (greetingVoiceUrl) {
         twiml += `\n  <Play>${greetingVoiceUrl}</Play>`;
       } else {
-        twiml += `\n  <Say voice="Polly.Amy">${greetingText}</Say>`;
+        twiml += `\n  ${getTtsPlayTag(greetingText)}`;
       }
 
       if (lineMode === 'menu') {
@@ -105,25 +116,22 @@ export async function POST(request: Request) {
             }
 
             if (voiceUrl) {
-              return `\n      <Say voice="Polly.Amy">Press ${digit} for</Say>\n      <Play>${voiceUrl}</Play>`;
+              return `\n      ${getTtsPlayTag("Press " + digit + " for")}\n      <Play>${voiceUrl}</Play>`;
             } else {
-              return `\n      <Say voice="Polly.Amy">Press ${digit} for ${c.name}.</Say>`;
+              return `\n      ${getTtsPlayTag("Press " + digit + " for " + c.name)}`;
             }
           })
         );
 
         twiml += `\n  <Gather numDigits="1" action="/api/twilio/voice?To=${encodeURIComponent(activeNumber)}" method="POST" timeout="8">`;
         twiml += menuPrompts.join('');
-        twiml += `\n      <Say voice="Polly.Amy">Or press 9 to leave a voice message.</Say>\n  </Gather>`;
+        twiml += `\n      ${getTtsPlayTag("Or press 9 to leave a voice message.")}\n  </Gather>`;
         twiml += `\n  <!-- Default fallback to leaving a voicemail if they wait and enter nothing -->\n  <Redirect method="POST">/api/twilio/voice?Digits=9&amp;To=${encodeURIComponent(activeNumber)}</Redirect>`;
       } else {
         // Cascade mode prompt
         twiml += `
         <Gather numDigits="1" action="/api/twilio/voice?To=${encodeURIComponent(activeNumber)}" method="POST" timeout="8">
-          <Say voice="Polly.Amy">
-            Press 1 to reach your family's trusted contacts.
-            Press 2 to leave a voice message for the family.
-          </Say>
+          ${getTtsPlayTag("Press 1 to reach your family's trusted contacts. Press 2 to leave a voice message for the family.")}
         </Gather>
         <!-- If gather times out or caller presses nothing, default to leaving a voicemail -->
         <Redirect method="POST">/api/twilio/voice?Digits=2&amp;To=${encodeURIComponent(activeNumber)}</Redirect>
@@ -138,7 +146,7 @@ export async function POST(request: Request) {
         const contact = contacts[d - 1];
         if (contact && contact.phone) {
           twiml += `
-            <Say voice="Polly.Amy">Connecting you to ${contact.name}. Please stand by.</Say>
+            ${getTtsPlayTag("Connecting you to " + contact.name + ". Please stand by.")}
             <Dial 
               timeout="15" 
               action="/api/twilio/voice-completed?To=${encodeURIComponent(activeNumber)}" 
@@ -151,16 +159,16 @@ export async function POST(request: Request) {
           `;
         } else {
           twiml += `
-            <Say voice="Polly.Amy">That contact is currently unavailable.</Say>
+            ${getTtsPlayTag("That contact is currently unavailable.")}
             <Redirect method="POST">/api/twilio/voice?To=${encodeURIComponent(activeNumber)}</Redirect>
           `;
         }
       } else if (digits === '9' || digits === 'no-answer') {
         if (digits === 'no-answer') {
-          twiml += `<Say voice="Polly.Amy">The contact is currently unavailable.</Say>`;
+          twiml += getTtsPlayTag("The contact is currently unavailable.");
         }
         twiml += `
-          <Say voice="Polly.Amy">Please leave your message after the tone. When you are finished, you can hang up.</Say>
+          ${getTtsPlayTag("Please leave your message after the tone. When you are finished, you can hang up.")}
           <Record 
             action="/api/twilio/transcription?To=${encodeURIComponent(activeNumber)}" 
             transcribe="true" 
@@ -171,7 +179,7 @@ export async function POST(request: Request) {
         `;
       } else {
         twiml += `
-          <Say voice="Polly.Amy">Invalid selection.</Say>
+          ${getTtsPlayTag("Invalid selection.")}
           <Redirect method="POST">/api/twilio/voice?To=${encodeURIComponent(activeNumber)}</Redirect>
         `;
       }
@@ -183,7 +191,7 @@ export async function POST(request: Request) {
         if (availableContacts.length > 0) {
           const timeLimitSeconds = Math.floor(availableMinutes * 60);
           twiml += `
-            <Say voice="Polly.Amy">Connecting you to your primary trusted contacts. Please stand by.</Say>
+            ${getTtsPlayTag("Connecting you to your primary trusted contacts. Please stand by.")}
             <Dial 
               timeout="15" 
               action="/api/twilio/voice-completed?To=${encodeURIComponent(activeNumber)}" 
@@ -197,8 +205,8 @@ export async function POST(request: Request) {
         } else {
           // Fallback to voicemail if no contacts are available/online
           twiml += `
-            <Say voice="Polly.Amy">Your primary trusted contacts are currently unavailable.</Say>
-            <Say voice="Polly.Amy">Please leave your message after the tone. When you are finished, you can hang up.</Say>
+            ${getTtsPlayTag("Your primary trusted contacts are currently unavailable.")}
+            ${getTtsPlayTag("Please leave your message after the tone. When you are finished, you can hang up.")}
             <Record 
               action="/api/twilio/transcription?To=${encodeURIComponent(activeNumber)}" 
               transcribe="true" 
@@ -209,10 +217,10 @@ export async function POST(request: Request) {
         }
       } else if (digits === '2' || digits === 'no-answer') {
         if (digits === 'no-answer') {
-          twiml += `<Say voice="Polly.Amy">The primary contacts are currently unavailable.</Say>`;
+          twiml += getTtsPlayTag("The primary contacts are currently unavailable.");
         }
         twiml += `
-          <Say voice="Polly.Amy">Please leave your message after the tone. When you are finished, you can hang up.</Say>
+          ${getTtsPlayTag("Please leave your message after the tone. When you are finished, you can hang up.")}
           <Record 
             action="/api/twilio/transcription?To=${encodeURIComponent(activeNumber)}" 
             transcribe="true" 
@@ -223,7 +231,7 @@ export async function POST(request: Request) {
         `;
       } else {
         twiml += `
-          <Say voice="Polly.Amy">Invalid selection.</Say>
+          ${getTtsPlayTag("Invalid selection.")}
           <Redirect method="POST">/api/twilio/voice?To=${encodeURIComponent(activeNumber)}</Redirect>
         `;
       }
