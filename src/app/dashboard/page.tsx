@@ -3759,35 +3759,27 @@ export function AccountView({
             const maxBlocks = 10;
 
             const proceedWithSaveAddons = (delta: number, minBlocksToSave: number) => {
-              if (delta > 0) {
-                // Initialize configuration slots for the newly added numbers
-                const initialConfig: AddonNumberSlotConfig[] = Array.from({ length: delta }).map((_, idx) => ({
-                  index: idx,
-                  areaCode: "415",
-                  numbersList: fetchNumbers("415", 6),
-                  selectedNumber: null,
-                  isSearching: false,
-                }));
-                setAddedNumbersConfig(initialConfig);
+              if (delta > 0 || minBlocksToSave > 0) {
+                if (delta > 0) {
+                  // Initialize configuration slots for the newly added numbers
+                  const initialConfig: AddonNumberSlotConfig[] = Array.from({ length: delta }).map((_, idx) => ({
+                    index: idx,
+                    areaCode: "415",
+                    numbersList: fetchNumbers("415", 6),
+                    selectedNumber: null,
+                    isSearching: false,
+                  }));
+                  setAddedNumbersConfig(initialConfig);
+                } else {
+                  setAddedNumbersConfig([]);
+                }
                 setAddonModalOpen(true);
               } else if (delta < 0) {
                 // User is removing numbers, must choose which ones to return
                 setSelectedLinesToRemove([]);
                 setAddonRemovalModalOpen(true);
               } else {
-                // Just saving minutes or no changes at all
-                setAccount((prev) => {
-                  const updated = {
-                    ...prev,
-                    addons: {
-                      ...(prev.addons || {}),
-                      extraNumbers: tempExtraNumbers,
-                      minuteBlocks: (prev.addons?.minuteBlocks || 0) + minBlocksToSave,
-                    } as Account["addons"],
-                  };
-                  localStorage.setItem("ic_account_data", JSON.stringify(updated));
-                  return updated;
-                });
+                // Just resetting minutes or no changes at all
                 setTempMinuteBlocks(0);
                 showToast(ext.addonsUpdatedToast);
               }
@@ -3859,6 +3851,15 @@ export function AccountView({
                       <span className="sub">
                         {numCost > 0 ? `+$${numCost.toFixed(2)}/${lang === "es" ? "mes" : lang === "fr" ? "mois" : lang === "ja" ? "月" : lang === "zh" ? "月" : lang === "ar" ? "شهر" : lang === "hi" ? "माह" : lang === "pt" ? "mês" : lang === "de" ? "Monat" : lang === "it" ? "mese" : lang === "ko" ? "월" : "mo"}` : lang === "es" ? "Incluido: plan base" : lang === "fr" ? "Inclus : forfait de base" : lang === "ja" ? "基本プランに含まれる" : lang === "zh" ? "包含在基础版中" : lang === "ar" ? "مشمول في الباقة الأساسية" : lang === "hi" ? "शामिल: बेस प्लान" : lang === "pt" ? "Incluído: plano básico" : lang === "de" ? "Inklusive: Basistarif" : lang === "it" ? "Incluso: piano base" : lang === "ko" ? "기본 제공: 기본 플랜" : "Included: base plan"}
                       </span>
+                      {a.addons?.extraNumbers && a.addons.extraNumbers > 0 ? (
+                        <div style={{ fontSize: "0.78rem", color: "var(--ink-faint)", marginTop: 6, textAlign: "right" }}>
+                          ℹ️ {lang === "es" 
+                            ? `Ya posee ${a.addons.extraNumbers} línea(s) adicional(es) activa(s)` 
+                            : lang === "fr" 
+                            ? `Vous possédez déjà ${a.addons.extraNumbers} ligne(s) supplémentaire(s) active(s)` 
+                            : `You already own ${a.addons.extraNumbers} active additional line(s)`}
+                        </div>
+                      ) : null}
                     </div>
                   </div>
 
