@@ -3178,15 +3178,17 @@ export function AccountView({
                       const top  = Math.round(window.screenY + (window.outerHeight - h) / 2);
                       const popup = window.open("about:blank", "creem_addon_checkout", `width=${w},height=${h},left=${left},top=${top},resizable=yes,scrollbars=yes`);
 
+                      // Clear any stale success flag before starting
+                      localStorage.removeItem("creem_addon_success");
+
                       setAddonCheckoutLoading(true);
-                      addonPendingAction.current = applyAddons;
 
                       try {
                         const first = checkouts[0];
                         const res = await fetch("/api/creem/checkout", {
                           method: "POST",
                           headers: { "Content-Type": "application/json" },
-                          body: JSON.stringify({ addon: first.addon, quantity: first.quantity, email: account.email }),
+                          body: JSON.stringify({ addon: first.addon, quantity: first.quantity }),
                         });
                         if (!res.ok) throw new Error("checkout_failed");
                         const { checkoutUrl } = await res.json();
@@ -3196,6 +3198,24 @@ export function AccountView({
                         } else {
                           window.open(checkoutUrl, "_blank");
                         }
+
+                        // Poll localStorage for success flag (focus events are unreliable after cross-origin popup nav)
+                        const poll = setInterval(() => {
+                          const raw = localStorage.getItem("creem_addon_success");
+                          if (raw) {
+                            try {
+                              const { ts } = JSON.parse(raw);
+                              if (Date.now() - ts < 60000) {
+                                clearInterval(poll);
+                                localStorage.removeItem("creem_addon_success");
+                                applyAddons();
+                              }
+                            } catch {}
+                          }
+                        }, 800);
+
+                        // Stop polling after 10 minutes
+                        setTimeout(() => clearInterval(poll), 600000);
                       } catch {
                         console.error("Failed to create add-on checkout");
                         popup?.close();
