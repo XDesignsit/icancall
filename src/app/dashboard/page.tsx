@@ -99,6 +99,7 @@ interface Account {
     usedMin: number;
     rolloverMin: number;
   };
+  avatarUrl?: string;
 }
 
 const getLineDefaultLabel = (totalIndex: number, plan: string, lang: string): string => {
@@ -2471,6 +2472,50 @@ export function AccountView({
   const [annualBillingConfirmOpen, setAnnualBillingConfirmOpen] = useState(false);
   const annualBillingConfirmCallback = useRef<(() => void) | null>(null);
 
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+
+  const handlePhotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      showToast(lang === "es" ? "La imagen debe ser menor a 5MB" : lang === "fr" ? "L'image doit être inférieure à 5 Mo" : "Image must be under 5MB");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    setUploadingPhoto(true);
+    try {
+      const res = await fetch("/api/caregiver/upload-avatar", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!res.ok) throw new Error("Upload failed");
+      const data = await res.json();
+
+      if (data.avatarUrl) {
+        setAccount((prev) => {
+          const updated = {
+            ...prev,
+            avatarUrl: data.avatarUrl,
+          };
+          localStorage.setItem("ic_account_data", JSON.stringify(updated));
+          return updated;
+        });
+        showToast(lang === "es" ? "¡Foto de perfil actualizada!" : lang === "fr" ? "Photo de profil mise à jour !" : "Profile photo updated successfully!");
+      }
+    } catch (err) {
+      console.error(err);
+      showToast(lang === "es" ? "Error al subir la foto" : lang === "fr" ? "Échec du téléchargement de la photo" : "Failed to upload photo");
+    } finally {
+      setUploadingPhoto(false);
+    }
+  };
+
   interface AddonNumberSlotConfig {
     index: number;
     areaCode: string;
@@ -2630,8 +2675,12 @@ export function AccountView({
           </div>
           <div className="card-pad">
             <div className="acct-photo">
-              <span className="big-ava" style={{ display: "grid", placeItems: "center" }}>
-                {initials(a.name)}
+              <span className="big-ava" style={{ display: "grid", placeItems: "center", overflow: "hidden" }}>
+                {a.avatarUrl ? (
+                  <img src={a.avatarUrl} alt={a.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                ) : (
+                  initials(a.name)
+                )}
               </span>
               <div className="pmeta">
                 <b>{a.name}</b>
@@ -2643,11 +2692,19 @@ export function AccountView({
                    a.role}
                 </span>
                 <div className="pacts">
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    style={{ display: "none" }}
+                    accept="image/*"
+                    onChange={handlePhotoChange}
+                  />
                   <button
                     className="btn btn-ghost btn-sm"
-                    onClick={() => showToast(ext.photoToast)}
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploadingPhoto}
                   >
-                    <Icon name="camera" /> {ext.changePhoto}
+                    <Icon name="camera" /> {uploadingPhoto ? (lang === "es" ? "Subiendo..." : lang === "fr" ? "Téléchargement..." : "Uploading...") : ext.changePhoto}
                   </button>
                 </div>
               </div>
@@ -4696,6 +4753,7 @@ export default function DashboardApp() {
     plan: "pro",
     billingCycle: "monthly",
     addons: { extraNumbers: 0, minuteBlocks: 0, usedMin: 41, rolloverMin: 18 },
+    avatarUrl: "",
   });
 
   const [lang, setLang] = useState<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi" | "pt" | "de" | "it" | "ko">("en");
@@ -4723,6 +4781,7 @@ export default function DashboardApp() {
       plan: settings.plan || "pro",
       billingCycle: settings.billingCycle || "monthly",
       addons: settings.addons || { extraNumbers: 0, minuteBlocks: 0, usedMin: 0, rolloverMin: 0 },
+      avatarUrl: settings.avatarUrl || "",
     };
   };
 
@@ -4743,7 +4802,8 @@ export default function DashboardApp() {
         billingAddr: account.billingAddr,
         plan: account.plan,
         billingCycle: account.billingCycle,
-        addons: account.addons
+        addons: account.addons,
+        avatarUrl: account.avatarUrl || ""
       }
     };
   };
@@ -5296,7 +5356,13 @@ export default function DashboardApp() {
             {missedCount > 0 && <span className="dot"></span>}
           </button>
           <div className="user-chip clickable" onClick={() => go("account")}>
-            <span className="ava">MD</span>
+            <span className="ava" style={{ overflow: "hidden", display: "grid", placeItems: "center" }}>
+              {account.avatarUrl ? (
+                <img src={account.avatarUrl} alt={account.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+              ) : (
+                initials(account.name)
+              )}
+            </span>
             <span className="who">
               <b>{account.name}</b>
               <span>{d.common.accountOwner}</span>
