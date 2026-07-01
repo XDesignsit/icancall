@@ -9,10 +9,16 @@ function AddonSuccessContent() {
   const qty = parseInt(searchParams.get("qty") ?? "1", 10);
 
   useEffect(() => {
-    if (window.opener) {
-      window.opener.postMessage({ type: "CREEM_ADDON_SUCCESS", addon, qty }, window.location.origin);
-      setTimeout(() => window.close(), 800);
-    }
+    // window.opener is nulled by browsers after cross-origin navigation (Creem → back)
+    // Use localStorage so the parent dashboard tab can detect the success
+    localStorage.setItem("creem_addon_success", JSON.stringify({ addon, qty, ts: Date.now() }));
+    // Still try postMessage in case opener is available
+    try {
+      if (window.opener) {
+        window.opener.postMessage({ type: "CREEM_ADDON_SUCCESS", addon, qty }, window.location.origin);
+      }
+    } catch {}
+    setTimeout(() => window.close(), 1200);
   }, [addon, qty]);
 
   return (

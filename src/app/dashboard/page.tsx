@@ -2382,8 +2382,30 @@ export function AccountView({
         addonPendingAction.current = null;
       }
     };
+
+    const checkAddonSuccess = () => {
+      if (!addonPendingAction.current) return;
+      const raw = localStorage.getItem("creem_addon_success");
+      if (!raw) return;
+      try {
+        const { ts } = JSON.parse(raw);
+        // Only act on a fresh success (within last 30 seconds)
+        if (Date.now() - ts < 30000) {
+          localStorage.removeItem("creem_addon_success");
+          addonPendingAction.current();
+          addonPendingAction.current = null;
+        }
+      } catch {}
+    };
+
     window.addEventListener("message", handleAddonMsg);
-    return () => window.removeEventListener("message", handleAddonMsg);
+    window.addEventListener("focus", checkAddonSuccess);
+    window.addEventListener("storage", checkAddonSuccess);
+    return () => {
+      window.removeEventListener("message", handleAddonMsg);
+      window.removeEventListener("focus", checkAddonSuccess);
+      window.removeEventListener("storage", checkAddonSuccess);
+    };
   }, []);
 
   const getModalButtonText = () => {
