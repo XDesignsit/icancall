@@ -5,48 +5,39 @@ export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
-    // Let's fetch the first profile to get a valid user_id
-    const { data: profile, error: profileErr } = await supabase
-      .from('profiles')
-      .select('id')
-      .limit(1)
-      .maybeSingle();
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-    if (profileErr) {
-      return NextResponse.json({ success: false, error: 'profile_fetch_err', details: profileErr });
+    if (!supabaseUrl || !serviceKey) {
+      return NextResponse.json({
+        success: false,
+        error: "Missing Supabase env variables on server"
+      });
     }
 
-    if (!profile) {
-      return NextResponse.json({ success: false, error: "No profiles found in database to test with" });
+    const res = await fetch(`${supabaseUrl}/rest/v1/`, {
+      headers: {
+        'apikey': serviceKey,
+      }
+    });
+
+    if (!res.ok) {
+      const errText = await res.text();
+      return NextResponse.json({
+        success: false,
+        error: "Failed to fetch PostgREST schema",
+        status: res.status,
+        details: errText
+      });
     }
 
-    const testNum = "+19999999999";
-
-    // Try a test upsert using { onConflict: "number" }
-    const { data: upserted, error: upsertError } = await supabase
-      .from('phone_lines')
-      .upsert({
-        user_id: profile.id,
-        number: testNum,
-        name: "Test Number",
-        type: "seniors",
-        contacts: []
-      }, { onConflict: 'number' })
-      .select();
-
-    // Clean up
-    if (upserted && upserted.length > 0) {
-      await supabase
-        .from('phone_lines')
-        .delete()
-        .eq('number', testNum);
-    }
+    const swagger = await res.json();
+    const tables = Object.keys(swagger.definitions || {});
 
     return NextResponse.json({
       success: true,
-      profileId: profile.id,
-      upsertResult: upserted,
-      upsertError: upsertError
+      supabaseUrl,
+      tables
     });
   } catch (err: any) {
     return NextResponse.json({
