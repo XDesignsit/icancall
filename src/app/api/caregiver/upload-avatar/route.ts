@@ -60,16 +60,38 @@ export async function POST(request: Request) {
       avatarUrl = `/avatars/${filename}?t=${Date.now()}`;
     } else {
       // Production mode: upload to Supabase Storage
-      const { data, error } = await supabase.storage
+      let uploadResult = await supabase.storage
         .from("avatars")
         .upload(filename, buffer, {
           contentType,
           upsert: true,
         });
 
-      if (error) {
-        console.error("Supabase storage upload error:", error);
-        return NextResponse.json({ error: "Storage upload failed: " + error.message }, { status: 500 });
+      // If bucket doesn't exist, create it and retry upload
+      if (uploadResult.error && uploadResult.error.message?.toLowerCase().includes("not found")) {
+        console.log("Bucket 'avatars' not found. Creating bucket...");
+        try {
+          const { error: createError } = await supabase.storage.createBucket("avatars", {
+            public: true,
+          });
+          if (createError) throw createError;
+
+          // Retry upload
+          uploadResult = await supabase.storage
+            .from("avatars")
+            .upload(filename, buffer, {
+              contentType,
+              upsert: true,
+            });
+        } catch (bucketErr: any) {
+          console.error("Failed to create bucket or retry upload:", bucketErr);
+          return NextResponse.json({ error: "Storage setup failed: " + (bucketErr.message || "Cannot create bucket") }, { status: 500 });
+        }
+      }
+
+      if (uploadResult.error) {
+        console.error("Supabase storage upload error:", uploadResult.error);
+        return NextResponse.json({ error: "Storage upload failed: " + uploadResult.error.message }, { status: 500 });
       }
 
       const { data: publicUrlData } = supabase.storage

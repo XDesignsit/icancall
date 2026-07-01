@@ -2494,7 +2494,10 @@ export function AccountView({
         body: formData,
       });
 
-      if (!res.ok) throw new Error("Upload failed");
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || "Upload failed");
+      }
       const data = await res.json();
 
       if (data.avatarUrl) {
@@ -2508,9 +2511,9 @@ export function AccountView({
         });
         showToast(lang === "es" ? "¡Foto de perfil actualizada!" : lang === "fr" ? "Photo de profil mise à jour !" : "Profile photo updated successfully!");
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      showToast(lang === "es" ? "Error al subir la foto" : lang === "fr" ? "Échec du téléchargement de la photo" : "Failed to upload photo");
+      showToast(err.message || (lang === "es" ? "Error al subir la foto" : lang === "fr" ? "Échec du téléchargement de la photo" : "Failed to upload photo"));
     } finally {
       setUploadingPhoto(false);
     }
