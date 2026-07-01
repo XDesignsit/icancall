@@ -3862,6 +3862,21 @@ export function AccountView({
                     ? "Êtes-vous sûr de vouloir passer à la facturation annuelle ? Votre mode de paiement enregistré sera débité immédiatement."
                     : "Are you sure you want to switch to annual billing? Your payment method on file will be charged immediately."}
                 </p>
+                <div style={{
+                  fontSize: "0.92rem",
+                  color: "var(--blue)",
+                  background: "var(--tint)",
+                  border: "1px solid var(--line)",
+                  borderRadius: "var(--r-md)",
+                  padding: "10px 14px",
+                  fontWeight: 600
+                }}>
+                  ℹ️ {lang === "es"
+                    ? `Monto de facturación anual: ${account.plan === "pro" ? "$249.00" : "$149.00"}/año`
+                    : lang === "fr"
+                    ? `Montant de la facturation annuelle : ${account.plan === "pro" ? "249,00 $" : "149,00 $"}/an`
+                    : `Annual billing amount: ${account.plan === "pro" ? "$249.00" : "$149.00"}/yr`}
+                </div>
               </div>
             </Modal>
           )}
