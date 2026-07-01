@@ -5450,13 +5450,23 @@ export default function DashboardApp() {
                   : "Select a phone number for your new priority line."}
               </p>
 
-              <div style={{ background: "oklch(0.96 0.03 220 / 0.4)", border: "1px solid var(--border)", borderRadius: "var(--r-md)", padding: "10px 14px", marginBottom: 16, fontSize: "0.85rem", color: "var(--ink-soft)", lineHeight: 1.4 }}>
-                ℹ️ {lang === "es"
-                  ? "Nota: Esta línea se agregará como un complemento y se cobrará a su tarifa de $6.99/mes inmediatamente al confirmar y guardar."
-                  : lang === "fr"
-                  ? "Remarque : Cette ligne sera ajoutée en tant qu'option et facturée à votre tarif de 6,99 $/mois immédiatement après confirmation."
-                  : "Note: This line will be added as an add-on and billed at your rate of $6.99/mo immediately upon confirming and saving."}
-              </div>
+              {lines.length >= 2 ? (
+                <div style={{ background: "oklch(0.96 0.03 220 / 0.4)", border: "1px solid var(--border)", borderRadius: "var(--r-md)", padding: "10px 14px", marginBottom: 16, fontSize: "0.85rem", color: "var(--ink-soft)", lineHeight: 1.4 }}>
+                  ℹ️ {lang === "es"
+                    ? "Nota: Esta línea se agregará como un complemento y se cobrará a su tarifa de $6.99/mes inmediatamente al confirmar y guardar."
+                    : lang === "fr"
+                    ? "Remarque : Cette ligne sera ajoutée en tant qu'option et facturée à votre tarif de 6,99 $/mois immédiatement après confirmation."
+                    : "Note: This line will be added as an add-on and billed at your rate of $6.99/mo immediately upon confirming and saving."}
+                </div>
+              ) : (
+                <div style={{ background: "oklch(0.96 0.03 140 / 0.1)", border: "1px solid oklch(0.8 0.1 140 / 0.3)", borderRadius: "var(--r-md)", padding: "10px 14px", marginBottom: 16, fontSize: "0.85rem", color: "var(--ink-soft)", lineHeight: 1.4 }}>
+                  ℹ️ {lang === "es"
+                    ? "Nota: Esta línea está incluida en su plan Pro sin costo adicional."
+                    : lang === "fr"
+                    ? "Remarque : Cette ligne est incluse dans votre forfait Pro sans frais supplémentaires."
+                    : "Note: This line is included in your Pro plan at no additional cost."}
+                </div>
+              )}
 
               {/* Area Code Search */}
               <div style={{ display: "flex", gap: 10, marginBottom: 16 }}>
