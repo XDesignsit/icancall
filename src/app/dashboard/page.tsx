@@ -63,6 +63,7 @@ interface Line {
     notifEmail?: boolean;
     notifMissed?: boolean;
     notifWeekly?: boolean;
+    greetingAudioPath?: string;
   };
 }
 
@@ -478,8 +479,42 @@ function ContactModal({
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
   const [voicePath, setVoicePath] = useState<string | null>(initial?.voicePath || null);
   const [isUploading, setIsUploading] = useState(false);
+  const [isGeneratingVoice, setIsGeneratingVoice] = useState(false);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
+
+  const generateAIVoice = async () => {
+    if (!name.trim()) {
+      alert("Please enter a name first.");
+      return;
+    }
+    setIsGeneratingVoice(true);
+    const contactId = initial?.id || "c" + Date.now();
+    try {
+      const response = await fetch('/api/caregiver/generate-voice', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          text: name.trim(),
+          contactId,
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setVoicePath(data.filePath);
+        setAudioUrl(data.audioUrl);
+      } else {
+        const err = await response.json();
+        alert(`AI voice generation failed: ${err.error || 'Server error'}`);
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Network error generating AI voice.");
+    } finally {
+      setIsGeneratingVoice(false);
+    }
+  };
 
   const startRecording = async () => {
     try {
@@ -635,10 +670,20 @@ function ContactModal({
               🛑 Stop Recording
             </button>
           ) : (
-            <button className="btn btn-ghost btn-sm" onClick={startRecording} type="button" disabled={isUploading} style={{ padding: '6px 12px', borderRadius: 4, cursor: 'pointer' }}>
+            <button className="btn btn-ghost btn-sm" onClick={startRecording} type="button" disabled={isUploading || isGeneratingVoice} style={{ padding: '6px 12px', borderRadius: 4, cursor: 'pointer' }}>
               🎙️ Record Name
             </button>
           )}
+
+          <button
+            className="btn btn-ghost btn-sm"
+            onClick={generateAIVoice}
+            type="button"
+            disabled={isUploading || isGeneratingVoice || !name.trim()}
+            style={{ padding: '6px 12px', borderRadius: 4, cursor: 'pointer' }}
+          >
+            {isGeneratingVoice ? "✨ Generating..." : "🤖 Generate AI Voice"}
+          </button>
           
           {audioUrl && (
             <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -2098,6 +2143,8 @@ function SettingsView({
   preferredName: string;
 }) {
   const ext = dashboardExtraTranslations[lang as keyof typeof dashboardExtraTranslations] || dashboardExtraTranslations.en;
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const s = line.settings || {};
   const set = (patch: Partial<NonNullable<Line["settings"]>>) =>
     setLine((prev) =>
@@ -2105,6 +2152,40 @@ function SettingsView({
         l.id === line.id ? { ...l, settings: { ...(l.settings || {}), ...patch } } : l
       )
     );
+
+  const generateGreetingVoice = async () => {
+    if (!greeting.trim()) {
+      alert("Please enter a greeting text first.");
+      return;
+    }
+    setIsGenerating(true);
+    const contactId = `greeting_${line.id}`;
+    try {
+      const response = await fetch('/api/caregiver/generate-voice', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          text: greeting.trim(),
+          contactId,
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        set({ greetingAudioPath: data.filePath });
+        setPreviewUrl(data.audioUrl);
+        showToast("ElevenLabs AI voice greeting generated successfully!");
+      } else {
+        const err = await response.json();
+        showToast(`ElevenLabs AI voice generation failed: ${err.error || 'Server error'}`);
+      }
+    } catch (err) {
+      console.error(err);
+      showToast("Network error generating ElevenLabs AI voice.");
+    } finally {
+      setIsGenerating(false);
+    }
+  };
 
   const greeting =
     s.greeting ??
@@ -2138,6 +2219,29 @@ function SettingsView({
               onChange={(e) => set({ greeting: e.target.value })}
               className="w-full p-3 rounded-lg border border-line focus:outline-none focus:border-accent bg-surface"
             />
+            <div style={{ display: 'flex', gap: 12, alignItems: 'center', marginTop: 10 }}>
+              <button
+                className="btn btn-ghost btn-sm"
+                onClick={generateGreetingVoice}
+                disabled={isGenerating || !greeting.trim()}
+                style={{ padding: '6px 12px', borderRadius: 4, cursor: 'pointer' }}
+                type="button"
+              >
+                {isGenerating ? "✨ Generating..." : "🤖 Generate ElevenLabs AI Voice"}
+              </button>
+
+              {previewUrl && (
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                  <audio src={previewUrl} controls style={{ width: 220, height: 32, borderRadius: 4 }} />
+                </div>
+              )}
+
+              {s.greetingAudioPath && !previewUrl && (
+                <span style={{ fontSize: '0.82rem', color: 'oklch(0.55 0.18 140)', fontWeight: 600 }}>
+                  ✅ ElevenLabs AI Voice Active
+                </span>
+              )}
+            </div>
           </div>
           <div className="set-row" style={{ paddingTop: 4 }}>
             <div className="txt">

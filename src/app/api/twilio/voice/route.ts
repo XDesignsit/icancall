@@ -58,6 +58,7 @@ export async function POST(request: Request) {
     const lineMode = account?.line?.mode || 'menu';
     const customGreeting = account?.line?.settings?.greeting;
     const greetingText = customGreeting || "Thank you for calling the iCanCall priority line.";
+    const greetingAudioPath = account?.line?.settings?.greetingAudioPath;
     const contacts = account?.line?.contacts || [];
 
     // If caller dialed cascade mode directly or pressed '1'
@@ -67,7 +68,23 @@ export async function POST(request: Request) {
 
     if (!digits) {
       // 2. Initial Call Greeting & Interactive IVR Menu
-      twiml += `\n  <Say voice="Polly.Amy">${greetingText}</Say>`;
+      let greetingVoiceUrl = null;
+      if (greetingAudioPath) {
+        try {
+          const { data } = await supabase.storage
+            .from('voice-prompts')
+            .createSignedUrl(greetingAudioPath, 60);
+          greetingVoiceUrl = data?.signedUrl;
+        } catch (err) {
+          console.warn('Error creating signed URL for greeting:', err);
+        }
+      }
+
+      if (greetingVoiceUrl) {
+        twiml += `\n  <Play>${greetingVoiceUrl}</Play>`;
+      } else {
+        twiml += `\n  <Say voice="Polly.Amy">${greetingText}</Say>`;
+      }
 
       if (lineMode === 'menu') {
         // Construct Caller Menu Routing options dynamically
