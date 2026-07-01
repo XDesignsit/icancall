@@ -3824,35 +3824,48 @@ export function AccountView({
                       <p>
                         {d.account.addonNumbersDesc}
                       </p>
+                      {a.addons?.extraNumbers && a.addons.extraNumbers > 0 ? (
+                        <div style={{ fontSize: "0.82rem", color: "var(--blue)", fontWeight: 500, marginTop: 4 }}>
+                          ℹ️ {lang === "es" 
+                            ? `Actualmente posee ${a.addons.extraNumbers} número(s) adicional(es) activo(s) ($${(a.addons.extraNumbers * 6.99).toFixed(2)}/mes)` 
+                            : lang === "fr" 
+                            ? `Vous possédez actuellement ${a.addons.extraNumbers} numéro(s) supplémentaire(s) actif(s) ($${(a.addons.extraNumbers * 6.99).toFixed(2)}/mois)` 
+                            : `You currently own ${a.addons.extraNumbers} active additional phone number(s) ($${(a.addons.extraNumbers * 6.99).toFixed(2)}/mo)`}
+                        </div>
+                      ) : null}
                     </div>
                     <div className="actl">
                       <div className="stepper">
                         <button
                           onClick={() => {
-                            const val = Math.max(0, tempExtraNumbers - 1);
+                            const val = Math.max(-currentExtraLines, tempExtraNumbers - 1);
                             console.log("Stepper - clicked", { tempExtraNumbers, newVal: val });
                             setTempExtraNumbers(val);
                           }}
-                          disabled={tempExtraNumbers === 0}
+                          disabled={tempExtraNumbers === -currentExtraLines}
                           aria-label="Remove one"
                         >
                           −
                         </button>
-                        <span className="v">{tempExtraNumbers}</span>
+                        <span className="v">{tempExtraNumbers > 0 ? `+${tempExtraNumbers}` : tempExtraNumbers}</span>
                         <button
                           onClick={() => {
-                            const val = Math.min(8, tempExtraNumbers + 1);
+                            const val = Math.min(8 - currentExtraLines, tempExtraNumbers + 1);
                             console.log("Stepper + clicked", { tempExtraNumbers, newVal: val });
                             setTempExtraNumbers(val);
                           }}
-                          disabled={tempExtraNumbers === 8}
+                          disabled={tempExtraNumbers === 8 - currentExtraLines}
                           aria-label="Add one"
                         >
                           +
                         </button>
                       </div>
                       <span className="sub">
-                        {numCost > 0 ? `+$${numCost.toFixed(2)}/${lang === "es" ? "mes" : lang === "fr" ? "mois" : lang === "ja" ? "月" : lang === "zh" ? "月" : lang === "ar" ? "شهر" : lang === "hi" ? "माह" : lang === "pt" ? "mês" : lang === "de" ? "Monat" : lang === "it" ? "mese" : lang === "ko" ? "월" : "mo"}` : lang === "es" ? "Incluido: plan base" : lang === "fr" ? "Inclus : forfait de base" : lang === "ja" ? "基本プランに含まれる" : lang === "zh" ? "包含在基础版中" : lang === "ar" ? "مشمول في الباقة الأساسية" : lang === "hi" ? "शामिल: बेस प्लान" : lang === "pt" ? "Incluído: plano básico" : lang === "de" ? "Inklusive: Basistarif" : lang === "it" ? "Incluso: piano base" : lang === "ko" ? "기본 제공: 기본 플랜" : "Included: base plan"}
+                        {tempExtraNumbers > 0 
+                          ? `+$${numCost.toFixed(2)}/${lang === "es" ? "mes" : lang === "fr" ? "mois" : "mo"}` 
+                          : tempExtraNumbers < 0 
+                          ? `-$${Math.abs(numCost).toFixed(2)}/${lang === "es" ? "mes" : lang === "fr" ? "mois" : "mo"}` 
+                          : `$0.00/${lang === "es" ? "mes" : lang === "fr" ? "mois" : "mo"}`}
                       </span>
                       {a.addons?.extraNumbers && a.addons.extraNumbers > 0 ? (
                         <div style={{ fontSize: "0.78rem", color: "var(--ink-faint)", marginTop: 6, textAlign: "right" }}>
@@ -3903,7 +3916,7 @@ export function AccountView({
                       {lang === "es" ? "Total mensual de complementos" : lang === "fr" ? "Total mensuel des options" : "Add-ons monthly total"}
                     </span>
                     <span className="big">
-                      ${total.toFixed(2)}
+                      {total < 0 ? `-$${Math.abs(total).toFixed(2)}` : `$${total.toFixed(2)}`}
                       <span> / {lang === "es" ? "mes" : lang === "fr" ? "mois" : lang === "ja" ? "月" : lang === "zh" ? "月" : lang === "ar" ? "شهر" : lang === "hi" ? "माह" : lang === "pt" ? "mês" : lang === "de" ? "Monat" : lang === "it" ? "mese" : lang === "ko" ? "월" : "mo"}</span>
                     </span>
                   </div>
