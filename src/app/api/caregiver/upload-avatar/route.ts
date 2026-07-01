@@ -98,7 +98,7 @@ export async function POST(request: Request) {
         .from("avatars")
         .getPublicUrl(filename);
 
-      avatarUrl = publicUrlData.publicUrl;
+      avatarUrl = `${publicUrlData.publicUrl}?t=${Date.now()}`;
     }
 
     // Update profile settings with the new avatarUrl
