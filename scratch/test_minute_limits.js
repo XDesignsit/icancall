@@ -85,7 +85,7 @@ async function runTests() {
 
   // --- TEST 2: Active Balance Greeting ---
   const res1 = await mockVoiceRequest(null, '+15005550006');
-  if (res1.includes('emergency safety line') && !res1.includes('run out of voice minutes')) {
+  if (res1.includes('priority line') && !res1.includes('run out of voice minutes')) {
     console.log('✅ Test 2 Passed: Inbound call allowed with active minutes.');
   } else {
     console.error('❌ Test 2 Failed: Unexpected TwiML output:', res1);

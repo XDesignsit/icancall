@@ -2771,7 +2771,7 @@ export function AccountView({
                           const newLine: Line = {
                             id: "line_" + Date.now(),
                             label: lang === "es" ? "Línea secundaria" : lang === "fr" ? "Ligne secondaire" : "Secondary line",
-                            person: lang === "es" ? "Línea del círculo de emergencia" : lang === "fr" ? "Ligne du cercle d'urgence" : "Emergency circle line",
+                            person: lang === "es" ? "Línea del círculo de confianza" : lang === "fr" ? "Ligne du cercle de confiance" : "Trusted contact line",
                             number: upgradeSelectedNumber.number,
                             color: "oklch(0.58 0.115 232)",
                             mode: "cascade",
@@ -3157,7 +3157,7 @@ export function AccountView({
                         const newLines = addedNumbersConfig.map((config, index) => ({
                           id: "line_" + Date.now() + "_" + index,
                           label: lang === "es" ? `Línea adicional ${index + 1}` : lang === "fr" ? `Ligne supplémentaire ${index + 1}` : `Additional line ${index + 1}`,
-                          person: lang === "es" ? "Línea del círculo de emergencia" : lang === "fr" ? "Ligne du cercle d'urgence" : "Emergency circle line",
+                          person: lang === "es" ? "Línea del círculo de confianza" : lang === "fr" ? "Ligne du cercle de confiance" : "Trusted contact line",
                           number: config.selectedNumber.number,
                           color: AVATAR_COLORS[(lines.length + index) % AVATAR_COLORS.length],
                           mode: "cascade" as const,
@@ -5227,7 +5227,7 @@ export default function DashboardApp() {
                   const newLine: Line = {
                     id: "line_" + Date.now() + "_" + index,
                     label: lang === "es" ? `Línea adicional ${index + 1}` : lang === "fr" ? `Ligne supplémentaire ${index + 1}` : `Additional line ${index + 1}`,
-                    person: lang === "es" ? "Línea del círculo de emergencia" : lang === "fr" ? "Ligne du cercle d'urgence" : "Emergency circle line",
+                    person: lang === "es" ? "Línea del círculo de confianza" : lang === "fr" ? "Ligne du cercle de confiance" : "Trusted contact line",
                     number: headerSelectedNumber.number,
                     color: AVATAR_COLORS[index % AVATAR_COLORS.length],
                     mode: "cascade",
@@ -5259,10 +5259,10 @@ export default function DashboardApp() {
             <div>
               <p style={{ margin: "0 0 10px 0", fontSize: "0.9rem", color: "var(--ink-soft)" }}>
                 {lang === "es"
-                  ? "Seleccione un número para su nueva línea de emergencia."
+                  ? "Seleccione un número para su nueva línea prioritaria."
                   : lang === "fr"
-                  ? "Sélectionnez un numéro pour votre nouvelle ligne d'urgence."
-                  : "Select a phone number for your new emergency line."}
+                  ? "Sélectionnez un numéro pour votre nouvelle ligne prioritaire."
+                  : "Select a phone number for your new priority line."}
               </p>
 
               <div style={{ background: "oklch(0.96 0.03 220 / 0.4)", border: "1px solid var(--border)", borderRadius: "var(--r-md)", padding: "10px 14px", marginBottom: 16, fontSize: "0.85rem", color: "var(--ink-soft)", lineHeight: 1.4 }}>

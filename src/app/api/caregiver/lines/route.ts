@@ -35,7 +35,7 @@ export async function GET() {
       const defaultLine = {
         user_id: userId,
         number: "+15005550006", // Magic Twilio test number
-        name: "Emergency cascaded line",
+        name: "Priority cascaded line",
         type: "seniors",
         contacts: [
           {

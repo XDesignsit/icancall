@@ -125,7 +125,7 @@ export async function POST(request: Request) {
       const phoneLinesRows = numbers.map((num: any) => ({
         user_id: userId,
         number: num.number || num,
-        name: "My Emergency Line",
+        name: "My Priority Line",
         type: "seniors",
         contacts: [
           {

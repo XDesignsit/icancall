@@ -176,7 +176,7 @@ export async function sendWelcomeBillingEmail(
   phoneNumbersIncluded: string
 ) {
   const subject = `Welcome to iCanCall! Confirmation for your ${planName}`;
-  const text = `Hi ${name},\n\nWelcome to iCanCall! Thank you for signing up. Here are your subscription details:\n\nPlan: ${planName}\nPrice: ${price}/${interval}\nStatus: ${paymentStatus}\nVirtual Lines: ${phoneNumbersIncluded}\n\nLogin to your dashboard to configure your emergency call circles.\n\nBest,\nThe iCanCall Team`;
+  const text = `Hi ${name},\n\nWelcome to iCanCall! Thank you for signing up. Here are your subscription details:\n\nPlan: ${planName}\nPrice: ${price}/${interval}\nStatus: ${paymentStatus}\nVirtual Lines: ${phoneNumbersIncluded}\n\nLogin to your dashboard to configure your trusted-contact circles.\n\nBest,\nThe iCanCall Team`;
 
   const html = `
     <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 580px; margin: 0 auto; padding: 32px 24px; background: #ffffff; border: 1px solid #f1f5f9; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
@@ -214,7 +214,7 @@ export async function sendWelcomeBillingEmail(
         <a href="https://icancall.co/dashboard" style="display: inline-block; padding: 12px 28px; background-color: #2563eb; color: #ffffff; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 0.95rem; box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);">Go to Your Dashboard</a>
       </div>
 
-      <p style="color: #64748b; font-size: 0.875rem; line-height: 1.6; margin: 0 0 24px 0;">In your dashboard, you can immediately configure call routing, manage emergency circles, and setup phone lines for your family members.</p>
+      <p style="color: #64748b; font-size: 0.875rem; line-height: 1.6; margin: 0 0 24px 0;">In your dashboard, you can immediately configure call routing, manage priority-contact circles, and setup phone lines for your family members.</p>
       
       <hr style="border: 0; border-top: 1px solid #f1f5f9; margin: 32px 0 20px 0;" />
       <p style="color: #94a3b8; font-size: 0.775rem; line-height: 1.5; margin: 0; text-align: center;">

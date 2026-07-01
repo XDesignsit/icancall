@@ -73,7 +73,7 @@ export async function POST(request: Request) {
             await supabase.from("phone_lines").insert({
               user_id: userId,
               number: "+15005550006",
-              name: "Emergency cascaded line",
+              name: "Priority cascaded line",
               type: "seniors",
               contacts: [
                 {

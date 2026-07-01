@@ -57,7 +57,7 @@ export async function POST(request: Request) {
 
     const lineMode = account?.line?.mode || 'menu';
     const customGreeting = account?.line?.settings?.greeting;
-    const greetingText = customGreeting || "Thank you for calling the iCanCall emergency safety line.";
+    const greetingText = customGreeting || "Thank you for calling the iCanCall priority line.";
     const contacts = account?.line?.contacts || [];
 
     // If caller dialed cascade mode directly or pressed '1'
@@ -104,7 +104,7 @@ export async function POST(request: Request) {
         twiml += `
         <Gather numDigits="1" action="/api/twilio/voice?To=${encodeURIComponent(activeNumber)}" method="POST" timeout="8">
           <Say voice="Polly.Amy">
-            Press 1 to cascade ring the family emergency circle.
+            Press 1 to reach your family's trusted contacts.
             Press 2 to leave a voice message for the family.
           </Say>
         </Gather>
@@ -166,7 +166,7 @@ export async function POST(request: Request) {
         if (availableContacts.length > 0) {
           const timeLimitSeconds = Math.floor(availableMinutes * 60);
           twiml += `
-            <Say voice="Polly.Amy">Connecting you to the primary emergency contacts. Please stand by.</Say>
+            <Say voice="Polly.Amy">Connecting you to your primary trusted contacts. Please stand by.</Say>
             <Dial 
               timeout="15" 
               action="/api/twilio/voice-completed?To=${encodeURIComponent(activeNumber)}" 
@@ -180,7 +180,7 @@ export async function POST(request: Request) {
         } else {
           // Fallback to voicemail if no contacts are available/online
           twiml += `
-            <Say voice="Polly.Amy">The primary emergency contacts are currently unavailable.</Say>
+            <Say voice="Polly.Amy">Your primary trusted contacts are currently unavailable.</Say>
             <Say voice="Polly.Amy">Please leave your message after the tone. When you are finished, you can hang up.</Say>
             <Record 
               action="/api/twilio/transcription?To=${encodeURIComponent(activeNumber)}" 

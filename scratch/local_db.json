@@ -36,7 +36,7 @@
     {
       "user_id": "mock-user-support-icancall-co",
       "number": "+15005550006",
-      "name": "Emergency cascaded line",
+      "name": "Priority cascaded line",
       "type": "seniors",
       "contacts": [
         {
