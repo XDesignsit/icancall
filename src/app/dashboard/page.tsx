@@ -4281,15 +4281,32 @@ export function AccountView({
                             </div>
                           ))}
                         </div>
-                        {a.addons?.extraNumbers && a.addons.extraNumbers > 0 ? (
-                          <div style={{ fontSize: "0.82rem", color: "var(--blue)", fontWeight: 500, marginTop: 12 }}>
-                            ℹ️ {lang === "es" 
-                              ? `Actualmente posee ${a.addons.extraNumbers} número(s) adicional(es) activo(s) ($${(a.addons.extraNumbers * 6.99).toFixed(2)}/mes)` 
-                              : lang === "fr" 
-                              ? `Vous possédez actuellement ${a.addons.extraNumbers} numéro(s) supplémentaire(s) actif(s) ($${(a.addons.extraNumbers * 6.99).toFixed(2)}/mois)` 
-                              : `You currently own ${a.addons.extraNumbers} active additional phone number(s) ($${(a.addons.extraNumbers * 6.99).toFixed(2)}/mo)`}
-                          </div>
-                        ) : null}
+                        {(() => {
+                          const planMaxIncluded = a.plan === "pro" ? 2 : 1;
+                          const planActive = Math.min(planMaxIncluded, lines.length);
+                          const addonActive = Math.max(0, lines.length - planMaxIncluded);
+                          
+                          return (
+                            <div style={{ display: "flex", flexDirection: "column", gap: 6, marginTop: 12 }}>
+                              <div style={{ fontSize: "0.82rem", color: "var(--ink-soft)", fontWeight: 500 }}>
+                                ℹ️ {lang === "es"
+                                  ? `Plan ${a.plan === "pro" ? "Pro" : "Essential"}: ${planActive} de ${planMaxIncluded} números de teléfono incluidos activados`
+                                  : lang === "fr"
+                                  ? `Forfait ${a.plan === "pro" ? "Pro" : "Essential"}: ${planActive} sur ${planMaxIncluded} numéros de téléphone inclus actifs`
+                                  : `${a.plan === "pro" ? "Pro" : "Essential"} plan: ${planActive} of ${planMaxIncluded} included phone numbers active`}
+                              </div>
+                              {addonActive > 0 ? (
+                                <div style={{ fontSize: "0.82rem", color: "var(--blue)", fontWeight: 500 }}>
+                                  ℹ️ {lang === "es"
+                                    ? `${addonActive} número(s) de teléfono adicional(es) activo(s) ($${(addonActive * 6.99).toFixed(2)}/mes)`
+                                    : lang === "fr"
+                                    ? `${addonActive} numéro(s) de téléphone supplémentaire(s) actif(s) ($${(addonActive * 6.99).toFixed(2)}/mois)`
+                                    : `${addonActive} active add-on phone number(s) ($${(addonActive * 6.99).toFixed(2)}/mo)`}
+                                </div>
+                              ) : null}
+                            </div>
+                          );
+                        })()}
                         <p style={{ fontSize: "0.76rem", color: "var(--ink-faint)", margin: "10px 0 0", lineHeight: "1.4" }}>
                           ℹ️ {lang === "es"
                             ? "Todos los números de esta cuenta comparten el mismo fondo de minutos mensuales e incorporados."
@@ -4868,11 +4885,11 @@ export default function DashboardApp() {
         if (!linesRes.ok) throw new Error("lines_fetch_failed");
         const linesData = await linesRes.json();
 
-        if (profileData.profile) {
-          const acc = mapProfileToAccount(profileData.profile);
-          setAccount(acc);
+        let currentAccount = profileData.profile ? mapProfileToAccount(profileData.profile) : null;
+        if (currentAccount) {
+          setAccount(currentAccount);
           localStorage.setItem("isLoggedIn", "true");
-          localStorage.setItem("ic_account_data", JSON.stringify(acc));
+          localStorage.setItem("ic_account_data", JSON.stringify(currentAccount));
         }
 
         if (Array.isArray(linesData.lines)) {
@@ -4881,6 +4898,18 @@ export default function DashboardApp() {
           localStorage.setItem("ic_lines_data", JSON.stringify(mappedLines));
           if (mappedLines[0]) {
             setActiveLineId(mappedLines[0].id);
+          }
+
+          // Auto-heal extraNumbers out-of-sync states on load
+          if (currentAccount) {
+            const baseLinesLimit = currentAccount.plan === "pro" ? 2 : 1;
+            const correctExtraNumbers = Math.max(0, mappedLines.length - baseLinesLimit);
+            if (currentAccount.addons && currentAccount.addons.extraNumbers !== correctExtraNumbers) {
+              console.log(`[Auto-heal] Correcting extraNumbers from ${currentAccount.addons.extraNumbers} to ${correctExtraNumbers}`);
+              currentAccount.addons.extraNumbers = correctExtraNumbers;
+              setAccount({ ...currentAccount });
+              localStorage.setItem("ic_account_data", JSON.stringify(currentAccount));
+            }
           }
         }
       } catch (err) {
@@ -5462,6 +5491,7 @@ export default function DashboardApp() {
                 className="btn btn-primary"
                 disabled={!headerSelectedNumber}
                 onClick={() => {
+                  let updatedAccount = account;
                   setAccount((prev) => {
                     const baseLinesCount = prev.plan === "pro" ? 2 : 1;
                     const needsAddon = lines.length >= baseLinesCount;
@@ -5474,13 +5504,15 @@ export default function DashboardApp() {
                         extraNumbers: (prev.addons?.extraNumbers || 0) + 1,
                       } as Account["addons"],
                     };
+                    updatedAccount = updated;
+                    localStorage.setItem("ic_account_data", JSON.stringify(updated));
                     return updated;
                   });
 
                   const index = lines.length;
                   const newLine: Line = {
                     id: "line_" + Date.now() + "_" + index,
-                    label: getLineDefaultLabel(index, account.plan, lang),
+                    label: getLineDefaultLabel(index, updatedAccount.plan, lang),
                     person: lang === "es" ? "Línea del círculo de confianza" : lang === "fr" ? "Ligne du cercle de confiance" : "Trusted contact line",
                     number: headerSelectedNumber.number,
                     color: AVATAR_COLORS[index % AVATAR_COLORS.length],
@@ -5498,7 +5530,9 @@ export default function DashboardApp() {
                     },
                   };
 
-                  setLines((prev) => [...prev, newLine]);
+                  const nextLines = [...lines, newLine];
+                  setLines(nextLines);
+                  localStorage.setItem("ic_lines_data", JSON.stringify(nextLines));
                   setActiveLineId(newLine.id);
                   setHeaderAddonModalOpen(false);
                   showToast(lang === "es" ? "¡Línea adicional configurada!" : lang === "fr" ? "Ligne supplémentaire configurée !" : "Additional line configured!");
