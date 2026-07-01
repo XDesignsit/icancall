@@ -2680,7 +2680,7 @@ export function AccountView({
             <div className="acct-photo">
               <span className="big-ava" style={{ display: "grid", placeItems: "center", overflow: "hidden" }}>
                 {a.avatarUrl ? (
-                  <img src={a.avatarUrl} alt={a.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                  <img src={a.avatarUrl} alt={a.name} style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "50%", display: "block" }} />
                 ) : (
                   initials(a.name)
                 )}
@@ -5361,7 +5361,7 @@ export default function DashboardApp() {
           <div className="user-chip clickable" onClick={() => go("account")}>
             <span className="ava" style={{ overflow: "hidden", display: "grid", placeItems: "center" }}>
               {account.avatarUrl ? (
-                <img src={account.avatarUrl} alt={account.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                <img src={account.avatarUrl} alt={account.name} style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "50%", display: "block" }} />
               ) : (
                 initials(account.name)
               )}
