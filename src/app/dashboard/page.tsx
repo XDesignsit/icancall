@@ -99,6 +99,20 @@ interface Account {
   };
 }
 
+const getLineDefaultLabel = (totalIndex: number, plan: string, lang: string): string => {
+  const baseLinesCount = plan === "pro" ? 2 : 1;
+  if (totalIndex < baseLinesCount) {
+    if (totalIndex === 0) {
+      return lang === "es" ? "Línea principal" : lang === "fr" ? "Ligne principale" : "Primary line";
+    } else {
+      return lang === "es" ? "Línea secundaria" : lang === "fr" ? "Ligne secondaire" : "Secondary line";
+    }
+  } else {
+    const extraIndex = totalIndex - baseLinesCount + 1;
+    return lang === "es" ? `Línea adicional ${extraIndex}` : lang === "fr" ? `Ligne supplémentaire ${extraIndex}` : `Additional line ${extraIndex}`;
+  }
+};
+
 /* ============ ICONS ============ */
 const ICONS = {
   overview: <><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></>,
@@ -3158,7 +3172,7 @@ export function AccountView({
 
                         const newLines = addedNumbersConfig.map((config, index) => ({
                           id: "line_" + Date.now() + "_" + index,
-                          label: lang === "es" ? `Línea adicional ${currentExtraLines + index + 1}` : lang === "fr" ? `Ligne supplémentaire ${currentExtraLines + index + 1}` : `Additional line ${currentExtraLines + index + 1}`,
+                          label: getLineDefaultLabel(lines.length + index, account.plan, lang),
                           person: lang === "es" ? "Línea del círculo de confianza" : lang === "fr" ? "Ligne du cercle de confiance" : "Trusted contact line",
                           number: config.selectedNumber.number,
                           color: AVATAR_COLORS[(lines.length + index) % AVATAR_COLORS.length],
@@ -5250,6 +5264,10 @@ export default function DashboardApp() {
                 disabled={!headerSelectedNumber}
                 onClick={() => {
                   setAccount((prev) => {
+                    const baseLinesCount = prev.plan === "pro" ? 2 : 1;
+                    const needsAddon = lines.length >= baseLinesCount;
+                    if (!needsAddon) return prev;
+
                     const updated = {
                       ...prev,
                       addons: {
@@ -5263,7 +5281,7 @@ export default function DashboardApp() {
                   const index = lines.length;
                   const newLine: Line = {
                     id: "line_" + Date.now() + "_" + index,
-                    label: lang === "es" ? `Línea adicional ${index + 1}` : lang === "fr" ? `Ligne supplémentaire ${index + 1}` : `Additional line ${index + 1}`,
+                    label: getLineDefaultLabel(index, account.plan, lang),
                     person: lang === "es" ? "Línea del círculo de confianza" : lang === "fr" ? "Ligne du cercle de confiance" : "Trusted contact line",
                     number: headerSelectedNumber.number,
                     color: AVATAR_COLORS[index % AVATAR_COLORS.length],
