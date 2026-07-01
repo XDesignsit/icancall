@@ -55,11 +55,12 @@ export async function GET(request: Request) {
     const sessionToken = await signSession({ email: email || "", role, expiresAt, userId });
     const response = NextResponse.redirect(`${appUrl}${next}`);
 
-    // Set secure HTTP-only session cookie
+    // Set secure HTTP-only session cookie (SameSite=None is required for iframe previews in prod)
+    const isProd = process.env.NODE_ENV === "production";
     response.cookies.set("session", sessionToken, {
       httpOnly: true,
-      secure: true,
-      sameSite: "none",
+      secure: isProd,
+      sameSite: isProd ? "none" : "lax",
       maxAge: 7 * 24 * 60 * 60, // 7 days
       path: "/",
     });

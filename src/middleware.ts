@@ -66,13 +66,14 @@ export async function middleware(request: NextRequest) {
       url.searchParams.set("unauthorized", "true");
       // Clear any invalid session cookie if present
       const response = NextResponse.redirect(url);
+      const isProd = process.env.NODE_ENV === "production";
       response.cookies.set("session", "", {
         path: "/",
         maxAge: 0,
         expires: new Date(0),
         httpOnly: true,
-        secure: true,
-        sameSite: "none",
+        secure: isProd,
+        sameSite: isProd ? "none" : "lax",
       });
       return response;
     }
@@ -93,13 +94,14 @@ export async function middleware(request: NextRequest) {
   // Clear session cookie when visiting login page to prevent auto-login
   if (url.pathname.startsWith("/login") && sessionCookie) {
     const response = NextResponse.next();
+    const isProd = process.env.NODE_ENV === "production";
     response.cookies.set("session", "", {
       path: "/",
       maxAge: 0,
       expires: new Date(0),
       httpOnly: true,
-      secure: true,
-      sameSite: "none",
+      secure: isProd,
+      sameSite: isProd ? "none" : "lax",
     });
     return response;
   }

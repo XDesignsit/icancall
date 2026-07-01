@@ -177,11 +177,12 @@ export async function POST(request: Request) {
 
       const response = NextResponse.json({ success: true, role });
 
-      // Set secure HTTP-only cookie (SameSite=None is required for iframe preview sandboxes)
+      // Set secure HTTP-only cookie (SameSite=None is required for iframe preview sandboxes in prod)
+      const isProd = process.env.NODE_ENV === "production";
       response.cookies.set("session", sessionToken, {
         httpOnly: true,
-        secure: true,
-        sameSite: "none",
+        secure: isProd,
+        sameSite: isProd ? "none" : "lax",
         maxAge: 7 * 24 * 60 * 60, // 7 days in seconds
         path: "/",
       });
