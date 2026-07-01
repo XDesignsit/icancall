@@ -2457,6 +2457,11 @@ export function AccountView({
   const [tempExtraNumbers, setTempExtraNumbers] = useState(a.addons?.extraNumbers || 0);
   const [tempMinuteBlocks, setTempMinuteBlocks] = useState(0);
 
+  const planMaxIncluded = a.plan === "pro" ? 2 : 1;
+  const unusedPlanLines = Math.max(0, planMaxIncluded - lines.length);
+  const newExtraNumbers = tempExtraNumbers - (a.addons?.extraNumbers || 0);
+  const chargeableNewNumbers = newExtraNumbers > 0 ? Math.max(0, newExtraNumbers - unusedPlanLines) : 0;
+
   const [lastPropExtraNumbers, setLastPropExtraNumbers] = useState(a.addons?.extraNumbers || 0);
 
   if ((a.addons?.extraNumbers || 0) !== lastPropExtraNumbers) {
@@ -3344,12 +3349,11 @@ export function AccountView({
                     className="btn btn-primary"
                     disabled={addedNumbersConfig.some(c => !c.selectedNumber) || addonCheckoutLoading}
                     onClick={async () => {
-                      const newExtraNumbers = tempExtraNumbers - (account.addons?.extraNumbers || 0);
                       const newMinuteBlocks = tempMinuteBlocks;
 
                       // Determine which add-ons need checkout
                       const checkouts: Array<{ addon: string; quantity: number }> = [];
-                      if (newExtraNumbers > 0) checkouts.push({ addon: "phone_number", quantity: newExtraNumbers });
+                      if (chargeableNewNumbers > 0) checkouts.push({ addon: "phone_number", quantity: chargeableNewNumbers });
                       if (newMinuteBlocks > 0) checkouts.push({ addon: "voice_minutes", quantity: newMinuteBlocks });
 
                       // Save the local state action for after payment(s) succeed
@@ -3359,7 +3363,7 @@ export function AccountView({
                             ...prev,
                             addons: {
                               ...(prev.addons || {}),
-                              extraNumbers: (prev.addons?.extraNumbers || 0) + tempExtraNumbers,
+                              extraNumbers: (prev.addons?.extraNumbers || 0) + chargeableNewNumbers,
                               minuteBlocks: (prev.addons?.minuteBlocks || 0) + newMinuteBlocks,
                             } as Account["addons"],
                           };
@@ -3457,7 +3461,9 @@ export function AccountView({
                   >
                     {addonCheckoutLoading
                       ? <><div style={{ width: 14, height: 14, border: "2px solid #fff", borderTopColor: "transparent", borderRadius: "50%", display: "inline-block", animation: "spin 0.7s linear infinite", marginRight: 6 }} />Processing…</>
-                      : (lang === "es" ? "Aprobar y pagar" : lang === "fr" ? "Approuver et payer" : "Approve & Pay")}
+                      : (chargeableNewNumbers > 0 || tempMinuteBlocks > 0
+                        ? (lang === "es" ? "Aprobar y pagar" : lang === "fr" ? "Approuver et payer" : "Approve & Pay")
+                        : (lang === "es" ? "Confirmar y guardar" : lang === "fr" ? "Confirmer et enregistrer" : "Confirm & Save"))}
                   </button>
                 </div>
               }
@@ -3503,18 +3509,26 @@ export function AccountView({
                       ? "Avis de facturation :" 
                       : "Billing Notice:"}
                   </b>{" "}
-                  {tempMinuteBlocks > 0 ? (
-                    lang === "es"
-                      ? "La facturación de los números y minutos adicionales comenzará inmediatamente después de aprobar los complementos."
-                      : lang === "fr"
-                      ? "La facturation des numéros supplémentaires et des minutes vocales supplémentaires sera effective immédiatement après l'approbation des options."
-                      : "Billing for the add-on numbers and extra voice minutes will be effective immediately upon approving the add-ons."
+                  {chargeableNewNumbers > 0 || tempMinuteBlocks > 0 ? (
+                    tempMinuteBlocks > 0 ? (
+                      lang === "es"
+                        ? "La facturación de los números y minutos adicionales comenzará inmediatamente después de aprobar los complementos."
+                        : lang === "fr"
+                        ? "La facturation des numéros supplémentaires et des minutes vocales supplémentaires sera effective immédiatement après l'approbation des options."
+                        : "Billing for the add-on numbers and extra voice minutes will be effective immediately upon approving the add-ons."
+                    ) : (
+                      lang === "es"
+                        ? "La facturación de los números adicionales comenzará inmediatamente después de aprobar los complementos."
+                        : lang === "fr"
+                        ? "La facturation des numéros supplémentaires sera effective immédiatement après l'approbation des options."
+                        : "Billing for the add-on numbers will be effective immediately upon approving the add-ons."
+                    )
                   ) : (
                     lang === "es"
-                      ? "La facturación de los números adicionales comenzará inmediatamente después de aprobar los complementos."
+                      ? "Esta línea adicional está incluida en su plan sin costo adicional."
                       : lang === "fr"
-                      ? "La facturation des numéros supplémentaires sera effective immédiatement après l'approbation des options."
-                      : "Billing for the add-on numbers will be effective immediately upon approving the add-ons."
+                      ? "Cette ligne supplémentaire est incluse dans votre forfait sans frais supplémentaires."
+                      : "This additional line is included in your plan at no additional cost."
                   )}
                 </div>
 
@@ -3967,7 +3981,11 @@ export function AccountView({
           </div>
 
           {(() => {
-            const numCost = tempExtraNumbers * 6.99;
+            const planMaxIncluded = a.plan === "pro" ? 2 : 1;
+            const unusedPlanLines = Math.max(0, planMaxIncluded - lines.length);
+            const chargeableNewNumbers = tempExtraNumbers > 0 ? Math.max(0, tempExtraNumbers - unusedPlanLines) : tempExtraNumbers;
+            
+            const numCost = chargeableNewNumbers * 6.99;
             const minCost = tempMinuteBlocks * 4.99;
             const total = numCost + minCost;
             const maxBlocks = 10;
@@ -4065,9 +4083,11 @@ export function AccountView({
                       </div>
                       <span className="sub">
                         {tempExtraNumbers > 0 
-                          ? `+$${numCost.toFixed(2)}/${lang === "es" ? "mes" : lang === "fr" ? "mois" : "mo"}` 
+                          ? (numCost > 0 
+                            ? `+$${numCost.toFixed(2)}/${lang === "es" ? "mes" : lang === "fr" ? "mois" : "mo"}` 
+                            : (lang === "es" ? "Incluido" : lang === "fr" ? "Inclus" : "Included"))
                           : tempExtraNumbers < 0 
-                          ? `-$${Math.abs(numCost).toFixed(2)}/${lang === "es" ? "mes" : lang === "fr" ? "mois" : "mo"}` 
+                          ? `-$${Math.abs(tempExtraNumbers * 6.99).toFixed(2)}/${lang === "es" ? "mes" : lang === "fr" ? "mois" : "mo"}` 
                           : `$0.00/${lang === "es" ? "mes" : lang === "fr" ? "mois" : "mo"}`}
                       </span>
 
@@ -5553,23 +5573,27 @@ export default function DashboardApp() {
                   : "Select a phone number for your new priority line."}
               </p>
 
-              {lines.length >= 2 ? (
-                <div style={{ background: "oklch(0.96 0.03 220 / 0.4)", border: "1px solid var(--border)", borderRadius: "var(--r-md)", padding: "10px 14px", marginBottom: 16, fontSize: "0.85rem", color: "var(--ink-soft)", lineHeight: 1.4 }}>
-                  ℹ️ {lang === "es"
-                    ? "Nota: Esta línea se agregará como un complemento y se cobrará a su tarifa de $6.99/mes inmediatamente al confirmar y guardar."
-                    : lang === "fr"
-                    ? "Remarque : Cette ligne sera ajoutée en tant qu'option et facturée à votre tarif de 6,99 $/mois immédiatement après confirmation."
-                    : "Note: This line will be added as an add-on and billed at your rate of $6.99/mo immediately upon confirming and saving."}
-                </div>
-              ) : (
-                <div style={{ background: "oklch(0.96 0.03 140 / 0.1)", border: "1px solid oklch(0.8 0.1 140 / 0.3)", borderRadius: "var(--r-md)", padding: "10px 14px", marginBottom: 16, fontSize: "0.85rem", color: "var(--ink-soft)", lineHeight: 1.4 }}>
-                  ℹ️ {lang === "es"
-                    ? "Nota: Esta línea está incluida en su plan Pro sin costo adicional."
-                    : lang === "fr"
-                    ? "Remarque : Cette ligne est incluse dans votre forfait Pro sans frais supplémentaires."
-                    : "Note: This line is included in your Pro plan at no additional cost."}
-                </div>
-              )}
+              {(() => {
+                const baseLinesLimit = account.plan === "pro" ? 2 : 1;
+                const isPro = account.plan === "pro";
+                return lines.length >= baseLinesLimit ? (
+                  <div style={{ background: "oklch(0.96 0.03 220 / 0.4)", border: "1px solid var(--border)", borderRadius: "var(--r-md)", padding: "10px 14px", marginBottom: 16, fontSize: "0.85rem", color: "var(--ink-soft)", lineHeight: 1.4 }}>
+                    ℹ️ {lang === "es"
+                      ? "Nota: Esta línea se agregará como un complemento y se cobrará a su tarifa de $6.99/mes inmediatamente al confirmar y guardar."
+                      : lang === "fr"
+                      ? "Remarque : Cette ligne sera ajoutée en tant qu'option et facturée à votre tarif de 6,99 $/mois immédiatement après confirmation."
+                      : "Note: This line will be added as an add-on and billed at your rate of $6.99/mo immediately upon confirming and saving."}
+                  </div>
+                ) : (
+                  <div style={{ background: "oklch(0.96 0.03 140 / 0.1)", border: "1px solid oklch(0.8 0.1 140 / 0.3)", borderRadius: "var(--r-md)", padding: "10px 14px", marginBottom: 16, fontSize: "0.85rem", color: "var(--ink-soft)", lineHeight: 1.4 }}>
+                    ℹ️ {lang === "es"
+                      ? `Nota: Esta línea está incluida en su plan ${isPro ? "Pro" : "Essential"} sin costo adicional.`
+                      : lang === "fr"
+                      ? `Remarque : Cette ligne est incluse dans votre forfait ${isPro ? "Pro" : "Essential"} sans frais supplémentaires.`
+                      : `Note: This line is included in your ${isPro ? "Pro" : "Essential"} plan at no additional cost.`}
+                  </div>
+                );
+              })()}
 
               {/* Area Code Search */}
               <div style={{ display: "flex", gap: 10, marginBottom: 16 }}>
