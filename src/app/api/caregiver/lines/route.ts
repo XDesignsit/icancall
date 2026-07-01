@@ -81,8 +81,9 @@ export async function POST(request: Request) {
     }
 
     // 1. Map to database rows (if ID is not a UUID, let Supabase generate one)
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
     const rows = lines.map((l: any) => {
-      const isUuid = typeof l.id === "string" && l.id.length > 20;
+      const isUuid = typeof l.id === "string" && uuidRegex.test(l.id);
       return {
         id: isUuid ? l.id : undefined,
         user_id: userId,

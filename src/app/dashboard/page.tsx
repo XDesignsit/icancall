@@ -4036,15 +4036,6 @@ export function AccountView({
                       <p>
                         {d.account.addonNumbersDesc}
                       </p>
-                      {a.addons?.extraNumbers && a.addons.extraNumbers > 0 ? (
-                        <div style={{ fontSize: "0.82rem", color: "var(--blue)", fontWeight: 500, marginTop: 4 }}>
-                          ℹ️ {lang === "es" 
-                            ? `Actualmente posee ${a.addons.extraNumbers} número(s) adicional(es) activo(s) ($${(a.addons.extraNumbers * 6.99).toFixed(2)}/mes)` 
-                            : lang === "fr" 
-                            ? `Vous possédez actuellement ${a.addons.extraNumbers} numéro(s) supplémentaire(s) actif(s) ($${(a.addons.extraNumbers * 6.99).toFixed(2)}/mois)` 
-                            : `You currently own ${a.addons.extraNumbers} active additional phone number(s) ($${(a.addons.extraNumbers * 6.99).toFixed(2)}/mo)`}
-                        </div>
-                      ) : null}
                     </div>
                     <div className="actl">
                       <div className="stepper">
@@ -4290,6 +4281,15 @@ export function AccountView({
                             </div>
                           ))}
                         </div>
+                        {a.addons?.extraNumbers && a.addons.extraNumbers > 0 ? (
+                          <div style={{ fontSize: "0.82rem", color: "var(--blue)", fontWeight: 500, marginTop: 12 }}>
+                            ℹ️ {lang === "es" 
+                              ? `Actualmente posee ${a.addons.extraNumbers} número(s) adicional(es) activo(s) ($${(a.addons.extraNumbers * 6.99).toFixed(2)}/mes)` 
+                              : lang === "fr" 
+                              ? `Vous possédez actuellement ${a.addons.extraNumbers} numéro(s) supplémentaire(s) actif(s) ($${(a.addons.extraNumbers * 6.99).toFixed(2)}/mois)` 
+                              : `You currently own ${a.addons.extraNumbers} active additional phone number(s) ($${(a.addons.extraNumbers * 6.99).toFixed(2)}/mo)`}
+                          </div>
+                        ) : null}
                         <p style={{ fontSize: "0.76rem", color: "var(--ink-faint)", margin: "10px 0 0", lineHeight: "1.4" }}>
                           ℹ️ {lang === "es"
                             ? "Todos los números de esta cuenta comparten el mismo fondo de minutos mensuales e incorporados."
