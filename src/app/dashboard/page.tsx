@@ -621,7 +621,7 @@ function ContactModal({
               🛑 Stop Recording
             </button>
           ) : (
-            <button className="btn btn-secondary btn-sm" onClick={startRecording} type="button" disabled={isUploading} style={{ padding: '6px 12px', borderRadius: 4, cursor: 'pointer' }}>
+            <button className="btn btn-ghost btn-sm" onClick={startRecording} type="button" disabled={isUploading} style={{ padding: '6px 12px', borderRadius: 4, cursor: 'pointer' }}>
               🎙️ Record Name
             </button>
           )}
@@ -5291,9 +5291,10 @@ export default function DashboardApp() {
                   style={{ width: 120, height: 38, padding: "0 12px", border: "1px solid var(--border)", borderRadius: "var(--r-md)", background: "var(--bg)", color: "var(--ink)" }}
                 />
                 <button
-                  className="btn btn-secondary"
+                  className="btn btn-ghost"
                   disabled={headerAreaCode.length !== 3 || headerIsSearching}
                   onClick={() => loadHeaderNumbers(headerAreaCode)}
+                  style={{ height: 38, padding: "0 16px" }}
                 >
                   {headerIsSearching ? (
                     lang === "es" ? "Buscando..." : lang === "fr" ? "Recherche..." : "Searching..."
@@ -5310,21 +5311,39 @@ export default function DashboardApp() {
                 </div>
               ) : headerNumbersList.length > 0 ? (
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 10 }}>
-                  {headerNumbersList.map((num) => (
-                    <button
-                      key={num.id || num.number}
-                      className={`btn ${headerSelectedNumber?.number === num.number ? 'btn-primary' : 'btn-secondary'}`}
-                      style={{ padding: "12px 8px", fontSize: "0.9rem", display: "flex", flexDirection: "column", alignItems: "center", gap: 4, cursor: "pointer" }}
-                      onClick={() => setHeaderSelectedNumber(num)}
-                    >
-                      <span style={{ fontWeight: 600 }}>{num.number}</span>
-                      {num.memorable ? (
-                        <span style={{ fontSize: "0.72rem", opacity: 0.8 }}>{num.memorable}</span>
-                      ) : (
-                        <span style={{ fontSize: "0.72rem", opacity: 0.8 }}>Standard Number</span>
-                      )}
-                    </button>
-                  ))}
+                  {headerNumbersList.map((num) => {
+                    const isSelected = headerSelectedNumber?.number === num.number;
+                    return (
+                      <button
+                        key={num.id || num.number}
+                        onClick={() => setHeaderSelectedNumber(num)}
+                        style={{
+                          display: "flex",
+                          flexDirection: "column",
+                          alignItems: "center",
+                          padding: "12px 8px",
+                          borderRadius: "var(--r-md)",
+                          border: isSelected ? "2px solid var(--blue)" : "1px solid var(--line)",
+                          background: isSelected ? "var(--tint)" : "var(--surface)",
+                          cursor: "pointer",
+                          transition: "all 0.15s",
+                          textAlign: "center",
+                          gap: 4,
+                        }}
+                      >
+                        <span style={{ fontWeight: 600, fontSize: "0.9rem", color: "var(--ink)" }}>{num.number}</span>
+                        {num.memorable ? (
+                          <span style={{ fontSize: "0.72rem", color: isSelected ? "var(--blue)" : "var(--ink-faint)" }}>
+                            {num.memorable}
+                          </span>
+                        ) : (
+                          <span style={{ fontSize: "0.72rem", color: isSelected ? "var(--blue)" : "var(--ink-faint)" }}>
+                            {lang === "es" ? "Número estándar" : lang === "fr" ? "Numéro standard" : "Standard Number"}
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
                 </div>
               ) : (
                 <div style={{ textAlign: "center", padding: "20px 0", color: "var(--ink-soft)" }}>
