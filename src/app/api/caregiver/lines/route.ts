@@ -103,7 +103,7 @@ export async function POST(request: Request) {
     // 2. Upsert the lines
     const { data: updatedLines, error: upsertError } = await supabase
       .from("phone_lines")
-      .upsert(rows)
+      .upsert(rows, { onConflict: "number" })
       .select();
 
     if (upsertError || !updatedLines) {

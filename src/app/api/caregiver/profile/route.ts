@@ -82,14 +82,26 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { name, preferred_name, settings } = await request.json();
+    const { name, preferred_name, settings: newSettings } = await request.json();
+
+    // Fetch existing settings to prevent overwriting payment metadata keys set by webhooks
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("settings")
+      .eq("id", userId)
+      .maybeSingle();
+
+    const mergedSettings = {
+      ...(profile?.settings || {}),
+      ...(newSettings || {}),
+    };
 
     const { data: updated, error } = await supabase
       .from("profiles")
       .update({
         name,
         preferred_name,
-        settings,
+        settings: mergedSettings,
         updated_at: new Date().toISOString(),
       })
       .eq("id", userId)
