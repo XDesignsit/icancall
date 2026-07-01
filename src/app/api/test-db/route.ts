@@ -1,48 +1,30 @@
 import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { findAccountByTwilioNumber } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-    if (!supabaseUrl || !serviceKey) {
+    // Try to fetch the seeded test account from the Supabase accounts table
+    const account = await findAccountByTwilioNumber('+15005550006');
+    
+    if (account) {
+      return NextResponse.json({
+        success: true,
+        message: 'Database connection successful! Supabase is active and returning data.',
+        data: account,
+      });
+    } else {
       return NextResponse.json({
         success: false,
-        error: "Missing Supabase env variables on server"
+        message: 'Connected to Supabase, but the test account (+15005550006) was not found. Please verify you ran the SQL seed query to insert the test account.',
       });
     }
-
-    const res = await fetch(`${supabaseUrl}/rest/v1/`, {
-      headers: {
-        'apikey': serviceKey,
-      }
-    });
-
-    if (!res.ok) {
-      const errText = await res.text();
-      return NextResponse.json({
-        success: false,
-        error: "Failed to fetch PostgREST schema",
-        status: res.status,
-        details: errText
-      });
-    }
-
-    const swagger = await res.json();
-    const tables = Object.keys(swagger.definitions || {});
-
-    return NextResponse.json({
-      success: true,
-      supabaseUrl,
-      tables
-    });
-  } catch (err: any) {
+  } catch (error: any) {
     return NextResponse.json({
       success: false,
-      error: err.message || err
-    });
+      message: 'Failed to connect to Supabase database. Verify environment variables.',
+      error: error.message || error,
+    }, { status: 500 });
   }
 }

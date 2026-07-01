@@ -3147,7 +3147,7 @@ export function AccountView({
                             ...prev,
                             addons: {
                               ...(prev.addons || {}),
-                              extraNumbers: tempExtraNumbers,
+                              extraNumbers: (prev.addons?.extraNumbers || 0) + tempExtraNumbers,
                               minuteBlocks: (prev.addons?.minuteBlocks || 0) + newMinuteBlocks,
                             } as Account["addons"],
                           };
@@ -4649,6 +4649,7 @@ export default function DashboardApp() {
           window.location.href = "/login?unauthorized=true";
           return;
         }
+        if (!profileRes.ok) throw new Error("profile_fetch_failed");
         const profileData = await profileRes.json();
 
         const linesRes = await fetch("/api/caregiver/lines");
@@ -4657,23 +4658,42 @@ export default function DashboardApp() {
           window.location.href = "/login?unauthorized=true";
           return;
         }
+        if (!linesRes.ok) throw new Error("lines_fetch_failed");
         const linesData = await linesRes.json();
 
-        if (profileRes.ok && profileData.profile) {
+        if (profileData.profile) {
           const acc = mapProfileToAccount(profileData.profile);
           setAccount(acc);
           localStorage.setItem("isLoggedIn", "true");
+          localStorage.setItem("ic_account_data", JSON.stringify(acc));
         }
 
-        if (linesRes.ok && Array.isArray(linesData.lines)) {
+        if (Array.isArray(linesData.lines)) {
           const mappedLines = mapDbLinesToFrontend(linesData.lines);
           setLines(mappedLines);
+          localStorage.setItem("ic_lines_data", JSON.stringify(mappedLines));
           if (mappedLines[0]) {
             setActiveLineId(mappedLines[0].id);
           }
         }
       } catch (err) {
-        console.error("Error loading dashboard data:", err);
+        console.error("Error loading dashboard data, falling back to localStorage:", err);
+        const cachedAcc = localStorage.getItem("ic_account_data");
+        const cachedLines = localStorage.getItem("ic_lines_data");
+        if (cachedAcc) {
+          try {
+            setAccount(JSON.parse(cachedAcc));
+          } catch {}
+        }
+        if (cachedLines) {
+          try {
+            const parsedLines = JSON.parse(cachedLines);
+            setLines(parsedLines);
+            if (parsedLines[0]) {
+              setActiveLineId(parsedLines[0].id);
+            }
+          } catch {}
+        }
       } finally {
         setLoading(false);
         setInitialLoadComplete(true);
