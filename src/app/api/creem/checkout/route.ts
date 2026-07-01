@@ -24,7 +24,9 @@ export async function POST(req: NextRequest) {
   try {
     const { plan, billing, email, addon, quantity } = await req.json();
 
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+    const host = req.headers.get("host") || "localhost:3000";
+    const proto = host.startsWith("localhost") ? "http" : "https";
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || `${proto}://${host}`;
 
     let productId: string;
     let successUrl: string;
