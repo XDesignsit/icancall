@@ -27,9 +27,10 @@
           "minuteBlocks": 0,
           "usedMin": 0,
           "rolloverMin": 0
-        }
+        },
+        "avatarUrl": ""
       },
-      "updated_at": "2026-06-30T04:28:00.807Z"
+      "updated_at": "2026-07-02T22:08:33.493Z"
     }
   ],
   "phone_lines": [
@@ -47,15 +48,13 @@
           "available": true
         }
       ],
-      "id": "mock-row-h0ia3svd6",
+      "id": "mock-row-etnp1481h",
       "settings": {
         "color": "oklch(0.58 0.115 232)",
         "mode": "menu",
         "minutesUsed": 0,
         "schedule": [],
-        "extraSettings": {
-          "notifMissed": true
-        }
+        "extraSettings": {}
       }
     }
   ]

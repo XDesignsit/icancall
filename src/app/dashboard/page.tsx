@@ -698,7 +698,7 @@ function ContactModal({
 
           {voicePath && !audioUrl && (
             <span style={{ fontSize: '0.82rem', color: 'oklch(0.55 0.18 140)', fontWeight: 600 }}>
-              ✅ Saved Voice Prompt
+              Saved Voice Prompt
             </span>
           )}
         </div>
@@ -1632,7 +1632,6 @@ function RoutingView({
           {/* Validation Alert / Status */}
           {(hasGap || hasOverlap) && (
             <div style={{ marginTop: 16, padding: "12px 16px", borderRadius: "var(--r-sm)", background: hasOverlap ? "oklch(0.96 0.04 25)" : "oklch(0.96 0.05 75)", color: hasOverlap ? "oklch(0.5 0.13 20)" : "oklch(0.5 0.13 60)", fontSize: "0.86rem", display: "flex", alignItems: "center", gap: 8 }}>
-              <span>⚠️</span>
               <div>
                 {hasOverlap && <div><b>{lang === "es" ? "Superposición de cobertura:" : lang === "fr" ? "Chevauchement de couverture :" : lang === "ja" ? "重複するカバー範囲:" : lang === "zh" ? "时间段重叠:" : lang === "ar" ? "تداخل التغطية:" : lang === "hi" ? "ओवरलैपिंग कवरेज:" : lang === "pt" ? "Sobreposição de cobertura:" : lang === "de" ? "Überschneidung der Abdeckung:" : lang === "it" ? "Copertura sovrapposta:" : lang === "ko" ? "스케줄 중복:" : "Overlapping Coverage:"}</b> {ext.overlappingCoverage.split(":").slice(1).join(":").trim() || ext.overlappingCoverage}</div>}
                 {hasGap && (
@@ -2245,7 +2244,7 @@ function SettingsView({
 
               {s.greetingAudioPath && !previewUrl && (
                 <span style={{ fontSize: '0.82rem', color: 'oklch(0.55 0.18 140)', fontWeight: 600 }}>
-                  ✅ ElevenLabs AI Voice Active
+                  ElevenLabs AI Voice Active
                 </span>
               )}
             </div>
@@ -3323,11 +3322,7 @@ export function AccountView({
                       fontWeight: 500,
                       textAlign: "left"
                     }}>
-                      ⚠️ {lang === "es"
-                        ? "Una vez devuelto un número, no podrá volver a reclamarlo."
-                        : lang === "fr"
-                        ? "Une fois qu'un numéro est restitué, vous ne pouvez plus le réclamer."
-                        : "Warning: Once a number is returned, you can no longer claim it again."}
+                      Once a number is returned, you can no longer claim it again.
                     </p>
                   </div>
                 )}
@@ -3481,7 +3476,7 @@ export function AccountView({
                     textAlign: "left",
                     fontWeight: 500
                   }}>
-                    📞 <b>{lang === "es" ? "Confirmar minutos adicionales:" : lang === "fr" ? "Confirmer les minutes supplémentaires :" : "Confirm Extra Voice Minutes:"}</b>{" "}
+                    <b>{lang === "es" ? "Confirmar minutos adicionales:" : lang === "fr" ? "Confirmer les minutes supplémentaires :" : "Confirm Extra Voice Minutes:"}</b>{" "}
                     {lang === "es"
                       ? `Agregando ${tempMinuteBlocks * 30} minutos adicionales.`
                       : lang === "fr"
@@ -3502,7 +3497,7 @@ export function AccountView({
                   textAlign: "left",
                   lineHeight: "1.4"
                 }}>
-                  ℹ️ <b>
+                  <b>
                     {lang === "es" 
                       ? "Aviso de facturación:" 
                       : lang === "fr" 
@@ -3795,11 +3790,7 @@ export function AccountView({
                   fontWeight: 500,
                   textAlign: "left"
                 }}>
-                  ⚠️ {lang === "es"
-                    ? "Una vez devuelto un número, no podrá volver a reclamarlo."
-                    : lang === "fr"
-                    ? "Une fois qu'un numéro est restitué, vous ne pouvez plus le réclamer."
-                    : "Warning: Once a number is returned, you can no longer claim it again."}
+                  Once a number is returned, you can no longer claim it again.
                 </p>
               </div>
             </Modal>
@@ -3871,7 +3862,7 @@ export function AccountView({
                   padding: "10px 14px",
                   fontWeight: 600
                 }}>
-                  ℹ️ {lang === "es"
+                  {lang === "es"
                     ? `Monto de facturación anual: ${account.plan === "pro" ? "$249.00" : "$149.00"}/año`
                     : lang === "fr"
                     ? `Montant de la facturation annuelle : ${account.plan === "pro" ? "249,00 $" : "149,00 $"}/an`
@@ -4202,7 +4193,7 @@ export function AccountView({
                       margin: 0,
                       fontWeight: 500
                     }}>
-                      ⚠️ <strong>{lang === "es" ? "Aviso de facturación:" : lang === "fr" ? "Avis de facturation :" : "Billing Notice:"}</strong>{" "}
+                      <strong>{lang === "es" ? "Aviso de facturación:" : lang === "fr" ? "Avis de facturation :" : "Billing Notice:"}</strong>{" "}
                       {lang === "es"
                         ? "La facturación por los minutos adicionales será efectiva de inmediato. Una vez confirmados los minutos adicionales, se facturarán inmediatamente a su cuenta."
                         : lang === "fr"
@@ -4324,7 +4315,7 @@ export function AccountView({
                           return (
                             <div style={{ display: "flex", flexDirection: "column", gap: 6, marginTop: 12 }}>
                               <div style={{ fontSize: "0.82rem", color: "var(--ink-soft)", fontWeight: 500 }}>
-                                ℹ️ {lang === "es"
+                                {lang === "es"
                                   ? `Plan ${a.plan === "pro" ? "Pro" : "Essential"}: ${planActive} de ${planMaxIncluded} números de teléfono incluidos activados`
                                   : lang === "fr"
                                   ? `Forfait ${a.plan === "pro" ? "Pro" : "Essential"}: ${planActive} sur ${planMaxIncluded} numéros de téléphone inclus actifs`
@@ -4332,7 +4323,7 @@ export function AccountView({
                               </div>
                               {addonActive > 0 ? (
                                 <div style={{ fontSize: "0.82rem", color: "var(--blue)", fontWeight: 500 }}>
-                                  ℹ️ {lang === "es"
+                                  {lang === "es"
                                     ? `${addonActive} número(s) de teléfono adicional(es) activo(s) ($${(addonActive * 6.99).toFixed(2)}/mes)`
                                     : lang === "fr"
                                     ? `${addonActive} numéro(s) de téléphone supplémentaire(s) actif(s) ($${(addonActive * 6.99).toFixed(2)}/mois)`
@@ -4343,7 +4334,7 @@ export function AccountView({
                           );
                         })()}
                         <p style={{ fontSize: "0.76rem", color: "var(--ink-faint)", margin: "10px 0 0", lineHeight: "1.4" }}>
-                          ℹ️ {lang === "es"
+                          {lang === "es"
                             ? "Todos los números de esta cuenta comparten el mismo fondo de minutos mensuales e incorporados."
                             : lang === "fr"
                             ? "Tous les numéros de ce compte partagent le même pool de minutes mensuelles et d'options."
@@ -4816,6 +4807,10 @@ export default function DashboardApp() {
   // 1. Loading and Syncing States
   const [loading, setLoading] = useState(true);
   const [initialLoadComplete, setInitialLoadComplete] = useState(false);
+  // Only allow syncing back to the server after server data actually loaded;
+  // otherwise a failed load would push the hardcoded placeholder account/lines
+  // over the user's real data (the lines POST also deletes unlisted rows).
+  const serverDataLoadedRef = useRef(false);
 
   // 2. Client-side profile to account mapping
   const mapProfileToAccount = (profile: any): Account => {
@@ -4947,6 +4942,8 @@ export default function DashboardApp() {
             }
           }
         }
+
+        serverDataLoadedRef.current = true;
       } catch (err) {
         console.error("Error loading dashboard data, falling back to localStorage:", err);
         const cachedAcc = localStorage.getItem("ic_account_data");
@@ -4975,7 +4972,7 @@ export default function DashboardApp() {
 
   // 4. Synchronize profile/account updates to Supabase
   useEffect(() => {
-    if (!initialLoadComplete) return;
+    if (!initialLoadComplete || !serverDataLoadedRef.current) return;
     const imp = localStorage.getItem("impersonatingUser");
     if (imp) return; // Skip updating real user database if impersonating
 
@@ -4995,7 +4992,7 @@ export default function DashboardApp() {
 
   // 5. Synchronize lines updates to Supabase
   useEffect(() => {
-    if (!initialLoadComplete) return;
+    if (!initialLoadComplete || !serverDataLoadedRef.current) return;
     const imp = localStorage.getItem("impersonatingUser");
     if (imp) return; // Skip updating real user database if impersonating
 
@@ -5173,8 +5170,13 @@ export default function DashboardApp() {
       localStorage.removeItem("isAdminLoggedIn");
       localStorage.removeItem("impersonatingUser");
     }
+    // Clear the HTTP-only session cookie server-side so the next visit
+    // requires a fresh login instead of silently reusing the old session
+    const clearSession = fetch("/api/auth/logout", { method: "POST" }).catch(() => {});
     setTimeout(() => {
-      window.location.href = "/";
+      clearSession.finally(() => {
+        window.location.href = "/";
+      });
     }, 750);
   };
 
@@ -5202,7 +5204,7 @@ export default function DashboardApp() {
       {impersonatingUser && (
         <div style={{ background: "oklch(0.35 0.08 28)", color: "#fff", padding: "10px 24px", display: "flex", alignItems: "center", justifyContent: "space-between", fontSize: "0.88rem", zIndex: 1000, boxShadow: "0 2px 8px rgba(0,0,0,0.15)", flex: "none" }}>
           <div>
-            ⚠️ Impersonation Mode: Active session for <strong>{impersonatingUser.name}</strong> ({impersonatingUser.email})
+            Impersonation Mode: Active session for <strong>{impersonatingUser.name}</strong> ({impersonatingUser.email})
           </div>
           <button 
             onClick={handleStopImpersonating}
@@ -5593,7 +5595,7 @@ export default function DashboardApp() {
                 const isPro = account.plan === "pro";
                 return lines.length >= baseLinesLimit ? (
                   <div style={{ background: "oklch(0.96 0.03 220 / 0.4)", border: "1px solid var(--border)", borderRadius: "var(--r-md)", padding: "10px 14px", marginBottom: 16, fontSize: "0.85rem", color: "var(--ink-soft)", lineHeight: 1.4 }}>
-                    ℹ️ {lang === "es"
+                    {lang === "es"
                       ? "Nota: Esta línea se agregará como un complemento y se cobrará a su tarifa de $6.99/mes inmediatamente al confirmar y guardar."
                       : lang === "fr"
                       ? "Remarque : Cette ligne sera ajoutée en tant qu'option et facturée à votre tarif de 6,99 $/mois immédiatement après confirmation."
@@ -5601,7 +5603,7 @@ export default function DashboardApp() {
                   </div>
                 ) : (
                   <div style={{ background: "oklch(0.96 0.03 140 / 0.1)", border: "1px solid oklch(0.8 0.1 140 / 0.3)", borderRadius: "var(--r-md)", padding: "10px 14px", marginBottom: 16, fontSize: "0.85rem", color: "var(--ink-soft)", lineHeight: 1.4 }}>
-                    ℹ️ {lang === "es"
+                    {lang === "es"
                       ? `Nota: Esta línea está incluida en su plan ${isPro ? "Pro" : "Essential"} sin costo adicional.`
                       : lang === "fr"
                       ? `Remarque : Cette ligne est incluse dans votre forfait ${isPro ? "Pro" : "Essential"} sans frais supplémentaires.`
@@ -5746,7 +5748,7 @@ export default function DashboardApp() {
                 : `Are you sure you want to remove the phone line "${headerRemovalLine.label}" (${headerRemovalLine.number})?`}
             </p>
             <p style={{ margin: 0, fontSize: "0.85rem", color: "oklch(0.6 0.18 22)", fontWeight: 500 }}>
-              ⚠️ {lang === "es"
+              {lang === "es"
                 ? "Esta acción devolverá este número de forma permanente y eliminará todas sus configuraciones y contactos."
                 : lang === "fr"
                 ? "Cette action restituera définitivement ce numéro et effacera toutes ses configurations."

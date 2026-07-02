@@ -1,8 +1,29 @@
 import { NextRequest, NextResponse } from "next/server";
+import { cookies } from "next/headers";
+import { verifySession } from "@/lib/session";
 
 const CREEM_API = process.env.CREEM_API_KEY?.startsWith("creem_test_")
   ? "https://test-api.creem.io/v1"
   : "https://api.creem.io/v1";
+
+const DEMO_EMAILS = ["support@icancall.co", "admin@icancall.co"];
+
+// Demo accounts must never reach a real payment gateway, and local/preview
+// environments have no Creem credentials at all — both get a simulated
+// checkout that lands directly on the success URL so the normal post-payment
+// flow (success flag → apply add-ons → sync to DB) still runs end to end.
+async function isSimulatedCheckout(productId: string): Promise<boolean> {
+  if (!process.env.CREEM_API_KEY || !productId) return true;
+  try {
+    const cookieStore = await cookies();
+    const sessionToken = cookieStore.get("session")?.value;
+    if (!sessionToken) return false;
+    const payload = await verifySession(sessionToken);
+    return !!payload && DEMO_EMAILS.includes(payload.email);
+  } catch {
+    return false;
+  }
+}
 
 const PLAN_PRODUCT_IDS: Record<string, Record<string, string>> = {
   essential: {
@@ -32,17 +53,26 @@ export async function POST(req: NextRequest) {
     let successUrl: string;
 
     if (addon) {
-      productId = ADDON_PRODUCT_IDS[addon];
-      if (!productId) {
+      if (!(addon in ADDON_PRODUCT_IDS)) {
         return NextResponse.json({ error: "Invalid add-on type" }, { status: 400 });
       }
+      productId = ADDON_PRODUCT_IDS[addon];
       successUrl = `${appUrl}/dashboard/addon-success?addon=${addon}&qty=${quantity || 1}`;
     } else {
-      productId = PLAN_PRODUCT_IDS[plan]?.[billing];
-      if (!productId) {
+      if (!PLAN_PRODUCT_IDS[plan] || !(billing in PLAN_PRODUCT_IDS[plan])) {
         return NextResponse.json({ error: "Invalid plan or billing cycle" }, { status: 400 });
       }
+      productId = PLAN_PRODUCT_IDS[plan][billing];
       successUrl = `${appUrl}/signup/creem-checkout?status=success`;
+    }
+
+    if (await isSimulatedCheckout(productId)) {
+      console.warn(`[MOCK] Simulating Creem checkout (${addon ? `addon=${addon}` : `plan=${plan}/${billing}`}) — redirecting straight to success URL.`);
+      return NextResponse.json({
+        checkoutUrl: successUrl,
+        checkoutId: `mock_checkout_${Date.now()}`,
+        simulated: true,
+      });
     }
 
     const body: Record<string, unknown> = {
