@@ -80,12 +80,12 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Lines must be an array" }, { status: 400 });
     }
 
-    // 1. Map to database rows (if ID is not a UUID, let Supabase generate one)
-    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    // 1. Map to database rows. No `id` column: PostgREST bulk upserts require
+    //    identical keys on every row, and new lines from the UI carry
+    //    client-generated non-UUID ids anyway — the unique `number` column is
+    //    the conflict target, so existing rows keep their ids.
     const rows = lines.map((l: any) => {
-      const isUuid = typeof l.id === "string" && uuidRegex.test(l.id);
       return {
-        id: isUuid ? l.id : undefined,
         user_id: userId,
         number: l.number,
         name: l.label, // label on frontend
@@ -120,13 +120,14 @@ export async function POST(request: Request) {
     });
 
     // 3. Delete any lines that were removed from the UI
+    // (PostgREST `in` lists take bare/double-quoted values; single quotes fail on uuid columns)
     const activeIds = (updatedLines || []).map((l: any) => l.id);
     if (activeIds.length > 0) {
       await supabase
         .from("phone_lines")
         .delete()
         .eq("user_id", userId)
-        .not("id", "in", `(${activeIds.map((id: any) => `'${id}'`).join(",")})`);
+        .not("id", "in", `(${activeIds.join(",")})`);
     } else {
       await supabase
         .from("phone_lines")
