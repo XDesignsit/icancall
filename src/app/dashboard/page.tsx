@@ -2472,7 +2472,6 @@ export function AccountView({
   const addonPendingAction = useRef<(() => void) | null>(null);
   const addonPopupRef = useRef<Window | null>(null);
   const [addonRemovalModalOpen, setAddonRemovalModalOpen] = useState(false);
-  const [minuteBlocksConfirmOpen, setMinuteBlocksConfirmOpen] = useState(false);
   const [annualBillingConfirmOpen, setAnnualBillingConfirmOpen] = useState(false);
   const annualBillingConfirmCallback = useRef<(() => void) | null>(null);
 
@@ -4029,13 +4028,7 @@ export function AccountView({
               const currentExtraLines = Math.max(0, lines.length - baseLinesCount);
               const delta = tempExtraNumbers - currentExtraLines;
 
-              const minutesChanged = tempMinuteBlocks > 0;
-
-              if (minutesChanged) {
-                setMinuteBlocksConfirmOpen(true);
-              } else {
-                proceedWithSaveAddons(delta, tempMinuteBlocks);
-              }
+              proceedWithSaveAddons(delta, tempMinuteBlocks);
             };
 
             return (
@@ -4149,60 +4142,6 @@ export function AccountView({
                 </div>
               </div>
 
-              {/* Extra Voice Minutes Confirmation Modal */}
-              {minuteBlocksConfirmOpen && (
-                <Modal
-                  title={lang === "es" ? "Confirmar minutos de voz adicionales" : lang === "fr" ? "Confirmer les minutes vocales supplémentaires" : "Confirm Extra Voice Minutes"}
-                  onClose={() => setMinuteBlocksConfirmOpen(false)}
-                  footer={
-                    <div style={{ display: "flex", justifyContent: "flex-end", gap: 10, width: "100%" }}>
-                      <button className="btn btn-ghost" onClick={() => setMinuteBlocksConfirmOpen(false)}>
-                        {lang === "es" ? "Cancelar" : lang === "fr" ? "Annuler" : "Cancel"}
-                      </button>
-                      <button
-                        className="btn btn-primary"
-                        onClick={() => {
-                          setMinuteBlocksConfirmOpen(false);
-                          const baseLinesCount = a.plan === "pro" ? 2 : 1;
-                          const currentExtraLines = Math.max(0, lines.length - baseLinesCount);
-                          const delta = tempExtraNumbers - currentExtraLines;
-                          proceedWithSaveAddons(delta, tempMinuteBlocks);
-                        }}
-                      >
-                        {lang === "es" ? "Confirmar y guardar" : lang === "fr" ? "Confirmer et enregistrer" : "Confirm & Save"}
-                      </button>
-                    </div>
-                  }
-                >
-                  <div style={{ display: "flex", flexDirection: "column", gap: 16, textAlign: "left" }}>
-                    <p style={{ color: "var(--ink-soft)", fontSize: "0.95rem", margin: 0 }}>
-                      {lang === "es"
-                        ? `Está agregando ${tempMinuteBlocks * 30} minutos de voz adicionales.`
-                        : lang === "fr"
-                        ? `Vous ajoutez ${tempMinuteBlocks * 30} minutes vocales supplémentaires.`
-                        : `You are adding ${tempMinuteBlocks * 30} extra voice minutes.`}
-                    </p>
-
-                    <p style={{ 
-                      fontSize: "0.88rem", 
-                      color: "oklch(0.55 0.18 25)", 
-                      background: "oklch(0.97 0.04 25 / 0.3)", 
-                      border: "1px solid oklch(0.85 0.08 25 / 0.3)",
-                      borderRadius: "var(--r-md)",
-                      padding: "10px 14px",
-                      margin: 0,
-                      fontWeight: 500
-                    }}>
-                      <strong>{lang === "es" ? "Aviso de facturación:" : lang === "fr" ? "Avis de facturation :" : "Billing Notice:"}</strong>{" "}
-                      {lang === "es"
-                        ? "La facturación por los minutos adicionales será efectiva de inmediato. Una vez confirmados los minutos adicionales, se facturarán inmediatamente a su cuenta."
-                        : lang === "fr"
-                        ? "La facturation des minutes supplémentaires sera effective immédiatement. Une fois les minutes supplémentaires confirmées, elles seront immédiatement facturées sur votre compte."
-                        : "Billing for the add-on minutes will be effective immediately. Once add-on minutes are confirmed, it will be billed immediately to your account."}
-                    </p>
-                  </div>
-                </Modal>
-              )}
             </>
           );
         })()}
