@@ -57,6 +57,6 @@ export default async function robots(): Promise<MetadataRoute.Robots> {
         disallow: appRoutes,
       },
     ],
-    sitemap: "https://icancall.co/sitemap.xml",
+    sitemap: "https://www.icancall.co/sitemap.xml",
   };
 }
