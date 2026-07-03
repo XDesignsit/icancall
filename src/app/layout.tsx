@@ -16,6 +16,11 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "iCanCall - Smart Family Voice Routing",
   description: "Give your family a dedicated phone number that intelligently cascades calls to trusted contacts until someone answers.",
+  alternates: {
+    types: {
+      "text/markdown": "/index.md",
+    },
+  },
 };
 
 export default function RootLayout({

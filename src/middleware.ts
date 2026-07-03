@@ -7,6 +7,22 @@ export async function middleware(request: NextRequest) {
   const host = request.headers.get("host") || "";
   const baseHost = host.split(":")[0]; // remove port if any
 
+  // Serve the Markdown edition of the homepage to clients that ask for it
+  // (LLM agents and CLI tools sending Accept: text/markdown). Browsers never
+  // send text/markdown, so a substring check is sufficient. /index.md is also
+  // directly reachable without the header.
+  const accept = request.headers.get("accept") || "";
+  if (
+    url.pathname === "/" &&
+    (request.method === "GET" || request.method === "HEAD") &&
+    accept.includes("text/markdown")
+  ) {
+    url.pathname = "/index.md";
+    const response = NextResponse.rewrite(url);
+    response.headers.set("Vary", "Accept");
+    return response;
+  }
+
   // 1. Detect if the request is loaded inside an iframe (e.g., in developer preview sandboxes)
   // where browsers block third-party cookies by default.
   const referer = request.headers.get("referer") || "";
