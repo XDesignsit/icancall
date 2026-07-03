@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import type { HomepageTranslations } from "@/lib/translations";
+import { PLAN_PRICING } from "@/lib/pricing";
 
 /* ============ TYPES ============ */
 interface Contact {
@@ -862,7 +863,7 @@ export default function Home() {
                 <h3>{t.pricing.essentialTitle}</h3>
                 <p className="desc">{t.pricing.essentialDesc}</p>
                 <div className="price">
-                  <b className="amt">{billingCycle === "annual" ? "$149" : "$14.99"}</b>
+                  <b className="amt">{billingCycle === "annual" ? PLAN_PRICING.essential.annualLabel : PLAN_PRICING.essential.monthlyLabel}</b>
                   <span className="per">{billingCycle === "annual" ? t.ui.perYear : t.ui.perMonth}</span>
                 </div>
                 <p className="price-yr">{billingCycle === "annual" ? t.ui.justPriceAnnualEssential : t.ui.billedMonthlyCancelAnytime}</p>
@@ -870,7 +871,7 @@ export default function Home() {
                   <li><Ico.check className="w-[19px] h-[19px]" /> {t.pricing.eFeat1}</li>
                   <li><Ico.check className="w-[19px] h-[19px]" /> {t.pricing.eFeat2}</li>
                   <li><Ico.check className="w-[19px] h-[19px]" /> {t.pricing.eFeat3}</li>
-                  <li><Ico.check className="w-[19px] h-[19px]" /> 30 {t.ui.voiceMinutes}</li>
+                  <li><Ico.check className="w-[19px] h-[19px]" /> {PLAN_PRICING.essential.voiceMinutes} {t.ui.voiceMinutes}</li>
                   <li><Ico.check className="w-[19px] h-[19px]" /> {t.pricing.eFeat4}</li>
                   <li><Ico.check className="w-[19px] h-[19px]" /> {t.pricing.eFeat5}</li>
                   <li><Ico.check className="w-[19px] h-[19px]" /> {t.ui.worksOnAnyPhoneNoApp}</li>
@@ -885,7 +886,7 @@ export default function Home() {
                 <h3>{t.pricing.proTitle}</h3>
                 <p className="desc">{t.pricing.proDesc}</p>
                 <div className="price">
-                  <b className="amt">{billingCycle === "annual" ? "$249" : "$24.99"}</b>
+                  <b className="amt">{billingCycle === "annual" ? PLAN_PRICING.pro.annualLabel : PLAN_PRICING.pro.monthlyLabel}</b>
                   <span className="per">{billingCycle === "annual" ? t.ui.perYear : t.ui.perMonth}</span>
                 </div>
                 <p className="price-yr">{billingCycle === "annual" ? t.ui.justPriceAnnualPro : t.ui.billedMonthlyCancelAnytime}</p>
@@ -893,7 +894,7 @@ export default function Home() {
                   <li><Ico.check className="w-[19px] h-[19px]" /> {t.pricing.pFeat1}</li>
                   <li><Ico.check className="w-[19px] h-[19px]" /> {t.pricing.pFeat2}</li>
                   <li><Ico.check className="w-[19px] h-[19px]" /> {t.pricing.eFeat3}</li>
-                  <li><Ico.check className="w-[19px] h-[19px]" /> 60 {t.ui.minutesIncluded}</li>
+                  <li><Ico.check className="w-[19px] h-[19px]" /> {PLAN_PRICING.pro.voiceMinutes} {t.ui.minutesIncluded}</li>
                   <li><Ico.check className="w-[19px] h-[19px]" /> {t.pricing.pFeat3}</li>
                   <li><Ico.check className="w-[19px] h-[19px]" /> {t.pricing.eFeat5}</li>
                   <li><Ico.check className="w-[19px] h-[19px]" /> {t.pricing.pFeat4}</li>

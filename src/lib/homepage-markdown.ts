@@ -1,11 +1,5 @@
 import { translations } from "@/lib/translations";
-
-// Dollar amounts and minute allowances mirror the values hardcoded in the
-// pricing cards of src/app/page.tsx — keep both in sync.
-const PRICING = {
-  essential: { monthly: "$14.99/month", annual: "$149/year", minutes: 30 },
-  pro: { monthly: "$24.99/month", annual: "$249/year", minutes: 60 },
-};
+import { PLAN_PRICING } from "@/lib/pricing";
 
 /**
  * Renders the marketing homepage as Markdown for text/markdown clients
@@ -19,7 +13,7 @@ export function renderHomepageMarkdown(): string {
     t.pricing.eFeat1,
     t.pricing.eFeat2,
     t.pricing.eFeat3,
-    `${PRICING.essential.minutes} ${t.ui.voiceMinutes}`,
+    `${PLAN_PRICING.essential.voiceMinutes} ${t.ui.voiceMinutes}`,
     t.pricing.eFeat4,
     t.pricing.eFeat5,
     t.ui.worksOnAnyPhoneNoApp,
@@ -30,7 +24,7 @@ export function renderHomepageMarkdown(): string {
     t.pricing.pFeat1,
     t.pricing.pFeat2,
     t.pricing.eFeat3,
-    `${PRICING.pro.minutes} ${t.ui.minutesIncluded}`,
+    `${PLAN_PRICING.pro.voiceMinutes} ${t.ui.minutesIncluded}`,
     t.pricing.pFeat3,
     t.pricing.eFeat5,
     t.pricing.pFeat4,
@@ -91,13 +85,13 @@ ${t.usecases.lead}
 
 ${t.pricing.lead} ${t.ui.bothPlansInclude}
 
-### ${t.pricing.essentialTitle} — ${PRICING.essential.monthly} or ${PRICING.essential.annual}
+### ${t.pricing.essentialTitle} — ${PLAN_PRICING.essential.monthlyLabel}/month or ${PLAN_PRICING.essential.annualLabel}/year
 
 ${t.pricing.essentialDesc} Annual billing: ${t.ui.justPriceAnnualEssential.toLowerCase()}.
 
 ${essentialFeatures.map((f) => `- ${f}`).join("\n")}
 
-### ${t.pricing.proTitle} (${t.pricing.mostPopular}) — ${PRICING.pro.monthly} or ${PRICING.pro.annual}
+### ${t.pricing.proTitle} (${t.pricing.mostPopular}) — ${PLAN_PRICING.pro.monthlyLabel}/month or ${PLAN_PRICING.pro.annualLabel}/year
 
 ${t.pricing.proDesc} Annual billing: ${t.ui.justPriceAnnualPro.toLowerCase()}.
 
