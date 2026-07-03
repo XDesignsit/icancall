@@ -9,11 +9,15 @@
 //   src/lib/translations.ts (all languages)
 export const PLAN_PRICING = {
   essential: {
+    monthlyAmount: 14.99,
+    annualAmount: 149,
     monthlyLabel: "$14.99",
     annualLabel: "$149",
     voiceMinutes: 30,
   },
   pro: {
+    monthlyAmount: 24.99,
+    annualAmount: 249,
     monthlyLabel: "$24.99",
     annualLabel: "$249",
     voiceMinutes: 60,

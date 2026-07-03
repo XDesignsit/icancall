@@ -918,7 +918,7 @@ export default function ComparisonChartPage() {
               <span className="eyebrow" style={{ display: "inline-flex", alignItems: "center", gap: 8, fontSize: "0.82rem", fontWeight: 600, textTransform: "uppercase", color: "oklch(0.44 0.105 240)", marginBottom: "14px" }}>
                 {c.pageEyebrow}
               </span>
-              <h2 style={{ fontSize: "clamp(1.8rem, 4vw, 2.6rem)", fontWeight: 700, letterSpacing: "-0.025em" }}>{c.pageTitle}</h2>
+              <h1 style={{ fontSize: "clamp(1.8rem, 4vw, 2.6rem)", fontWeight: 700, letterSpacing: "-0.025em" }}>{c.pageTitle}</h1>
               <p className="lead" style={{ marginTop: "14px", color: "oklch(0.45 0.022 245)" }}>{c.pageLead}</p>
             </div>
 

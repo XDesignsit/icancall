@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import type { HomepageTranslations } from "@/lib/translations";
+import enTranslations from "@/lib/translations/en";
 import { PLAN_PRICING } from "@/lib/pricing";
 
 /* ============ TYPES ============ */
@@ -105,9 +106,86 @@ const Ico = {
   )
 };
 
+/* ============ STRUCTURED DATA ============ */
+// Canonical English regardless of the visitor's language toggle.
+const SITE_URL = "https://www.icancall.co";
+const JSON_LD = JSON.stringify({
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": `${SITE_URL}/#organization`,
+      name: "iCanCall",
+      url: `${SITE_URL}/`,
+      logo: `${SITE_URL}/icon.svg`,
+      email: "support@icancall.co",
+    },
+    {
+      "@type": "WebSite",
+      "@id": `${SITE_URL}/#website`,
+      url: `${SITE_URL}/`,
+      name: "iCanCall",
+      publisher: { "@id": `${SITE_URL}/#organization` },
+    },
+    {
+      "@type": "Service",
+      "@id": `${SITE_URL}/#service`,
+      name: "iCanCall",
+      serviceType: "Family phone call routing service",
+      description: enTranslations.hero.lead,
+      provider: { "@id": `${SITE_URL}/#organization` },
+      offers: [
+        {
+          "@type": "Offer",
+          name: `${enTranslations.pricing.essentialTitle} (monthly)`,
+          price: PLAN_PRICING.essential.monthlyAmount,
+          priceCurrency: "USD",
+          description: enTranslations.pricing.essentialDesc,
+        },
+        {
+          "@type": "Offer",
+          name: `${enTranslations.pricing.essentialTitle} (annual)`,
+          price: PLAN_PRICING.essential.annualAmount,
+          priceCurrency: "USD",
+          description: enTranslations.pricing.essentialDesc,
+        },
+        {
+          "@type": "Offer",
+          name: `${enTranslations.pricing.proTitle} (monthly)`,
+          price: PLAN_PRICING.pro.monthlyAmount,
+          priceCurrency: "USD",
+          description: enTranslations.pricing.proDesc,
+        },
+        {
+          "@type": "Offer",
+          name: `${enTranslations.pricing.proTitle} (annual)`,
+          price: PLAN_PRICING.pro.annualAmount,
+          priceCurrency: "USD",
+          description: enTranslations.pricing.proDesc,
+        },
+      ],
+    },
+    {
+      "@type": "FAQPage",
+      "@id": `${SITE_URL}/#faq`,
+      mainEntity: ([1, 2, 3, 4, 5, 6] as const).map((i) => ({
+        "@type": "Question",
+        name: enTranslations.faq[`q${i}`],
+        acceptedAnswer: {
+          "@type": "Answer",
+          text: enTranslations.faq[`a${i}`],
+        },
+      })),
+    },
+  ],
+}).replace(/</g, "\\u003c");
+
 export default function Home() {
   const [lang, setLang] = useState<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi" | "pt" | "de" | "it" | "ko">("en");
-  const [t, setT] = useState<HomepageTranslations | null>(null);
+  // Initialized with the statically imported English copy (not null) so the
+  // server renders the full page for crawlers that don't execute JS; the
+  // saved language loads and swaps in after hydration.
+  const [t, setT] = useState<HomepageTranslations | null>(enTranslations);
 
   useEffect(() => {
     const savedLang = localStorage.getItem("lang") as any;
@@ -423,7 +501,8 @@ export default function Home() {
 
   return (
     <div className="min-h-screen selection:bg-teal-500 selection:text-white overflow-x-hidden">
-      
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON_LD }} />
+
       {/* ============== HEADER ============== */}
       <header className={`header ${scrolled ? "scrolled" : ""}`}>
         <div className="wrap header-inner">
