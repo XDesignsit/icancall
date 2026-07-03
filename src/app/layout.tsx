@@ -37,6 +37,8 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
+        {/* React hoists this into <head>; the Metadata API has no rel="describedby" support */}
+        <link rel="describedby" type="text/plain" href="/llms.txt" />
         {showConcord && (
           <Script
             src={`https://api.concord.tech/site-v1/${concordProjectId}/site-client`}
