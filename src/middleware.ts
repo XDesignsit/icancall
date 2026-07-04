@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { verifySession } from "@/lib/session";
+import { PRELAUNCH } from "@/lib/prelaunch";
 
 export async function middleware(request: NextRequest) {
   const url = request.nextUrl.clone();
@@ -51,14 +52,15 @@ export async function middleware(request: NextRequest) {
     return response;
   }
 
-  // 3. Enforce redirect to coming soon page for visitors on production/preview domains.
-  // Bypass with ?preview=hellionz (sets a 30-day cookie, handled above).
-  // /privacy-policy and /terms-of-service stay live — the coming-soon footer
-  // links to them. Dotted paths (/index.md, /llms.txt, sitemap, robots) and
-  // /api are outside the matcher and stay live too.
+  // 3. Enforce redirect to coming soon page for visitors on production/preview
+  // domains while PRELAUNCH (src/lib/prelaunch.ts) is on — flip that single
+  // switch at launch. Bypass with ?preview=hellionz (sets a 30-day cookie,
+  // handled above). /privacy-policy and /terms-of-service stay live — the
+  // coming-soon footer links to them. /api and dotted paths are outside the
+  // matcher; /index.md and /llms.txt serve their own prelaunch editions.
   const isProduction = baseHost.includes("icancall.co") || baseHost.includes("vercel.app");
   const comingSoonExempt = ["/coming-soon", "/privacy-policy", "/terms-of-service"];
-  if (isProduction && !hasPreviewBypass && !comingSoonExempt.some((p) => url.pathname.startsWith(p))) {
+  if (PRELAUNCH && isProduction && !hasPreviewBypass && !comingSoonExempt.some((p) => url.pathname.startsWith(p))) {
     url.pathname = "/coming-soon";
     url.search = "";
     return NextResponse.redirect(url);

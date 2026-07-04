@@ -2,6 +2,51 @@ import { translations } from "@/lib/translations";
 import { PLAN_PRICING } from "@/lib/pricing";
 
 /**
+ * Prelaunch edition served to non-bypassed clients while PRELAUNCH is on —
+ * mirrors what human visitors see on /coming-soon (waitlist pitch, no
+ * pricing). Copy comes from the same waitlist translations as that page.
+ */
+export function renderComingSoonMarkdown(): string {
+  const t = translations.en;
+  const w = t.waitlist!;
+
+  return `# iCanCall — ${w.beFirstInLine} ${w.beFirstInLineAccent}
+
+> ${w.launchingSoon}
+
+${w.heroLead}
+
+## ${w.demoSub}
+
+${w.demoBody}.
+
+## ${w.expectTitle}
+
+${w.expectLead}
+
+- **${w.expectCardTitle1}** — ${w.expectCardText1}
+- **${w.expectCardTitle2}** — ${w.expectCardText2}
+- **${w.expectCardTitle3}** — ${w.expectCardText3}
+
+## ${w.reserveTitle}
+
+${w.reserveText}. Join the waitlist at https://www.icancall.co/coming-soon
+
+## Links
+
+- [Join the waitlist](https://icancall.co/coming-soon)
+- [Privacy Policy](https://icancall.co/privacy-policy)
+- [Terms of Service](https://icancall.co/terms-of-service)
+
+---
+
+${t.footer.blurb}
+
+${t.footer.allRights}
+`;
+}
+
+/**
  * Renders the marketing homepage as Markdown for text/markdown clients
  * (LLM agents, CLI tools). Copy is pulled from the same translations used
  * by the React homepage so the two never drift apart.

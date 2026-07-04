@@ -1,13 +1,17 @@
+import type { NextRequest } from "next/server";
 import { translations } from "@/lib/translations";
 import { PLAN_PRICING } from "@/lib/pricing";
+import { PRELAUNCH, isPrelaunchGated } from "@/lib/prelaunch";
 
 // llms.txt per https://llmstxt.org: H1, blockquote summary, then ## sections
 // of markdown links. Points agents at the markdown edition of the homepage
-// (/index.md) and the other public marketing pages.
-export async function GET() {
+// (/index.md) and the other public marketing pages. While the prelaunch gate
+// is on, non-bypassed clients get the waitlist edition instead — matching
+// what human visitors see on /coming-soon.
+export async function GET(request: NextRequest) {
   const t = translations.en;
 
-  const body = `# iCanCall
+  const fullBody = `# iCanCall
 
 > ${t.hero.lead} ${t.footer.blurb}
 
@@ -32,10 +36,32 @@ iCanCall is a virtual phone routing service: one dedicated, memorable phone numb
 - [Terms of Service](https://icancall.co/terms-of-service)
 `;
 
-  return new Response(body, {
+  const w = t.waitlist!;
+  const prelaunchBody = `# iCanCall
+
+> ${w.launchingSoon}. ${w.heroLead}
+
+iCanCall is a virtual phone routing service launching soon: one dedicated, memorable phone number that rings a circle of trusted family contacts until someone answers — no hardware, no apps. It is currently in private early access; join the waitlist for first pick of memorable numbers and founding-member pricing.
+
+## Docs
+
+- [About iCanCall (Markdown)](https://icancall.co/index.md): Prelaunch overview — what iCanCall does and what waitlist members can expect
+
+## Pages
+
+- [Join the waitlist](https://icancall.co/coming-soon): ${w.reserveText}
+
+## Optional
+
+- [Privacy Policy](https://icancall.co/privacy-policy)
+- [Terms of Service](https://icancall.co/terms-of-service)
+`;
+
+  return new Response(isPrelaunchGated(request) ? prelaunchBody : fullBody, {
     headers: {
       "Content-Type": "text/plain; charset=utf-8",
-      "Cache-Control": "public, max-age=3600",
+      // Cookie-dependent while the gate is on — see src/app/index.md/route.ts
+      "Cache-Control": PRELAUNCH ? "no-store" : "public, max-age=3600",
     },
   });
 }
