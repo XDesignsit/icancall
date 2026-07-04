@@ -392,8 +392,6 @@ export default function ComingSoon() {
             <Link href="/#faq">{t.nav.faq}</Link>
           </nav>
           <div className="header-cta" style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <Link className="btn btn-text" href="/login" style={{ marginRight: 6 }}>{t.nav.login}</Link>
-            <Link className="btn btn-primary" href="/#pricing">{t.nav.selectPlanBtn}</Link>
             <select
               value={lang}
               onChange={(e) => changeLanguage(e.target.value as any)}
@@ -658,33 +656,7 @@ export default function ComingSoon() {
               </a>
               <p className="blurb">{t.footer.blurb}</p>
             </div>
-            <div>
-              <h5>{t.footer.product}</h5>
-              <ul>
-                <li><Link href="/#how">{t.nav.how}</Link></li>
-                <li><Link href="/#features">{t.nav.features}</Link></li>
-                <li><Link href="/#pricing">{t.nav.pricing}</Link></li>
-                <li><Link href="/#faq">{t.nav.faq}</Link></li>
-                <li><Link href="/comparison-chart">{t.footer.comparisonChart}</Link></li>
-                <li><Link href="/login">Login</Link></li>
-              </ul>
-            </div>
-            <div>
-              <h5>{t.footer.who}</h5>
-              <ul>
-                <li><Link href="/parents">{t.footer.parents}</Link></li>
-                <li><Link href="/caregivers">{t.footer.caregivers}</Link></li>
-                <li><Link href="/seniors">{t.footer.seniors}</Link></li>
-              </ul>
-            </div>
-            <div>
-              <h5>{t.footer.company}</h5>
-              <ul>
-                <li><a href="#">{t.footer.about}</a></li>
-                <li><a href="#">{t.footer.careers}</a></li>
-                <li><a href="#">{t.footer.contact}</a></li>
-              </ul>
-            </div>
+
             <div>
               <h5>{t.footer.trust}</h5>
               <ul>
