@@ -51,14 +51,18 @@ export async function middleware(request: NextRequest) {
     return response;
   }
 
-  // 3. Enforce redirect to coming soon page for visitors on production/preview domains
-  // const isProduction = baseHost.includes("icancall.co") || baseHost.includes("vercel.app");
-  // if (isProduction && !hasPreviewBypass) {
-  //   if (url.pathname !== "/coming-soon") {
-  //     url.pathname = "/coming-soon";
-  //     return NextResponse.redirect(url);
-  //   }
-  // }
+  // 3. Enforce redirect to coming soon page for visitors on production/preview domains.
+  // Bypass with ?preview=hellionz (sets a 30-day cookie, handled above).
+  // /privacy-policy and /terms-of-service stay live — the coming-soon footer
+  // links to them. Dotted paths (/index.md, /llms.txt, sitemap, robots) and
+  // /api are outside the matcher and stay live too.
+  const isProduction = baseHost.includes("icancall.co") || baseHost.includes("vercel.app");
+  const comingSoonExempt = ["/coming-soon", "/privacy-policy", "/terms-of-service"];
+  if (isProduction && !hasPreviewBypass && !comingSoonExempt.some((p) => url.pathname.startsWith(p))) {
+    url.pathname = "/coming-soon";
+    url.search = "";
+    return NextResponse.redirect(url);
+  }
 
   // 4. Only run proxy redirects on production domains containing 'icancall.co'
   // (Prevents iframe cookie-blocking loops in local development & Vercel preview environments)
