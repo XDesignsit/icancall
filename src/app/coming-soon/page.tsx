@@ -654,8 +654,19 @@ export default function ComingSoon() {
 
           </div>
           <div className="footer-bottom">
-            <span>{t.footer.allRights}</span>
-            <span>{t.footer.moments}</span>
+            <div>
+              <span>{t.footer.allRights}</span>
+              <span style={{ margin: "0 8px" }}>·</span>
+              <span>{t.footer.moments}</span>
+            </div>
+            <div style={{ display: "flex", gap: 16 }}>
+              <Link href="/privacy-policy" style={{ color: "var(--ink-soft)", textDecoration: "none", fontSize: "0.84rem" }}>
+                {t.footer.privacy}
+              </Link>
+              <Link href="/terms-of-service" style={{ color: "var(--ink-soft)", textDecoration: "none", fontSize: "0.84rem" }}>
+                {t.footer.terms}
+              </Link>
+            </div>
           </div>
         </div>
       </footer>
