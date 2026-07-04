@@ -38,5 +38,21 @@ When credentials for external messaging providers (SMTP or Twilio) are missing o
 - **Fail-Open SMTP Fallback**: The email dispatch system (`sendEmail` in `src/lib/mail.ts`) must gracefully mock transmission, log the simulated message details to the console, and return `{ success: true, messageId: ... }` rather than letting connection failures throw exceptions.
 - **Graceful Twilio SMS Fallback**: The SMS dispatch system (`sendSms` in `src/lib/twilio.ts`) must check for client initialization, log a warning if absent, and return gracefully. Webhooks calling it must handle uninitialized states to prevent returning 500 errors to caller gateways during testing.
 
+## Billing, Branding & Layout Guardrails
+
+### 1. Plan-Included Quotas vs. Add-ons
+- When implementing additions (e.g., adding phone numbers, extra voice minutes):
+  1. Always verify if the user has unused plan-included quotas (e.g., the Pro plan includes up to 2 active lines at no extra cost, while the Essential plan includes 1).
+  2. If the resource is within the plan's quota, bypass payment portals (e.g., Creem, Stripe) and save the resource immediately to the local state/DB for free.
+  3. Ensure the billing subtext, checkout modal buttons (e.g., "Confirm & Save" instead of "Approve & Pay"), and billing notices dynamically adjust based on whether the action is chargeable or free.
+
+### 2. Premium Typography-First Styling (No Emojis)
+- To maintain the site's sleek, premium, and clean styling, **never use raw emojis** (such as `ℹ️`, `⚠️`, `✅`, `📞`) in notices, alert boxes, status badges, or popup dialogs.
+- Rely on typography hierarchy, CSS background tints, clean borders, or designated SVG vector icons instead.
+
+### 3. Minimalist Landing & Waiting Pages
+- Marketing or waitlist-only landing pages (like `src/app/coming-soon/page.tsx`) must be stripped of dashboard-specific headers (e.g., Login links, Select a Plan buttons, nav title tabs) and verbose footer columns (Product, Who, Company, Trust).
+- Keep footers on these waiting pages to a bare minimum (e.g., brand logo, description blurb, and inline Privacy Policy and Terms of Service links placed in the bottom row).
+
 
 
