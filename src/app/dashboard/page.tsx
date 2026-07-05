@@ -2383,7 +2383,7 @@ function RoutingView({
     setLine((prev) =>
       prev.map((l) => (l.id === line.id ? { ...l, schedule: newSchedule } : l))
     );
-    showToast("Coverage schedule updated successfully");
+    showToast(ext.scheduleUpdatedToast);
   };
 
   const startEditing = (slot: CoverageSlot) => {
@@ -2502,13 +2502,13 @@ function RoutingView({
       <div className="card section-gap">
         <div className="card-head">
           <div>
-            <h2>{lang === "es" ? "Detalles de la línea" : lang === "fr" ? "Détails de la ligne" : "Line Details"}</h2>
-            <p>{lang === "es" ? "Actualice la etiqueta de esta línea y a quién está asignada." : lang === "fr" ? "Mettez à jour le libellé de cette ligne et son destinataire." : "Update this line's label and who it is assigned to."}</p>
+            <h2>{ext.lineDetails}</h2>
+            <p>{ext.lineDetailsSub}</p>
           </div>
         </div>
         <div className="card-pad" style={{ display: "flex", flexDirection: "column", gap: 16 }}>
           <div className="field">
-            <label>{lang === "es" ? "Etiqueta de la línea" : lang === "fr" ? "Libellé de la ligne" : "Line Label"}</label>
+            <label>{ext.lineLabel}</label>
             <input
               type="text"
               value={getLocalizedLineLabel(line.label, lang)}
@@ -2519,7 +2519,7 @@ function RoutingView({
             />
           </div>
           <div className="field">
-            <label>{lang === "es" ? "Asignado a (Persona)" : lang === "fr" ? "Assigné à (Personne)" : "Assigned To (Person)"}</label>
+            <label>{ext.assignedToPerson}</label>
             <input
               type="text"
               value={getLocalizedPersonName(line.person, lang)}
@@ -2639,10 +2639,10 @@ function RoutingView({
           {/* Timeline visualization */}
           <div style={{ background: "var(--tint)", padding: 20, borderRadius: "var(--r-md)", border: "1px solid var(--line)", position: "relative" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-              <span style={{ fontSize: "0.86rem", fontWeight: 600 }}>24-Hour Coverage Timeline</span>
+              <span style={{ fontSize: "0.86rem", fontWeight: 600 }}>{ext.coverageTimeline}</span>
               <span className="demo-status" style={{ fontSize: "0.78rem", padding: "4px 10px", borderRadius: 999 }}>
                 <span className="live" style={{ background: activeSlot ? "var(--green)" : "var(--ink-faint)" }}></span>
-                Current Time: {formatHour(Math.floor(currentHour))}:{String(Math.floor((currentHour % 1) * 60)).padStart(2, '0')}
+                {ext.currentTimeLabel}: {formatHour(Math.floor(currentHour))}:{String(Math.floor((currentHour % 1) * 60)).padStart(2, '0')}
               </span>
             </div>
             
