@@ -885,7 +885,7 @@ interface Line {
   person: string;
   number: string;
   color: string;
-  mode: "menu" | "cascade" | "schedule";
+  mode: "menu" | "cascade" | "simultaneous" | "schedule";
   minutesUsed: number;
   contacts: Contact[];
   schedule?: CoverageSlot[];
@@ -1233,7 +1233,7 @@ function OverviewView({
                 </div>
                 <div style={{ textAlign: "right" }}>
                   <Badge kind={l.mode === "menu" ? "blue" : "amber"}>
-                    {l.mode === "menu" ? d.overview.callerMenu : l.mode === "schedule" ? d.overview.timeSchedule : d.overview.cascade}
+                    {l.mode === "menu" ? d.overview.callerMenu : l.mode === "schedule" ? d.overview.timeSchedule : l.mode === "simultaneous" ? d.routing.simultaneous : d.overview.cascade}
                   </Badge>
                   <div style={{ fontSize: "0.76rem", color: "var(--ink-faint)", marginTop: 6 }}>
                     {l.contacts.length} {d.contacts.limitPill}
@@ -1920,12 +1920,14 @@ function TestCall({ line, d, lang }: { line: Line; d: any; lang: string }) {
       cls: "",
       av: line.mode === "schedule" ? "🕒" : line.mode === "menu" ? "☰" : "—",
       avColor: null,
-      name: line.mode === "schedule" ? d.overview.timeSchedule : line.mode === "menu" ? d.overview.callerMenu : d.sim.ready,
+      name: line.mode === "schedule" ? d.overview.timeSchedule : line.mode === "menu" ? d.overview.callerMenu : line.mode === "simultaneous" ? d.routing.simultaneous : d.sim.ready,
       state:
         line.mode === "schedule"
           ? d.routing.scheduleDesc
           : line.mode === "menu"
           ? d.routing.menuDesc
+          : line.mode === "simultaneous"
+          ? d.routing.simultaneousDesc
           : d.sim.runTest,
       ring: false,
     });
@@ -1984,6 +1986,48 @@ function TestCall({ line, d, lang }: { line: Line; d: any; lang: string }) {
       await sleep(500);
     }
     if (!done && !cancelled.current) {
+      setScreen({
+        cls: "voicemail",
+        av: "✉",
+        avColor: null,
+        name: d.sim.voicemail,
+        state: d.sim.vmSent,
+        ring: false,
+      });
+    }
+  }
+
+  async function runSimultaneous() {
+    setDots(contacts.length);
+    // Ring every contact at once.
+    setActiveDots(Object.fromEntries(contacts.map((_, i) => [i, "active"])));
+    setScreen({
+      cls: "ring-state",
+      av: "•",
+      avColor: null,
+      name: d.routing.simultaneous,
+      state: `${d.sim.ringing}…`,
+      ring: true,
+    });
+    await sleep(1600);
+    if (cancelled.current) return;
+    // The first available contact answers.
+    const firstAvailable = contacts.findIndex((c) => c.available);
+    if (firstAvailable !== -1) {
+      const c = contacts[firstAvailable];
+      setActiveDots(
+        Object.fromEntries(contacts.map((_, i) => [i, i === firstAvailable ? "active" : "done"]))
+      );
+      setScreen({
+        cls: "connected",
+        av: initials(c.name),
+        avColor: c.color,
+        name: c.name,
+        state: d.sim.connected,
+        ring: false,
+      });
+    } else {
+      setActiveDots(Object.fromEntries(contacts.map((_, i) => [i, "done"])));
       setScreen({
         cls: "voicemail",
         av: "✉",
@@ -2146,6 +2190,7 @@ function TestCall({ line, d, lang }: { line: Line; d: any; lang: string }) {
     setRunning(true);
     if (line.mode === "menu") await runMenu();
     else if (line.mode === "schedule") await runSchedule();
+    else if (line.mode === "simultaneous") await runSimultaneous();
     else await runCascade();
     if (!cancelled.current) {
       await sleep(2200);
@@ -2219,6 +2264,8 @@ function TestCall({ line, d, lang }: { line: Line; d: any; lang: string }) {
               ? d.routing.scheduleTitle
               : line.mode === "menu"
               ? d.overview.callerMenu
+              : line.mode === "simultaneous"
+              ? d.routing.simultaneous
               : d.overview.cascade}
           </div>
           {contacts.map((c, i) => (
@@ -2443,7 +2490,7 @@ function RoutingView({
     { value: "oklch(0.58 0.12 145)", name: "Green" },
   ];
 
-  const setMode = (mode: "cascade" | "menu" | "schedule") => {
+  const setMode = (mode: "cascade" | "menu" | "simultaneous" | "schedule") => {
     if (mode === line.mode) return;
     setLine((prev) => prev.map((l) => (l.id === line.id ? { ...l, mode } : l)));
     showToast(d.common.savedToast);
@@ -2512,6 +2559,24 @@ function RoutingView({
               <h4>{d.routing.cascade}</h4>
               <p style={{ fontSize: "0.86rem", color: "var(--ink-soft)", marginTop: 6 }}>
                 {d.routing.cascadeDesc}
+              </p>
+            </div>
+            <div
+              className={`mode-card ${line.mode === "simultaneous" ? "sel" : ""}`}
+              style={{
+                cursor: "pointer",
+                padding: 20,
+                border: line.mode === "simultaneous" ? "2.5px solid var(--accent)" : "1px solid var(--line)",
+                borderRadius: "var(--r-md)",
+              }}
+              onClick={() => setMode("simultaneous")}
+            >
+              <div className="ic" style={{ marginBottom: 12 }}>
+                <Icon name="spark" style={{ width: 24, height: 24 }} />
+              </div>
+              <h4>{d.routing.simultaneous}</h4>
+              <p style={{ fontSize: "0.86rem", color: "var(--ink-soft)", marginTop: 6 }}>
+                {d.routing.simultaneousDesc}
               </p>
             </div>
             <div
