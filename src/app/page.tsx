@@ -1298,6 +1298,9 @@ export default function Home() {
           <div className="footer-bottom">
             <span>{t.footer.allRights}</span>
             <span>{t.footer.moments}</span>
+            <a href="https://elevenlabs.io/startup-grants" target="_blank" rel="noopener noreferrer" style={{ display: "block" }}>
+              <img src="https://eleven-public-cdn.elevenlabs.io/payloadcms/pwsc4vchsqt-ElevenLabsGrants.webp" alt="ElevenLabs" style={{ width: "120px", height: "auto" }} />
+            </a>
           </div>
         </div>
       </footer>

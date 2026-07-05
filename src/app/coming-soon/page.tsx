@@ -659,13 +659,16 @@ export default function ComingSoon() {
               <span style={{ margin: "0 8px" }}>·</span>
               <span>{t.footer.moments}</span>
             </div>
-            <div style={{ display: "flex", gap: 16 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
               <Link href="/privacy-policy" style={{ color: "var(--ink-soft)", textDecoration: "none", fontSize: "0.84rem" }}>
                 {t.footer.privacy}
               </Link>
               <Link href="/terms-of-service" style={{ color: "var(--ink-soft)", textDecoration: "none", fontSize: "0.84rem" }}>
                 {t.footer.terms}
               </Link>
+              <a href="https://elevenlabs.io/startup-grants" target="_blank" rel="noopener noreferrer" style={{ display: "block", marginLeft: 4 }}>
+                <img src="https://eleven-public-cdn.elevenlabs.io/payloadcms/pwsc4vchsqt-ElevenLabsGrants.webp" alt="ElevenLabs" style={{ width: "110px", height: "auto" }} />
+              </a>
             </div>
           </div>
         </div>
