@@ -3737,6 +3737,7 @@ export function AccountView({
                    a.role === "Family member" ? ext.familyMember :
                    a.role === "Account administrator" ? ext.accountAdmin :
                    a.role === "Care coordinator" ? ext.careCoordinator :
+                   a.role === "Caregiver" ? ext.caregiver :
                    a.role}
                 </span>
                 <div className="pacts">
@@ -3773,6 +3774,7 @@ export function AccountView({
               <label>{d.account.role}</label>
               <select value={a.role} onChange={(e) => set({ role: e.target.value })} style={{ maxWidth: 320 }}>
                 {[
+                  { id: "Caregiver", label: ext.caregiver },
                   { id: "Primary caregiver", label: ext.primaryCaregiver },
                   { id: "Family member", label: ext.familyMember },
                   { id: "Account administrator", label: ext.accountAdmin },
