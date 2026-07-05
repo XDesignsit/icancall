@@ -3338,14 +3338,50 @@ function SettingsView({
                 color: 'var(--ink)'
               }}
             >
-              <option value="21m00Tcm4TlvDq8ikWAM">Rachel (Female, Warm)</option>
-              <option value="29vD33N1CtxCmqQRPOHJ">Drew (Male, Professional)</option>
-              <option value="2EiwWnXF2V4j29thjbwy">Clyde (Male, Friendly)</option>
-              <option value="5Q0t7uMcgp8Aagzh1ZQQ">Paul (Male, Deep)</option>
-              <option value="pNInz6obpgmx5142qiA7">Adam (Male, Narrator)</option>
-              <option value="cgSgspJ2msm6clMCxT41">Jessica (Female, Storyteller)</option>
-              <option value="nPczCjzI2devA2R17O2Y">Brian (Male, Deep)</option>
-              <option value="EXAVITQu4vr4xnSDxMaL">Sarah (Female, Soft)</option>
+              <optgroup label="English">
+                <option value="21m00Tcm4TlvDq8ikWAM">Rachel (Female, Warm)</option>
+                <option value="29vD33N1CtxCmqQRPOHJ">Drew (Male, Professional)</option>
+              </optgroup>
+              <optgroup label="Spanish (Español)">
+                <option value="EXAVITQu4vr4xnSDxMaL">Sarah (Female, Warm Accent)</option>
+                <option value="2EiwWnXF2V4j29thjbwy">Clyde (Male, Friendly)</option>
+              </optgroup>
+              <optgroup label="French (Français)">
+                <option value="21m00Tcm4TlvDq8ikWAM">Rachel (Female, Soft Accent)</option>
+                <option value="5Q0t7uMcgp8Aagzh1ZQQ">Paul (Male, Deep)</option>
+              </optgroup>
+              <optgroup label="Japanese (日本語)">
+                <option value="cgSgspJ2msm6clMCxT41">Jessica (Female, Warm Accent)</option>
+                <option value="29vD33N1CtxCmqQRPOHJ">Drew (Male, Friendly)</option>
+              </optgroup>
+              <optgroup label="Chinese (中文)">
+                <option value="21m00Tcm4TlvDq8ikWAM">Rachel (Female, Clean Accent)</option>
+                <option value="pNInz6obpgmx5142qiA7">Adam (Male, Narrator)</option>
+              </optgroup>
+              <optgroup label="Arabic (العربية)">
+                <option value="cgSgspJ2msm6clMCxT41">Jessica (Female, Warm Accent)</option>
+                <option value="5Q0t7uMcgp8Aagzh1ZQQ">Paul (Male, Deep Accent)</option>
+              </optgroup>
+              <optgroup label="Hindi (हिन्दी)">
+                <option value="EXAVITQu4vr4xnSDxMaL">Sarah (Female, Soft Accent)</option>
+                <option value="2EiwWnXF2V4j29thjbwy">Clyde (Male, Friendly Accent)</option>
+              </optgroup>
+              <optgroup label="Portuguese (Português)">
+                <option value="21m00Tcm4TlvDq8ikWAM">Rachel (Female, Friendly Accent)</option>
+                <option value="nPczCjzI2devA2R17O2Y">Brian (Male, Deep Accent)</option>
+              </optgroup>
+              <optgroup label="German (Deutsch)">
+                <option value="EXAVITQu4vr4xnSDxMaL">Sarah (Female, Clean Accent)</option>
+                <option value="pNInz6obpgmx5142qiA7">Adam (Male, Professional)</option>
+              </optgroup>
+              <optgroup label="Italian (Italiano)">
+                <option value="cgSgspJ2msm6clMCxT41">Jessica (Female, Warm Accent)</option>
+                <option value="nPczCjzI2devA2R17O2Y">Brian (Male, Deep)</option>
+              </optgroup>
+              <optgroup label="Korean (한국어)">
+                <option value="21m00Tcm4TlvDq8ikWAM">Rachel (Female, Friendly Accent)</option>
+                <option value="29vD33N1CtxCmqQRPOHJ">Drew (Male, Professional Accent)</option>
+              </optgroup>
             </select>
           </div>
           <div className="set-row" style={{ paddingTop: 4 }}>
