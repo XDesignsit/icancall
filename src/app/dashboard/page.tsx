@@ -1908,7 +1908,10 @@ function TestCall({ line, d, lang }: { line: Line; d: any; lang: string }) {
 
   useEffect(() => {
     reset();
-  }, [line.id, line.mode]);
+    // `lang` is included so the idle screen re-localizes when the language
+    // selector changes (line.id/line.mode alone don't change on that event).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [line.id, line.mode, lang]);
 
   function reset() {
     cancelled.current = true;
@@ -3063,8 +3066,7 @@ function RoutingView({
           <div>
             <h2>{d.sim.runTest}</h2>
             <p>
-              Place a simulated call to see exactly what {getLocalizedPersonName(line.person, lang).split(" · ")[0]}'s callers will
-              experience.
+              {ext.simSubtitle.replace("{name}", getLocalizedPersonName(line.person, lang).split(" · ")[0])}
             </p>
           </div>
           <Badge kind="blue">
@@ -3072,6 +3074,8 @@ function RoutingView({
               ? d.routing.scheduleTitle
               : line.mode === "menu"
               ? d.overview.callerMenu
+              : line.mode === "simultaneous"
+              ? d.routing.simultaneous
               : d.overview.cascade}
           </Badge>
         </div>

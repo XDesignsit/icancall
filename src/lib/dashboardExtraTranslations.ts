@@ -81,6 +81,7 @@ export const dashboardExtraTranslations: Record<
     coverageTimeline: "24-Hour Coverage Timeline",
     currentTimeLabel: "Current Time",
     scheduleUpdatedToast: "Coverage schedule updated successfully",
+    simSubtitle: "Place a simulated call to see exactly what {name}'s callers will experience.",
   },
   es: {
     changePhoto: "Cambiar foto",
@@ -161,6 +162,7 @@ export const dashboardExtraTranslations: Record<
     coverageTimeline: "Cronograma de cobertura 24 horas",
     currentTimeLabel: "Hora actual",
     scheduleUpdatedToast: "Cronograma de cobertura actualizado correctamente",
+    simSubtitle: "Realice una llamada simulada para ver exactamente lo que experimentarán las personas que llamen a {name}.",
   },
   fr: {
     changePhoto: "Changer la photo",
@@ -241,6 +243,7 @@ export const dashboardExtraTranslations: Record<
     coverageTimeline: "Calendrier de couverture 24 heures",
     currentTimeLabel: "Heure actuelle",
     scheduleUpdatedToast: "Calendrier de couverture mis à jour avec succès",
+    simSubtitle: "Passez un appel simulé pour voir exactement ce que vivront les personnes qui appellent {name}.",
   },
   ja: {
     changePhoto: "写真を変更",
@@ -321,6 +324,7 @@ export const dashboardExtraTranslations: Record<
     coverageTimeline: "24時間カバレッジタイムライン",
     currentTimeLabel: "現在時刻",
     scheduleUpdatedToast: "カバレッジスケジュールを更新しました",
+    simSubtitle: "{name}に電話をかけた人が体験する内容を、シミュレーション通話で確認できます。",
   },
   zh: {
     changePhoto: "更改照片",
@@ -401,6 +405,7 @@ export const dashboardExtraTranslations: Record<
     coverageTimeline: "24 小时覆盖时间线",
     currentTimeLabel: "当前时间",
     scheduleUpdatedToast: "覆盖时间表更新成功",
+    simSubtitle: "拨打模拟电话，准确了解拨打给 {name} 的来电者将体验到的内容。",
   },
   ar: {
     changePhoto: "تغيير الصورة",
@@ -481,6 +486,7 @@ export const dashboardExtraTranslations: Record<
     coverageTimeline: "الجدول الزمني للتغطية على مدار 24 ساعة",
     currentTimeLabel: "الوقت الحالي",
     scheduleUpdatedToast: "تم تحديث جدول التغطية بنجاح",
+    simSubtitle: "أجرِ مكالمة تجريبية لترى بالضبط ما سيختبره المتصلون بـ {name}.",
   },
   hi: {
     changePhoto: "फोटो बदलें",
@@ -561,6 +567,7 @@ export const dashboardExtraTranslations: Record<
     coverageTimeline: "24-घंटे कवरेज टाइमलाइन",
     currentTimeLabel: "वर्तमान समय",
     scheduleUpdatedToast: "कवरेज शेड्यूल सफलतापूर्वक अपडेट किया गया",
+    simSubtitle: "एक सिम्युलेटेड कॉल करें ताकि आप ठीक-ठीक देख सकें कि {name} को कॉल करने वालों को क्या अनुभव होगा।",
   },
   pt: {
     changePhoto: "Alterar foto",
@@ -641,6 +648,7 @@ export const dashboardExtraTranslations: Record<
     coverageTimeline: "Linha do tempo de cobertura 24 horas",
     currentTimeLabel: "Hora atual",
     scheduleUpdatedToast: "Cronograma de cobertura atualizado com sucesso",
+    simSubtitle: "Faça uma chamada simulada para ver exatamente o que as pessoas que ligam para {name} vão experimentar.",
   },
   de: {
     changePhoto: "Foto ändern",
@@ -721,6 +729,7 @@ export const dashboardExtraTranslations: Record<
     coverageTimeline: "24-Stunden-Abdeckungszeitleiste",
     currentTimeLabel: "Aktuelle Zeit",
     scheduleUpdatedToast: "Abdeckungsplan erfolgreich aktualisiert",
+    simSubtitle: "Führen Sie einen simulierten Anruf durch, um genau zu sehen, was Anrufer von {name} erleben werden.",
   },
   it: {
     changePhoto: "Cambia foto",
@@ -801,6 +810,7 @@ export const dashboardExtraTranslations: Record<
     coverageTimeline: "Cronologia di copertura 24 ore",
     currentTimeLabel: "Ora attuale",
     scheduleUpdatedToast: "Programma di copertura aggiornato con successo",
+    simSubtitle: "Effettua una chiamata simulata per vedere esattamente cosa sperimenteranno le persone che chiamano {name}.",
   },
   ko: {
     changePhoto: "사진 변경",
@@ -881,5 +891,6 @@ export const dashboardExtraTranslations: Record<
     coverageTimeline: "24시간 커버리지 타임라인",
     currentTimeLabel: "현재 시간",
     scheduleUpdatedToast: "커버리지 일정이 업데이트되었습니다",
+    simSubtitle: "모의 통화를 걸어 {name}에게 전화하는 사람이 겪게 될 상황을 정확히 확인하세요.",
   },
 };
