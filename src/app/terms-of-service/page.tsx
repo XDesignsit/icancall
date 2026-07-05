@@ -3,10 +3,125 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 
+const TERMS_DICTS = {
+  en: {
+    back: "Back to Home",
+    title: "Terms of Service",
+    lastUpdated: "Last updated: June 18, 2026",
+    loading: "Please wait while the terms of service are loaded. If they do not load, please",
+    clickHere: "click here to view the terms of service",
+    error: "There was an error loading the terms of service, please"
+  },
+  es: {
+    back: "Volver al inicio",
+    title: "Términos de servicio",
+    lastUpdated: "Última actualización: 18 de junio de 2026",
+    loading: "Por favor, espere mientras se cargan los términos de servicio. Si no se cargan, por favor",
+    clickHere: "haga clic aquí para ver los términos de servicio",
+    error: "Hubo un error al cargar los términos de servicio, por favor"
+  },
+  fr: {
+    back: "Retour à l'accueil",
+    title: "Conditions d'utilisation",
+    lastUpdated: "Dernière mise à jour : 18 juin 2026",
+    loading: "Veuillez patienter pendant le chargement des conditions d'utilisation. Si elles ne se chargent pas, veuillez",
+    clickHere: "cliquer ici pour consulter les conditions d'utilisation",
+    error: "Une erreur est survenue lors du chargement des conditions d'utilisation, veuillez"
+  },
+  ja: {
+    back: "ホームに戻る",
+    title: "利用規約",
+    lastUpdated: "最終更新日: 2026年6月18日",
+    loading: "利用規約が読み込まれるまでお待ちください。読み込まれない場合は、",
+    clickHere: "こちらをクリックして利用規約を表示してください",
+    error: "利用規約の読み込み中にエラーが発生しました。こちらを"
+  },
+  zh: {
+    back: "返回首页",
+    title: "服务条款",
+    lastUpdated: "最后更新时间：2026年6月18日",
+    loading: "服务条款正在加载，请稍候。如果未加载成功，请",
+    clickHere: "点击此处查看服务条款",
+    error: "加载服务条款时出错，请"
+  },
+  ar: {
+    back: "العودة إلى الصفحة الرئيسية",
+    title: "شروط الخدمة",
+    lastUpdated: "آخر تحديث: 18 يونيو 2026",
+    loading: "يرجى الانتظار أثناء تحميل شروط الخدمة. إذا لم يتم تحميلها، يرجى",
+    clickHere: "الضغط هنا لعرض شروط الخدمة",
+    error: "حدث خطأ أثناء تحميل شروط الخدمة، يرجى"
+  },
+  hi: {
+    back: "होम पर वापस जाएं",
+    title: "सेवा की शर्तें",
+    lastUpdated: "अंतिम अद्यतन: 18 जून, 2026",
+    loading: "सेवा की शर्तें लोड होने तक कृपया प्रतीक्षा करें। यदि वे लोड नहीं होती हैं, तो कृपया",
+    clickHere: "सेवा की शर्तें देखने के लिए यहां क्लिक करें",
+    error: "सेवा की शर्तें लोड करने में त्रुटि हुई, कृपया"
+  },
+  pt: {
+    back: "Voltar para o início",
+    title: "Termos de Serviço",
+    lastUpdated: "Última atualização: 18 de junho de 2026",
+    loading: "Por favor, aguarde enquanto os termos de serviço são carregados. Se não carregar, por favor",
+    clickHere: "clique aqui para visualizar os termos de serviço",
+    error: "Ocorreu um erro ao carregar os termos de serviço, por favor"
+  },
+  de: {
+    back: "Zurück zur Startseite",
+    title: "Nutzungsbedingungen",
+    lastUpdated: "Zuletzt aktualisiert: 18. Juni 2026",
+    loading: "Bitte warten Sie, während die Nutzungsbedingungen geladen werden. Wenn sie nicht geladen werden, bitte",
+    clickHere: "hier klicken, um die Nutzungsbedingungen anzuzeigen",
+    error: "Beim Laden der Nutzungsbedingungen ist ein Fehler aufgetreten. Bitte"
+  },
+  it: {
+    back: "Torna alla home",
+    title: "Termini di servizio",
+    lastUpdated: "Ultimo aggiornamento: 18 giugno 2026",
+    loading: "Attendere il caricamento dei termini di servizio. Se non si caricano, si prega di",
+    clickHere: "fare clic qui per visualizzare i termini di servizio",
+    error: "Si è verificato un errore durante il caricamento dei termini di servizio, si prega di"
+  },
+  ko: {
+    back: "홈으로 돌아가기",
+    title: "서비스 이용약관",
+    lastUpdated: "최종 수정일: 2026년 6월 18일",
+    loading: "이용약관이 로드되는 동안 잠시 기다려 주십시오. 로드되지 않는 경우,",
+    clickHere: "여기를 클릭하여 이용약관을 확인하십시오",
+    error: "이용약관을 로드하는 동안 오류가 발생했습니다. 여기를"
+  }
+};
+
 export default function TermsOfServicePage() {
   const [policyHtml, setPolicyHtml] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [lang, setLang] = useState<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi" | "pt" | "de" | "it" | "ko">("en");
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const validLangs = ["en", "es", "fr", "ja", "zh", "ar", "hi", "pt", "de", "it", "ko"];
+      const searchParams = new URLSearchParams(window.location.search);
+      const paramLang = searchParams.get("lang");
+      if (paramLang && validLangs.includes(paramLang)) {
+        setLang(paramLang as any);
+        localStorage.setItem("lang", paramLang);
+      } else {
+        const savedLang = localStorage.getItem("lang") as any;
+        if (validLangs.includes(savedLang)) {
+          setLang(savedLang);
+        }
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
+  }, [lang]);
+
+  const t = TERMS_DICTS[lang] || TERMS_DICTS.en;
 
   useEffect(() => {
     const fetchPolicy = async () => {
@@ -57,7 +172,7 @@ export default function TermsOfServicePage() {
         {/* Navigation */}
         <div style={{ marginBottom: 32 }}>
           <Link
-            href="/"
+            href={lang ? `/?lang=${lang}` : "/"}
             style={{
               display: "inline-flex",
               alignItems: "center",
@@ -71,7 +186,7 @@ export default function TermsOfServicePage() {
             onMouseOver={(e) => (e.currentTarget.style.opacity = "0.8")}
             onMouseOut={(e) => (e.currentTarget.style.opacity = "1")}
           >
-            ← Back to Home
+            ← {t.back}
           </Link>
         </div>
 
@@ -85,7 +200,7 @@ export default function TermsOfServicePage() {
             color: "oklch(0.20 0.02 245)",
           }}
         >
-          Terms of Service
+          {t.title}
         </h1>
         <p
           style={{
@@ -96,7 +211,7 @@ export default function TermsOfServicePage() {
             paddingBottom: 20,
           }}
         >
-          Last updated: June 18, 2026
+          {t.lastUpdated}
         </p>
 
         {/* Termageddon Embed Container */}
@@ -113,7 +228,7 @@ export default function TermsOfServicePage() {
         >
           {loading && (
             <div>
-              Please wait while the terms of service are loaded. If they do not load, please{" "}
+              {t.loading}{" "}
               <a
                 rel="nofollow"
                 aria-label="click here to view the terms of service"
@@ -121,20 +236,20 @@ export default function TermsOfServicePage() {
                 target="_blank"
                 style={{ color: "oklch(0.45 0.13 242)", textDecoration: "underline" }}
               >
-                click here to view the terms of service
+                {t.clickHere}
               </a>.
             </div>
           )}
 
           {!loading && error && (
             <div role="alert" style={{ color: "red" }}>
-              There was an error loading the terms of service, please{" "}
+              {t.error}{" "}
               <a
                 href="https://embed.termageddon.com/api/policy/VFRCelZUSjJPSEJEYkVKMVltYzlQUT09"
                 target="_blank"
                 style={{ color: "oklch(0.45 0.13 242)", textDecoration: "underline" }}
               >
-                click here to view the terms of service
+                {t.clickHere}
               </a>.
             </div>
           )}

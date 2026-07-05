@@ -78,7 +78,9 @@ export interface HomepageTranslations {
     hangUp: string;
     startSim: string;
     btnCascade: string;
+    btnSimultaneous: string;
     btnMenu: string;
+    btnSchedule: string;
     routingMode: string;
     available: string;
     offline: string;
@@ -318,6 +320,8 @@ export interface HomepageTranslations {
     press: string;
     simExplanationMenuExtra: string;
     simExplanationCascadeExtra: string;
+    simExplanationSimultaneousExtra: string;
+    simExplanationScheduleExtra: string;
     whyFamiliesChoose: string;
     thoughtfulByDesign: string;
     dependableByDefault: string;

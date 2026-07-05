@@ -30,7 +30,7 @@
         },
         "avatarUrl": ""
       },
-      "updated_at": "2026-07-02T22:08:33.493Z"
+      "updated_at": "2026-07-02T23:05:08.503Z"
     }
   ],
   "phone_lines": [
@@ -48,7 +48,7 @@
           "available": true
         }
       ],
-      "id": "mock-row-etnp1481h",
+      "id": "mock-row-tslf9cfks",
       "settings": {
         "color": "oklch(0.58 0.115 232)",
         "mode": "menu",

@@ -231,8 +231,7 @@ export default function Home() {
   ]);
   const [addName, setAddName] = useState("");
   const [addRel, setAddRel] = useState("");
-  
-  const [simMode, setSimMode] = useState<"cascade" | "menu">("cascade");
+  const [simMode, setSimMode] = useState<"cascade" | "menu" | "simultaneous" | "schedule">("cascade");
   const [simCalling, setSimCalling] = useState(false);
   const [simScreen, setSimScreen] = useState<SimulatedCallConfig>({
     av: "—",
@@ -371,6 +370,141 @@ export default function Home() {
       
       // Render menu options on phone screen
       setSimScreen({ av: "\u2630", name: "Select an option", state: "", cls: "menu-mode" });
+    } else if (simMode === "simultaneous") {
+      // Simultaneous Mode Simulation
+      setSimDots(Array(contacts.length).fill("active"));
+      setSimScreen({ av: "\u2022", name: "Connecting\u2026", state: "Placing your call" });
+      await new Promise(r => setTimeout(r, 900));
+
+      setSimScreen({
+        av: "\ud83d\udc65",
+        name: "Ringing circle",
+        state: "Ringing all contacts simultaneously\u2026",
+        cls: "ringing-state"
+      });
+      await new Promise(r => setTimeout(r, 2000));
+
+      const firstAvailableIdx = contacts.findIndex(c => c.available);
+      if (firstAvailableIdx !== -1) {
+        const c = contacts[firstAvailableIdx];
+        setSimConnectedRow(c.id);
+        setSimScreen({
+          av: getInitials(c.name),
+          avColor: getColor(firstAvailableIdx),
+          name: c.name,
+          state: "\u2713 Connected \u2014 say hello!",
+          cls: "connected"
+        });
+        // Non-answering ones are marked as done/missed
+        const missedIds: number[] = [];
+        setSimDots(prev => {
+          const copy = [...prev];
+          for (let i = 0; i < contacts.length; i++) {
+            if (i !== firstAvailableIdx) {
+              copy[i] = "done";
+              missedIds.push(contacts[i].id);
+            }
+          }
+          return copy;
+        });
+        setSimMissedRows(missedIds);
+      } else {
+        // All missed, go to voicemail
+        setSimDots(Array(contacts.length).fill("done"));
+        setSimMissedRows(contacts.map(c => c.id));
+        setSimScreen({
+          av: "\u2709",
+          name: "Voicemail",
+          state: "Message sent \u2014 whole circle alerted",
+          cls: "voicemail"
+        });
+      }
+
+      await new Promise(r => setTimeout(r, 2600));
+      resetSimScreen();
+      setSimCalling(false);
+      setSimRingingRow(null);
+      setSimConnectedRow(null);
+      setSimMissedRows([]);
+    } else if (simMode === "schedule") {
+      // Schedule Mode Simulation
+      setSimDots(Array(contacts.length).fill("standingby"));
+      setSimScreen({ av: "\u2022", name: "Connecting\u2026", state: "Placing your call" });
+      await new Promise(r => setTimeout(r, 900));
+
+      const hour = new Date().getHours();
+      let activeContact = null;
+      let slotDescription = "";
+
+      if (hour >= 0 && hour < 7) {
+        activeContact = contacts.find(c => c.name.toLowerCase().includes("dawn") || c.rel.toLowerCase().includes("paid")) || contacts[2] || contacts[0];
+        slotDescription = "Night Coverage";
+      } else if (hour >= 7 && hour < 15) {
+        activeContact = contacts.find(c => c.name.toLowerCase().includes("sarah") || c.rel.toLowerCase().includes("daughter")) || contacts[0];
+        slotDescription = "Daytime Coverage";
+      } else {
+        activeContact = contacts.find(c => c.name.toLowerCase().includes("david") || c.rel.toLowerCase().includes("son")) || contacts[1] || contacts[0];
+        slotDescription = "Evening Coverage";
+      }
+
+      if (activeContact) {
+        const idx = contacts.findIndex(c => c.id === activeContact.id);
+        setSimDots(prev => {
+          const copy = [...prev];
+          copy[idx] = "active";
+          return copy;
+        });
+        setSimRingingRow(activeContact.id);
+        setSimScreen({
+          av: getInitials(activeContact.name),
+          avColor: getColor(idx),
+          name: activeContact.name,
+          state: `Ringing active contact (${slotDescription})…`,
+          cls: "ringing-state"
+        });
+
+        await new Promise(r => setTimeout(r, 1800));
+
+        if (activeContact.available) {
+          setSimRingingRow(null);
+          setSimConnectedRow(activeContact.id);
+          setSimScreen({
+            av: getInitials(activeContact.name),
+            avColor: getColor(idx),
+            name: activeContact.name,
+            state: `✓ Connected — ${slotDescription}`,
+            cls: "connected"
+          });
+        } else {
+          setSimRingingRow(null);
+          setSimMissedRows([activeContact.id]);
+          setSimDots(prev => {
+            const copy = [...prev];
+            copy[idx] = "done";
+            return copy;
+          });
+          setSimScreen({
+            av: "\u2709",
+            name: `${activeContact.name} is busy`,
+            state: "Voicemail sent — they’ve been alerted",
+            cls: "voicemail"
+          });
+        }
+      } else {
+        setSimScreen({
+          av: "!",
+          name: "No active caregiver",
+          state: "No contact is currently scheduled",
+          cls: "voicemail"
+        });
+      }
+
+      await new Promise(r => setTimeout(r, 2600));
+      resetSimScreen();
+      setSimCalling(false);
+      setSimRingingRow(null);
+      setSimConnectedRow(null);
+      setSimMissedRows([]);
     } else {
       // Cascade Mode Simulation
       setSimDots(Array(contacts.length).fill("standingby"));
@@ -486,9 +620,9 @@ export default function Home() {
 
   const resetSimScreen = () => {
     setSimScreen({
-      av: simMode === "menu" ? "\u2630" : "—",
-      name: simMode === "menu" ? "Caller menu" : "Ready",
-      state: simMode === "menu" ? "{t.demo.startSim} to hear the options" : "Press call to start routing"
+      av: simMode === "menu" ? "\u2630" : simMode === "schedule" ? "🕒" : "—",
+      name: simMode === "menu" ? "Caller menu" : simMode === "schedule" ? "Around the Clock" : "Ready",
+      state: simMode === "menu" ? (t ? `${t.demo.startSim} to hear the options` : "Run a test call") : "Press call to start routing"
     });
     setSimDots([]);
   };
@@ -681,6 +815,8 @@ export default function Home() {
               <span className="mode-label">{t.demo.routingMode}</span>
               <div className="seg" role="tablist" aria-label="Routing mode">
                 <button className={`seg-btn ${simMode === "cascade" ? "active" : ""}`} type="button" onClick={() => !simCalling && setSimMode("cascade")}>{t.demo.btnCascade}</button>
+                <button className={`seg-btn ${simMode === "simultaneous" ? "active" : ""}`} type="button" onClick={() => !simCalling && setSimMode("simultaneous")}>{t.demo.btnSimultaneous}</button>
+                <button className={`seg-btn ${simMode === "schedule" ? "active" : ""}`} type="button" onClick={() => !simCalling && setSimMode("schedule")}>{t.demo.btnSchedule}</button>
                 <button className={`seg-btn ${simMode === "menu" ? "active" : ""}`} type="button" onClick={() => !simCalling && setSimMode("menu")}>{t.demo.btnMenu}</button>
               </div>
               <span className="mode-note">
@@ -702,7 +838,7 @@ export default function Home() {
                     <div className="circle-empty">{t.demo.addContact}</div>
                   ) : (
                     contacts.map((c, i) => {
-                      const isRinging = simRingingRow === c.id;
+                      const isRinging = simRingingRow === c.id || (simMode === "simultaneous" && simCalling && simConnectedRow === null && simMissedRows.length === 0);
                       const isConnected = simConnectedRow === c.id;
                       const isMissed = simMissedRows.includes(c.id);
 
@@ -787,6 +923,10 @@ export default function Home() {
                 <p className="sim-hint">
                   {simMode === "menu"
                     ? t.ui.simExplanationMenuExtra
+                    : simMode === "simultaneous"
+                    ? t.ui.simExplanationSimultaneousExtra
+                    : simMode === "schedule"
+                    ? t.ui.simExplanationScheduleExtra
                     : t.ui.simExplanationCascadeExtra}
                 </p>
               </div>

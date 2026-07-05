@@ -4,6 +4,262 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import Turnstile from "@/components/Turnstile";
 
+const LOGIN_DICTS = {
+  en: {
+    title: "Sign in to iCanCall",
+    emailPrompt: "Enter your email to receive a secure login verification PIN",
+    otpPrompt: "Enter the 6-digit PIN sent to your email to complete login",
+    emailLabel: "Email address",
+    otpLabel: "Verification PIN",
+    changeEmail: "Change Email",
+    pinPlaceholder: "6-digit code",
+    sendPin: "Send Login PIN",
+    sendingPin: "Sending PIN...",
+    verifyBtn: "Verify and Sign In",
+    verifying: "Verifying...",
+    orSignInWith: "or sign in with",
+    continueWithGoogle: "Continue with Google",
+    connecting: "Connecting...",
+    demoTitle: "Demo Accounts (Click to auto-log in):",
+    noAccount: "Don't have an account?",
+    signUp: "Sign up",
+    successSentToast: "A 6-digit verification code has been sent to your email.",
+    failedSentToast: "Failed to send verification code. Please check your email address.",
+    invalidOtpToast: "Invalid or expired verification code. Please try again.",
+    errorUnexpected: "An unexpected error occurred. Please try again."
+  },
+  es: {
+    title: "Iniciar sesión en iCanCall",
+    emailPrompt: "Ingrese su correo electrónico para recibir un PIN de verificación de inicio de sesión seguro",
+    otpPrompt: "Ingrese el PIN de 6 dígitos enviado a su correo electrónico para completar el inicio de sesión",
+    emailLabel: "Dirección de correo electrónico",
+    otpLabel: "PIN de verificación",
+    changeEmail: "Cambiar correo electrónico",
+    pinPlaceholder: "Código de 6 dígitos",
+    sendPin: "Enviar PIN de inicio de sesión",
+    sendingPin: "Enviando PIN...",
+    verifyBtn: "Verificar e Iniciar Sesión",
+    verifying: "Verificando...",
+    orSignInWith: "o iniciar sesión con",
+    continueWithGoogle: "Continuar con Google",
+    connecting: "Conectando...",
+    demoTitle: "Cuentas de demostración (Haga clic para iniciar sesión automáticamente):",
+    noAccount: "¿No tiene una cuenta?",
+    signUp: "Registrarse",
+    successSentToast: "Se ha enviado un código de verificación de 6 dígitos a su correo electrónico.",
+    failedSentToast: "Error al enviar el código de verificación. Por favor, compruebe su dirección de correo electrónico.",
+    invalidOtpToast: "Código de verificación no válido o caducado. Por favor, inténtelo de nuevo.",
+    errorUnexpected: "Ocurrió un error inesperado. Por favor, inténtelo de nuevo."
+  },
+  fr: {
+    title: "Se connecter à iCanCall",
+    emailPrompt: "Entrez votre adresse e-mail pour recevoir un code PIN de connexion sécurisé",
+    otpPrompt: "Saisissez le code PIN à 6 chiffres envoyé à votre adresse e-mail pour finaliser la connexion",
+    emailLabel: "Adresse e-mail",
+    otpLabel: "Code PIN de vérification",
+    changeEmail: "Modifier l'e-mail",
+    pinPlaceholder: "Code à 6 chiffres",
+    sendPin: "Envoyer le code PIN",
+    sendingPin: "Envoi du code PIN...",
+    verifyBtn: "Vérifier et se connecter",
+    verifying: "Vérification...",
+    orSignInWith: "ou se connecter avec",
+    continueWithGoogle: "Continuer avec Google",
+    connecting: "Connexion...",
+    demoTitle: "Comptes de démonstration (Cliquez pour vous connecter automatiquement) :",
+    noAccount: "Vous n'avez pas de compte ?",
+    signUp: "S'inscrire",
+    successSentToast: "Un code de vérification à 6 chiffres a été envoyé à votre adresse e-mail.",
+    failedSentToast: "Échec de l'envoi du code de vérification. Veuillez vérifier votre adresse e-mail.",
+    invalidOtpToast: "Code de vérification invalide ou expiré. Veuillez réessayer.",
+    errorUnexpected: "Une erreur inattendue est survenue. Veuillez réessayer."
+  },
+  ja: {
+    title: "iCanCall にサインイン",
+    emailPrompt: "セキュアなログイン用認証コードを受け取るため、メールアドレスを入力してください",
+    otpPrompt: "ログインを完了するため、メールに送信された6桁の認証コードを入力してください",
+    emailLabel: "メールアドレス",
+    otpLabel: "認証コード",
+    changeEmail: "メールアドレスを変更",
+    pinPlaceholder: "6桁のコード",
+    sendPin: "ログインコードを送信",
+    sendingPin: "送信中...",
+    verifyBtn: "認証してサインイン",
+    verifying: "検証中...",
+    orSignInWith: "または以下でサインイン",
+    continueWithGoogle: "Google でログイン",
+    connecting: "接続中...",
+    demoTitle: "デモアカウント（クリックして自動ログイン）:",
+    noAccount: "アカウントをお持ちでない場合",
+    signUp: "新規登録",
+    successSentToast: "6桁 of 認証コードがメールに送信されました。",
+    failedSentToast: "認証コードの送信に失敗しました。メールアドレスを確認してください。",
+    invalidOtpToast: "認証コードが無効であるか、有効期限が切れています。もう一度お試しください。",
+    errorUnexpected: "予期しないエラーが発生しました。もう一度お試しください。"
+  },
+  zh: {
+    title: "登录 iCanCall",
+    emailPrompt: "输入您的电子邮件以接收安全登录验证码 PIN",
+    otpPrompt: "输入发送到您电子邮件的 6 位验证码以完成登录",
+    emailLabel: "电子邮件地址",
+    otpLabel: "验证码 PIN",
+    changeEmail: "更改电子邮件",
+    pinPlaceholder: "6位数字验证码",
+    sendPin: "发送登录验证码",
+    sendingPin: "正在发送验证码...",
+    verifyBtn: "验证并登录",
+    verifying: "正在验证...",
+    orSignInWith: "或使用以下方式登录",
+    continueWithGoogle: "使用 Google 继续",
+    connecting: "正在连接...",
+    demoTitle: "演示账号（点击即可自动登录）：",
+    noAccount: "还没有账号？",
+    signUp: "注册账号",
+    successSentToast: "已向您的邮箱发送了 6 位验证码。",
+    failedSentToast: "无法发送验证码。请检查您的电子邮件地址。",
+    invalidOtpToast: "验证码无效或已过期。请重试。",
+    errorUnexpected: "发生未知错误。请重试。"
+  },
+  ar: {
+    title: "تسجيل الدخول إلى iCanCall",
+    emailPrompt: "أدخل بريدك الإلكتروني لتلقي رمز PIN آمن للتحقق من تسجيل الدخول",
+    otpPrompt: "أدخل رمز PIN المكون من 6 أرقام والمرسل إلى بريدك الإلكتروني لإكمال تسجيل الدخول",
+    emailLabel: "البريد الإلكتروني",
+    otpLabel: "رمز التحقق PIN",
+    changeEmail: "تغيير البريد الإلكتروني",
+    pinPlaceholder: "رمز مكون من 6 أرقام",
+    sendPin: "إرسال رمز PIN",
+    sendingPin: "جاري الإرسال...",
+    verifyBtn: "التحقق وتسجيل الدخول",
+    verifying: "جاري التحقق...",
+    orSignInWith: "أو تسجيل الدخول بواسطة",
+    continueWithGoogle: "المتابعة باستخدام Google",
+    connecting: "جاري الاتصال...",
+    demoTitle: "حسابات تجريبية (اضغط لتسجيل الدخول التلقائي):",
+    noAccount: "ليس لديك حساب؟",
+    signUp: "إنشاء حساب",
+    successSentToast: "تم إرسال رمز التحقق المكون من 6 أرقام إلى بريدك الإلكتروني.",
+    failedSentToast: "فشل إرسال رمز التحقق. يرجى التحقق من بريدك الإلكتروني.",
+    invalidOtpToast: "رمز التحقق غير صالح أو منتهي الصلاحية. يرجى المحاولة مرة أخرى.",
+    errorUnexpected: "حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى."
+  },
+  hi: {
+    title: "iCanCall में साइन इन करें",
+    emailPrompt: "सुरक्षित लॉगिन सत्यापन पिन प्राप्त करने के लिए अपना ईमेल दर्ज करें",
+    otpPrompt: "लॉगिन पूरा करने के लिए अपने ईमेल पर भेजा गया 6-अंकीय पिन दर्ज करें",
+    emailLabel: "ईमेल पता",
+    otpLabel: "सत्यापन पिन",
+    changeEmail: "ईमेल बदलें",
+    pinPlaceholder: "6-अंकीय कोड",
+    sendPin: "लॉगिन पिन भेजें",
+    sendingPin: "पिन भेजा जा रहा है...",
+    verifyBtn: "सत्यापित करें और साइन इन करें",
+    verifying: "सत्यापन किया जा रहा है...",
+    orSignInWith: "या इसके साथ साइन इन करें",
+    continueWithGoogle: "Google के साथ जारी रखें",
+    connecting: "कनेक्ट किया जा रहा है...",
+    demoTitle: "डेमो खाते (ऑटो-लॉगिन के लिए क्लिक करें):",
+    noAccount: "खाता नहीं है?",
+    signUp: "साइन अप करें",
+    successSentToast: "आपके ईमेल पर 6-अंकीय सत्यापन कोड भेजा गया है।",
+    failedSentToast: "सत्यापन कोड भेजने में विफल। कृपया अपना ईमेल पता जांचें।",
+    invalidOtpToast: "अमान्य या समाप्त सत्यापन कोड। कृपया पुनः प्रयास करें।",
+    errorUnexpected: "एक अप्रत्याशित त्रुटि हुई। कृपया पुनः प्रयास करें।"
+  },
+  pt: {
+    title: "Entrar no iCanCall",
+    emailPrompt: "Insira seu e-mail para receber um PIN de verificação de login seguro",
+    otpPrompt: "Insira o PIN de 6 dígitos enviado ao seu e-mail para concluir o login",
+    emailLabel: "Endereço de e-mail",
+    otpLabel: "PIN de verificação",
+    changeEmail: "Alterar e-mail",
+    pinPlaceholder: "Código de 6 dígitos",
+    sendPin: "Enviar PIN de login",
+    sendingPin: "Enviando PIN...",
+    verifyBtn: "Verificar e Entrar",
+    verifying: "Verificando...",
+    orSignInWith: "ou entrar com",
+    continueWithGoogle: "Continuar com Google",
+    connecting: "Conectando...",
+    demoTitle: "Contas de demonstração (Clique para entrar automaticamente):",
+    noAccount: "Não tem uma conta?",
+    signUp: "Cadastrar-se",
+    successSentToast: "Um código de verificação de 6 dígitos foi enviado ao seu e-mail.",
+    failedSentToast: "Falha ao enviar o código de verificação. Por favor, verifique seu endereço de e-mail.",
+    invalidOtpToast: "Código de verificação inválido ou expirado. Por favor, tente novamente.",
+    errorUnexpected: "Ocorreu um erro inesperado. Por favor, tente novamente."
+  },
+  de: {
+    title: "Bei iCanCall anmelden",
+    emailPrompt: "Geben Sie Ihre E-Mail-Adresse ein, um eine sichere PIN zur Anmeldung zu erhalten",
+    otpPrompt: "Geben Sie die 6-stellige PIN ein, die an Ihre E-Mail gesendet wurde, um die Anmeldung abzuschließen",
+    emailLabel: "E-Mail-Adresse",
+    otpLabel: "Bestätigungs-PIN",
+    changeEmail: "E-Mail ändern",
+    pinPlaceholder: "6-stelliger Code",
+    sendPin: "Anmelde-PIN senden",
+    sendingPin: "Sende PIN...",
+    verifyBtn: "Verifizieren und anmelden",
+    verifying: "Verifiziere...",
+    orSignInWith: "oder anmelden mit",
+    continueWithGoogle: "Weiter mit Google",
+    connecting: "Verbinde...",
+    demoTitle: "Demo-Konten (Klicken zur automatischen Anmeldung):",
+    noAccount: "Sie haben noch kein Konto?",
+    signUp: "Registrieren",
+    successSentToast: "Eine 6-stellige Bestätigungs-PIN wurde an Ihre E-Mail gesendet.",
+    failedSentToast: "Fehler beim Senden der Bestätigungs-PIN. Bitte überprüfen Sie Ihre E-Mail-Adresse.",
+    invalidOtpToast: "Ungültige oder abgelaufene Bestätigungs-PIN. Bitte versuchen Sie es erneut.",
+    errorUnexpected: "Ein unerwarteter Fehler ist aufgetreten. Bitte versuchen Sie es erneut."
+  },
+  it: {
+    title: "Accedi a iCanCall",
+    emailPrompt: "Inserisci la tua email per ricevere un PIN di verifica di accesso sicuro",
+    otpPrompt: "Inserisci il PIN a 6 cifre inviato alla tua email per completare l'accesso",
+    emailLabel: "Indirizzo email",
+    otpLabel: "PIN di verifica",
+    changeEmail: "Cambia email",
+    pinPlaceholder: "Codice a 6 cifre",
+    sendPin: "Invia PIN di accesso",
+    sendingPin: "Invio PIN in corso...",
+    verifyBtn: "Verifica e Accedi",
+    verifying: "Verifica in corso...",
+    orSignInWith: "o accedi con",
+    continueWithGoogle: "Continua con Google",
+    connecting: "Connessione in corso...",
+    demoTitle: "Account demo (Fai clic per accedere automaticamente):",
+    noAccount: "Non hai un account?",
+    signUp: "Registrati",
+    successSentToast: "Un codice di verifica a 6 cifre è stato inviato alla tua email.",
+    failedSentToast: "Impossibile inviare il codice di verifica. Controlla il tuo indirizzo email.",
+    invalidOtpToast: "Codice di verifica non valido o scaduto. Riprova.",
+    errorUnexpected: "Si è verificato un errore imprevisto. Riprova."
+  },
+  ko: {
+    title: "iCanCall 로그인",
+    emailPrompt: "보안 로그인 인증 PIN 번호를 받으려면 이메일을 입력하세요",
+    otpPrompt: "로그인을 완료하려면 이메일로 전송된 6자리 PIN 번호를 입력하세요",
+    emailLabel: "이메일 주소",
+    otpLabel: "인증 PIN 번호",
+    changeEmail: "이메일 변경",
+    pinPlaceholder: "6자리 코드",
+    sendPin: "로그인 PIN 번호 전송",
+    sendingPin: "PIN 전송 중...",
+    verifyBtn: "인증 및 로그인",
+    verifying: "인증 중...",
+    orSignInWith: "또는 다음으로 로그인",
+    continueWithGoogle: "Google 계정으로 로그인",
+    connecting: "연결 중...",
+    demoTitle: "데모 계정 (클릭 시 자동 로그인):",
+    noAccount: "계정이 없으신가요?",
+    signUp: "회원가입",
+    successSentToast: "6자리 인증 코드가 귀하의 이메일로 전송되었습니다.",
+    failedSentToast: "인증 코드 전송에 실패했습니다. 이메일 주소를 확인해 주세요.",
+    invalidOtpToast: "인증 코드가 잘못되었거나 만료되었습니다. 다시 시도해 주세요.",
+    errorUnexpected: "예기치 않은 오류가 발생했습니다. 다시 시도해 주세요."
+  }
+};
+
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
@@ -12,6 +268,7 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const [lang, setLang] = useState<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi" | "pt" | "de" | "it" | "ko">("en");
 
   const isDemo = email === "support@icancall.co" || email === "admin@icancall.co";
 
@@ -20,8 +277,27 @@ export default function LoginPage() {
       localStorage.removeItem("isLoggedIn");
       localStorage.removeItem("isAdminLoggedIn");
       localStorage.removeItem("userEmail");
+      
+      const validLangs = ["en", "es", "fr", "ja", "zh", "ar", "hi", "pt", "de", "it", "ko"];
+      const searchParams = new URLSearchParams(window.location.search);
+      const paramLang = searchParams.get("lang");
+      if (paramLang && validLangs.includes(paramLang)) {
+        setLang(paramLang as any);
+        localStorage.setItem("lang", paramLang);
+      } else {
+        const savedLang = localStorage.getItem("lang") as any;
+        if (validLangs.includes(savedLang)) {
+          setLang(savedLang);
+        }
+      }
     }
   }, []);
+
+  useEffect(() => {
+    document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
+  }, [lang]);
+
+  const t = LOGIN_DICTS[lang] || LOGIN_DICTS.en;
 
   const handleSendOtp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,16 +314,16 @@ export default function LoginPage() {
 
       const data = await res.json();
       if (!res.ok) {
-        setError(data.error || "Failed to send verification code. Please check your email address.");
+        setError(data.error || t.failedSentToast);
         setIsLoading(false);
         return;
       }
 
-      setMessage("A 6-digit verification code has been sent to your email.");
+      setMessage(t.successSentToast);
       setStep("otp");
       setIsLoading(false);
     } catch (err) {
-      setError("An unexpected error occurred. Please try again.");
+      setError(t.errorUnexpected);
       setIsLoading(false);
     }
   };
@@ -66,7 +342,7 @@ export default function LoginPage() {
 
       const data = await res.json();
       if (!res.ok) {
-        setError(data.error || "Invalid or expired verification code. Please try again.");
+        setError(data.error || t.invalidOtpToast);
         setIsLoading(false);
         return;
       }
@@ -80,7 +356,7 @@ export default function LoginPage() {
         window.location.href = "/dashboard";
       }
     } catch (err) {
-      setError("An unexpected error occurred. Please try again.");
+      setError(t.errorUnexpected);
       setIsLoading(false);
     }
   };
@@ -136,12 +412,10 @@ export default function LoginPage() {
             <path className="cls-2" d="M614.0104,195.1547c-58.4407-52.4543-93.2093-19.3341-137.3701,25.2658-18.0159,17.3568-39.4915,26.1448-62.1767,12.6879-26.6933-16.1483-56.3542-45.8081-89.7483-28.8362-25.1566,11.9738-47.3469,46.6871-69.9757,58.4414-30.1543,15.3242-50.9165-22.3549-76.0731-31.3079-49.6534-17.4664-96.0106,93.9237-104.0846,134.2393-3.6246,17.851-9.777,64.3185,18.2358,62.3959,23.6171-4.9981,43.0062-29.0008,68.2727-30.8684,29.9894-5.7122,52.1248,23.838,76.7315,30.7038,36.9101,8.3489,57.1225-52.2347,101.7781-51.7952,30.8677-1.5931,52.3997,26.0349,76.4016,41.1395,31.9673,19.7186,58.8806-12.9075,87.3332-28.6166,77.0051-48.1153,156.0444,57.0133,183.4524-14.2257l.3299-.879c16.3129-69.5362-30.7041-135.0629-73.1069-178.3447ZM161.9688,375.0375c-45.369-4.3394-43.2811-69.9757,2.1978-71.6238h.8783c48.6637,2.2522,45.8638,73.546-3.0762,71.6238ZM378.5432,327.0872c-15.051,43.9408-80.3025,36.9651-85.6302-9.2279-3.6246-25.3758,17.9059-49.653,43.446-49.3785h.7697c29.3296-.4392,51.575,31.0883,41.4144,58.6063ZM601.2122,303.5237c-4.7779,58.1668-84.4756,71.0193-107.5443,17.5764-16.0393-35.592,12.0835-78.6541,51.1901-78.05h.8247c31.8574-.2746,58.5507,28.6716,55.5295,60.4736Z" />
           </svg>
           <h1 style={{ fontSize: "1.45rem", fontWeight: 700, letterSpacing: "-0.03em", margin: 0, color: "oklch(0.26 0.028 248)" }}>
-            Sign in to iCanCall
+            {t.title}
           </h1>
           <p style={{ fontSize: "0.85rem", color: "oklch(0.60 0.018 242)", marginTop: 6, margin: 0 }}>
-            {step === "email"
-              ? "Enter your email to receive a secure login verification PIN"
-              : "Enter the 6-digit PIN sent to your email to complete login"}
+            {step === "email" ? t.emailPrompt : t.otpPrompt}
           </p>
         </div>
 
@@ -185,7 +459,7 @@ export default function LoginPage() {
         {step === "email" ? (
           <form onSubmit={handleSendOtp} style={{ display: "flex", flexDirection: "column", gap: 18 }}>
             <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-              <label style={{ fontSize: "0.8rem", fontWeight: 600, color: "oklch(0.46 0.022 245)" }}>Email address</label>
+              <label style={{ fontSize: "0.8rem", fontWeight: 600, color: "oklch(0.46 0.022 245)" }}>{t.emailLabel}</label>
               <input
                 type="email"
                 value={email}
@@ -228,14 +502,14 @@ export default function LoginPage() {
                 transition: "background 0.15s, color 0.15s, box-shadow 0.15s",
               }}
             >
-              {isLoading ? "Sending PIN..." : "Send Login PIN"}
+              {isLoading ? t.sendingPin : t.sendPin}
             </button>
           </form>
         ) : (
           <form onSubmit={handleVerifyOtp} style={{ display: "flex", flexDirection: "column", gap: 18 }}>
             <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <label style={{ fontSize: "0.8rem", fontWeight: 600, color: "oklch(0.46 0.022 245)" }}>Verification PIN</label>
+                <label style={{ fontSize: "0.8rem", fontWeight: 600, color: "oklch(0.46 0.022 245)" }}>{t.otpLabel}</label>
                 <button
                   type="button"
                   onClick={() => setStep("email")}
@@ -250,12 +524,12 @@ export default function LoginPage() {
                     padding: 0
                   }}
                 >
-                  Change Email
+                  {t.changeEmail}
                 </button>
               </div>
               <input
                 type="text"
-                placeholder="6-digit code"
+                placeholder={t.pinPlaceholder}
                 value={otp}
                 onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
                 required
@@ -291,7 +565,7 @@ export default function LoginPage() {
                 transition: "background 0.15s",
               }}
             >
-              {isLoading ? "Verifying..." : "Verify and Sign In"}
+              {isLoading ? t.verifying : t.verifyBtn}
             </button>
           </form>
         )}
@@ -299,7 +573,7 @@ export default function LoginPage() {
         {/* Divider */}
         <div style={{ display: "flex", alignItems: "center", margin: "20px 0", color: "oklch(0.60 0.018 242)" }}>
           <div style={{ flex: 1, height: 1, background: "oklch(0.905 0.012 225)" }} />
-          <span style={{ padding: "0 10px", fontSize: "0.78rem", fontWeight: 500 }}>or sign in with</span>
+          <span style={{ padding: "0 10px", fontSize: "0.78rem", fontWeight: 500 }}>{t.orSignInWith}</span>
           <div style={{ flex: 1, height: 1, background: "oklch(0.905 0.012 225)" }} />
         </div>
 
@@ -332,7 +606,7 @@ export default function LoginPage() {
             <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" fill="#FBBC05"/>
             <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
           </svg>
-          {isLoading ? "Connecting..." : "Continue with Google"}
+          {isLoading ? t.connecting : t.continueWithGoogle}
         </button>
 
         {/* Demo Accounts Panel */}
@@ -346,7 +620,7 @@ export default function LoginPage() {
           lineHeight: "1.4",
           color: "oklch(0.4 0.01 220)"
         }}>
-          <strong>Demo Accounts (Click to auto-log in):</strong>
+          <strong>{t.demoTitle}</strong>
           <div style={{ marginTop: 8, display: "flex", flexDirection: "column", gap: 6 }}>
             <div 
               style={{ cursor: "pointer", display: "inline-block", color: "oklch(0.4 0.01 220)" }} 
@@ -368,7 +642,7 @@ export default function LoginPage() {
         </div>
 
         <div style={{ textAlign: "center", marginTop: 24, fontSize: "0.84rem", color: "oklch(0.46 0.022 245)" }}>
-          Don't have an account?{" "}
+          {t.noAccount}{" "}
           <span 
             onClick={async () => {
               try {
@@ -376,13 +650,13 @@ export default function LoginPage() {
               } catch (e) {
                 console.error(e);
               }
-              window.location.href = "/signup";
+              window.location.href = `/signup?lang=${lang}`;
             }}
             style={{ color: "oklch(0.58 0.115 232)", cursor: "pointer", fontWeight: 600 }}
             onMouseEnter={(e) => e.currentTarget.style.textDecoration = "underline"}
             onMouseLeave={(e) => e.currentTarget.style.textDecoration = "none"}
           >
-            Sign up
+            {t.signUp}
           </span>
         </div>
       </div>

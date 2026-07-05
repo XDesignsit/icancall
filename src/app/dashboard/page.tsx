@@ -14,6 +14,840 @@ const AVATAR_COLORS = [
   "oklch(0.6 0.14 350)",
 ];
 
+
+const getAcrossNumbersText = (count: number, lang: string) => {
+  if (lang === "es") return `en ${count} número${count > 1 ? "s" : ""}`;
+  if (lang === "fr") return `sur ${count} numéro${count > 1 ? "s" : ""}`;
+  if (lang === "ja") return `${count} つの番号全体で`;
+  if (lang === "zh") return `分布在 ${count} 个号码中`;
+  if (lang === "ar") return `عبر ${count} ${count === 1 ? "رقم" : "أرقام"}`;
+  if (lang === "hi") return `${count} नंबरों पर`;
+  if (lang === "pt") return `em ${count} número${count > 1 ? "s" : ""}`;
+  if (lang === "de") return `über ${count} Rufnummer${count > 1 ? "n" : ""}`;
+  if (lang === "it") return `su ${count} numero${count > 1 ? "i" : ""}`;
+  if (lang === "ko") return `${count}개 번호 전체`;
+  return `across ${count} number${count > 1 ? "s" : ""}`;
+};
+
+
+
+const CANONICAL_RELATIONSHIPS: Record<string, string> = {
+  "daughter": "daughter",
+  "hija": "daughter",
+  "fille": "daughter",
+  "娘": "daughter",
+  "女儿": "daughter",
+  "ابنة": "daughter",
+  "बेटी": "daughter",
+  "filha": "daughter",
+  "tochter": "daughter",
+  "figlia": "daughter",
+  "딸": "daughter",
+
+  "son": "son",
+  "hijo": "son",
+  "fils": "son",
+  "息子": "son",
+  "儿子": "son",
+  "ابن": "son",
+  "बेटा": "son",
+  "filho": "son",
+  "sohn": "son",
+  "figlio": "son",
+  "아들": "son",
+
+  "brother": "brother",
+  "hermano": "brother",
+  "frère": "brother",
+  "兄弟": "brother",
+  "أخ": "brother",
+  "भाई": "brother",
+  "irmão": "brother",
+  "bruder": "brother",
+  "fratello": "brother",
+  "형제": "brother",
+
+  "sister": "sister",
+  "hermana": "sister",
+  "sœur": "sister",
+  "姉妹": "sister",
+  "姐妹": "sister",
+  "أخت": "sister",
+  "बहन": "sister",
+  "irmã": "sister",
+  "schwester": "sister",
+  "sorella": "sister",
+  "자매": "sister",
+
+  "caregiver": "caregiver",
+  "cuidador": "caregiver",
+  "aidant": "caregiver",
+  "介護者": "caregiver",
+  "看护人": "caregiver",
+  "مقدم الرعاية": "caregiver",
+  "देखभाल करने वाला": "caregiver",
+  "pflegekraft": "caregiver",
+  "assistente": "caregiver",
+  "간병인": "caregiver",
+
+  "primary physician": "primary physician",
+  "primary doctor": "primary physician",
+  "médico de cabecera": "primary physician",
+  "médecin traitant": "primary physician",
+  "主治医": "primary physician",
+  "主治医生": "primary physician",
+  "الطبيب المعالج": "primary physician",
+  "طبيب العائلة": "primary physician",
+  "प्राथमिक चिकित्सक": "primary physician",
+  "मुख्य चिकित्सक": "primary physician",
+  "médico de família": "primary physician",
+  "hausarzt": "primary physician",
+  "medico curante": "primary physician",
+  "주치의": "primary physician",
+
+  "neighbor": "neighbor",
+  "vecino": "neighbor",
+  "voisin": "neighbor",
+  "近所の人": "neighbor",
+  "邻居": "neighbor",
+  "جار": "neighbor",
+  "पड़ोसी": "neighbor",
+  "vizinho": "neighbor",
+  "nachbar": "neighbor",
+  "vicino": "neighbor",
+  "이웃": "neighbor",
+
+  "niece": "niece",
+  "sobrina": "niece",
+  "nièce": "niece",
+  "姪": "niece",
+  "侄女/外甥女": "niece",
+  "ابنة الأخ/الأخت": "niece",
+  "भतीजी/भांजी": "niece",
+  "nichte": "niece",
+  "nipote": "niece",
+  "조카딸": "niece",
+
+  "nephew": "nephew",
+  "sobrino": "nephew",
+  "neveu": "nephew",
+  "甥": "nephew",
+  "侄子/外甥": "nephew",
+  "ابن الأخ/الأخت": "nephew",
+  "भतीजा/भांजी": "nephew",
+  "neffe": "nephew",
+  "조카": "nephew",
+
+  "spouse": "spouse",
+  "cónyuge": "spouse",
+  "conjoint": "spouse",
+  "配偶者": "spouse",
+  "配偶": "spouse",
+  "زوج/زوجة": "spouse",
+  "जीवनसाथी": "spouse",
+  "ehepartner": "spouse",
+  "coniuge": "spouse",
+  "배우자": "spouse",
+
+  "daytime caregiver": "daytime caregiver",
+  "cuidador diurno": "daytime caregiver",
+  "aidant de jour": "daytime caregiver",
+  "日中介護者": "daytime caregiver",
+  "日间看护": "daytime caregiver",
+  "مقدم الرعاية النهارية": "daytime caregiver",
+  "डेकेयरर": "daytime caregiver",
+  "tagespfleger": "daytime caregiver",
+  "caregiver diurno": "daytime caregiver",
+  "주간 보호자": "daytime caregiver",
+
+  "primary caregiver": "primary caregiver",
+  "cuidador principal": "primary caregiver",
+  "aidant principal": "primary caregiver",
+  "主な介護者": "primary caregiver",
+  "主要看护人": "primary caregiver",
+  "مقدم الرعاية الرئيسي": "primary caregiver",
+  "मुख्य केयर테कर": "primary caregiver",
+  "hauptbetreuer": "primary caregiver",
+  "caregiver principale": "primary caregiver",
+  "주 보호자": "primary caregiver",
+
+  "family member": "family member",
+  "miembro de la familia": "family member",
+  "membre de la famille": "family member",
+  "家族メンバー": "family member",
+  "家庭成员": "family member",
+  "أحد أفراد العائلة": "family member",
+  "परिवार का सदस्य": "family member",
+  "membro da família": "family member",
+  "familienmitglied": "family member",
+  "familiare": "family member",
+  "가족 구성원": "family member",
+
+  "voicemail left": "voicemail left",
+  "buzón de voz grabado": "voicemail left",
+  "message vocal laissé": "voicemail left",
+  "留守番電話保存": "voicemail left",
+  "已留语音留言": "voicemail left",
+  "تم ترك بريد صوتي": "voicemail left",
+  "वॉयसमेल छोड़ा गया": "voicemail left",
+  "mensagem de voz deixada": "voicemail left",
+  "mailbox-nachricht hinterlassen": "voicemail left",
+  "messaggio in segreteria": "voicemail left",
+  "음성 사서함에 녹음됨": "voicemail left",
+
+  "cardiologist": "cardiologist",
+  "cardiólogo": "cardiologist",
+  "cardiologue": "cardiologist",
+  "心臓専門医": "cardiologist",
+  "心脏病专家": "cardiologist",
+  "طبيب أمراض القلب": "cardiologist",
+  "हृदय रोग विशेषज्ञ": "cardiologist",
+  "cardiologista": "cardiologist",
+  "kardiologe": "cardiologist",
+  "cardiologo": "cardiologist",
+  "심장 전문의": "cardiologist",
+
+  "carrier": "carrier",
+  "operador": "carrier",
+  "opérateur": "carrier",
+  "通信事業者": "carrier",
+  "运营商": "carrier",
+  "المشغل": "carrier",
+  "वाहक": "carrier",
+  "operadora": "carrier",
+  "anbieter": "carrier",
+  "operatore": "carrier",
+  "통신사": "carrier",
+
+  "mother": "mother",
+  "mom": "mother",
+  "madre": "mother",
+  "mère": "mother",
+  "母": "mother",
+  "母亲": "mother",
+  "أم": "mother",
+  "माँ": "mother",
+  "mãe": "mother",
+  "mutter": "mother",
+  "어머니": "mother",
+
+  "father": "father",
+  "dad": "father",
+  "padre": "father",
+  "père": "father",
+  "父": "father",
+  "父亲": "father",
+  "أب": "father",
+  "पिता": "father",
+  "pai": "father",
+  "vater": "father",
+  "아버지": "father",
+
+  "husband": "husband",
+  "esposo": "husband",
+  "mari": "husband",
+  "夫": "husband",
+  "丈夫": "husband",
+  "زوج": "husband",
+  "पति": "husband",
+  "marido": "husband",
+  "ehemann": "husband",
+  "marito": "husband",
+  "남편": "husband",
+
+  "wife": "wife",
+  "esposa": "wife",
+  "épouse": "wife",
+  "妻": "wife",
+  "妻子": "wife",
+  "زوجة": "wife",
+  "पत्नी": "wife",
+  "ehefrau": "wife",
+  "moglie": "wife",
+  "아내": "wife",
+
+  "grandmother": "grandmother",
+  "grandma": "grandmother",
+  "abuela": "grandmother",
+  "grand-mère": "grandmother",
+  "祖母": "grandmother",
+  "جدة": "grandmother",
+  "दादी": "grandmother",
+  "नानी": "grandmother",
+  "avó": "grandmother",
+  "großmutter": "grandmother",
+  "nonna": "grandmother",
+  "할머니": "grandmother",
+
+  "grandfather": "grandfather",
+  "grandpa": "grandfather",
+  "abuelo": "grandfather",
+  "grand-père": "grandfather",
+  "祖父": "grandfather",
+  "جد": "grandfather",
+  "दादा": "grandfather",
+  "नाना": "grandfather",
+  "avô": "grandfather",
+  "großvater": "grandfather",
+  "nonno": "grandfather",
+  "할아버지": "grandfather",
+
+  "grandson": "grandson",
+  "nieto": "grandson",
+  "petit-fils": "grandson",
+  "孫息子": "grandson",
+  "孙子": "grandson",
+  "حفيد": "grandson",
+  "पोता": "grandson",
+  "नाती": "grandson",
+  "neto": "grandson",
+  "enkel": "grandson",
+  "손자": "grandson",
+
+  "granddaughter": "granddaughter",
+  "nieta": "granddaughter",
+  "petite-fille": "granddaughter",
+  "孫娘": "granddaughter",
+  "孙女": "granddaughter",
+  "حفيدة": "granddaughter",
+  "पोती": "granddaughter",
+  "नातिन": "granddaughter",
+  "neta": "granddaughter",
+  "enkelin": "granddaughter",
+  "손녀": "granddaughter",
+
+  "aunt": "aunt",
+  "tía": "aunt",
+  "tante": "aunt",
+  "おば": "aunt",
+  "姑姑": "aunt",
+  "阿姨": "aunt",
+  "عمة": "aunt",
+  "خالة": "aunt",
+  "चाची": "aunt",
+  "मौसी": "aunt",
+  "tia": "aunt",
+  "zia": "aunt",
+  "이모": "aunt",
+  "고모": "aunt",
+
+  "uncle": "uncle",
+  "tío": "uncle",
+  "oncle": "uncle",
+  "おじ": "uncle",
+  "叔叔": "uncle",
+  "舅舅": "uncle",
+  "عم": "uncle",
+  "خال": "uncle",
+  "चाचा": "uncle",
+  "मामा": "uncle",
+  "tio": "uncle",
+  "onkel": "uncle",
+  "zio": "uncle",
+  "삼촌": "uncle",
+
+  "cousin": "cousin",
+  "primo": "cousin",
+  "prima": "cousin",
+  "cousine": "cousin",
+  "いとこ": "cousin",
+  "表亲": "cousin",
+  "堂亲": "cousin",
+  "ابن العم": "cousin",
+  "चचेरा भाई": "cousin",
+  "cugino": "cousin",
+  "cugina": "cousin",
+  "사촌": "cousin",
+
+  "friend": "friend",
+  "amigo": "friend",
+  "amiga": "friend",
+  "ami": "friend",
+  "amie": "friend",
+  "友人": "friend",
+  "朋友": "friend",
+  "صديق": "friend",
+  "मित्र": "friend",
+  "दोस्त": "friend",
+  "amigo/a": "friend",
+  "freund": "friend",
+  "freundin": "friend",
+  "amico": "friend",
+  "amica": "friend",
+  "친구": "friend",
+
+  "contact": "contact",
+  "contacto": "contact",
+  "連絡先": "contact",
+  "联系人": "contact",
+  "جهة اتصال": "contact",
+  "संपrk": "contact",
+  "contato": "contact",
+  "kontakt": "contact",
+  "contatto": "contact",
+  "연락처": "contact"
+};
+
+const getLocalizedRelationship = (rel: string, lang: string): string => {
+  if (!rel) return rel;
+  const rawClean = rel.trim().toLowerCase();
+  const r = CANONICAL_RELATIONSHIPS[rawClean] || rawClean;
+
+  if (r === "daughter") {
+    if (lang === "es") return "Hija";
+    if (lang === "fr") return "Fille";
+    if (lang === "ja") return "娘";
+    if (lang === "zh") return "女儿";
+    if (lang === "ar") return "ابنة";
+    if (lang === "hi") return "बेटी";
+    if (lang === "pt") return "Filha";
+    if (lang === "de") return "Tochter";
+    if (lang === "it") return "Figlia";
+    if (lang === "ko") return "딸";
+    return "Daughter";
+  }
+  if (r === "son") {
+    if (lang === "es") return "Hijo";
+    if (lang === "fr") return "Fils";
+    if (lang === "ja") return "息子";
+    if (lang === "zh") return "儿子";
+    if (lang === "ar") return "ابن";
+    if (lang === "hi") return "बेटा";
+    if (lang === "pt") return "Filho";
+    if (lang === "de") return "Sohn";
+    if (lang === "it") return "Figlio";
+    if (lang === "ko") return "아들";
+    return "Son";
+  }
+  if (r === "brother") {
+    if (lang === "es") return "Hermano";
+    if (lang === "fr") return "Frère";
+    if (lang === "ja") return "兄弟";
+    if (lang === "zh") return "兄弟";
+    if (lang === "ar") return "أخ";
+    if (lang === "hi") return "भाई";
+    if (lang === "pt") return "Irmão";
+    if (lang === "de") return "Bruder";
+    if (lang === "it") return "Fratello";
+    if (lang === "ko") return "형제";
+    return "Brother";
+  }
+  if (r === "sister") {
+    if (lang === "es") return "Hermana";
+    if (lang === "fr") return "Sœur";
+    if (lang === "ja") return "姉妹";
+    if (lang === "zh") return "姐妹";
+    if (lang === "ar") return "أخت";
+    if (lang === "hi") return "बहन";
+    if (lang === "pt") return "Irmã";
+    if (lang === "de") return "Schwester";
+    if (lang === "it") return "Sorella";
+    if (lang === "ko") return "자매";
+    return "Sister";
+  }
+  if (r === "caregiver") {
+    if (lang === "es") return "Cuidador";
+    if (lang === "fr") return "Aidant";
+    if (lang === "ja") return "介護者";
+    if (lang === "zh") return "看护人";
+    if (lang === "ar") return "مقدم الرعاية";
+    if (lang === "hi") return "देखभाल करने वाला";
+    if (lang === "pt") return "Cuidador";
+    if (lang === "de") return "Pflegekraft";
+    if (lang === "it") return "Assistente";
+    if (lang === "ko") return "간병인";
+    return "Caregiver";
+  }
+  if (r === "primary physician" || r === "primary doctor") {
+    if (lang === "es") return "Médico de cabecera";
+    if (lang === "fr") return "Médecin traitant";
+    if (lang === "ja") return "主治医";
+    if (lang === "zh") return "主治医生";
+    if (lang === "ar") return "الطبيب المعالج";
+    if (lang === "hi") return "प्राथमिक चिकित्सक";
+    if (lang === "pt") return "Médico de família";
+    if (lang === "de") return "Hausarzt";
+    if (lang === "it") return "Medico curante";
+    if (lang === "ko") return "주치의";
+    return "Primary Physician";
+  }
+  if (r === "neighbor") {
+    if (lang === "es") return "Vecino";
+    if (lang === "fr") return "Voisin";
+    if (lang === "ja") return "近所の人";
+    if (lang === "zh") return "邻居";
+    if (lang === "ar") return "جار";
+    if (lang === "hi") return "पड़ोसी";
+    if (lang === "pt") return "Vizinho";
+    if (lang === "de") return "Nachbar";
+    if (lang === "it") return "Vicino";
+    if (lang === "ko") return "이웃";
+    return "Neighbor";
+  }
+  if (r === "niece") {
+    if (lang === "es") return "Sobrina";
+    if (lang === "fr") return "Nièce";
+    if (lang === "ja") return "姪";
+    if (lang === "zh") return "侄女/外甥女";
+    if (lang === "ar") return "ابنة الأخ/الأخت";
+    if (lang === "hi") return "भतीजी/भांजी";
+    if (lang === "pt") return "Sobrinha";
+    if (lang === "de") return "Nichte";
+    if (lang === "it") return "Nipote";
+    if (lang === "ko") return "조카딸";
+    return "Niece";
+  }
+  if (r === "nephew") {
+    if (lang === "es") return "Sobrino";
+    if (lang === "fr") return "Neveu";
+    if (lang === "ja") return "甥";
+    if (lang === "zh") return "侄子/外甥";
+    if (lang === "ar") return "ابن الأخ/الأخت";
+    if (lang === "hi") return "भतीजा/भांजी";
+    if (lang === "pt") return "Sobrino";
+    if (lang === "de") return "Neffe";
+    if (lang === "it") return "Nipote";
+    if (lang === "ko") return "조카";
+    return "Nephew";
+  }
+  if (r === "spouse") {
+    if (lang === "es") return "Cónyuge";
+    if (lang === "fr") return "Conjoint";
+    if (lang === "ja") return "配偶者";
+    if (lang === "zh") return "配偶";
+    if (lang === "ar") return "زوج/زوجة";
+    if (lang === "hi") return "जीवनसाथी";
+    if (lang === "pt") return "Cônjuge";
+    if (lang === "de") return "Ehepartner";
+    if (lang === "it") return "Coniuge";
+    if (lang === "ko") return "배우자";
+    return "Spouse";
+  }
+  if (r === "daytime caregiver") {
+    if (lang === "es") return "Cuidador diurno";
+    if (lang === "fr") return "Aidant de jour";
+    if (lang === "ja") return "日中介護者";
+    if (lang === "zh") return "日间看护";
+    if (lang === "ar") return "مقدم الرعاية النهارية";
+    if (lang === "hi") return "डेकेयरर";
+    if (lang === "pt") return "Cuidador diurno";
+    if (lang === "de") return "Tagespfleger";
+    if (lang === "it") return "Caregiver diurno";
+    if (lang === "ko") return "주간 보호자";
+    return "Daytime caregiver";
+  }
+  if (r === "primary caregiver") {
+    if (lang === "es") return "Cuidador principal";
+    if (lang === "fr") return "Aidant principal";
+    if (lang === "ja") return "主な介護者";
+    if (lang === "zh") return "主要看护人";
+    if (lang === "ar") return "مقدم الرعاية الرئيسي";
+    if (lang === "hi") return "मुख्य केयरटेकर";
+    if (lang === "pt") return "Cuidador principal";
+    if (lang === "de") return "Hauptbetreuer";
+    if (lang === "it") return "Caregiver principale";
+    if (lang === "ko") return "주 보호자";
+    return "Primary caregiver";
+  }
+  if (r === "family member") {
+    if (lang === "es") return "Miembro de la familia";
+    if (lang === "fr") return "Membre de la famille";
+    if (lang === "ja") return "家族メンバー";
+    if (lang === "zh") return "家庭成员";
+    if (lang === "ar") return "أحد أفراد العائلة";
+    if (lang === "hi") return "परिवार का सदस्य";
+    if (lang === "pt") return "Membro da família";
+    if (lang === "de") return "Familienmitglied";
+    if (lang === "it") return "Familiare";
+    if (lang === "ko") return "가족 구성원";
+    return "Family member";
+  }
+  if (r === "voicemail left") {
+    if (lang === "es") return "Buzón de voz grabado";
+    if (lang === "fr") return "Message vocal laissé";
+    if (lang === "ja") return "留守番電話保存";
+    if (lang === "zh") return "已留语音留言";
+    if (lang === "ar") return "تم ترك بريد صوتي";
+    if (lang === "hi") return "वॉयसमेल छोड़ा गया";
+    if (lang === "pt") return "Mensagem de voz deixada";
+    if (lang === "de") return "Mailbox-Nachricht hinterlassen";
+    if (lang === "it") return "Messaggio in segreteria";
+    if (lang === "ko") return "음성 사서함에 녹음됨";
+    return "Voicemail left";
+  }
+  if (r === "cardiologist") {
+    if (lang === "es") return "Cardiólogo";
+    if (lang === "fr") return "Cardiologue";
+    if (lang === "ja") return "心臓専門医";
+    if (lang === "zh") return "心脏病专家";
+    if (lang === "ar") return "طبيب أمراض القلب";
+    if (lang === "hi") return "हृदय रोग विशेषज्ञ";
+    if (lang === "pt") return "Cardiologista";
+    if (lang === "de") return "Kardiologe";
+    if (lang === "it") return "Cardiologo";
+    if (lang === "ko") return "심장 전문의";
+    return "Cardiologist";
+  }
+  if (r === "carrier") {
+    if (lang === "es") return "Operador";
+    if (lang === "fr") return "Opérateur";
+    if (lang === "ja") return "通信事業者";
+    if (lang === "zh") return "运营商";
+    if (lang === "ar") return "المشغل";
+    if (lang === "hi") return "वाहक";
+    if (lang === "pt") return "Operadora";
+    if (lang === "de") return "Anbieter";
+    if (lang === "it") return "Operatore";
+    if (lang === "ko") return "통신사";
+    return "Carrier";
+  }
+  if (r === "contact") {
+    if (lang === "es") return "Contacto";
+    if (lang === "fr") return "Contact";
+    if (lang === "ja") return "連絡先";
+    if (lang === "zh") return "联系人";
+    if (lang === "ar") return "جهة اتصال";
+    if (lang === "hi") return "संपर्क";
+    if (lang === "pt") return "Contato";
+    if (lang === "de") return "Kontakt";
+    if (lang === "it") return "Contatto";
+    if (lang === "ko") return "연락처";
+    return "Contact";
+  }
+  if (r === "mother") {
+    if (lang === "es") return "Madre";
+    if (lang === "fr") return "Mère";
+    if (lang === "ja") return "母";
+    if (lang === "zh") return "母亲";
+    if (lang === "ar") return "أم";
+    if (lang === "hi") return "माँ";
+    if (lang === "pt") return "Mãe";
+    if (lang === "de") return "Mutter";
+    if (lang === "it") return "Madre";
+    if (lang === "ko") return "어머니";
+    return "Mother";
+  }
+  if (r === "father") {
+    if (lang === "es") return "Padre";
+    if (lang === "fr") return "Père";
+    if (lang === "ja") return "父";
+    if (lang === "zh") return "父亲";
+    if (lang === "ar") return "أب";
+    if (lang === "hi") return "पिता";
+    if (lang === "pt") return "Pai";
+    if (lang === "de") return "Vater";
+    if (lang === "it") return "Padre";
+    if (lang === "ko") return "아버지";
+    return "Father";
+  }
+  if (r === "husband") {
+    if (lang === "es") return "Esposo";
+    if (lang === "fr") return "Mari";
+    if (lang === "ja") return "夫";
+    if (lang === "zh") return "丈夫";
+    if (lang === "ar") return "زوج";
+    if (lang === "hi") return "पति";
+    if (lang === "pt") return "Marido";
+    if (lang === "de") return "Ehemann";
+    if (lang === "it") return "Marito";
+    if (lang === "ko") return "남편";
+    return "Husband";
+  }
+  if (r === "wife") {
+    if (lang === "es") return "Esposa";
+    if (lang === "fr") return "Épouse";
+    if (lang === "ja") return "妻";
+    if (lang === "zh") return "妻子";
+    if (lang === "ar") return "زوجة";
+    if (lang === "hi") return "पत्नी";
+    if (lang === "pt") return "Esposa";
+    if (lang === "de") return "Ehefrau";
+    if (lang === "it") return "Moglie";
+    if (lang === "ko") return "아내";
+    return "Wife";
+  }
+  if (r === "grandmother") {
+    if (lang === "es") return "Abuela";
+    if (lang === "fr") return "Grand-mère";
+    if (lang === "ja") return "祖母";
+    if (lang === "zh") return "祖母";
+    if (lang === "ar") return "جدة";
+    if (lang === "hi") return "दादी/नानी";
+    if (lang === "pt") return "Avó";
+    if (lang === "de") return "Großmutter";
+    if (lang === "it") return "Nonna";
+    if (lang === "ko") return "할머니";
+    return "Grandmother";
+  }
+  if (r === "grandfather") {
+    if (lang === "es") return "Abuelo";
+    if (lang === "fr") return "Grand-père";
+    if (lang === "ja") return "祖父";
+    if (lang === "zh") return "祖父";
+    if (lang === "ar") return "جد";
+    if (lang === "hi") return "दादा/नाना";
+    if (lang === "pt") return "Avô";
+    if (lang === "de") return "Großvater";
+    if (lang === "it") return "Nonno";
+    if (lang === "ko") return "할아버지";
+    return "Grandfather";
+  }
+  if (r === "grandson") {
+    if (lang === "es") return "Nieto";
+    if (lang === "fr") return "Petit-fils";
+    if (lang === "ja") return "孫息子";
+    if (lang === "zh") return "孙子";
+    if (lang === "ar") return "حفيد";
+    if (lang === "hi") return "पोता/नाती";
+    if (lang === "pt") return "Neto";
+    if (lang === "de") return "Enkel";
+    if (lang === "it") return "Nipote";
+    if (lang === "ko") return "손자";
+    return "Grandson";
+  }
+  if (r === "granddaughter") {
+    if (lang === "es") return "Nieta";
+    if (lang === "fr") return "Petite-fille";
+    if (lang === "ja") return "孫娘";
+    if (lang === "zh") return "孙女";
+    if (lang === "ar") return "حفيدة";
+    if (lang === "hi") return "पोती/नातिन";
+    if (lang === "pt") return "Neta";
+    if (lang === "de") return "Enkelin";
+    if (lang === "it") return "Nipote";
+    if (lang === "ko") return "손녀";
+    return "Granddaughter";
+  }
+  if (r === "aunt") {
+    if (lang === "es") return "Tía";
+    if (lang === "fr") return "Tante";
+    if (lang === "ja") return "おば";
+    if (lang === "zh") return "姑姑/阿姨";
+    if (lang === "ar") return "عمة/خالة";
+    if (lang === "hi") return "चाची/मौसी";
+    if (lang === "pt") return "Tia";
+    if (lang === "de") return "Tante";
+    if (lang === "it") return "Zia";
+    if (lang === "ko") return "이모/고모";
+    return "Aunt";
+  }
+  if (r === "uncle") {
+    if (lang === "es") return "Tío";
+    if (lang === "fr") return "Oncle";
+    if (lang === "ja") return "おじ";
+    if (lang === "zh") return "叔叔/舅舅";
+    if (lang === "ar") return "عم/خال";
+    if (lang === "hi") return "चाचा/मामा";
+    if (lang === "pt") return "Tio";
+    if (lang === "de") return "Onkel";
+    if (lang === "it") return "Zio";
+    if (lang === "ko") return "삼촌";
+    return "Uncle";
+  }
+  if (r === "cousin") {
+    if (lang === "es") return "Primo/a";
+    if (lang === "fr") return "Cousin(e)";
+    if (lang === "ja") return "いとこ";
+    if (lang === "zh") return "表亲/堂亲";
+    if (lang === "ar") return "ابن/ابنة العم";
+    if (lang === "hi") return "चचेरा भाई/बहन";
+    if (lang === "pt") return "Primo/a";
+    if (lang === "de") return "Cousin/Cousine";
+    if (lang === "it") return "Cugino/a";
+    if (lang === "ko") return "사촌";
+    return "Cousin";
+  }
+  if (r === "friend") {
+    if (lang === "es") return "Amigo/a";
+    if (lang === "fr") return "Ami(e)";
+    if (lang === "ja") return "友人";
+    if (lang === "zh") return "朋友";
+    if (lang === "ar") return "صديق";
+    if (lang === "hi") return "मित्र/दोस्त";
+    if (lang === "pt") return "Amigo/a";
+    if (lang === "de") return "Freund/in";
+    if (lang === "it") return "Amico/a";
+    if (lang === "ko") return "친구";
+    return "Friend";
+  }
+
+  return rel;
+};
+
+const getLocalizedLineLabel = (label: string, lang: string): string => {
+  if (!label) return label;
+  
+  // 1. Primary Line check
+  const isPrimary = label === "Primary line" || label === "Línea principal" || label === "Ligne principale";
+  if (isPrimary) {
+    if (lang === "es") return "Línea principal";
+    if (lang === "fr") return "Ligne principale";
+    if (lang === "ja") return "主回線";
+    if (lang === "zh") return "主线路";
+    if (lang === "ar") return "الخط الأساسي";
+    if (lang === "hi") return "मुख्य लाइन";
+    if (lang === "pt") return "Linha principal";
+    if (lang === "de") return "Hauptleitung";
+    if (lang === "it") return "Linea principale";
+    if (lang === "ko") return "주 회선";
+    return "Primary line";
+  }
+
+  // 2. Secondary Line check
+  const isSecondary = label === "Secondary line" || label === "Línea secundaria" || label === "Ligne secondaire";
+  if (isSecondary) {
+    if (lang === "es") return "Línea secundaria";
+    if (lang === "fr") return "Ligne secondaire";
+    if (lang === "ja") return "副回線";
+    if (lang === "zh") return "副线路";
+    if (lang === "ar") return "الخط الثانوي";
+    if (lang === "hi") return "द्वितीयक लाइन";
+    if (lang === "pt") return "Linha secundária";
+    if (lang === "de") return "Zweitverbindung";
+    if (lang === "it") return "Linea secondaria";
+    if (lang === "ko") return "부 회선";
+    return "Secondary line";
+  }
+
+  // 3. Additional Line X check
+  const match = label.match(/^(?:Additional line|Línea adicional|Ligne supplémentaire)\s+(\d+)$/i);
+  if (match) {
+    const idx = match[1];
+    if (lang === "es") return `Línea adicional ${idx}`;
+    if (lang === "fr") return `Ligne supplémentaire ${idx}`;
+    if (lang === "ja") return `追加の電話番号 ${idx}`;
+    if (lang === "zh") return `附加号码 ${idx}`;
+    if (lang === "ar") return `خط إضافي ${idx}`;
+    if (lang === "hi") return `ऐड-ऑन लाइन ${idx}`;
+    if (lang === "pt") return `Linha adicional ${idx}`;
+    if (lang === "de") return `Zusatzleitung ${idx}`;
+    if (lang === "it") return `Linea aggiuntiva ${idx}`;
+    if (lang === "ko") return `추가 회선 ${idx}`;
+    return `Additional line ${idx}`;
+  }
+
+  return label;
+};
+
+const getLocalizedPersonName = (person: string, lang: string) => {
+  const isDefault = person === "Trusted contact line" || 
+                    person === "Línea del círculo de confianza" || 
+                    person === "Ligne du cercle de confiance";
+  if (!isDefault) return person;
+
+  if (lang === "es") return "Línea del círculo de confianza";
+  if (lang === "fr") return "Ligne du cercle de confiance";
+  if (lang === "ja") return "信頼できる連絡先";
+  if (lang === "zh") return "信任的联系人";
+  if (lang === "ar") return "خط الاتصال الموثوق";
+  if (lang === "hi") return "विश्वसनीय संपर्क लाइन";
+  if (lang === "pt") return "Linha de contato confiável";
+  if (lang === "de") return "Vertrauenswürdige Kontaktlinie";
+  if (lang === "it") return "Linea di contatto fidata";
+  if (lang === "ko") return "신뢰할 수 있는 연락처 라인";
+  return "Trusted contact line";
+};
+
 const initials = (name: string) =>
   (name || "").trim().split(/\s+/).map((w) => w[0]).slice(0, 2).join("").toUpperCase() || "?";
 
@@ -367,7 +1201,7 @@ function OverviewView({
           iconColor="var(--violet)"
           val={totalContacts}
           lbl={d.overview.trustedContacts}
-          trend={`across ${lines.length} ${d.common.numbers}`}
+          trend={getAcrossNumbersText(lines.length, lang)}
           trendDir="up"
         />
       </div>
@@ -391,10 +1225,10 @@ function OverviewView({
                   setView("contacts");
                 }}
               >
-                <Avatar name={l.person} color={l.color} size={42} radius="11px" />
+                <Avatar name={getLocalizedPersonName(l.person, lang)} color={l.color} size={42} radius="11px" />
                 <div className="info">
-                  <b>{l.label}</b>
-                  <div className="rel">{l.person}</div>
+                  <b>{getLocalizedLineLabel(l.label, lang)}</b>
+                  <div className="rel">{getLocalizedPersonName(l.person, lang)}</div>
                   <div className="tel">{l.number}</div>
                 </div>
                 <div style={{ textAlign: "right" }}>
@@ -414,7 +1248,7 @@ function OverviewView({
           <div className="card-head">
             <div>
               <h2>{d.overview.recentCalls}</h2>
-              <p>{line.label}</p>
+              <p>{getLocalizedLineLabel(line.label, lang)}</p>
             </div>
             <button className="btn btn-soft btn-sm" onClick={() => setView("log")}>
               {d.overview.viewAll}
@@ -463,6 +1297,7 @@ function ContactModal({
   onClose,
   d,
   voiceId,
+  lang,
 }: {
   initial?: Contact;
   order: number;
@@ -470,10 +1305,11 @@ function ContactModal({
   onClose: () => void;
   d: any;
   voiceId?: string;
+  lang: string;
 }) {
   const editing = !!initial;
   const [name, setName] = useState(initial?.name || "");
-  const [rel, setRel] = useState(initial?.rel || "");
+  const [rel, setRel] = useState(initial?.rel ? getLocalizedRelationship(initial.rel, lang) : "");
   const [phone, setPhone] = useState(initial?.phone || "");
   const [color, setColor] = useState(initial?.color || AVATAR_COLORS[order % AVATAR_COLORS.length]);
 
@@ -489,7 +1325,17 @@ function ContactModal({
 
   const generateAIVoice = async () => {
     if (!name.trim()) {
-      alert("Please enter a name first.");
+      alert(lang === "es" ? "Por favor, introduzca un nombre primero."
+        : lang === "fr" ? "Veuillez d'abord saisir un nom."
+        : lang === "ja" ? "最初に名前を入力してください。"
+        : lang === "zh" ? "请先输入名字。"
+        : lang === "ar" ? "يرجى إدخال الاسم أولاً."
+        : lang === "hi" ? "कृपया पहले एक नाम दर्ज करें।"
+        : lang === "pt" ? "Por favor, insira um nome primeiro."
+        : lang === "de" ? "Bitte geben Sie zuerst einen Namen ein."
+        : lang === "it" ? "Inserisci prima un nome."
+        : lang === "ko" ? "먼저 이름을 입력해 주세요."
+        : "Please enter a name first.");
       return;
     }
     setIsGeneratingVoice(true);
@@ -511,11 +1357,31 @@ function ContactModal({
         setAudioUrl(data.audioUrl);
       } else {
         const err = await response.json();
-        alert(`AI voice generation failed: ${err.error || 'Server error'}`);
+        alert(lang === "es" ? `La generación de voz IA falló: ${err.error || 'Error del servidor'}`
+          : lang === "fr" ? `La génération de la voix IA a échoué: ${err.error || 'Erreur du serveur'}`
+          : lang === "ja" ? `AI音声の生成に失敗しました: ${err.error || 'サーバーエラー'}`
+          : lang === "zh" ? `AI语音生成失败: ${err.error || '服务器错误'}`
+          : lang === "ar" ? `فشل توليد صوت الذكاء الاصطناعي: ${err.error || 'خطأ في الخادم'}`
+          : lang === "hi" ? `एआई आवाज जनरेशन विफल रहा: ${err.error || 'सर्वर त्रुटि'}`
+          : lang === "pt" ? `A geração de voz de IA falhou: ${err.error || 'Erro no servidor'}`
+          : lang === "de" ? `KI-Stimmerzeugung fehlgeschlagen: ${err.error || 'Serverfehler'}`
+          : lang === "it" ? `Generazione della voce IA fallita: ${err.error || 'Errore del server'}`
+          : lang === "ko" ? `AI 음성 생성 실패: ${err.error || '서버 오류'}`
+          : `AI voice generation failed: ${err.error || 'Server error'}`);
       }
     } catch (err) {
       console.error(err);
-      alert("Network error generating AI voice.");
+      alert(lang === "es" ? "Error de red al generar la voz de IA."
+        : lang === "fr" ? "Erreur réseau lors de la génération de la voix IA."
+        : lang === "ja" ? "AI音声生成中にネットワークエラーが発生しました。"
+        : lang === "zh" ? "生成 AI 语音时发生网络错误。"
+        : lang === "ar" ? "خطأ في الشبكة أثناء توليد صوت الذكاء الاصطناعي."
+        : lang === "hi" ? "एआई आवाज उत्पन्न करने में नेटवर्क त्रुटि।"
+        : lang === "pt" ? "Erro de rede ao gerar voz de IA."
+        : lang === "de" ? "Netzwerkfehler bei der Erzeugung der KI-Stimme."
+        : lang === "it" ? "Errore di rete durante la generazione della voce IA."
+        : lang === "ko" ? "AI 음성을 생성하는 중 네트워크 오류가 발생했습니다."
+        : "Network error generating AI voice.");
     } finally {
       setIsGeneratingVoice(false);
     }
@@ -542,7 +1408,17 @@ function ContactModal({
         
         console.log("Recorded Audio Blob Size:", blob.size, "MIME:", blob.type);
         if (blob.size === 0) {
-          alert("Error: Recorded audio size is 0 bytes. Your microphone may not be capturing audio. Please try again.");
+          alert(lang === "es" ? "Error: El tamaño del audio grabado es de 0 bytes. Es posible que el micrófono no esté capturando audio. Inténtelo de nuevo."
+            : lang === "fr" ? "Erreur: La taille de l'audio enregistré est de 0 octet. Il se peut que le microphone ne capture pas de son. Veuillez réessayer."
+            : lang === "ja" ? "エラー：録音された音声サイズが0バイトです。マイクが音声をキャプチャしていない可能性があります。もう一度お試しください。"
+            : lang === "zh" ? "错误：录制的音频大小为 0 字节。您的麦克风可能没有捕获到声音。请重试。"
+            : lang === "ar" ? "خطأ: حجم الصوت المسجل 0 بايت. قد لا يلتقط الميكروفون الصوت. يرجى المحاولة مرة أخرى."
+            : lang === "hi" ? "त्रुटि: रिकॉर्ड किए गए ऑडियो का आकार 0 बाइट है। हो सकता है कि आपका माइक्रोफ़ोन ऑडियो कैप्चर नहीं कर रहा हो। कृपया पुनः प्रयास करें।"
+            : lang === "pt" ? "Erro: O tamanho do áudio gravado é de 0 bytes. O microfone pode não estar capturando áudio. Tente novamente."
+            : lang === "de" ? "Fehler: Die aufgenommene Audiodatei ist 0 Bytes groß. Ihr Mikrofon nimmt möglicherweise keinen Ton auf. Bitte versuchen Sie es erneut."
+            : lang === "it" ? "Errore: la dimensione dell'audio registrato è 0 byte. Il microfono potrebbe non catturare l'audio. Riprova."
+            : lang === "ko" ? "오류: 녹음된 오디오 크기가 0바이트입니다. 마이크가 오디오를 캡처하지 못하고 있을 수 있습니다. 다시 시도해 주세요."
+            : "Error: Recorded audio size is 0 bytes. Your microphone may not be capturing audio. Please try again.");
           return;
         }
 
@@ -556,7 +1432,17 @@ function ContactModal({
       setRecording(true);
     } catch (err: any) {
       console.error('Failed to start recording:', err);
-      alert('Could not start recording: ' + (err.message || 'Microphone permissions denied.'));
+      alert((lang === "es" ? "No se pudo iniciar la grabación: "
+        : lang === "fr" ? "Impossible de démarrer l'enregistrement: "
+        : lang === "ja" ? "録音を開始できませんでした: "
+        : lang === "zh" ? "无法开始录音: "
+        : lang === "ar" ? "تعذر بدء التسجيل: "
+        : lang === "hi" ? "रिकॉर्डिंग शुरू नहीं की जा सकी: "
+        : lang === "pt" ? "Não foi possível iniciar a gravação: "
+        : lang === "de" ? "Aufnahme konnte nicht gestartet werden: "
+        : lang === "it" ? "Impossibile avviare la registrazione: "
+        : lang === "ko" ? "녹음을 시작할 수 없습니다: "
+        : "Could not start recording: ") + (err.message || 'Microphone permissions denied.'));
     }
   };
 
@@ -627,7 +1513,19 @@ function ContactModal({
             {d.contacts.cancel}
           </button>
           <button className="btn btn-primary" onClick={save} disabled={isUploading || recording}>
-            {isUploading ? "Uploading..." : editing ? d.contacts.saveChanges : d.contacts.addContact}
+            {isUploading ? (
+              lang === "es" ? "Subiendo..."
+              : lang === "fr" ? "Téléchargement..."
+              : lang === "ja" ? "アップロード中..."
+              : lang === "zh" ? "正在上传..."
+              : lang === "ar" ? "جاري الرفع..."
+              : lang === "hi" ? "अपलोड हो रहा है..."
+              : lang === "pt" ? "Enviando..."
+              : lang === "de" ? "Hochladen..."
+              : lang === "it" ? "Caricamento..."
+              : lang === "ko" ? "업로드 중..."
+              : "Uploading..."
+            ) : editing ? d.contacts.saveChanges : d.contacts.addContact}
           </button>
         </>
       }
@@ -637,7 +1535,17 @@ function ContactModal({
         <input
           value={name}
           onChange={(e) => setName(e.target.value)}
-          placeholder="e.g. Maria Delgado"
+          placeholder={lang === "es" ? "ej. María Delgado"
+                     : lang === "fr" ? "ex. Maria Delgado"
+                     : lang === "ja" ? "例：マリア・デルガド"
+                     : lang === "zh" ? "例：玛丽亚·德尔加多"
+                     : lang === "ar" ? "مثال: ماريا ديلجادو"
+                     : lang === "hi" ? "जैसे: मारिया डेलगाडो"
+                     : lang === "pt" ? "ex. Maria Delgado"
+                     : lang === "de" ? "z.B. Maria Delgado"
+                     : lang === "it" ? "es. Maria Delgado"
+                     : lang === "ko" ? "예: 마리아 델가도"
+                     : "e.g. Maria Delgado"}
           autoFocus
           maxLength={28}
           disabled={isUploading}
@@ -650,7 +1558,17 @@ function ContactModal({
             <input
               value={rel}
               onChange={(e) => setRel(e.target.value)}
-              placeholder="Daughter"
+              placeholder={lang === "es" ? "Hija"
+                         : lang === "fr" ? "Fille"
+                         : lang === "ja" ? "娘"
+                         : lang === "zh" ? "女儿"
+                         : lang === "ar" ? "ابنة"
+                         : lang === "hi" ? "बेटी"
+                         : lang === "pt" ? "Filha"
+                         : lang === "de" ? "Tochter"
+                         : lang === "it" ? "Figlia"
+                         : lang === "ko" ? "딸"
+                         : "Daughter"}
               maxLength={28}
               disabled={isUploading}
             />
@@ -668,15 +1586,47 @@ function ContactModal({
         </div>
       </div>
       <div className="field">
-        <label>Voice Name Recording (for Caller Menu Routing)</label>
+        <label>
+          {lang === "es" ? "Grabación de voz del nombre (para el menú de enrutamiento)"
+           : lang === "fr" ? "Enregistrement vocal du nom (pour le menu d'aiguillage)"
+           : lang === "ja" ? "音声名の録音（発信者メニュー配信用）"
+           : lang === "zh" ? "语音名字录音（用于拨号菜单路由）"
+           : lang === "ar" ? "تسجيل الاسم الصوتي (لتوجيه قائمة المتصلين)"
+           : lang === "hi" ? "आवाज नाम रिकॉर्डिंग (कॉलर मेनू रूटिंग के लिए)"
+           : lang === "pt" ? "Gravação de nome de voz (para menu de chamadas)"
+           : lang === "de" ? "Aufzeichnung des gesprochenen Namens (für Sprachmenü-Routing)"
+           : lang === "it" ? "Registrazione vocale del nome (per il menu di deviazione)"
+           : lang === "ko" ? "음성 이름 녹음 (발신자 메뉴 라우팅용)"
+           : "Voice Name Recording (for Caller Menu Routing)"}
+        </label>
         <div style={{ display: 'flex', gap: 10, alignItems: 'center', marginTop: 8 }}>
           {recording ? (
             <button className="btn btn-rose btn-sm" onClick={stopRecording} type="button" style={{ background: 'var(--rose)', color: '#fff', border: 'none', padding: '6px 12px', borderRadius: 4, cursor: 'pointer' }}>
-              🛑 Stop Recording
+              {lang === "es" ? "🛑 Detener grabación"
+               : lang === "fr" ? "🛑 Arrêter l'enregistrement"
+               : lang === "ja" ? "🛑 録音停止"
+               : lang === "zh" ? "🛑 停止录音"
+               : lang === "ar" ? "🛑 إيقاف التسجيل"
+               : lang === "hi" ? "🛑 रिकॉर्डिंग रोकें"
+               : lang === "pt" ? "🛑 Parar gravação"
+               : lang === "de" ? "🛑 Aufnahme stoppen"
+               : lang === "it" ? "🛑 Interrompi registrazione"
+               : lang === "ko" ? "🛑 녹음 중지"
+               : "🛑 Stop Recording"}
             </button>
           ) : (
             <button className="btn btn-ghost btn-sm" onClick={startRecording} type="button" disabled={isUploading || isGeneratingVoice} style={{ padding: '6px 12px', borderRadius: 4, cursor: 'pointer' }}>
-              🎙️ Record Name
+              {lang === "es" ? "🎙️ Grabar nombre"
+               : lang === "fr" ? "🎙️ Enregistrer le nom"
+               : lang === "ja" ? "🎙️ 名前を録音"
+               : lang === "zh" ? "🎙️ 录制名字"
+               : lang === "ar" ? "🎙️ تسجيل الاسم"
+               : lang === "hi" ? "🎙️ नाम रिकॉर्ड करें"
+               : lang === "pt" ? "🎙️ Gravar nome"
+               : lang === "de" ? "🎙️ Name aufnehmen"
+               : lang === "it" ? "🎙️ Registra nome"
+               : lang === "ko" ? "🎙️ 이름 녹음"
+               : "🎙️ Record Name"}
             </button>
           )}
 
@@ -687,7 +1637,31 @@ function ContactModal({
             disabled={isUploading || isGeneratingVoice || !name.trim()}
             style={{ padding: '6px 12px', borderRadius: 4, cursor: 'pointer' }}
           >
-            {isGeneratingVoice ? "✨ Generating..." : "🤖 Generate AI Voice"}
+            {isGeneratingVoice ? (
+              lang === "es" ? "✨ Generando..."
+              : lang === "fr" ? "✨ Génération..."
+              : lang === "ja" ? "✨ 生成中..."
+              : lang === "zh" ? "✨ 正在生成..."
+              : lang === "ar" ? "✨ جاري التوليد..."
+              : lang === "hi" ? "✨ उत्पन्न हो रहा है..."
+              : lang === "pt" ? "✨ Gerando..."
+              : lang === "de" ? "✨ Generiert..."
+              : lang === "it" ? "✨ Generazione in corso..."
+              : lang === "ko" ? "✨ 생성 중..."
+              : "✨ Generating..."
+            ) : (
+              lang === "es" ? "🤖 Generar voz de IA"
+              : lang === "fr" ? "🤖 Générer la voix d'IA"
+              : lang === "ja" ? "🤖 AI音声を生成"
+              : lang === "zh" ? "🤖 生成 AI 语音"
+              : lang === "ar" ? "🤖 توليد صوت الذكاء الاصطناعي"
+              : lang === "hi" ? "🤖 एआई आवाज उत्पन्न करें"
+              : lang === "pt" ? "🤖 Gerar voz de IA"
+              : lang === "de" ? "🤖 KI-Stimme generieren"
+              : lang === "it" ? "🤖 Genera voce IA"
+              : lang === "ko" ? "🤖 AI 음성 생성"
+              : "🤖 Generate AI Voice"
+            )}
           </button>
           
           {audioUrl && (
@@ -698,7 +1672,17 @@ function ContactModal({
 
           {voicePath && !audioUrl && (
             <span style={{ fontSize: '0.82rem', color: 'oklch(0.55 0.18 140)', fontWeight: 600 }}>
-              Saved Voice Prompt
+              {lang === "es" ? "Mensaje de voz guardado"
+               : lang === "fr" ? "Message vocal enregistré"
+               : lang === "ja" ? "保存された音声プロンプト"
+               : lang === "zh" ? "已保存的语音提示"
+               : lang === "ar" ? "رسالة صوتية محفوظة"
+               : lang === "hi" ? "सहेजा गया वॉयस प्रॉम्प्ट"
+               : lang === "pt" ? "Mensagem de voz salva"
+               : lang === "de" ? "Gespeicherte Sprachansage"
+               : lang === "it" ? "Messaggio vocale salvato"
+               : lang === "ko" ? "저장된 음성 프롬프트"
+               : "Saved Voice Prompt"}
             </span>
           )}
         </div>
@@ -801,7 +1785,7 @@ function ContactsView({
       <div className="contacts-head">
         <div>
           <p className="hint">
-            <b>{line.person.split(" · ")[0]}</b>
+            <b>{getLocalizedPersonName(line.person, lang).split(" · ")[0]}</b>
             {lang === "es" ? " puede contactar en " : lang === "fr" ? " peut joindre sur " : lang === "ja" ? " が連絡可能な相手番号: " : lang === "zh" ? " 可以呼叫的电话号码: " : lang === "ar" ? " يمكنه الاتصال على " : lang === "hi" ? " इस नंबर पर संपर्क कर सकते हैं: " : lang === "pt" ? " pode contatar em " : lang === "de" ? " kann unter dieser Nummer erreichen: " : lang === "it" ? " può raggiungere su " : lang === "ko" ? " 가 연락할 수 있는 번호: " : " can reach on "}
             {line.number}.{" "}
             {line.mode === "schedule"
@@ -831,8 +1815,32 @@ function ContactsView({
             <Avatar name={c.name} color={c.color} />
             <div className="info">
               <b>{c.name}</b>
-              <div className="rel">{c.rel || "Contact"}</div>
-              <div className="tel">{c.phone || "No number set"}</div>
+              <div className="rel">
+                {c.rel ? getLocalizedRelationship(c.rel, lang) : (lang === "es" ? "Contacto"
+                           : lang === "fr" ? "Contact"
+                           : lang === "ja" ? "連絡先"
+                           : lang === "zh" ? "联系人"
+                           : lang === "ar" ? "جهة اتصال"
+                           : lang === "hi" ? "संपर्क"
+                           : lang === "pt" ? "Contato"
+                           : lang === "de" ? "Kontakt"
+                           : lang === "it" ? "Contatto"
+                           : lang === "ko" ? "연락처"
+                           : "Contact")}
+              </div>
+              <div className="tel">
+                {c.phone || (lang === "es" ? "Sin número configurado"
+                             : lang === "fr" ? "Aucun número configuré"
+                             : lang === "ja" ? "番号が設定されていません"
+                             : lang === "zh" ? "未设置号码"
+                             : lang === "ar" ? "لا يوجد رقم محدد"
+                             : lang === "hi" ? "कोई नंबर सेट नहीं"
+                             : lang === "pt" ? "Nenhum número configurado"
+                             : lang === "de" ? "Keine Nummer eingerichtet"
+                             : lang === "it" ? "Nessun numero impostato"
+                             : lang === "ko" ? "설정된 번호 없음"
+                             : "No number set")}
+              </div>
             </div>
             <div className="acts">
               <Toggle on={c.available} onChange={() => toggleAvail(c.id)} labels={[d.contacts.busy, d.contacts.available]} />
@@ -865,6 +1873,7 @@ function ContactsView({
           onClose={() => setModal(null)}
           d={d}
           voiceId={line.settings?.voiceId}
+          lang={lang}
         />
       )}
     </div>
@@ -872,7 +1881,7 @@ function ContactsView({
 }
 
 /* Call Simulator */
-function TestCall({ line, d }: { line: Line; d: any }) {
+function TestCall({ line, d, lang }: { line: Line; d: any; lang: string }) {
   const [screen, setScreen] = useState({
     cls: "",
     av: "—",
@@ -928,7 +1937,7 @@ function TestCall({ line, d }: { line: Line; d: any }) {
       av: initials(c.name),
       avColor: c.color,
       name: c.name,
-      state: `${d.sim.ringing} ${c.rel || ""}…`,
+      state: `${d.sim.ringing} ${c.rel ? getLocalizedRelationship(c.rel, lang) : ""}…`,
       ring: true,
     });
     await sleep(1500);
@@ -1009,7 +2018,7 @@ function TestCall({ line, d }: { line: Line; d: any }) {
       av: initials(c.name),
       avColor: c.color,
       name: c.name,
-      state: `${d.sim.connecting} ${c.rel || c.name}…`,
+      state: `${d.sim.connecting} ${c.rel ? getLocalizedRelationship(c.rel, lang) : c.name}…`,
       ring: true,
     });
     await sleep(1500);
@@ -1169,7 +2178,7 @@ function TestCall({ line, d }: { line: Line; d: any }) {
                   <b>
                     {d.routing.caregiver} {i + 1} — {c.name}
                   </b>
-                  <small>{c.rel || "Contact"}</small>
+                  <small>{c.rel ? getLocalizedRelationship(c.rel, lang) : (lang === "es" ? "Contacto" : lang === "fr" ? "Contact" : lang === "ja" ? "連絡先" : lang === "zh" ? "联系人" : lang === "ar" ? "جهة اتصال" : lang === "hi" ? "संपर्क" : lang === "pt" ? "Contato" : lang === "de" ? "Kontakt" : lang === "it" ? "Contatto" : lang === "ko" ? "연락처" : "Contact")}</small>
                 </span>
               </button>
             ))}
@@ -1217,7 +2226,7 @@ function TestCall({ line, d }: { line: Line; d: any }) {
               <span className="dg">{i + 1}</span>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <b style={{ fontSize: "0.86rem", display: "block" }}>{c.name}</b>
-                <span style={{ fontSize: "0.76rem", color: "var(--ink-faint)" }}>{c.rel}</span>
+                <span style={{ fontSize: "0.76rem", color: "var(--ink-faint)" }}>{getLocalizedRelationship(c.rel, lang)}</span>
               </div>
               {!c.available && (
                 <span className="badge badge-gray">
@@ -1455,7 +2464,7 @@ function RoutingView({
             <label>{lang === "es" ? "Etiqueta de la línea" : lang === "fr" ? "Libellé de la ligne" : "Line Label"}</label>
             <input
               type="text"
-              value={line.label}
+              value={getLocalizedLineLabel(line.label, lang)}
               onChange={(e) => setLine((prev) => prev.map((l) => l.id === line.id ? { ...l, label: e.target.value } : l))}
               className="w-full p-3 rounded-lg border border-line focus:outline-none focus:border-accent bg-surface"
               placeholder="e.g. Robert's line"
@@ -1466,7 +2475,7 @@ function RoutingView({
             <label>{lang === "es" ? "Asignado a (Persona)" : lang === "fr" ? "Assigné à (Personne)" : "Assigned To (Person)"}</label>
             <input
               type="text"
-              value={line.person}
+              value={getLocalizedPersonName(line.person, lang)}
               onChange={(e) => setLine((prev) => prev.map((l) => l.id === line.id ? { ...l, person: e.target.value } : l))}
               className="w-full p-3 rounded-lg border border-line focus:outline-none focus:border-accent bg-surface"
               placeholder="e.g. Robert Hale · Dad"
@@ -1707,7 +2716,7 @@ function RoutingView({
                                 // Suggest description based on relationship if available
                                 const contact = line.contacts.find((c) => c.name === e.target.value);
                                 if (contact && contact.rel) {
-                                  setSlotDesc(contact.rel);
+                                  setSlotDesc(getLocalizedRelationship(contact.rel, lang));
                                 }
                               }}
                               style={{ padding: 8, borderRadius: "var(--r-sm)", border: "1px solid var(--line)", background: "var(--surface)", color: "var(--ink)" }}
@@ -1715,7 +2724,7 @@ function RoutingView({
                               <option value="Nurse Dawn">{lang === "ko" ? "간호사 Dawn" : lang === "ja" ? "看護師 Dawn" : lang === "zh" ? "护士 Dawn" : "Nurse Dawn"}</option>
                               {line.contacts.map((c) => (
                                 <option key={c.id} value={c.name}>
-                                  {c.name} ({c.rel})
+                                  {c.name} ({getLocalizedRelationship(c.rel, lang)})
                                 </option>
                               ))}
                               <option value="Custom">{ext.custom}</option>
@@ -1870,7 +2879,7 @@ function RoutingView({
                       setSlotName(e.target.value);
                       const contact = line.contacts.find((c) => c.name === e.target.value);
                       if (contact && contact.rel) {
-                        setSlotDesc(contact.rel);
+                        setSlotDesc(getLocalizedRelationship(contact.rel, lang));
                       }
                     }}
                     style={{ padding: 8, borderRadius: "var(--r-sm)", border: "1px solid var(--line)", background: "var(--surface)", color: "var(--ink)" }}
@@ -1878,7 +2887,7 @@ function RoutingView({
                     <option value="Nurse Dawn">{lang === "ko" ? "간호사 Dawn" : lang === "ja" ? "看護師 Dawn" : lang === "zh" ? "护士 Dawn" : "Nurse Dawn"}</option>
                     {line.contacts.map((c) => (
                       <option key={c.id} value={c.name}>
-                        {c.name} ({c.rel})
+                        {c.name} ({getLocalizedRelationship(c.rel, lang)})
                       </option>
                     ))}
                     <option value="Custom">{ext.custom}</option>
@@ -1989,7 +2998,7 @@ function RoutingView({
           <div>
             <h2>{d.sim.runTest}</h2>
             <p>
-              Place a simulated call to see exactly what {line.person.split(" · ")[0]}'s callers will
+              Place a simulated call to see exactly what {getLocalizedPersonName(line.person, lang).split(" · ")[0]}'s callers will
               experience.
             </p>
           </div>
@@ -2002,7 +3011,7 @@ function RoutingView({
           </Badge>
         </div>
         <div className="card-pad">
-          <TestCall line={line} d={d} />
+          <TestCall line={line} d={d} lang={lang} />
         </div>
       </div>
     </div>
@@ -2073,14 +3082,7 @@ function CallLogView({ line, log, d, lang }: { line: Line; log: Record<string, C
                   </div>
                   <div className="routed">
                     <b>{c.routed === "No one available" ? (lang === "es" ? "Nadie disponible" : lang === "fr" ? "Personne de disponible" : lang === "ja" ? "対応者なし" : lang === "zh" ? "无人可用" : lang === "ar" ? "لا أحد متاح" : lang === "hi" ? "कोई उपलब्ध नहीं" : lang === "pt" ? "Ninguém disponível" : lang === "de" ? "Niemand verfügbar" : lang === "it" ? "Nessuno disponibile" : lang === "ko" ? "연결 가능 도우미 없음" : "No one available") : c.routed}</b>
-                    {c.rel === "Daughter" ? (lang === "es" ? "Hija" : lang === "fr" ? "Fille" : lang === "ja" ? "娘" : lang === "zh" ? "女儿" : lang === "ar" ? "ابنة" : lang === "hi" ? "बेटी" : lang === "pt" ? "Filha" : lang === "de" ? "Tochter" : lang === "it" ? "Figlia" : lang === "ko" ? "딸" : "Daughter") :
-                     c.rel === "Son" ? (lang === "es" ? "Hijo" : lang === "fr" ? "Fils" : lang === "ja" ? "息子" : lang === "zh" ? "儿子" : lang === "ar" ? "ابن" : lang === "hi" ? "बेटा" : lang === "pt" ? "Filho" : lang === "de" ? "Sohn" : lang === "it" ? "Figlio" : lang === "ko" ? "아들" : "Son") :
-                     c.rel === "Daytime caregiver" ? (lang === "es" ? "Cuidador diurno" : lang === "fr" ? "Aidant de jour" : lang === "ja" ? "日中介護者" : lang === "zh" ? "日间看护" : lang === "ar" ? "مقدم الرعاية النهارية" : lang === "hi" ? "डेकेयरर" : lang === "pt" ? "Cuidador diurno" : lang === "de" ? "Tagespfleger" : lang === "it" ? "Caregiver diurno" : lang === "ko" ? "주간 보호자" : "Daytime caregiver") :
-                     c.rel === "Primary caregiver" ? (lang === "es" ? "Cuidador principal" : lang === "fr" ? "Aidant principal" : lang === "ja" ? "主な介護者" : lang === "zh" ? "主要看护人" : lang === "ar" ? "مقدم الرعاية الرئيسي" : lang === "hi" ? "मुख्य केयरटेकर" : lang === "pt" ? "Cuidador principal" : lang === "de" ? "Hauptbetreuer" : lang === "it" ? "Caregiver principale" : lang === "ko" ? "주 보호자" : "Primary caregiver") :
-                     c.rel === "Family member" ? (lang === "es" ? "Miembro de la familia" : lang === "fr" ? "Membre de la famille" : lang === "ja" ? "家族メンバー" : lang === "zh" ? "家庭成员" : lang === "ar" ? "أحد أفراد العائلة" : lang === "hi" ? "परिवार का सदस्य" : lang === "pt" ? "Membro da família" : lang === "de" ? "Familienmitglied" : lang === "it" ? "Familiare" : lang === "ko" ? "가족 구성원" : "Family member") :
-                     c.rel === "Primary physician" ? (lang === "es" ? "Médico de cabecera" : lang === "fr" ? "Médecin traitant" : lang === "ja" ? "主治医" : lang === "zh" ? "主治医生" : lang === "ar" ? "الطبيب المعالج" : lang === "hi" ? "प्राथमिक चिकित्सक" : lang === "pt" ? "Médico de família" : lang === "de" ? "Hausarzt" : lang === "it" ? "Medico curante" : lang === "ko" ? "주치의" : "Primary physician") :
-                     c.rel === "Voicemail left" ? (lang === "es" ? "Buzón de voz grabado" : lang === "fr" ? "Message vocal laissé" : lang === "ja" ? "留守番電話保存" : lang === "zh" ? "已留语音留言" : lang === "ar" ? "تم ترك بريد صوتي" : lang === "hi" ? "वॉयसमेल छोड़ा गया" : lang === "pt" ? "Mensagem de voz deixada" : lang === "de" ? "Mailbox-Nachricht hinterlassen" : lang === "it" ? "Messaggio in segreteria" : lang === "ko" ? "음성 사서함에 녹음됨" : "Voicemail left") :
-                     c.rel}
+                    {getLocalizedRelationship(c.rel, lang)}
                   </div>
                   <div className="dur">{c.dur}</div>
                   <div style={{ textAlign: "right" }}>
@@ -2195,7 +3197,7 @@ function SettingsView({
 
   const greeting =
     s.greeting ??
-    `Hi, you've reached ${line.person.split(" · ")[0]}. ${
+    `Hi, you've reached ${getLocalizedPersonName(line.person, lang).split(" · ")[0]}. ${
       line.mode === "menu"
         ? "Please choose who you'd like to reach."
         : "Hold on while we connect you."
@@ -2311,7 +3313,7 @@ function SettingsView({
                   { id: "German", label: lang === "es" ? "Alemán" : lang === "fr" ? "Allemand" : lang === "ja" ? "ドイツ語" : lang === "zh" ? "德语" : lang === "ar" ? "الألمانية" : lang === "hi" ? "जर्मन" : lang === "pt" ? "Alemão" : lang === "de" ? "Deutsch" : lang === "it" ? "Tedesco" : lang === "ko" ? "독일어" : "German" },
                   { id: "Italian", label: lang === "es" ? "Italiano" : lang === "fr" ? "Italien" : lang === "ja" ? "イタリア語" : lang === "zh" ? "意大利语" : lang === "ar" ? "الإيطالية" : lang === "hi" ? "इतालवी" : lang === "pt" ? "Italiano" : lang === "de" ? "Italienisch" : lang === "it" ? "Italiano" : lang === "ko" ? "이탈리아어" : "Italian" }
                 ].map((l) => (
-                  <option key={l.id} value={l.id}>{l.label}</option>
+                  <option key={l.id} value={l.id}>{getLocalizedLineLabel(l.label, lang)}</option>
                 ))}
               </select>
             </div>
@@ -2623,17 +3625,57 @@ export function AccountView({
     const isCurrentCycle = tempCycle === account.billingCycle;
     
     if (isCurrentPlan && isCurrentCycle) {
-      return lang === "es" ? "Plan actual" : lang === "fr" ? "Forfait actuel" : "Current Plan";
+      return lang === "es" ? "Plan actual"
+           : lang === "fr" ? "Forfait actuel"
+           : lang === "ja" ? "現在のプラン"
+           : lang === "zh" ? "当前方案"
+           : lang === "ar" ? "الباقة الحالية"
+           : lang === "hi" ? "वर्तमान प्लान"
+           : lang === "pt" ? "Plano atual"
+           : lang === "de" ? "Aktueller Tarif"
+           : lang === "it" ? "Piano attuale"
+           : lang === "ko" ? "현재 플랜"
+           : "Current Plan";
     }
     
     if (isCurrentPlan) {
-      return lang === "es" ? "Actualizar ciclo de facturación" : lang === "fr" ? "Mettre à jour le cycle" : "Update Billing Cycle";
+      return lang === "es" ? "Actualizar ciclo de facturación"
+           : lang === "fr" ? "Mettre à jour le cycle"
+           : lang === "ja" ? "請求サイクルを更新"
+           : lang === "zh" ? "更新账单周期"
+           : lang === "ar" ? "تحديث دورة الفوترة"
+           : lang === "hi" ? "बिलिंग चक्र अपडेट करें"
+           : lang === "pt" ? "Atualizar ciclo de cobrança"
+           : lang === "de" ? "Abrechnungszeitraum aktualisieren"
+           : lang === "it" ? "Aggiorna ciclo di fatturazione"
+           : lang === "ko" ? "결제 주기 업데이트"
+           : "Update Billing Cycle";
     }
     
     if (tempPlan === "pro" && account.plan === "essential") {
-      return lang === "es" ? "Actualizar a Pro" : lang === "fr" ? "Passer à Pro" : "Upgrade to Pro";
+      return lang === "es" ? "Actualizar a Pro"
+           : lang === "fr" ? "Passer à Pro"
+           : lang === "ja" ? "Proにアップグレード"
+           : lang === "zh" ? "升级到专业版"
+           : lang === "ar" ? "الترقية إلى برو"
+           : lang === "hi" ? "प्रो पर अपग्रेड करें"
+           : lang === "pt" ? "Upgrade para Pro"
+           : lang === "de" ? "Auf Pro upgraden"
+           : lang === "it" ? "Passa a Pro"
+           : lang === "ko" ? "Pro로 업그레이드"
+           : "Upgrade to Pro";
     } else {
-      return lang === "es" ? "Degradar a Esencial" : lang === "fr" ? "Passer à Essentiel" : "Downgrade to Essential";
+      return lang === "es" ? "Degradar a Esencial"
+           : lang === "fr" ? "Passer à Essentiel"
+           : lang === "ja" ? "エッセンシャルにダウング레ード"
+           : lang === "zh" ? "降级到基础版"
+           : lang === "ar" ? "تخفيض الباقة إلى أساسي"
+           : lang === "hi" ? "एसेनशियल पर डाउनग्रेड करें"
+           : lang === "pt" ? "Downgrade para Essencial"
+           : lang === "de" ? "Auf Essential downgraden"
+           : lang === "it" ? "Passa a Essenziale"
+           : lang === "ko" ? "에센셜로 다운그레이드"
+           : "Downgrade to Essential";
     }
   };
 
@@ -2948,7 +3990,7 @@ export function AccountView({
                       { id: "Vietnamese", label: lang === "es" ? "Vietnamita" : lang === "fr" ? "Vietnamien" : lang === "ja" ? "ベトナム語" : lang === "zh" ? "越南语" : lang === "ar" ? "الفيتنامية" : lang === "hi" ? "वियतनामी" : lang === "pt" ? "Vietnamita" : lang === "de" ? "Vietnamesisch" : lang === "it" ? "Vietnamita" : lang === "ko" ? "베트남어" : "Vietnamese" },
                       { id: "French", label: lang === "es" ? "Francés" : lang === "fr" ? "Français" : lang === "ja" ? "フランス語" : lang === "zh" ? "法语" : lang === "ar" ? "الفرنسية" : lang === "hi" ? "फ़्रेंच" : lang === "pt" ? "Francês" : lang === "de" ? "Französisch" : lang === "it" ? "Francese" : lang === "ko" ? "프랑스어" : "French" }
                     ].map((l) => (
-                      <option key={l.id} value={l.id}>{l.label}</option>
+                      <option key={l.id} value={l.id}>{getLocalizedLineLabel(l.label, lang)}</option>
                     ))}
                   </select>
                 </div>
@@ -2968,12 +4010,32 @@ export function AccountView({
           {/* Plan Change Modal */}
           {planModalOpen && (
             <Modal
-              title={lang === "es" ? "Cambiar plan de suscripción" : lang === "fr" ? "Changer de forfait" : "Change Subscription Plan"}
+              title={lang === "es" ? "Cambiar plan de suscripción"
+                : lang === "fr" ? "Changer de forfait"
+                : lang === "ja" ? "サブスクリプションプランの変更"
+                : lang === "zh" ? "更改订阅方案"
+                : lang === "ar" ? "تغيير باقة الاشتراك"
+                : lang === "hi" ? "सदस्यता प्लान बदलें"
+                : lang === "pt" ? "Alterar plano de assinatura"
+                : lang === "de" ? "Abonnement-Tarif ändern"
+                : lang === "it" ? "Modifica il piano di abbonamento"
+                : lang === "ko" ? "구독 플랜 변경"
+                : "Change Subscription Plan"}
               onClose={() => setPlanModalOpen(false)}
               footer={
                 <div style={{ display: "flex", justifyContent: "flex-end", gap: 10, width: "100%" }}>
                   <button className="btn btn-ghost" onClick={() => setPlanModalOpen(false)}>
-                    {lang === "es" ? "Cancelar" : lang === "fr" ? "Annuler" : "Cancel"}
+                    {lang === "es" ? "Cancelar"
+                     : lang === "fr" ? "Annuler"
+                     : lang === "ja" ? "キャンセル"
+                     : lang === "zh" ? "取消"
+                     : lang === "ar" ? "إلغاء"
+                     : lang === "hi" ? "रद्द करें"
+                     : lang === "pt" ? "Cancelar"
+                     : lang === "de" ? "Abbrechen"
+                     : lang === "it" ? "Annulla"
+                     : lang === "ko" ? "취소"
+                     : "Cancel"}
                   </button>
                   <button
                     className="btn btn-primary"
@@ -3001,7 +4063,17 @@ export function AccountView({
                         }
                         set({ plan: tempPlan, billingCycle: tempCycle });
                         setPlanModalOpen(false);
-                        showToast(lang === "es" ? "Plan actualizado correctamente" : lang === "fr" ? "Forfait mis à jour avec succès" : "Plan updated successfully");
+                        showToast(lang === "es" ? "Plan actualizado correctamente"
+                          : lang === "fr" ? "Forfait mis à jour avec succès"
+                          : lang === "ja" ? "プランが正常に更新されました"
+                          : lang === "zh" ? "方案已成功更新"
+                          : lang === "ar" ? "تم تحديث الباقة بنجاح"
+                          : lang === "hi" ? "प्लान सफलतापूर्वक अपडेट किया गया"
+                          : lang === "pt" ? "Plano atualizado com sucesso"
+                          : lang === "de" ? "Tarif erfolgreich aktualisiert"
+                          : lang === "it" ? "Piano aggiornato con successo"
+                          : lang === "ko" ? "플랜이 성공적으로 업데이트되었습니다"
+                          : "Plan updated successfully");
                       };
 
                       const isUpgradingCycle = account.billingCycle === "monthly" && tempCycle === "yearly";
@@ -3020,10 +4092,16 @@ export function AccountView({
             >
               <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
                 <p style={{ color: "var(--ink-soft)", fontSize: "0.95rem" }}>
-                  {lang === "es" 
-                    ? "Seleccione el plan y el ciclo de facturación que mejor se adapte a sus necesidades:" 
-                    : lang === "fr" 
-                    ? "Sélectionnez le forfait et le cycle de facturation qui vous conviennent :" 
+                  {lang === "es" ? "Seleccione el plan y el ciclo de facturación que mejor se adapte a sus necesidades:"
+                    : lang === "fr" ? "Sélectionnez le forfait et le cycle de facturation qui vous conviennent :"
+                    : lang === "ja" ? "ニーズに最適なプランと請求サイクルを選択してください:"
+                    : lang === "zh" ? "选择最适合您需求的方案和账单周期:"
+                    : lang === "ar" ? "اختر الباقة ودورة الفوترة التي تناسب احتياجاتك بشكل أفضل:"
+                    : lang === "hi" ? "वह प्लान और बिलिंग चक्र चुनें जो आपकी आवश्यकताओं के सबसे अनुकूल हो:"
+                    : lang === "pt" ? "Selecione o plano e o ciclo de cobrança que melhor atendam às suas necessidades:"
+                    : lang === "de" ? "Wählen Sie den Tarif und Abrechnungszeitraum, der am besten zu Ihren Anforderungen passt:"
+                    : lang === "it" ? "Seleziona il piano e il ciclo di fatturazione più adatti alle tue esigenze:"
+                    : lang === "ko" ? "귀하의 필요에 가장 적합한 플랜과 결제 주기를 선택하세요:"
                     : "Select the plan and billing cycle that best fits your needs:"}
                 </p>
                 
@@ -3035,7 +4113,17 @@ export function AccountView({
                       onClick={() => setTempCycle("monthly")}
                       style={{ padding: "6px 16px", fontSize: "0.88rem" }}
                     >
-                      {lang === "es" ? "Mensual" : lang === "fr" ? "Mensuel" : "Monthly"}
+                      {lang === "es" ? "Mensual"
+                       : lang === "fr" ? "Mensuel"
+                       : lang === "ja" ? "月払い"
+                       : lang === "zh" ? "按月"
+                       : lang === "ar" ? "شهرياً"
+                       : lang === "hi" ? "मासिक"
+                       : lang === "pt" ? "Mensal"
+                       : lang === "de" ? "Monatlich"
+                       : lang === "it" ? "Mensile"
+                       : lang === "ko" ? "월간"
+                       : "Monthly"}
                     </button>
                     <button
                       className={`seg-btn ${tempCycle === "yearly" ? "active" : ""}`}
@@ -3048,7 +4136,17 @@ export function AccountView({
                         gap: 6 
                       }}
                     >
-                      {lang === "es" ? "Anual" : lang === "fr" ? "Annuel" : "Annual"}
+                      {lang === "es" ? "Anual"
+                     : lang === "fr" ? "Annuel"
+                     : lang === "ja" ? "年払い"
+                     : lang === "zh" ? "按年"
+                     : lang === "ar" ? "سنوياً"
+                     : lang === "hi" ? "वार्षिक"
+                     : lang === "pt" ? "Anual"
+                     : lang === "de" ? "Jährlich"
+                     : lang === "it" ? "Annuale"
+                     : lang === "ko" ? "연간"
+                     : "Annual"}
                       <span style={{ 
                         fontSize: "0.72rem", 
                         fontWeight: 700, 
@@ -3083,10 +4181,32 @@ export function AccountView({
                   >
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                        <b style={{ fontSize: "1.1rem" }}>{lang === "es" ? "Plan Esencial" : lang === "fr" ? "Forfait Essentiel" : "Essential Plan"}</b>
+                        <b style={{ fontSize: "1.1rem" }}>
+                          {lang === "es" ? "Plan Esencial"
+                           : lang === "fr" ? "Forfait Essentiel"
+                           : lang === "ja" ? "エッセンシャルプラン"
+                           : lang === "zh" ? "基础版方案"
+                           : lang === "ar" ? "الباقة الأساسية"
+                           : lang === "hi" ? "एसेनशियल प्लान"
+                           : lang === "pt" ? "Plano Essencial"
+                           : lang === "de" ? "Essential-Tarif"
+                           : lang === "it" ? "Piano Essenziale"
+                           : lang === "ko" ? "에센셜 플랜"
+                           : "Essential Plan"}
+                        </b>
                         {account.plan === "essential" && (
                           <span className="badge badge-green" style={{ fontSize: "0.72rem", padding: "2px 8px" }}>
-                            {lang === "es" ? "Plan actual" : lang === "fr" ? "Forfait actuel" : "Current Plan"}
+                            {lang === "es" ? "Plan actual"
+                             : lang === "fr" ? "Forfait actuel"
+                             : lang === "ja" ? "現在のプラン"
+                             : lang === "zh" ? "当前方案"
+                             : lang === "ar" ? "الباقة الحالية"
+                             : lang === "hi" ? "वर्तमान प्लान"
+                             : lang === "pt" ? "Plano atual"
+                             : lang === "de" ? "Aktueller Tarif"
+                             : lang === "it" ? "Piano attuale"
+                             : lang === "ko" ? "현재 플랜"
+                             : "Current Plan"}
                           </span>
                         )}
                       </div>
@@ -3095,10 +4215,16 @@ export function AccountView({
                       </span>
                     </div>
                     <p style={{ fontSize: "0.85rem", color: "var(--ink-faint)" }}>
-                      {lang === "es" 
-                        ? "Perfecto para familias individuales. Incluye 1 número y hasta 3 contactos." 
-                        : lang === "fr" 
-                        ? "Idéal pour une configuration mono-famille. 1 numéro et 3 contacts max." 
+                      {lang === "es" ? "Perfecto para familias individuales. Incluye 1 número y hasta 3 contactos."
+                        : lang === "fr" ? "Idéal pour une configuration mono-famille. 1 numéro et 3 contacts max."
+                        : lang === "ja" ? "単一家族のセットアップに最適。1つの番号と最大3つの連絡先が含まれます。"
+                        : lang === "zh" ? "最适合单家庭使用。包含 1 个号码和最多 3 个联系人。"
+                        : lang === "ar" ? "مثالي للعائلات المستقلة. يشمل رقماً واحداً وحتى 3 جهات اتصال."
+                        : lang === "hi" ? "एकल-परिवार सेटअप के लिए बिल्कुल सही। इसमें 1 नंबर और 3 संपर्कों तक शामिल हैं।"
+                        : lang === "pt" ? "Perfeito para configurações de família única. Inclui 1 número e até 3 contatos."
+                        : lang === "de" ? "Perfekt für Einzelfamilien. Enthält 1 Rufnummer und bis zu 3 Kontakte."
+                        : lang === "it" ? "Perfetto per configurazioni mono-famiglia. Include 1 numero e fino a 3 contatti."
+                        : lang === "ko" ? "단일 가족 구성에 적합합니다. 1개의 번호와 최대 3개의 연락처를 포함합니다."
                         : "Perfect for single-family setups. Includes 1 number and up to 3 contacts."}
                     </p>
                   </div>
@@ -3121,10 +4247,32 @@ export function AccountView({
                   >
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                        <b style={{ fontSize: "1.1rem" }}>{lang === "es" ? "Plan Pro" : lang === "fr" ? "Forfait Pro" : "Pro Plan"}</b>
+                        <b style={{ fontSize: "1.1rem" }}>
+                          {lang === "es" ? "Plan Pro"
+                           : lang === "fr" ? "Forfait Pro"
+                           : lang === "ja" ? "プロプラン"
+                           : lang === "zh" ? "专业版方案"
+                           : lang === "ar" ? "الباقة الاحترافية"
+                           : lang === "hi" ? "प्रो प्लान"
+                           : lang === "pt" ? "Plano Pro"
+                           : lang === "de" ? "Pro-Tarif"
+                           : lang === "it" ? "Piano Pro"
+                           : lang === "ko" ? "프로 플랜"
+                           : "Pro Plan"}
+                        </b>
                         {account.plan === "pro" && (
                           <span className="badge badge-green" style={{ fontSize: "0.72rem", padding: "2px 8px" }}>
-                            {lang === "es" ? "Plan actual" : lang === "fr" ? "Forfait actuel" : "Current Plan"}
+                            {lang === "es" ? "Plan actual"
+                             : lang === "fr" ? "Forfait actuel"
+                             : lang === "ja" ? "現在のプラン"
+                             : lang === "zh" ? "当前方案"
+                             : lang === "ar" ? "الباقة الحالية"
+                             : lang === "hi" ? "वर्तमान प्लान"
+                             : lang === "pt" ? "Plano atual"
+                             : lang === "de" ? "Aktueller Tarif"
+                             : lang === "it" ? "Piano attuale"
+                             : lang === "ko" ? "현재 플랜"
+                             : "Current Plan"}
                           </span>
                         )}
                       </div>
@@ -3133,10 +4281,16 @@ export function AccountView({
                       </span>
                     </div>
                     <p style={{ fontSize: "0.85rem", color: "var(--ink-faint)" }}>
-                      {lang === "es" 
-                        ? "Para grupos activos. Incluye 2 números, hasta 6 contactos, menús y horarios." 
-                        : lang === "fr" 
-                        ? "Pour les aidants actifs. 2 numéros, 6 contacts max, menus et planning." 
+                      {lang === "es" ? "Para grupos activos. Incluye 2 números, hasta 6 contactos, menús y horarios."
+                        : lang === "fr" ? "Pour les aidants actifs. 2 numéros, 6 contacts max, menus et planning."
+                        : lang === "ja" ? "アクティブな介護グループ向け。2つの番号、最大6つの連絡先、音声メニュー、スケジュール機能を含みます。"
+                        : lang === "zh" ? "适合活跃的看护团队。包含 2 个号码、最多 6 个联系人、语音菜单和排班管理。"
+                        : lang === "ar" ? "لمجموعات الرعاية النشطة. يشمل رقمين، وحتى 6 جهات اتصال، وقوائم اتصال، وجدولة التغطية."
+                        : lang === "hi" ? "सक्रिय देखभाल समूहों के लिए। इसमें 2 नंबर, 6 संपर्कों तक, मेनू और शेड्यूलिंग शामिल हैं।"
+                        : lang === "pt" ? "Para grupos de cuidados ativos. Inclui 2 números, até 6 contatos, menus e agendamento."
+                        : lang === "de" ? "Für aktive Pflegegruppen. Enthält 2 Rufnummern, bis zu 6 Kontakte, Sprachmenüs und Schichtplanung."
+                        : lang === "it" ? "Per gruppi di assistenza attivi. Include 2 numeri, fino a 6 contatti, menu e programmazione."
+                        : lang === "ko" ? "활동적인 케어 그룹용. 2개의 번호, 최대 6개의 연락처, 메뉴 및 일정 관리 기능을 포함합니다."
                         : "For active care groups. Includes 2 numbers, up to 6 contacts, menus, and scheduling."}
                     </p>
                   </div>
@@ -3303,7 +4457,7 @@ export function AccountView({
                             style={{ width: 16, height: 16 }}
                           />
                           <div style={{ display: "flex", flexDirection: "column", textAlign: "left" }}>
-                            <span style={{ fontSize: "0.92rem", fontWeight: 600 }}>{l.label}</span>
+                            <span style={{ fontSize: "0.92rem", fontWeight: 600 }}>{getLocalizedLineLabel(l.label, lang)}</span>
                             <span style={{ fontSize: "0.82rem", color: "var(--ink-faint)" }}>{l.number}</span>
                           </div>
                         </label>
@@ -3321,7 +4475,17 @@ export function AccountView({
                       fontWeight: 500,
                       textAlign: "left"
                     }}>
-                      Once a number is returned, you can no longer claim it again.
+                      {lang === "es" ? "Una vez devuelto un número, ya no se puede reclamar nuevamente."
+                      : lang === "fr" ? "Une fois un numéro restitué, vous ne pouvez plus le réclamer."
+                      : lang === "ja" ? "一度返却された番号は、再度取得することはできません。"
+                      : lang === "zh" ? "号码一旦退还，将无法再次申领。"
+                      : lang === "ar" ? "بمجرد إرجاع الرقم، لا يمكنك المطالبة به مرة أخرى."
+                      : lang === "hi" ? "एक बार नंबर वापस करने के बाद, आप उसे दोबारा क्लेम नहीं कर सकते।"
+                      : lang === "pt" ? "Depois de devolver um número, você não poderá solicitá-lo novamente."
+                      : lang === "de" ? "Sobald eine Nummer zurückgegeben wurde, kann sie nicht erneut beansprucht werden."
+                      : lang === "it" ? "Una volta restituito un numero, non potrai più richiederlo."
+                      : lang === "ko" ? "번호가 반환되면 다시 청구할 수 없습니다."
+                      : "Once a number is returned, you can no longer claim it again."}
                     </p>
                   </div>
                 )}
@@ -3447,14 +4611,24 @@ export function AccountView({
                           addonPopupRef.current = null;
                         }
                         addonPendingAction.current = null;
-                        showToast("Could not start checkout. Please try again.");
+                        showToast(lang === "es" ? "No se pudo iniciar el proceso de pago. Por favor, inténtelo de nuevo."
+                          : lang === "fr" ? "Impossible de lancer le paiement. Veuillez réessayer."
+                          : lang === "ja" ? "チェックアウトを開始できませんでした。もう一度お試しください。"
+                          : lang === "zh" ? "无法开始结账。请重试。"
+                          : lang === "ar" ? "تعذر بدء عملية الدفع. يرجى المحاولة مرة أخرى."
+                          : lang === "hi" ? "चेकआउट शुरू नहीं किया जा सका। कृपया पुनः प्रयास करें।"
+                          : lang === "pt" ? "Não foi possível iniciar o checkout. Por favor, tente novamente."
+                          : lang === "de" ? "Zahlungsvorgang konnte nicht gestartet werden. Bitte versuchen Sie es erneut."
+                          : lang === "it" ? "Impossibile avviare il pagamento. Riprova."
+                          : lang === "ko" ? "결제를 시작할 수 없습니다. 다시 시도해 주세요."
+                          : "Could not start checkout. Please try again.");
                       } finally {
                         setAddonCheckoutLoading(false);
                       }
                     }}
                   >
                     {addonCheckoutLoading
-                      ? <><div style={{ width: 14, height: 14, border: "2px solid #fff", borderTopColor: "transparent", borderRadius: "50%", display: "inline-block", animation: "spin 0.7s linear infinite", marginRight: 6 }} />Processing…</>
+                      ? <><div style={{ width: 14, height: 14, border: "2px solid #fff", borderTopColor: "transparent", borderRadius: "50%", display: "inline-block", animation: "spin 0.7s linear infinite", marginRight: 6 }} />{lang === "es" ? "Procesando…" : lang === "fr" ? "Traitement…" : lang === "ja" ? "処理中…" : lang === "zh" ? "处理中…" : lang === "ar" ? "جاري المعالجة…" : lang === "hi" ? "प्रसंस्करण…" : lang === "pt" ? "Processando…" : lang === "de" ? "Verarbeitung…" : lang === "it" ? "Elaborazione in corso…" : lang === "ko" ? "처리 중…" : "Processing…"}</>
                       : (chargeableNewNumbers > 0 || tempMinuteBlocks > 0
                         ? (lang === "es" ? "Aprobar y pagar" : lang === "fr" ? "Approuver et payer" : "Approve & Pay")
                         : (lang === "es" ? "Confirmar y guardar" : lang === "fr" ? "Confirmer et enregistrer" : "Confirm & Save"))}
@@ -3497,31 +4671,56 @@ export function AccountView({
                   lineHeight: "1.4"
                 }}>
                   <b>
-                    {lang === "es" 
-                      ? "Aviso de facturación:" 
-                      : lang === "fr" 
-                      ? "Avis de facturation :" 
+                    {lang === "es" ? "Aviso de facturación:" 
+                      : lang === "fr" ? "Avis de facturation :" 
+                      : lang === "ja" ? "請求に関するお知らせ:"
+                      : lang === "zh" ? "账单通知:"
+                      : lang === "ar" ? "إشعار الفواتير:"
+                      : lang === "hi" ? "बिलिंग सूचना:"
+                      : lang === "pt" ? "Aviso de faturamento:"
+                      : lang === "de" ? "Abrechnungshinweis:"
+                      : lang === "it" ? "Avviso di fatturazione:"
+                      : lang === "ko" ? "결제 안내:"
                       : "Billing Notice:"}
                   </b>{" "}
                   {chargeableNewNumbers > 0 || tempMinuteBlocks > 0 ? (
                     tempMinuteBlocks > 0 ? (
-                      lang === "es"
-                        ? "La facturación de los números y minutos adicionales comenzará inmediatamente después de aprobar los complementos."
-                        : lang === "fr"
-                        ? "La facturation des numéros supplémentaires et des minutes vocales supplémentaires sera effective immédiatement après l'approbation des options."
+                      lang === "es" ? "La facturación de los números y minutos adicionales comenzará inmediatamente después de aprobar los complementos."
+                        : lang === "fr" ? "La facturation des numéros supplémentaires et des minutes vocales supplémentaires sera effective immédiatement après l'approbation des options."
+                        : lang === "ja" ? "アドオン番号と追加通話分の請求は、アドオンの承認後すぐに開始されます。"
+                        : lang === "zh" ? "附加号码和额外通话分钟数的计费将在批准附加服务后立即生效。"
+                        : lang === "ar" ? "سيبدأ تحصيل فواتير الأرقام الإضافية ودقائق المكالمات الزائدة فور الموافقة على الخدمات الإضافية."
+                        : lang === "hi" ? "ऐड-ऑन नंबरों और अतिरिक्त वॉयस मिनटों की计费将在批准附加服务后立即生效。"
+                        : lang === "pt" ? "A cobrança dos números adicionais e minutos de voz extras entrará em vigor imediatamente após a aprovação dos adicionais."
+                        : lang === "de" ? "Die Abrechnung für die Zusatzrufnummern und zusätzlichen Sprachminuten erfolgt sofort nach Genehmigung der Zusatzoptionen."
+                        : lang === "it" ? "La fatturazione per i numeri aggiuntivi e i minuti di conversazione extra sarà effettiva immediatamente dopo l'approvazione delle opzioni."
+                        : lang === "ko" ? "추가 번호 및 추가 음성 통화 분 요금은 부가 서비스를 승인하는 즉시 청구됩니다."
                         : "Billing for the add-on numbers and extra voice minutes will be effective immediately upon approving the add-ons."
                     ) : (
                       lang === "es"
                         ? "La facturación de los números adicionales comenzará inmediatamente después de aprobar los complementos."
-                        : lang === "fr"
-                        ? "La facturation des numéros supplémentaires sera effective immédiatement après l'approbation des options."
+                        : lang === "fr" ? "La facturation des numéros supplémentaires sera effective immédiatement après l'approbation des options."
+                        : lang === "ja" ? "アドオン番号の請求は、アドオンの承認後すぐに開始されます。"
+                        : lang === "zh" ? "附加号码的计费将在批准附加服务后立即生效。"
+                        : lang === "ar" ? "سيبدأ تحصيل فواتير الأرقام الإضافية فور الموافقة على الخدمات الإضافية."
+                        : lang === "hi" ? "ऐड-ऑन नंबरों की计费将在批准附加服务后立即生效。"
+                        : lang === "pt" ? "A cobrança dos números adicionais entrará em vigor imediatamente após a aprovação dos adicionais."
+                        : lang === "de" ? "Die Abrechnung für die Zusatzrufnummern erfolgt sofort nach Genehmigung der Zusatzoptionen."
+                        : lang === "it" ? "La fatturazione per i numeri aggiuntivi sarà effettiva immediatamente dopo l'approvazione delle opzioni."
+                        : lang === "ko" ? "추가 번호 요금은 부가 서비스를 승인하는 즉시 청구됩니다."
                         : "Billing for the add-on numbers will be effective immediately upon approving the add-ons."
                     )
                   ) : (
-                    lang === "es"
-                      ? "Esta línea adicional está incluida en su plan sin costo adicional."
-                      : lang === "fr"
-                      ? "Cette ligne supplémentaire est incluse dans votre forfait sans frais supplémentaires."
+                    lang === "es" ? "Esta línea adicional está incluida en su plan sin costo adicional."
+                      : lang === "fr" ? "Cette ligne supplémentaire est incluse dans votre forfait sans frais supplémentaires."
+                      : lang === "ja" ? "この追加回線はプランに含まれており、追加料金はかかりません。"
+                      : lang === "zh" ? "此附加线路已包含在您的方案中，无需额外费用。"
+                      : lang === "ar" ? "هذا الخط الإضافي مشمول في باقتك دون أي تكلفة إضافية."
+                      : lang === "hi" ? "यह अतिरिक्त लाइन आपके प्लान में बिना किसी अतिरिक्त शुल्क के शामिल है।"
+                      : lang === "pt" ? "Esta linha adicional está incluída no seu plano sem custo extra."
+                      : lang === "de" ? "Diese zusätzliche Leitung ist ohne zusätzliche Kosten in Ihrem Tarif enthalten."
+                      : lang === "it" ? "Questa linea aggiuntiva è inclusa nel tuo piano senza costi aggiuntivi."
+                      : lang === "ko" ? "이 추가 회선은 플랜에 포함되어 있어 추가 비용이 발생하지 않습니다."
                       : "This additional line is included in your plan at no additional cost."
                   )}
                 </div>
@@ -3770,7 +4969,7 @@ export function AccountView({
                           style={{ width: 16, height: 16 }}
                         />
                         <div style={{ display: "flex", flexDirection: "column", textAlign: "left" }}>
-                          <span style={{ fontSize: "0.92rem", fontWeight: 600 }}>{l.label}</span>
+                          <span style={{ fontSize: "0.92rem", fontWeight: 600 }}>{getLocalizedLineLabel(l.label, lang)}</span>
                           <span style={{ fontSize: "0.82rem", color: "var(--ink-faint)" }}>{l.number}</span>
                         </div>
                       </label>
@@ -3789,7 +4988,17 @@ export function AccountView({
                   fontWeight: 500,
                   textAlign: "left"
                 }}>
-                  Once a number is returned, you can no longer claim it again.
+                  {lang === "es" ? "Una vez devuelto un número, ya no se puede reclamar nuevamente."
+                  : lang === "fr" ? "Une fois un numéro restitué, vous ne pouvez plus le réclamer."
+                  : lang === "ja" ? "一度返却された番号は、再度取得することはできません。"
+                  : lang === "zh" ? "号码一旦退还，将无法再次申领。"
+                  : lang === "ar" ? "بمجرد إرجاع الرقم، لا يمكنك المطالبة به مرة أخرى."
+                  : lang === "hi" ? "एक बार नंबर वापस करने के बाद, आप उसे दोबारा क्लेม नहीं कर सकते।"
+                  : lang === "pt" ? "Depois de devolver um número, você não poderá solicitá-lo novamente."
+                  : lang === "de" ? "Sobald eine Nummer zurückgegeben wurde, kann sie nicht erneut beansprucht werden."
+                  : lang === "it" ? "Una volta restituito un numero, non potrai più richiederlo."
+                  : lang === "ko" ? "번호가 반환되면 다시 청구할 수 없습니다."
+                  : "Once a number is returned, you can no longer claim it again."}
                 </p>
               </div>
             </Modal>
@@ -3876,13 +5085,39 @@ export function AccountView({
               <div>
                 <h2>{d.account.billing}</h2>
                 <p>
-                  {account.billingCycle === "yearly" 
-                    ? (lang === "es" ? "Facturado anualmente · renueva el 1 de junio de 2026" : lang === "fr" ? "Facturé annuellement · se renouvelle le 1er juin 2026" : "Billed annually · renews June 1, 2026")
+                  {account.billingCycle === "yearly"
+                    ? (lang === "es" ? "Facturado anualmente · renueva el 1 de junio de 2026"
+                     : lang === "fr" ? "Facturé annuellement · se renouvelle le 1er juin 2026"
+                     : lang === "ja" ? "年次請求 · 2026年6月1日に更新"
+                     : lang === "zh" ? "按年计费 · 于 2026年6月1日续期"
+                     : lang === "ar" ? "مفوتر سنوياً · يتجدد في 1 يونيو 2026"
+                     : lang === "hi" ? "सालाना बिलिंग · 1 जून, 2026 को नवीनीकृत होगा"
+                     : lang === "pt" ? "Cobrado anualmente · renova em 1 de junho de 2026"
+                     : lang === "de" ? "Jährliche Abrechnung · verlängert sich am 1. Juni 2026"
+                     : lang === "it" ? "Fatturato annualmente · si rinnova il 1 giugno 2026"
+                     : lang === "ko" ? "연간 결제 · 2026년 6월 1일에 갱신 예정"
+                     : "Billed annually · renews June 1, 2026")
                     : d.account.renewDateSub}
                 </p>
               </div>
               <Badge kind={account.plan === "pro" ? "blue" : "amber"}>
-                {account.plan === "pro" ? "Pro" : (lang === "es" ? "Esencial" : lang === "fr" ? "Essentiel" : "Essential")}
+                {account.plan === "pro"
+                  ? (lang === "ja" ? "プロ"
+                   : lang === "ko" ? "프로"
+                   : lang === "zh" ? "专业版"
+                   : lang === "ar" ? "برو"
+                   : "Pro")
+                  : (lang === "es" ? "Esencial"
+                   : lang === "fr" ? "Essentiel"
+                   : lang === "ja" ? "エッセンシャル"
+                   : lang === "zh" ? "基础版"
+                   : lang === "ar" ? "أساسي"
+                   : lang === "hi" ? "एसेनशियल"
+                   : lang === "pt" ? "Essencial"
+                   : lang === "de" ? "Essential"
+                   : lang === "it" ? "Essenziale"
+                   : lang === "ko" ? "에센셜"
+                   : "Essential")}
               </Badge>
             </div>
             <div className="card-pad">
@@ -3893,11 +5128,33 @@ export function AccountView({
                     : (account.billingCycle === "yearly" ? "$12.42" : "$14.99")}
                 </span>
                 <span style={{ color: "var(--ink-faint)" }}>
-                  {lang === "es" ? "/ mes" : lang === "fr" ? "/ mois" : lang === "ja" ? "/ 月" : lang === "zh" ? "/ 月" : lang === "ar" ? "/ شهر" : lang === "hi" ? "/ महीना" : lang === "/ mês" ? "/ mês" : lang === "de" ? "/ Monat" : lang === "it" ? "/ mese" : lang === "ko" ? "/ 월" : "/ month"}
+                  {lang === "es" ? "/ mes" : lang === "fr" ? "/ mois" : lang === "ja" ? "/ 月" : lang === "zh" ? "/ 月" : lang === "ar" ? "/ شهر" : lang === "hi" ? "/ महीना" : lang === "pt" ? "/ mês" : lang === "de" ? "/ Monat" : lang === "it" ? "/ mese" : lang === "ko" ? "/ 월" : "/ month"}
                 </span>
                 {account.billingCycle === "yearly" && (
                   <span style={{ fontSize: "0.95rem", color: "var(--ink-faint)", marginLeft: 6 }}>
-                    {account.plan === "pro" ? "(billed annually at $249/yr)" : "(billed annually at $149/yr)"}
+                    {account.plan === "pro"
+                      ? (lang === "es" ? "(facturado anualmente a $249/año)"
+                       : lang === "fr" ? "(facturé annuellement à 249 $/an)"
+                       : lang === "ja" ? "(年額 $249 で請求)"
+                       : lang === "zh" ? "(按年计费，每年 $249)"
+                       : lang === "ar" ? "(تُخصم سنوياً بقيمة 249$/السنة)"
+                       : lang === "hi" ? "(सालाना $249 शुल्क)"
+                       : lang === "pt" ? "(cobrado anualmente a $249/ano)"
+                       : lang === "de" ? "(jährliche Abrechnung von 249 $/Jahr)"
+                       : lang === "it" ? "(fatturato annualmente a 249 $/anno)"
+                       : lang === "ko" ? "(연간 $249 청구)"
+                       : "(billed annually at $249/yr)")
+                      : (lang === "es" ? "(facturado anualmente a $149/año)"
+                       : lang === "fr" ? "(facturé annuellement à 149 $/an)"
+                       : lang === "ja" ? "(年額 $149 で請求)"
+                       : lang === "zh" ? "(按年计费，每年 $149)"
+                       : lang === "ar" ? "(تُخصم سنوياً بقيمة 149$/السنة)"
+                       : lang === "hi" ? "(सालाना $149 शुल्क)"
+                       : lang === "pt" ? "(cobrado anualmente a $149/ano)"
+                       : lang === "de" ? "(jährliche Abrechnung von 149 $/Jahr)"
+                       : lang === "it" ? "(fatturato annualmente a 149 $/anno)"
+                       : lang === "ko" ? "(연간 $149 청구)"
+                       : "(billed annually at $149/yr)")}
                   </span>
                 )}
                 {account.billingCycle !== "yearly" && (
@@ -3916,12 +5173,77 @@ export function AccountView({
                 className="feat-grid"
               >
                 {((account.plan === "pro" ? d.account.billingFeatures : undefined) || [
-                  lang === "es" ? "1 número de teléfono dedicado" : lang === "fr" ? "1 numéro de sécurité dédié" : "1 dedicated phone number",
-                  lang === "es" ? "Hasta 3 contactos por número" : lang === "fr" ? "Jusqu'à 3 contacts par numéro" : "3 routable contacts per number",
-                  lang === "es" ? "Enrutamiento en cascada (Secuencial)" : lang === "fr" ? "Appel en cascade (séquentiel)" : "Call Cascade (Sequential)",
-                  lang === "es" ? "Alertas por correo electrónico" : lang === "fr" ? "Alertes e-mail en temps réel" : "Real-time email alerts",
-                  lang === "es" ? "Buzón de voz estándar" : lang === "fr" ? "Boîte messagerie standard" : "Standard voicemail box",
-                  lang === "es" ? "DASHBOARD de administración" : lang === "fr" ? "Tableau de bord administrateur" : "Admin dashboard"
+                  lang === "es" ? "1 número de teléfono dedicado"
+                  : lang === "fr" ? "1 numéro de sécurité dédié"
+                  : lang === "ja" ? "1つの専用電話番号"
+                  : lang === "zh" ? "1 个专用电话号码"
+                  : lang === "ar" ? "رقم هاتف واحد مخصص"
+                  : lang === "hi" ? "1 समर्पित फ़ोन नंबर"
+                  : lang === "pt" ? "1 número de telefone dedicado"
+                  : lang === "de" ? "1 dedizierte Telefonnummer"
+                  : lang === "it" ? "1 numero di tempo dedicato"
+                  : lang === "ko" ? "1개의 전용 전화번호"
+                  : "1 dedicated phone number",
+
+                  lang === "es" ? "Hasta 3 contactos por número"
+                  : lang === "fr" ? "Jusqu'à 3 contacts par numéro"
+                  : lang === "ja" ? "1番号あたり最大3つの連絡先"
+                  : lang === "zh" ? "每个号码最多 3 个可路由联系人"
+                  : lang === "ar" ? "حتى 3 جهات اتصال لكل رقم"
+                  : lang === "hi" ? "प्रति नंबर 3 रूट करने योग्य संपर्क"
+                  : lang === "pt" ? "Até 3 contatos por número"
+                  : lang === "de" ? "Bis zu 3 Kontakte pro Nummer"
+                  : lang === "it" ? "Fino a 3 contatti per numero"
+                  : lang === "ko" ? "번호당 최대 3개의 연결 연락처"
+                  : "3 routable contacts per number",
+
+                  lang === "es" ? "Enrutamiento en cascada (Secuencial)"
+                  : lang === "fr" ? "Appel en cascade (séquentiel)"
+                  : lang === "ja" ? "順次着信転送 (シーケンシャル)"
+                  : lang === "zh" ? "顺次呼叫路由 (顺序联络)"
+                  : lang === "ar" ? "توجيه المكالمات بالتتابع"
+                  : lang === "hi" ? "कॉल कैस्केड (क्रमिक)"
+                  : lang === "pt" ? "Roteamento em cascata (Sequencial)"
+                  : lang === "de" ? "Anruf-Kaskade (sequenziell)"
+                  : lang === "it" ? "Routing a cascata (Sequenziale)"
+                  : lang === "ko" ? "순차적 통화 전환"
+                  : "Call Cascade (Sequential)",
+
+                  lang === "es" ? "Alertas por correo electrónico"
+                  : lang === "fr" ? "Alertes e-mail en temps réel"
+                  : lang === "ja" ? "リアルタイムメール通知"
+                  : lang === "zh" ? "实时电子邮件提醒"
+                  : lang === "ar" ? "تنبيهات البريد الإلكتروني الفورية"
+                  : lang === "hi" ? "वास्तविक समय ईमेल अलर्ट"
+                  : lang === "pt" ? "Alertas de e-mail em tempo real"
+                  : lang === "de" ? "E-Mail-Benachrichtigungen in Echtzeit"
+                  : lang === "it" ? "Avvisi e-mail in tempo reale"
+                  : lang === "ko" ? "실시간 이메일 알림"
+                  : "Real-time email alerts",
+
+                  lang === "es" ? "Buzón de voz estándar"
+                  : lang === "fr" ? "Boîte messagerie standard"
+                  : lang === "ja" ? "標準ボイスメールボックス"
+                  : lang === "zh" ? "标准语音信箱"
+                  : lang === "ar" ? "صندوق بريد صوتي قياسي"
+                  : lang === "hi" ? "मानक वॉयस मेल बॉक्स"
+                  : lang === "pt" ? "Caixa de correio de voz padrão"
+                  : lang === "de" ? "Standard-Mailbox"
+                  : lang === "it" ? "Segreteria telefonica standard"
+                  : lang === "ko" ? "기본 음성 사물함"
+                  : "Standard voicemail box",
+
+                  lang === "es" ? "DASHBOARD de administración"
+                  : lang === "fr" ? "Tableau de bord administrateur"
+                  : lang === "ja" ? "管理者ダッシュボード"
+                  : lang === "zh" ? "管理控制台"
+                  : lang === "ar" ? "لوحة تحكم المشرف"
+                  : lang === "hi" ? "प्रशासक डैशबोर्ड"
+                  : lang === "pt" ? "Painel de administração"
+                  : lang === "de" ? "Administrator-Dashboard"
+                  : lang === "it" ? "Pannello di controllo amministratore"
+                  : lang === "ko" ? "관리자 대시보드"
+                  : "Admin dashboard"
                 ]).map((f: string) => (
                   <div className="plan-feat" key={f}>
                     <Icon name="check" /> {f}
@@ -3934,11 +5256,31 @@ export function AccountView({
                     className={`seg-btn ${account.billingCycle === "monthly" ? "active" : ""}`}
                     onClick={() => {
                       set({ billingCycle: "monthly" });
-                      showToast(lang === "es" ? "Cambiado a facturación mensual" : lang === "fr" ? "Facturation mensuelle activée" : "Switched to monthly billing");
+                      showToast(lang === "es" ? "Cambiado a facturación mensual"
+                        : lang === "fr" ? "Facturation mensuelle activée"
+                        : lang === "ja" ? "月額プランの請求に切り替えました"
+                        : lang === "zh" ? "已切换为按月计费"
+                        : lang === "ar" ? "تم التحويل إلى الدفع الشهري"
+                        : lang === "hi" ? "मासिक बिलिंग पर स्विच किया गया"
+                        : lang === "pt" ? "Alterado para cobrança mensal"
+                        : lang === "de" ? "Auf monatliche Abrechnung umgestellt"
+                        : lang === "it" ? "Passato alla fatturazione mensile"
+                        : lang === "ko" ? "월간 결제로 전환되었습니다"
+                        : "Switched to monthly billing");
                     }}
                     style={{ padding: "8px 16px", fontSize: "0.9rem" }}
                   >
-                    {lang === "es" ? "Mensual" : lang === "fr" ? "Mensuel" : "Monthly"}
+                    {lang === "es" ? "Mensual"
+                     : lang === "fr" ? "Mensuel"
+                     : lang === "ja" ? "月払い"
+                     : lang === "zh" ? "按月"
+                     : lang === "ar" ? "شهرياً"
+                     : lang === "hi" ? "मासिक"
+                     : lang === "pt" ? "Mensal"
+                     : lang === "de" ? "Monatlich"
+                     : lang === "it" ? "Mensile"
+                     : lang === "ko" ? "월간"
+                     : "Monthly"}
                   </button>
                   <button
                     className={`seg-btn ${account.billingCycle === "yearly" ? "active" : ""}`}
@@ -3947,7 +5289,17 @@ export function AccountView({
                         set({ billingCycle: "yearly" });
                         showToast(account.plan === "pro" 
                           ? ext.annualToast 
-                          : (lang === "es" ? "Cambiado a facturación anual — $149/año" : lang === "fr" ? "Facturation annuelle activée — 149 $/an" : "Switched to annual billing — $149/yr"));
+                          : (lang === "es" ? "Cambiado a facturación anual — $149/año"
+                           : lang === "fr" ? "Facturation annuelle activée — 149 $/an"
+                           : lang === "ja" ? "年額プランに切り替えました — $149/年"
+                           : lang === "zh" ? "已切换为按年计费 — $149/年"
+                           : lang === "ar" ? "تم التحويل إلى الدفع السنوي — 149$/السنة"
+                           : lang === "hi" ? "वार्षिक बिलिंग पर स्विच किया गया — $149/वर्ष"
+                           : lang === "pt" ? "Alterado para cobrança anual — $149/ano"
+                           : lang === "de" ? "Auf jährliche Abrechnung umgestellt — 149 $/Jahr"
+                           : lang === "it" ? "Passato alla fatturazione annuale — 149 $/anno"
+                           : lang === "ko" ? "연간 결제로 전환되었습니다 — $149/년"
+                           : "Switched to annual billing — $149/yr"));
                       };
 
                       if (account.billingCycle === "monthly") {
@@ -3965,7 +5317,17 @@ export function AccountView({
                       gap: 6 
                     }}
                   >
-                    {lang === "es" ? "Anual" : lang === "fr" ? "Annuel" : "Annual"}
+                    {lang === "es" ? "Anual"
+                     : lang === "fr" ? "Annuel"
+                     : lang === "ja" ? "年払い"
+                     : lang === "zh" ? "按年"
+                     : lang === "ar" ? "سنوياً"
+                     : lang === "hi" ? "वार्षिक"
+                     : lang === "pt" ? "Anual"
+                     : lang === "de" ? "Jährlich"
+                     : lang === "it" ? "Annuale"
+                     : lang === "ko" ? "연간"
+                     : "Annual"}
                     <span style={{ 
                       fontSize: "0.72rem", 
                       fontWeight: 700, 
@@ -4202,7 +5564,7 @@ export function AccountView({
                             <b>{purchased} {lang === "es" ? "min" : lang === "fr" ? "min" : lang === "ja" ? "分" : lang === "zh" ? "分钟" : lang === "ar" ? "دقيقة" : lang === "hi" ? "मिनट" : lang === "pt" ? "min" : lang === "de" ? "Min" : lang === "it" ? "min" : lang === "ko" ? "분" : "min"}</b>
                             <span>
                               {ext.thisCycleTopup}
-                              {` · ${planBaseMinutes} ${lang === "es" ? "min del plan" : lang === "fr" ? "min du forfait" : "plan min"}${ad.minuteBlocks ? ` + ${ad.minuteBlocks} × 30 ${lang === "es" ? "min adicionales" : lang === "fr" ? "min supplémentaires" : "add-on min"}` : ""}`}
+                              {` · ${planBaseMinutes} ${lang === "es" ? "min del plan" : lang === "fr" ? "min du forfait" : lang === "ja" ? "基本プラン分" : lang === "zh" ? "套餐分钟" : lang === "ar" ? "دقيقة الباقة" : lang === "hi" ? "प्लान मिनट" : lang === "pt" ? "min do plano" : lang === "de" ? "Inklusivminuten" : lang === "it" ? "min del piano" : lang === "ko" ? "기본 제공 분" : "plan min"}${ad.minuteBlocks ? ` + ${ad.minuteBlocks} × 30 ${lang === "es" ? "min adicionales" : lang === "fr" ? "min supplémentaires" : lang === "ja" ? "分追加" : lang === "zh" ? "分钟充值" : lang === "ar" ? "دقيقة إضافية" : lang === "hi" ? "अतिरिक्त मिनट" : lang === "pt" ? "min adicionais" : lang === "de" ? "Zusatzminuten" : lang === "it" ? "min aggiuntivi" : lang === "ko" ? "추가 충전 분" : "add-on min"}` : ""}`}
                             </span>
                           </div>
                         </div>
@@ -4229,9 +5591,29 @@ export function AccountView({
                       {/* Pooled Minutes Breakdown & Notice */}
                       <div style={{ marginTop: 20, paddingTop: 16, borderTop: "1px solid var(--line)", textAlign: "left" }}>
                         <h4 style={{ fontSize: "0.88rem", fontWeight: 700, margin: "0 0 10px", color: "var(--ink)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                          <span>{lang === "es" ? "Uso por número (Grupo compartido)" : lang === "fr" ? "Usage par numéro (Pool partagé)" : "Usage by Number (Shared Pool)"}</span>
+                          <span>{lang === "es" ? "Uso por número (Grupo compartido)"
+                            : lang === "fr" ? "Usage par numéro (Pool partagé)"
+                            : lang === "ja" ? "番号ごとの使用量 (共有プール)"
+                            : lang === "zh" ? "按号码使用量 (共享池)"
+                            : lang === "ar" ? "الاستخدام حسب الرقم (مجموعة مشتركة)"
+                            : lang === "hi" ? "नंबर द्वारा उपयोग (साझा पूल)"
+                            : lang === "pt" ? "Uso por número (Pool compartilhado)"
+                            : lang === "de" ? "Nutzung nach Nummer (Gemeinsamer Pool)"
+                            : lang === "it" ? "Utilizzo per numero (Pool condiviso)"
+                            : lang === "ko" ? "번호별 사용량 (공유 풀)"
+                            : "Usage by Number (Shared Pool)"}</span>
                           <span style={{ fontSize: "0.78rem", color: "var(--blue)", fontWeight: 500 }}>
-                            {lang === "es" ? "Pool de Minutos Compartido" : lang === "fr" ? "Minutes partagées" : "Shared Minutes Pool"}
+                            {lang === "es" ? "Pool de Minutos Compartido"
+                              : lang === "fr" ? "Minutes partagées"
+                              : lang === "ja" ? "共有通話分プール"
+                              : lang === "zh" ? "共享分钟数池"
+                              : lang === "ar" ? "مجموعة الدقائق المشتركة"
+                              : lang === "hi" ? "साझा मिनट पूल"
+                              : lang === "pt" ? "Pool de minutos compartilhado"
+                              : lang === "de" ? "Gemeinsamer Minuten-Pool"
+                              : lang === "it" ? "Pool di minuti condivisi"
+                              : lang === "ko" ? "공유 통화 시간 풀"
+                              : "Shared Minutes Pool"}
                           </span>
                         </h4>
                         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
@@ -4239,10 +5621,18 @@ export function AccountView({
                             <div key={l.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: "0.85rem" }}>
                               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                                 <span style={{ width: 8, height: 8, borderRadius: "50%", background: l.color }} />
-                                <span style={{ fontWeight: 600, color: "var(--ink-soft)" }}>{l.label}</span>
+                                <span style={{ fontWeight: 600, color: "var(--ink-soft)" }}>{getLocalizedLineLabel(l.label, lang)}</span>
                                 <span style={{ color: "var(--ink-faint)", fontSize: "0.78rem" }}>{l.number}</span>
                               </div>
-                              <span style={{ fontWeight: 700, color: "var(--ink)" }}>{l.minutesUsed || 0} min</span>
+                              <span style={{ fontWeight: 700, color: "var(--ink)" }}>
+                                {l.minutesUsed || 0}{" "}
+                                {lang === "ja" ? "分"
+                                 : lang === "zh" ? "分钟"
+                                 : lang === "ar" ? "دقيقة"
+                                 : lang === "hi" ? "मिनट"
+                                 : lang === "ko" ? "분"
+                                 : "min"}
+                              </span>
                             </div>
                           ))}
                         </div>
@@ -4254,30 +5644,48 @@ export function AccountView({
                           return (
                             <div style={{ display: "flex", flexDirection: "column", gap: 6, marginTop: 12 }}>
                               <div style={{ fontSize: "0.82rem", color: "var(--ink-soft)", fontWeight: 500 }}>
-                                {lang === "es"
-                                  ? `Plan ${a.plan === "pro" ? "Pro" : "Essential"}: ${planActive} de ${planMaxIncluded} números de teléfono incluidos activados`
-                                  : lang === "fr"
-                                  ? `Forfait ${a.plan === "pro" ? "Pro" : "Essential"}: ${planActive} sur ${planMaxIncluded} numéros de téléphone inclus actifs`
-                                  : `${a.plan === "pro" ? "Pro" : "Essential"} plan: ${planActive} of ${planMaxIncluded} included phone numbers active`}
+                                {lang === "es" ? `Plan ${a.plan === "pro" ? "Pro" : "Esencial"}: ${planActive} de ${planMaxIncluded} números de teléfono incluidos activados`
+                               : lang === "fr" ? `Forfait ${a.plan === "pro" ? "Pro" : "Essentiel"}: ${planActive} sur ${planMaxIncluded} numéros de téléphone inclus actifs`
+                               : lang === "ja" ? `${a.plan === "pro" ? "Pro" : "エッセンシャル"}プラン：含まれている電話番号 ${planActive} / ${planMaxIncluded} 個が有効`
+                               : lang === "zh" ? `${a.plan === "pro" ? "专业版" : "基础版"}方案：包含的 ${planMaxIncluded} 个电话号码中已启用 ${planActive} 个`
+                               : lang === "ar" ? `باقة ${a.plan === "pro" ? "برو" : "أساسي"}: ${planActive} من أصل ${planMaxIncluded} أرقام هواتف مشمولة نشطة`
+                               : lang === "hi" ? `${a.plan === "pro" ? "प्रो" : "एसेनशियल"} प्लान: शामिल ${planMaxIncluded} फ़ोन नंबरों में से ${planActive} सक्रिय हैं`
+                               : lang === "pt" ? `Plano ${a.plan === "pro" ? "Pro" : "Essencial"}: ${planActive} de ${planMaxIncluded} número(s) de telefone incluído(s) ativo(s)`
+                               : lang === "de" ? `${a.plan === "pro" ? "Pro" : "Essential"}-Tarif: ${planActive} von ${planMaxIncluded} enthaltenen Telefonnummern aktiv`
+                               : lang === "it" ? `Piano ${a.plan === "pro" ? "Pro" : "Essenziale"}: ${planActive} di ${planMaxIncluded} numeri di telefono inclusi attivi`
+                               : lang === "ko" ? `${a.plan === "pro" ? "Pro" : "에센셜"} 플랜: 포함된 ${planMaxIncluded}개의 전화번호 중 ${planActive}개 활성화됨`
+                               : `${a.plan === "pro" ? "Pro" : "Essential"} plan: ${planActive} of ${planMaxIncluded} included phone numbers active`}
                               </div>
                               {addonActive > 0 ? (
                                 <div style={{ fontSize: "0.82rem", color: "var(--blue)", fontWeight: 500 }}>
-                                  {lang === "es"
-                                    ? `${addonActive} número(s) de teléfono adicional(es) activo(s) ($${(addonActive * 6.99).toFixed(2)}/mes)`
-                                    : lang === "fr"
-                                    ? `${addonActive} numéro(s) de téléphone supplémentaire(s) actif(s) ($${(addonActive * 6.99).toFixed(2)}/mois)`
-                                    : `${addonActive} active add-on phone number(s) ($${(addonActive * 6.99).toFixed(2)}/mo)`}
+                                  {lang === "es" ? `${addonActive} número(s) de teléfono adicional(es) activo(s) ($${(addonActive * 6.99).toFixed(2)}/mes)`
+                                  : lang === "fr" ? `${addonActive} número(s) de téléphone supplémentaire(s) actif(s) ($${(addonActive * 6.99).toFixed(2)}/mois)`
+                                  : lang === "ja" ? `${addonActive} 個の追加電話番号が有効 ($${(addonActive * 6.99).toFixed(2)}/月)`
+                                  : lang === "zh" ? `${addonActive} 个启用的附加电话号码 (每个 $${(addonActive * 6.99).toFixed(2)}/月)`
+                                  : lang === "ar" ? `${addonActive} رقم (أرقام) هاتف إضافي نشط ($${(addonActive * 6.99).toFixed(2)}/شهر)`
+                                  : lang === "hi" ? `${addonActive} सक्रिय ऐड-ऑन फ़ोन नंबर ($${(addonActive * 6.99).toFixed(2)}/माह)`
+                                  : lang === "pt" ? `${addonActive} número(s) de telefone adicional(is) ativo(s) ($${(addonActive * 6.99).toFixed(2)}/mês)`
+                                  : lang === "de" ? `${addonActive} aktive Zusatz-Telefonnummer(n) ($${(addonActive * 6.99).toFixed(2)}/Monat)`
+                                  : lang === "it" ? `${addonActive} numero/i di telefono aggiuntivo/i attivo/i ($${(addonActive * 6.99).toFixed(2)}/mese)`
+                                  : lang === "ko" ? `${addonActive}개의 활성화된 추가 전화번호 ($${(addonActive * 6.99).toFixed(2)}/월)`
+                                  : `${addonActive} active add-on phone number(s) ($${(addonActive * 6.99).toFixed(2)}/mo)`}
                                 </div>
                               ) : null}
                             </div>
                           );
                         })()}
                         <p style={{ fontSize: "0.76rem", color: "var(--ink-faint)", margin: "10px 0 0", lineHeight: "1.4" }}>
-                          {lang === "es"
-                            ? "Todos los números de esta cuenta comparten el mismo fondo de minutos mensuales e incorporados."
-                            : lang === "fr"
-                            ? "Tous les numéros de ce compte partagent le même pool de minutes mensuelles et d'options."
-                            : "All phone numbers on this account share the same pool of plan minutes and add-on minutes."}
+                          {lang === "es" ? "Todos los números de esta cuenta comparten el mismo fondo de minutos mensuales e incorporados."
+                           : lang === "fr" ? "Tous les numéros de ce compte partagent le même pool de minutes mensuelles et d'options."
+                           : lang === "ja" ? "このアカウントのすべての電話番号は、プランの無料通話分と追加の通話分の同じプールを共有します。"
+                           : lang === "zh" ? "此账户下的所有电话号码共享同一个套餐分钟数和附加分钟数池。"
+                           : lang === "ar" ? "تشترك جميع أرقام الهواتف في هذا الحساب في نفس مجموعة دقائق الباقة والدقائق الإضافية."
+                           : lang === "hi" ? "इस खाते के सभी फ़ोन नंबर प्लान मिनटों और ऐड-ऑन मिनटों के समान पूल को साझा करते हैं।"
+                           : lang === "pt" ? "Todos os números de telefone desta conta compartilham o mesmo pool de minutos do plano e minutos adicionais."
+                           : lang === "de" ? "Alle Telefonnummern dieses Kontos nutzen denselben Pool an Tarifminuten und Zusatzminuten gemeinsam."
+                           : lang === "it" ? "Tutti i numeri di telefono su questo account condividono lo stesso pool di minuti del piano e minuti aggiuntivi."
+                           : lang === "ko" ? "이 계정의 모든 전화번호는 플랜 통화 분수와 추가 통화 분수의 동일한 풀을 공유합니다."
+                           : "All phone numbers on this account share the same pool of plan minutes and add-on minutes."}
                         </p>
                       </div>
 
@@ -4308,12 +5716,32 @@ export function AccountView({
                 <button
                   className="btn btn-ghost btn-sm"
                   onClick={async () => {
-                    showToast(lang === "es" ? "Abriendo el portal de facturación…" : lang === "fr" ? "Ouverture du portail de facturation…" : "Opening billing portal…");
+                    showToast(lang === "es" ? "Abriendo el portal de facturación…"
+                      : lang === "fr" ? "Ouverture du portail de facturation…"
+                      : lang === "ja" ? "請求ポータルを開いています…"
+                      : lang === "zh" ? "正在打开账单门户…"
+                      : lang === "ar" ? "جاري فتح بوابة الفواتير…"
+                      : lang === "hi" ? "बिलिंग पोर्टल खोला जा रहा है…"
+                      : lang === "pt" ? "Abrindo portal de faturamento…"
+                      : lang === "de" ? "Kundenportal wird geöffnet…"
+                      : lang === "it" ? "Apertura del portale di fatturazione…"
+                      : lang === "ko" ? "결제 포털을 여는 중…"
+                      : "Opening billing portal…");
                     try {
                       const res = await fetch("/api/creem/portal", { method: "POST" });
                       if (!res.ok) {
                         const err = await res.json();
-                        showToast(err.error || "Could not open billing portal.");
+                        showToast(err.error || (lang === "es" ? "No se pudo abrir el portal de facturación."
+                          : lang === "fr" ? "Impossible d'ouvrir le portail de facturation."
+                          : lang === "ja" ? "請求ポータルを開くことができませんでした。"
+                          : lang === "zh" ? "无法打开账单门户。"
+                          : lang === "ar" ? "تعذر فتح بوابة الفواتير."
+                          : lang === "hi" ? "बिलिंग पोर्टल नहीं खोला जा सका।"
+                          : lang === "pt" ? "Não foi possível abrir o portal de faturamento."
+                          : lang === "de" ? "Kundenportal konnte nicht geöffnet werden."
+                          : lang === "it" ? "Impossibile aprire il portale di fatturazione."
+                          : lang === "ko" ? "결제 포털을 열 수 없습니다."
+                          : "Could not open billing portal."));
                         return;
                       }
                       const { portalUrl } = await res.json();
@@ -4322,7 +5750,17 @@ export function AccountView({
                       const top  = Math.round(window.screenY + (window.outerHeight - h) / 2);
                       window.open(portalUrl, "creem_portal", `width=${w},height=${h},left=${left},top=${top},resizable=yes,scrollbars=yes`);
                     } catch {
-                      showToast("Could not open billing portal.");
+                      showToast(lang === "es" ? "No se pudo abrir el portal de facturación."
+                        : lang === "fr" ? "Impossible d'ouvrir le portail de facturation."
+                        : lang === "ja" ? "請求ポータルを開くことができませんでした。"
+                        : lang === "zh" ? "无法打开账单门户。"
+                        : lang === "ar" ? "تعذر فتح بوابة الفواتير."
+                        : lang === "hi" ? "बिलिंग पोर्टल नहीं खोला जा सका।"
+                        : lang === "pt" ? "Não foi possível abrir o portal de faturamento."
+                        : lang === "de" ? "Kundenportal konnte nicht geöffnet werden."
+                        : lang === "it" ? "Impossibile aprire il portale di fatturazione."
+                        : lang === "ko" ? "결제 포털을 열 수 없습니다."
+                        : "Could not open billing portal.");
                     }
                   }}
                 >
@@ -5210,7 +6648,29 @@ export default function DashboardApp() {
           <div className="plan-card">
             <div className="row">
               <span className="pill">
-                {account.plan === "pro" ? "PRO PLAN" : "ESSENTIAL PLAN"}
+                {account.plan === "pro"
+                  ? (lang === "es" ? "PLAN PRO"
+                   : lang === "fr" ? "FORFAIT PRO"
+                   : lang === "ja" ? "プロプラン"
+                   : lang === "zh" ? "专业版方案"
+                   : lang === "ar" ? "باقة برو"
+                   : lang === "hi" ? "प्रो प्लान"
+                   : lang === "pt" ? "PLANO PRO"
+                   : lang === "de" ? "PRO-TARIF"
+                   : lang === "it" ? "PIANO PRO"
+                   : lang === "ko" ? "프로 플랜"
+                   : "PRO PLAN")
+                  : (lang === "es" ? "PLAN ESENCIAL"
+                   : lang === "fr" ? "FORFAIT ESSENTIEL"
+                   : lang === "ja" ? "エッセンシャルプラン"
+                   : lang === "zh" ? "基础版方案"
+                   : lang === "ar" ? "الباقة الأساسية"
+                   : lang === "hi" ? "एसेनशियल प्लान"
+                   : lang === "pt" ? "PLANO ESSENCIAL"
+                   : lang === "de" ? "ESSENTIAL-TARIF"
+                   : lang === "it" ? "PIANO ESSENZIALE"
+                   : lang === "ko" ? "에센셜 플랜"
+                   : "ESSENTIAL PLAN")}
               </span>
               <span style={{ fontSize: "0.78rem", color: "oklch(0.82 0.02 225)" }}>
                 {lines.length}/{account.plan === "pro" ? 2 + (account.addons?.extraNumbers || 0) : 1 + (account.addons?.extraNumbers || 0)} {d.common.numbers}
@@ -5245,7 +6705,7 @@ export default function DashboardApp() {
           </button>
           <div className="page-title">
             <h1>{t1}</h1>
-            <p>{LINE_SCOPED[view as keyof typeof LINE_SCOPED] ? line.label + " · " + line.person : t2}</p>
+            <p>{LINE_SCOPED[view as keyof typeof LINE_SCOPED] ? getLocalizedLineLabel(line.label, lang) + " · " + getLocalizedPersonName(line.person, lang) : t2}</p>
           </div>
           <div className="topbar-spacer"></div>
 
@@ -5284,10 +6744,10 @@ export default function DashboardApp() {
           <div className={`numswitch ${switchOpen ? "open" : ""}`}>
             <button className="numswitch-btn" onClick={() => setSwitchOpen((o) => !o)}>
               <span className="ava" style={{ background: line.color }}>
-                {initials(line.person)}
+                {initials(getLocalizedPersonName(line.person, lang))}
               </span>
               <span className="meta">
-                <b>{line.label}</b>
+                <b>{getLocalizedLineLabel(line.label, lang)}</b>
                 <span>{line.number}</span>
               </span>
               <span className="chev">
@@ -5310,10 +6770,10 @@ export default function DashboardApp() {
                       }}
                     >
                       <span className="ava" style={{ background: l.color }}>
-                        {initials(l.person)}
+                        {initials(getLocalizedPersonName(l.person, lang))}
                       </span>
                       <span className="meta">
-                        <b>{l.label}</b>
+                        <b>{getLocalizedLineLabel(l.label, lang)}</b>
                         <span>{l.number}</span>
                       </span>
                     </div>
@@ -5681,10 +7141,10 @@ export default function DashboardApp() {
           <div style={{ padding: "10px 0" }}>
             <p style={{ margin: "0 0 10px 0", fontSize: "0.95rem", color: "var(--ink)", fontWeight: 500 }}>
               {lang === "es"
-                ? `¿Está seguro de que desea eliminar la línea "${headerRemovalLine.label}" (${headerRemovalLine.number})?`
+                ? `¿Está seguro de que desea eliminar la línea "${getLocalizedLineLabel(headerRemovalLine.label, lang)}" (${headerRemovalLine.number})?`
                 : lang === "fr"
-                ? `Êtes-vous sûr de vouloir supprimer la ligne "${headerRemovalLine.label}" (${headerRemovalLine.number}) ?`
-                : `Are you sure you want to remove the phone line "${headerRemovalLine.label}" (${headerRemovalLine.number})?`}
+                ? `Êtes-vous sûr de vouloir supprimer la ligne "${getLocalizedLineLabel(headerRemovalLine.label, lang)}" (${headerRemovalLine.number}) ?`
+                : `Are you sure you want to remove the phone line "${getLocalizedLineLabel(headerRemovalLine.label, lang)}" (${headerRemovalLine.number})?`}
             </p>
             <p style={{ margin: 0, fontSize: "0.85rem", color: "oklch(0.6 0.18 22)", fontWeight: 500 }}>
               {lang === "es"

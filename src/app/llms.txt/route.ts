@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
 
 > ${t.hero.lead} ${t.footer.blurb}
 
-iCanCall is a virtual phone routing service: one dedicated, memorable phone number that rings a circle of up to six trusted contacts — in sequence (Call Cascade) or via a spoken menu — until someone answers. No hardware, no apps; works from any landline, flip phone, or smartphone. Plans: Essential ${PLAN_PRICING.essential.monthlyLabel}/mo or ${PLAN_PRICING.essential.annualLabel}/yr (1 number, 3 contacts, ${PLAN_PRICING.essential.voiceMinutes} voice minutes) and Pro ${PLAN_PRICING.pro.monthlyLabel}/mo or ${PLAN_PRICING.pro.annualLabel}/yr (2 numbers, 6 contacts, ${PLAN_PRICING.pro.voiceMinutes} minutes, scheduling, voicemail transcription). ${t.pricing.shortGuarantee}.
+iCanCall is a virtual phone routing service: one dedicated, memorable phone number that rings a circle of up to six trusted contacts — in sequence (Call Cascade), simultaneously (Simultaneous Ring), or via a spoken menu — until someone answers. No hardware, no apps; works from any landline, flip phone, or smartphone. Plans: Essential ${PLAN_PRICING.essential.monthlyLabel}/mo or ${PLAN_PRICING.essential.annualLabel}/yr (1 number, 3 contacts, ${PLAN_PRICING.essential.voiceMinutes} voice minutes) and Pro ${PLAN_PRICING.pro.monthlyLabel}/mo or ${PLAN_PRICING.pro.annualLabel}/yr (2 numbers, 6 contacts, ${PLAN_PRICING.pro.voiceMinutes} minutes, scheduling, voicemail transcription). ${t.pricing.shortGuarantee}.
 
 ## Docs
 

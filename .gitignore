@@ -42,3 +42,6 @@ next-env.d.ts
 
 # scratch DB
 scratch/db.json
+
+# Claude Code local settings (machine-local, may contain keys)
+.claude/
