@@ -5201,7 +5201,7 @@ export function AccountView({
                       annualBillingConfirmCallback.current = null;
                     }}
                   >
-                    {lang === "es" ? "Cancelar" : lang === "fr" ? "Annuler" : "Cancel"}
+                    {lang === "es" ? "Cancelar" : lang === "fr" ? "Annuler" : lang === "ja" ? "キャンセル" : lang === "zh" ? "取消" : lang === "ar" ? "إلغاء" : lang === "hi" ? "रद्द करें" : lang === "pt" ? "Cancelar" : lang === "de" ? "Abbrechen" : lang === "it" ? "Annulla" : lang === "ko" ? "취소" : "Cancel"}
                   </button>
                   <button
                     className="btn btn-primary"
@@ -5213,7 +5213,7 @@ export function AccountView({
                       }
                     }}
                   >
-                    {lang === "es" ? "Confirmar" : lang === "fr" ? "Confirmer" : "Confirm"}
+                    {lang === "es" ? "Confirmar" : lang === "fr" ? "Confirmer" : lang === "ja" ? "確認" : lang === "zh" ? "确认" : lang === "ar" ? "تأكيد" : lang === "hi" ? "पुष्टि करें" : lang === "pt" ? "Confirmar" : lang === "de" ? "Bestätigen" : lang === "it" ? "Conferma" : lang === "ko" ? "확인" : "Confirm"}
                   </button>
                 </div>
               }
@@ -5224,6 +5224,22 @@ export function AccountView({
                     ? "¿Está seguro de que desea cambiar a la facturación anual? Su método de pago registrado se cargará de inmediato."
                     : lang === "fr"
                     ? "Êtes-vous sûr de vouloir passer à la facturation annuelle ? Votre mode de paiement enregistré sera débité immédiatement."
+                    : lang === "ja"
+                    ? "年間請求に切り替えてもよろしいですか？登録済みのお支払い方法にすぐに請求されます。"
+                    : lang === "zh"
+                    ? "确定要切换为按年计费吗？将立即从您登记的付款方式中扣款。"
+                    : lang === "ar"
+                    ? "هل أنت متأكد أنك تريد التحول إلى الفوترة السنوية؟ سيتم الخصم فوراً من وسيلة الدفع المسجلة."
+                    : lang === "hi"
+                    ? "क्या आप वाकई वार्षिक बिलिंग पर स्विच करना चाहते हैं? आपकी दर्ज भुगतान विधि से तुरंत शुल्क लिया जाएगा।"
+                    : lang === "pt"
+                    ? "Tem certeza de que deseja mudar para a cobrança anual? Seu método de pagamento cadastrado será cobrado imediatamente."
+                    : lang === "de"
+                    ? "Möchten Sie wirklich zur jährlichen Abrechnung wechseln? Ihre hinterlegte Zahlungsmethode wird sofort belastet."
+                    : lang === "it"
+                    ? "Sei sicuro di voler passare alla fatturazione annuale? Il tuo metodo di pagamento registrato verrà addebitato immediatamente."
+                    : lang === "ko"
+                    ? "연간 결제로 전환하시겠습니까? 등록된 결제 수단으로 즉시 청구됩니다."
                     : "Are you sure you want to switch to annual billing? Your payment method on file will be charged immediately."}
                 </p>
                 <div style={{
@@ -5239,6 +5255,22 @@ export function AccountView({
                     ? `Monto de facturación anual: ${account.plan === "pro" ? "$249.00" : "$149.00"}/año`
                     : lang === "fr"
                     ? `Montant de la facturation annuelle : ${account.plan === "pro" ? "249,00 $" : "149,00 $"}/an`
+                    : lang === "ja"
+                    ? `年間請求額: ${account.plan === "pro" ? "$249.00" : "$149.00"}/年`
+                    : lang === "zh"
+                    ? `年度计费金额：${account.plan === "pro" ? "$249.00" : "$149.00"}/年`
+                    : lang === "ar"
+                    ? `مبلغ الفوترة السنوية: ${account.plan === "pro" ? "$249.00" : "$149.00"} سنوياً`
+                    : lang === "hi"
+                    ? `वार्षिक बिलिंग राशि: ${account.plan === "pro" ? "$249.00" : "$149.00"}/वर्ष`
+                    : lang === "pt"
+                    ? `Valor da cobrança anual: ${account.plan === "pro" ? "$249.00" : "$149.00"}/ano`
+                    : lang === "de"
+                    ? `Jährlicher Abrechnungsbetrag: ${account.plan === "pro" ? "$249.00" : "$149.00"}/Jahr`
+                    : lang === "it"
+                    ? `Importo della fatturazione annuale: ${account.plan === "pro" ? "$249.00" : "$149.00"}/anno`
+                    : lang === "ko"
+                    ? `연간 결제 금액: ${account.plan === "pro" ? "$249.00" : "$149.00"}/년`
                     : `Annual billing amount: ${account.plan === "pro" ? "$249.00" : "$149.00"}/yr`}
                 </div>
               </div>
