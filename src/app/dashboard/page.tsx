@@ -774,6 +774,56 @@ const getLocalizedRelationship = (rel: string, lang: string): string => {
   return rel;
 };
 
+const ELEVENLABS_VOICE_GROUPS: {
+  langKey: string;
+  voices: { id: string; name: string; gender: "voiceFemale" | "voiceMale"; desc: string }[];
+}[] = [
+  { langKey: "langEnglish", voices: [
+    { id: "21m00Tcm4TlvDq8ikWAM", name: "Rachel", gender: "voiceFemale", desc: "voiceDescWarm" },
+    { id: "29vD33N1CtxCmqQRPOHJ", name: "Drew", gender: "voiceMale", desc: "voiceDescProfessional" },
+  ] },
+  { langKey: "langSpanish", voices: [
+    { id: "EXAVITQu4vr4xnSDxMaL", name: "Sarah", gender: "voiceFemale", desc: "voiceDescWarmAccent" },
+    { id: "2EiwWnXF2V4j29thjbwy", name: "Clyde", gender: "voiceMale", desc: "voiceDescFriendly" },
+  ] },
+  { langKey: "langFrench", voices: [
+    { id: "21m00Tcm4TlvDq8ikWAM", name: "Rachel", gender: "voiceFemale", desc: "voiceDescSoftAccent" },
+    { id: "5Q0t7uMcgp8Aagzh1ZQQ", name: "Paul", gender: "voiceMale", desc: "voiceDescDeep" },
+  ] },
+  { langKey: "langJapanese", voices: [
+    { id: "cgSgspJ2msm6clMCxT41", name: "Jessica", gender: "voiceFemale", desc: "voiceDescWarmAccent" },
+    { id: "29vD33N1CtxCmqQRPOHJ", name: "Drew", gender: "voiceMale", desc: "voiceDescFriendly" },
+  ] },
+  { langKey: "langChinese", voices: [
+    { id: "21m00Tcm4TlvDq8ikWAM", name: "Rachel", gender: "voiceFemale", desc: "voiceDescCleanAccent" },
+    { id: "pNInz6obpgmx5142qiA7", name: "Adam", gender: "voiceMale", desc: "voiceDescNarrator" },
+  ] },
+  { langKey: "langArabic", voices: [
+    { id: "cgSgspJ2msm6clMCxT41", name: "Jessica", gender: "voiceFemale", desc: "voiceDescWarmAccent" },
+    { id: "5Q0t7uMcgp8Aagzh1ZQQ", name: "Paul", gender: "voiceMale", desc: "voiceDescDeepAccent" },
+  ] },
+  { langKey: "langHindi", voices: [
+    { id: "EXAVITQu4vr4xnSDxMaL", name: "Sarah", gender: "voiceFemale", desc: "voiceDescSoftAccent" },
+    { id: "2EiwWnXF2V4j29thjbwy", name: "Clyde", gender: "voiceMale", desc: "voiceDescFriendlyAccent" },
+  ] },
+  { langKey: "langPortuguese", voices: [
+    { id: "21m00Tcm4TlvDq8ikWAM", name: "Rachel", gender: "voiceFemale", desc: "voiceDescFriendlyAccent" },
+    { id: "nPczCjzI2devA2R17O2Y", name: "Brian", gender: "voiceMale", desc: "voiceDescDeepAccent" },
+  ] },
+  { langKey: "langGerman", voices: [
+    { id: "EXAVITQu4vr4xnSDxMaL", name: "Sarah", gender: "voiceFemale", desc: "voiceDescCleanAccent" },
+    { id: "pNInz6obpgmx5142qiA7", name: "Adam", gender: "voiceMale", desc: "voiceDescProfessional" },
+  ] },
+  { langKey: "langItalian", voices: [
+    { id: "cgSgspJ2msm6clMCxT41", name: "Jessica", gender: "voiceFemale", desc: "voiceDescWarmAccent" },
+    { id: "nPczCjzI2devA2R17O2Y", name: "Brian", gender: "voiceMale", desc: "voiceDescDeep" },
+  ] },
+  { langKey: "langKorean", voices: [
+    { id: "21m00Tcm4TlvDq8ikWAM", name: "Rachel", gender: "voiceFemale", desc: "voiceDescFriendlyAccent" },
+    { id: "29vD33N1CtxCmqQRPOHJ", name: "Drew", gender: "voiceMale", desc: "voiceDescProfessionalAccent" },
+  ] },
+];
+
 const getLocalizedLineLabel = (label: string, lang: string): string => {
   if (!label) return label;
   
@@ -2311,12 +2361,20 @@ function RoutingView({
   showToast,
   d,
   lang,
+  plan,
+  setView,
+  setAcctTab,
+  setAutoOpenPlanModal,
 }: {
   line: Line;
   setLine: React.Dispatch<React.SetStateAction<Line[]>>;
   showToast: (msg: string) => void;
   d: any;
   lang: string;
+  plan: "essential" | "pro";
+  setView: (v: string) => void;
+  setAcctTab: (t: string) => void;
+  setAutoOpenPlanModal: (open: boolean) => void;
 }) {
   const ext = dashboardExtraTranslations[lang as keyof typeof dashboardExtraTranslations] || dashboardExtraTranslations.en;
   const [localSchedule, setLocalSchedule] = useState<CoverageSlot[]>([]);
@@ -2495,6 +2553,24 @@ function RoutingView({
 
   const setMode = (mode: "cascade" | "menu" | "simultaneous" | "schedule") => {
     if (mode === line.mode) return;
+    if (plan === "essential" && mode !== "cascade") {
+      const upgradeMsg = lang === "es" ? "¡Mejora a Pro para desbloquear este modo!"
+        : lang === "fr" ? "Passez à la version Pro pour débloquer ce mode !"
+        : lang === "ja" ? "このモードを有効にするにはProプランにアップグレードしてください"
+        : lang === "zh" ? "升级到专业版以解锁此模式"
+        : lang === "ar" ? "ترقية إلى باقة برو لفتح هذا الوضع"
+        : lang === "hi" ? "इस मोड को अनलॉक करने के लिए प्रो में अपग्रेड करें"
+        : lang === "pt" ? "Atualize para o Pro para desbloquear este modo"
+        : lang === "de" ? "Upgrade auf Pro, um diesen Modus freizuschalten"
+        : lang === "it" ? "Passa a Pro per sbloccare questa modalità"
+        : lang === "ko" ? "이 모드를 잠금 해제하려면 Pro로 업그레이드하세요"
+        : "Upgrade to Pro to unlock this routing mode";
+      showToast(upgradeMsg);
+      setAcctTab("billing");
+      setAutoOpenPlanModal(true);
+      setView("account");
+      return;
+    }
     setLine((prev) => prev.map((l) => (l.id === line.id ? { ...l, mode } : l)));
     showToast(d.common.savedToast);
   };
@@ -2565,17 +2641,19 @@ function RoutingView({
               </p>
             </div>
             <div
-              className={`mode-card ${line.mode === "simultaneous" ? "sel" : ""}`}
+              className={`mode-card ${line.mode === "simultaneous" ? "sel" : ""} ${plan === "essential" ? "locked" : ""}`}
               style={{
                 cursor: "pointer",
                 padding: 20,
                 border: line.mode === "simultaneous" ? "2.5px solid var(--accent)" : "1px solid var(--line)",
                 borderRadius: "var(--r-md)",
+                opacity: plan === "essential" ? 0.75 : 1,
               }}
               onClick={() => setMode("simultaneous")}
             >
-              <div className="ic" style={{ marginBottom: 12 }}>
+              <div className="ic" style={{ marginBottom: 12, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <Icon name="spark" style={{ width: 24, height: 24 }} />
+                {plan === "essential" && <Badge kind="blue">PRO</Badge>}
               </div>
               <h4>{d.routing.simultaneous}</h4>
               <p style={{ fontSize: "0.86rem", color: "var(--ink-soft)", marginTop: 6 }}>
@@ -2583,17 +2661,19 @@ function RoutingView({
               </p>
             </div>
             <div
-              className={`mode-card ${line.mode === "menu" ? "sel" : ""}`}
+              className={`mode-card ${line.mode === "menu" ? "sel" : ""} ${plan === "essential" ? "locked" : ""}`}
               style={{
                 cursor: "pointer",
                 padding: 20,
                 border: line.mode === "menu" ? "2.5px solid var(--accent)" : "1px solid var(--line)",
                 borderRadius: "var(--r-md)",
+                opacity: plan === "essential" ? 0.75 : 1,
               }}
               onClick={() => setMode("menu")}
             >
-              <div className="ic" style={{ marginBottom: 12 }}>
+              <div className="ic" style={{ marginBottom: 12, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <Icon name="list" style={{ width: 24, height: 24 }} />
+                {plan === "essential" && <Badge kind="blue">PRO</Badge>}
               </div>
               <h4>{d.routing.callerMenu}</h4>
               <p style={{ fontSize: "0.86rem", color: "var(--ink-soft)", marginTop: 6 }}>
@@ -2601,17 +2681,19 @@ function RoutingView({
               </p>
             </div>
             <div
-              className={`mode-card ${line.mode === "schedule" ? "sel" : ""}`}
+              className={`mode-card ${line.mode === "schedule" ? "sel" : ""} ${plan === "essential" ? "locked" : ""}`}
               style={{
                 cursor: "pointer",
                 padding: 20,
                 border: line.mode === "schedule" ? "2.5px solid var(--accent)" : "1px solid var(--line)",
                 borderRadius: "var(--r-md)",
+                opacity: plan === "essential" ? 0.75 : 1,
               }}
               onClick={() => setMode("schedule")}
             >
-              <div className="ic" style={{ marginBottom: 12 }}>
+              <div className="ic" style={{ marginBottom: 12, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <Icon name="clock" style={{ width: 24, height: 24 }} />
+                {plan === "essential" && <Badge kind="blue">PRO</Badge>}
               </div>
               <h4>{d.routing.scheduleTitle}</h4>
               <p style={{ fontSize: "0.86rem", color: "var(--ink-soft)", marginTop: 6 }}>
@@ -3231,7 +3313,7 @@ function SettingsView({
 
   const generateGreetingVoice = async () => {
     if (!greeting.trim()) {
-      alert("Please enter a greeting text first.");
+      alert(ext.enterGreetingFirst);
       return;
     }
     setIsGenerating(true);
@@ -3251,14 +3333,14 @@ function SettingsView({
         const data = await response.json();
         set({ greetingAudioPath: data.filePath });
         setPreviewUrl(data.audioUrl);
-        showToast("ElevenLabs AI voice greeting generated successfully!");
+        showToast(ext.voiceGeneratedToast);
       } else {
         const err = await response.json();
-        showToast(`ElevenLabs AI voice generation failed: ${err.error || 'Server error'}`);
+        showToast(ext.voiceGenerateFailedToast.replace("{error}", err.error || 'Server error'));
       }
     } catch (err) {
       console.error(err);
-      showToast("Network error generating ElevenLabs AI voice.");
+      showToast(ext.voiceNetworkErrorToast);
     } finally {
       setIsGenerating(false);
     }
@@ -3304,7 +3386,7 @@ function SettingsView({
                 style={{ padding: '6px 12px', borderRadius: 4, cursor: 'pointer' }}
                 type="button"
               >
-                {isGenerating ? "✨ Generating..." : "🤖 Generate ElevenLabs AI Voice"}
+                {isGenerating ? ext.generatingVoice : ext.generateAiVoice}
               </button>
 
               {previewUrl && (
@@ -3315,15 +3397,15 @@ function SettingsView({
 
               {s.greetingAudioPath && !previewUrl && (
                 <span style={{ fontSize: '0.82rem', color: 'oklch(0.55 0.18 140)', fontWeight: 600 }}>
-                  ElevenLabs AI Voice Active
+                  {ext.aiVoiceActive}
                 </span>
               )}
             </div>
           </div>
           <div className="set-row" style={{ borderBottom: '1px solid var(--line-faint)' }}>
             <div className="txt">
-              <b>ElevenLabs AI Voice</b>
-              <p>Choose the voice used for all system prompts and generated greetings.</p>
+              <b>{ext.elevenLabsTitle}</b>
+              <p>{ext.elevenLabsDesc}</p>
             </div>
             <select
               value={s.voiceId || "21m00Tcm4TlvDq8ikWAM"}
@@ -3338,50 +3420,15 @@ function SettingsView({
                 color: 'var(--ink)'
               }}
             >
-              <optgroup label="English">
-                <option value="21m00Tcm4TlvDq8ikWAM">Rachel (Female, Warm)</option>
-                <option value="29vD33N1CtxCmqQRPOHJ">Drew (Male, Professional)</option>
-              </optgroup>
-              <optgroup label="Spanish (Español)">
-                <option value="EXAVITQu4vr4xnSDxMaL">Sarah (Female, Warm Accent)</option>
-                <option value="2EiwWnXF2V4j29thjbwy">Clyde (Male, Friendly)</option>
-              </optgroup>
-              <optgroup label="French (Français)">
-                <option value="21m00Tcm4TlvDq8ikWAM">Rachel (Female, Soft Accent)</option>
-                <option value="5Q0t7uMcgp8Aagzh1ZQQ">Paul (Male, Deep)</option>
-              </optgroup>
-              <optgroup label="Japanese (日本語)">
-                <option value="cgSgspJ2msm6clMCxT41">Jessica (Female, Warm Accent)</option>
-                <option value="29vD33N1CtxCmqQRPOHJ">Drew (Male, Friendly)</option>
-              </optgroup>
-              <optgroup label="Chinese (中文)">
-                <option value="21m00Tcm4TlvDq8ikWAM">Rachel (Female, Clean Accent)</option>
-                <option value="pNInz6obpgmx5142qiA7">Adam (Male, Narrator)</option>
-              </optgroup>
-              <optgroup label="Arabic (العربية)">
-                <option value="cgSgspJ2msm6clMCxT41">Jessica (Female, Warm Accent)</option>
-                <option value="5Q0t7uMcgp8Aagzh1ZQQ">Paul (Male, Deep Accent)</option>
-              </optgroup>
-              <optgroup label="Hindi (हिन्दी)">
-                <option value="EXAVITQu4vr4xnSDxMaL">Sarah (Female, Soft Accent)</option>
-                <option value="2EiwWnXF2V4j29thjbwy">Clyde (Male, Friendly Accent)</option>
-              </optgroup>
-              <optgroup label="Portuguese (Português)">
-                <option value="21m00Tcm4TlvDq8ikWAM">Rachel (Female, Friendly Accent)</option>
-                <option value="nPczCjzI2devA2R17O2Y">Brian (Male, Deep Accent)</option>
-              </optgroup>
-              <optgroup label="German (Deutsch)">
-                <option value="EXAVITQu4vr4xnSDxMaL">Sarah (Female, Clean Accent)</option>
-                <option value="pNInz6obpgmx5142qiA7">Adam (Male, Professional)</option>
-              </optgroup>
-              <optgroup label="Italian (Italiano)">
-                <option value="cgSgspJ2msm6clMCxT41">Jessica (Female, Warm Accent)</option>
-                <option value="nPczCjzI2devA2R17O2Y">Brian (Male, Deep)</option>
-              </optgroup>
-              <optgroup label="Korean (한국어)">
-                <option value="21m00Tcm4TlvDq8ikWAM">Rachel (Female, Friendly Accent)</option>
-                <option value="29vD33N1CtxCmqQRPOHJ">Drew (Male, Professional Accent)</option>
-              </optgroup>
+              {ELEVENLABS_VOICE_GROUPS.map((g) => (
+                <optgroup key={g.langKey} label={ext[g.langKey]}>
+                  {g.voices.map((v) => (
+                    <option key={`${g.langKey}-${v.id}`} value={v.id}>
+                      {v.name} ({ext[v.gender]}, {ext[v.desc]})
+                    </option>
+                  ))}
+                </optgroup>
+              ))}
             </select>
           </div>
           <div className="set-row" style={{ paddingTop: 4 }}>
@@ -3520,6 +3567,8 @@ export function AccountView({
   lang,
   lines,
   setLines,
+  autoOpenPlanModal,
+  setAutoOpenPlanModal,
 }: {
   account: Account;
   setAccount: React.Dispatch<React.SetStateAction<Account>>;
@@ -3530,6 +3579,8 @@ export function AccountView({
   lang: string;
   lines: Line[];
   setLines: React.Dispatch<React.SetStateAction<Line[]>>;
+  autoOpenPlanModal: boolean;
+  setAutoOpenPlanModal: (open: boolean) => void;
 }) {
   const ext = dashboardExtraTranslations[lang as keyof typeof dashboardExtraTranslations] || dashboardExtraTranslations.en;
   const a = account;
@@ -3552,6 +3603,13 @@ export function AccountView({
       setSelectedLineToKeep(lines[0].id);
     }
   }, [planModalOpen, lines]);
+
+  useEffect(() => {
+    if (autoOpenPlanModal && tab === "billing") {
+      setPlanModalOpen(true);
+      setAutoOpenPlanModal(false);
+    }
+  }, [autoOpenPlanModal, tab, setAutoOpenPlanModal]);
 
   // Upgrade to Pro number selection state
   const [upgradeAreaCode, setUpgradeAreaCode] = useState("415");
@@ -5908,9 +5966,15 @@ export function AccountView({
                     </div>
                     <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
                       <span className="amt">{amt}</span>
-                      <button className="btn btn-soft btn-sm" onClick={() => showToast(ext.downloadReceiptToast)}>
+                      <a
+                        className="btn btn-soft btn-sm"
+                        href={`/api/caregiver/receipt?date=${encodeURIComponent(dVal)}&desc=${encodeURIComponent(localizedDesc)}&amount=${encodeURIComponent(amt)}&last4=${encodeURIComponent(a.card.last4)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{ display: "inline-flex", alignItems: "center", gap: 6, textDecoration: "none" }}
+                      >
                         <Icon name="download" /> {ext.receipt}
-                      </button>
+                      </a>
                     </div>
                   </div>
                 );
@@ -6267,6 +6331,7 @@ export default function DashboardApp() {
 
   const [impersonatingUser, setImpersonatingUser] = useState<{ email: string; name: string } | null>(null);
   const [acctTab, setAcctTab] = useState("profile");
+  const [autoOpenPlanModal, setAutoOpenPlanModal] = useState(false);
   const [account, setAccount] = useState<Account>({
     name: "Maria Delgado",
     preferred: "Maria",
@@ -6992,7 +7057,17 @@ export default function DashboardApp() {
             <ContactsView line={line} setLine={setLines} showToast={showToast} d={d} lang={lang} plan={account.plan} />
           )}
           {view === "routing" && (
-            <RoutingView line={line} setLine={setLines} showToast={showToast} d={d} lang={lang} />
+            <RoutingView
+              line={line}
+              setLine={setLines}
+              showToast={showToast}
+              d={d}
+              lang={lang}
+              plan={account.plan}
+              setView={go}
+              setAcctTab={setAcctTab}
+              setAutoOpenPlanModal={setAutoOpenPlanModal}
+            />
           )}
           {view === "log" && <CallLogView line={line} log={log} d={d} lang={lang} />}
           {view === "settings" && (
@@ -7016,6 +7091,8 @@ export default function DashboardApp() {
               lang={lang}
               lines={lines}
               setLines={setLines}
+              autoOpenPlanModal={autoOpenPlanModal}
+              setAutoOpenPlanModal={setAutoOpenPlanModal}
             />
           )}
         </div>
