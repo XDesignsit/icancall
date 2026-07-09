@@ -69,12 +69,12 @@ const PLANS = [
 const planById = (id: Plan) => PLANS.find((p) => p.id === id) || PLANS[0];
 
 const AREA_SUGGESTIONS = [
-  { code: "415", city: "San Francisco" },
-  { code: "212", city: "New York" },
-  { code: "312", city: "Chicago" },
-  { code: "305", city: "Miami" },
-  { code: "206", city: "Seattle" },
-  { code: "617", city: "Boston" },
+  { code: "470", city: "Atlanta" },
+  { code: "872", city: "Chicago" },
+  { code: "945", city: "Dallas" },
+  { code: "629", city: "Nashville" },
+  { code: "689", city: "Orlando" },
+  { code: "984", city: "Raleigh" },
   { code: "787", city: "Puerto Rico" },
 ];
 
@@ -137,16 +137,20 @@ function fetchNumbers(areaCode: string, count = 6): NumberData[] {
   return out;
 }
 
-// Fetches real available numbers from Twilio, falling back to the mock
-// generator when the API is unconfigured, errors, or returns nothing.
+// Fetches real available numbers from Twilio. Falls back to the mock
+// generator only when Twilio is unconfigured (local dev); when Twilio is
+// live, an out-of-stock area code returns an empty list so the UI can show
+// its "no numbers found" state instead of fake numbers.
 async function fetchNumbersLive(areaCode: string, count = 6): Promise<NumberData[]> {
-  const ac = areaCode.replace(/\D/g, "").slice(0, 3) || "415";
+  const ac = areaCode.replace(/\D/g, "").slice(0, 3) || "470";
   try {
     const res = await fetch(`/api/twilio/numbers?areaCode=${ac}`);
     if (res.ok) {
       const data = await res.json();
-      if (data?.success && Array.isArray(data.results) && data.results.length) {
-        return data.results.slice(0, count).map((n: any) => ({
+      if (data?.success) {
+        if (data.configured === false) return fetchNumbers(ac, count);
+        const results = Array.isArray(data.results) ? data.results : [];
+        return results.slice(0, count).map((n: any) => ({
           id: n.phoneNumber,
           number: n.friendlyName || n.phoneNumber,
           area: ac,
@@ -155,9 +159,9 @@ async function fetchNumbersLive(areaCode: string, count = 6): Promise<NumberData
       }
     }
   } catch {
-    // fall through to mock
+    // network/API failure: show the empty state rather than fake numbers
   }
-  return fetchNumbers(ac, count);
+  return [];
 }
 
 const initials = (name: string) =>
@@ -1029,7 +1033,7 @@ function AccountStep({ data, set, onNext, onBack, t, lang }: { data: OnboardingD
 function NumberStep({ data, set, onNext, onBack, t, lang }: { data: OnboardingData; set: (patch: Partial<OnboardingData>) => void; onNext: () => void; onBack: () => void; t: any; lang: string }) {
   const need = planById(data.plan).numbers;
   const selected = data.numbers;
-  const [area, setArea] = useState("415");
+  const [area, setArea] = useState("470");
   const [results, setResults] = useState<NumberData[]>([]);
   const [loading, setLoading] = useState(true);
   const [spin, setSpin] = useState(false);
@@ -1100,7 +1104,7 @@ function NumberStep({ data, set, onNext, onBack, t, lang }: { data: OnboardingDa
       <div className="search-bar">
         <div className="area-wrap">
           <span className="prefix">{t.onboarding.labelAreaCode}</span>
-          <input className="input" inputMode="numeric" maxLength={3} placeholder="415"
+          <input className="input" inputMode="numeric" maxLength={3} placeholder="470"
             value={area}
             onChange={(e) => setArea(e.target.value.replace(/\D/g, "").slice(0, 3))}
             onKeyDown={(e) => e.key === "Enter" && search()} />
@@ -1116,6 +1120,12 @@ function NumberStep({ data, set, onNext, onBack, t, lang }: { data: OnboardingDa
           </button>
         ))}
       </div>
+
+      {!loading && (results[0]?.area === "787" || results[0]?.area === "939") && (
+        <div className="num-need" style={{ background: "rgba(217, 119, 6, 0.07)", borderColor: "rgba(217, 119, 6, 0.35)", color: "#92400e", marginTop: 12 }}>
+          <span>{t.onboarding.prRateNotice}</span>
+        </div>
+      )}
 
       <div className="results-head">
         <span className="rh-title">Available in <b>({area || "—"})</b></span>

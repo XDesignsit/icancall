@@ -313,6 +313,7 @@ const t: HomepageTranslations = {
   "metaLocal": "일반 번호",
   "metaMemorable": "기억하기 쉬운 번호",
   "errNoNumbers": "해당 지역 번호의 발급 가능한 번호가 없습니다. 다른 번호로 검색해 주세요.",
+  "prRateNotice": "이 번호들은 푸에르토리코 전화번호입니다. 통화 요금이 미국 본토 번호보다 높을 수 있습니다.",
   "checkoutSecure": "안전 결제",
   "checkoutSecuring": "안전한 결제 회선을 구성 중입니다...",
   "step4Eyebrow": "4단계 / 4단계 · 확인",

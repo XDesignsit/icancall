@@ -186,6 +186,7 @@ export interface HomepageTranslations {
     metaLocal: string;
     metaMemorable: string;
     errNoNumbers: string;
+    prRateNotice: string;
     checkoutSecure: string;
     checkoutSecuring: string;
     step4Eyebrow: string;
@@ -657,6 +658,7 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "metaLocal": "Local number",
     "metaMemorable": "Memorable",
     "errNoNumbers": "No numbers found for that area code. Try another.",
+    "prRateNotice": "These are Puerto Rico phone numbers. Calling rates may be higher than mainland US numbers.",
     "checkoutSecure": "Secure Payment",
     "checkoutSecuring": "Securing payment channel...",
     "step4Eyebrow": "Step 4 of 4 · Confirm",
@@ -1000,6 +1002,7 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "metaLocal": "Número local",
     "metaMemorable": "Memorable",
     "errNoNumbers": "No se encontraron números para ese código de área. Pruebe otro.",
+    "prRateNotice": "Estos son números de teléfono de Puerto Rico. Las tarifas de llamada pueden ser más altas que las de números del territorio continental de EE. UU.",
     "checkoutSecure": "Pago Seguro",
     "checkoutSecuring": "Asegurando el canal de pago...",
     "step4Eyebrow": "Paso 4 de 4 · Confirmar",
@@ -1343,6 +1346,7 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "metaLocal": "Numéro local",
     "metaMemorable": "Mémorable",
     "errNoNumbers": "Aucun numéro trouvé pour cet indicatif. Essayez un autre.",
+    "prRateNotice": "Ce sont des numéros de téléphone de Porto Rico. Les tarifs d'appel peuvent être plus élevés que ceux des numéros des États-Unis continentaux.",
     "checkoutSecure": "Paiement Sécurisé",
     "checkoutSecuring": "Sécurisation du canal de paiement...",
     "step4Eyebrow": "Étape 4 sur 4 · Confirmer",
@@ -1686,6 +1690,7 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "metaLocal": "通常の番号",
     "metaMemorable": "覚えやすい番号",
     "errNoNumbers": "該当エリアの番号が見つかりませんでした。別の番号で検索してください。",
+    "prRateNotice": "これらはプエルトリコの電話番号です。通話料金が米国本土の番号より高くなる場合があります。",
     "checkoutSecure": "安全なお支払い",
     "checkoutSecuring": "決済用の通信接続を確立しています...",
     "step4Eyebrow": "ステップ 4 / 4 · 確認",
@@ -2029,6 +2034,7 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "metaLocal": "普通号码",
     "metaMemorable": "好记的号码",
     "errNoNumbers": "该区号下未找到可用号码。请尝试其他区号。",
+    "prRateNotice": "这些是波多黎各电话号码。通话费率可能高于美国本土号码。",
     "checkoutSecure": "安全支付",
     "checkoutSecuring": "正在建立安全支付通道...",
     "step4Eyebrow": "步骤 4 / 4 · 确认",
@@ -2372,6 +2378,7 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "metaLocal": "رقم محلي",
     "metaMemorable": "رقم مميز",
     "errNoNumbers": "لم يتم العثور على أرقام لرمز المنطقة هذا. جرب رمزًا آخر.",
+    "prRateNotice": "هذه أرقام هواتف من بورتوريكو. قد تكون أسعار المكالمات أعلى من أسعار أرقام الولايات المتحدة القارية.",
     "checkoutSecure": "دفع آمن",
     "checkoutSecuring": "جاري تأمين قناة الدفع...",
     "step4Eyebrow": "الخطوة 4 من 4 · تأكيد",
@@ -2715,6 +2722,7 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "metaLocal": "स्थानीय नंबर",
     "metaMemorable": "यादगार",
     "errNoNumbers": "उस एरिया कोड के लिए कोई नंबर नहीं मिले। दूसरा प्रयास करें।",
+    "prRateNotice": "ये प्यूर्टो रिको के फ़ोन नंबर हैं। कॉल दरें अमेरिकी मुख्य भूमि के नंबरों की तुलना में अधिक हो सकती हैं।",
     "checkoutSecure": "सुरक्षित भुगतान",
     "checkoutSecuring": "भुगतान चैनल सुरक्षित किया जा रहा है...",
     "step4Eyebrow": "चरण 4 / 4 · पुष्टि करें",
@@ -3058,6 +3066,7 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "metaLocal": "Número local",
     "metaMemorable": "Memorável",
     "errNoNumbers": "Nenhum número encontrado para esse código de área. Tente outro.",
+    "prRateNotice": "Estes são números de telefone de Porto Rico. As tarifas de chamada podem ser mais altas do que as de números dos EUA continentais.",
     "checkoutSecure": "Pagamento Seguro",
     "checkoutSecuring": "A ligar ao canal de pagamento seguro...",
     "step4Eyebrow": "Passo 4 de 4 · Confirmar",
@@ -3401,6 +3410,7 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "metaLocal": "Lokale Rufnummer",
     "metaMemorable": "Einprägsam",
     "errNoNumbers": "Keine Nummern für diese Vorwahl gefunden. Versuchen Sie eine andere.",
+    "prRateNotice": "Dies sind Telefonnummern aus Puerto Rico. Die Anrufkosten können höher sein als bei Nummern auf dem US-Festland.",
     "checkoutSecure": "Sichere Zahlung",
     "checkoutSecuring": "Sichere Verbindung zum Zahlungskanal wird hergestellt...",
     "step4Eyebrow": "Schritt 4 von 4 · Bestätigen",
@@ -3744,6 +3754,7 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "metaLocal": "Numero locale",
     "metaMemorable": "Facile da ricordare",
     "errNoNumbers": "Nessun numero trovato per questo prefisso. Provane un altro.",
+    "prRateNotice": "Questi sono numeri di telefono di Porto Rico. Le tariffe delle chiamate potrebbero essere più alte rispetto ai numeri degli Stati Uniti continentali.",
     "checkoutSecure": "Pagamento Sicuro",
     "checkoutSecuring": "Connessione al canale di pagamento sicuro...",
     "step4Eyebrow": "Passo 4 di 4 · Conferma",
@@ -4087,6 +4098,7 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "metaLocal": "일반 번호",
     "metaMemorable": "기억하기 쉬운 번호",
     "errNoNumbers": "해당 지역 번호의 발급 가능한 번호가 없습니다. 다른 번호로 검색해 주세요.",
+    "prRateNotice": "이 번호들은 푸에르토리코 전화번호입니다. 통화 요금이 미국 본토 번호보다 높을 수 있습니다.",
     "checkoutSecure": "안전 결제",
     "checkoutSecuring": "안전한 결제 회선을 구성 중입니다...",
     "step4Eyebrow": "4단계 / 4단계 · 확인",

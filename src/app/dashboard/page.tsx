@@ -3,6 +3,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { dashboardTranslations } from "@/lib/dashboardTranslations";
 import { dashboardExtraTranslations } from "@/lib/dashboardExtraTranslations";
+import { stateForAreaCode } from "@/lib/areaCodeStates";
 
 /* ============ DEMO DATA & HELPERS ============ */
 const AVATAR_COLORS = [
@@ -3612,7 +3613,7 @@ export function AccountView({
   }, [autoOpenPlanModal, tab, setAutoOpenPlanModal]);
 
   // Upgrade to Pro number selection state
-  const [upgradeAreaCode, setUpgradeAreaCode] = useState("415");
+  const [upgradeAreaCode, setUpgradeAreaCode] = useState("470");
   const [upgradeNumbersList, setUpgradeNumbersList] = useState<any[]>([]);
   const [upgradeSelectedNumber, setUpgradeSelectedNumber] = useState<any | null>(null);
   const [isSearchingNumbers, setIsSearchingNumbers] = useState(false);
@@ -4510,6 +4511,7 @@ export function AccountView({
                             color: "var(--ink)"
                           }}
                         />
+                        {upgradeAreaCode.length === 3 && <AreaFlag areaCode={upgradeAreaCode} height={15} showAbbr />}
                       </div>
                       <button
                         className="btn btn-ghost"
@@ -4551,6 +4553,11 @@ export function AccountView({
                       </div>
                     ) : upgradeNumbersList.length > 0 ? (
                       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, maxHeight: 160, overflowY: "auto", padding: 2 }}>
+                        {(upgradeNumbersList[0]?.area === "787" || upgradeNumbersList[0]?.area === "939") && (
+                          <div style={{ gridColumn: "1 / -1", fontSize: "0.8rem", color: "#92400e", background: "rgba(217, 119, 6, 0.07)", border: "1px solid rgba(217, 119, 6, 0.35)", borderRadius: "var(--r-md)", padding: "8px 12px" }}>
+                            {lang === "es" ? "Estos son números de Puerto Rico. Las tarifas de llamada pueden ser más altas que las de números del territorio continental de EE. UU." : lang === "fr" ? "Ce sont des numéros de Porto Rico. Les tarifs d'appel peuvent être plus élevés que ceux des numéros des États-Unis continentaux." : "These are Puerto Rico phone numbers. Calling rates may be higher than mainland US numbers."}
+                          </div>
+                        )}
                         {upgradeNumbersList.map((n) => {
                           const isSelected = upgradeSelectedNumber?.number === n.number;
                           return (
@@ -4571,7 +4578,10 @@ export function AccountView({
                                 gap: 2
                               }}
                             >
-                              <span style={{ fontSize: "0.9rem", fontWeight: 700, color: "var(--ink)" }}>{n.number}</span>
+                              <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                                <AreaFlag areaCode={n.area} />
+                                <span style={{ fontSize: "0.9rem", fontWeight: 700, color: "var(--ink)" }}>{n.number}</span>
+                              </span>
                               <span style={{ fontSize: "0.72rem", color: isSelected ? "var(--blue)" : "var(--ink-faint)" }}>
                                 {n.memorable || (lang === "es" ? "Número local" : lang === "fr" ? "Numéro local" : "Local number")}
                               </span>
@@ -4964,6 +4974,7 @@ export function AccountView({
                               color: "var(--ink)"
                             }}
                           />
+                          {config.areaCode.length === 3 && <AreaFlag areaCode={config.areaCode} height={15} showAbbr />}
                         </div>
                         <button
                           className="btn btn-ghost"
@@ -5008,6 +5019,11 @@ export function AccountView({
                         </div>
                       ) : config.numbersList && config.numbersList.length > 0 ? (
                         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, maxHeight: 160, overflowY: "auto", padding: 2 }}>
+                          {(config.numbersList[0]?.area === "787" || config.numbersList[0]?.area === "939") && (
+                            <div style={{ gridColumn: "1 / -1", fontSize: "0.8rem", color: "#92400e", background: "rgba(217, 119, 6, 0.07)", border: "1px solid rgba(217, 119, 6, 0.35)", borderRadius: "var(--r-md)", padding: "8px 12px" }}>
+                              {lang === "es" ? "Estos son números de Puerto Rico. Las tarifas de llamada pueden ser más altas que las de números del territorio continental de EE. UU." : lang === "fr" ? "Ce sont des numéros de Porto Rico. Les tarifs d'appel peuvent être plus élevés que ceux des numéros des États-Unis continentaux." : "These are Puerto Rico phone numbers. Calling rates may be higher than mainland US numbers."}
+                            </div>
+                          )}
                           {config.numbersList.map((n) => {
                             const isSelected = config.selectedNumber?.number === n.number;
                             return (
@@ -5028,7 +5044,10 @@ export function AccountView({
                                   gap: 2
                                 }}
                               >
-                                <span style={{ fontSize: "0.9rem", fontWeight: 700, color: "var(--ink)" }}>{n.number}</span>
+                                <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                                  <AreaFlag areaCode={n.area} />
+                                  <span style={{ fontSize: "0.9rem", fontWeight: 700, color: "var(--ink)" }}>{n.number}</span>
+                                </span>
                                 <span style={{ fontSize: "0.72rem", color: isSelected ? "var(--blue)" : "var(--ink-faint)" }}>
                                   {n.memorable || (lang === "es" ? "Número local" : lang === "fr" ? "Numéro local" : "Local number")}
                                 </span>
@@ -5561,13 +5580,13 @@ export function AccountView({
                   // Initialize configuration slots for the newly added numbers
                   const initialConfig: AddonNumberSlotConfig[] = Array.from({ length: delta }).map((_, idx) => ({
                     index: idx,
-                    areaCode: "415",
+                    areaCode: "470",
                     numbersList: [],
                     selectedNumber: null,
                     isSearching: true,
                   }));
                   setAddedNumbersConfig(initialConfig);
-                  initialConfig.forEach((c) => loadAddonNumberSlot(c.index, "415"));
+                  initialConfig.forEach((c) => loadAddonNumberSlot(c.index, "470"));
                 } else {
                   setAddedNumbersConfig([]);
                 }
@@ -6460,7 +6479,7 @@ export default function DashboardApp() {
 
   // Header Add-on configuration states
   const [headerAddonModalOpen, setHeaderAddonModalOpen] = useState(false);
-  const [headerAreaCode, setHeaderAreaCode] = useState("415");
+  const [headerAreaCode, setHeaderAreaCode] = useState("470");
   const [headerNumbersList, setHeaderNumbersList] = useState<any[]>([]);
   const [headerSelectedNumber, setHeaderSelectedNumber] = useState<any | null>(null);
   const [headerIsSearching, setHeaderIsSearching] = useState(false);
@@ -7229,7 +7248,7 @@ export default function DashboardApp() {
               })()}
 
               {/* Area Code Search */}
-              <div style={{ display: "flex", gap: 10, marginBottom: 16 }}>
+              <div style={{ display: "flex", gap: 10, marginBottom: 16, alignItems: "center" }}>
                 <input
                   type="text"
                   maxLength={3}
@@ -7245,6 +7264,7 @@ export default function DashboardApp() {
                   className="input"
                   style={{ width: 120, height: 38, padding: "0 12px", border: "1px solid var(--border)", borderRadius: "var(--r-md)", background: "var(--bg)", color: "var(--ink)" }}
                 />
+                {headerAreaCode.length === 3 && <AreaFlag areaCode={headerAreaCode} height={15} showAbbr />}
                 <button
                   className="btn btn-ghost"
                   disabled={headerAreaCode.length !== 3 || headerIsSearching}
@@ -7266,6 +7286,11 @@ export default function DashboardApp() {
                 </div>
               ) : headerNumbersList.length > 0 ? (
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 10 }}>
+                  {(headerNumbersList[0]?.area === "787" || headerNumbersList[0]?.area === "939") && (
+                    <div style={{ gridColumn: "1 / -1", fontSize: "0.8rem", color: "#92400e", background: "rgba(217, 119, 6, 0.07)", border: "1px solid rgba(217, 119, 6, 0.35)", borderRadius: "var(--r-md)", padding: "8px 12px" }}>
+                      {lang === "es" ? "Estos son números de Puerto Rico. Las tarifas de llamada pueden ser más altas que las de números del territorio continental de EE. UU." : lang === "fr" ? "Ce sont des numéros de Porto Rico. Les tarifs d'appel peuvent être plus élevés que ceux des numéros des États-Unis continentaux." : "These are Puerto Rico phone numbers. Calling rates may be higher than mainland US numbers."}
+                    </div>
+                  )}
                   {headerNumbersList.map((num) => {
                     const isSelected = headerSelectedNumber?.number === num.number;
                     return (
@@ -7286,7 +7311,10 @@ export default function DashboardApp() {
                           gap: 4,
                         }}
                       >
-                        <span style={{ fontWeight: 600, fontSize: "0.9rem", color: "var(--ink)" }}>{num.number}</span>
+                        <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                          <AreaFlag areaCode={num.area} />
+                          <span style={{ fontWeight: 600, fontSize: "0.9rem", color: "var(--ink)" }}>{num.number}</span>
+                        </span>
                         {num.memorable ? (
                           <span style={{ fontSize: "0.72rem", color: isSelected ? "var(--blue)" : "var(--ink-faint)" }}>
                             {num.memorable}
@@ -7380,13 +7408,39 @@ export default function DashboardApp() {
   );
 }
 
+function AreaFlag({ areaCode, height = 13, showAbbr = false }: { areaCode: string; height?: number; showAbbr?: boolean }) {
+  const region = stateForAreaCode(areaCode);
+  if (!region) return null;
+  return (
+    <span title={region.name} style={{ display: "inline-flex", alignItems: "center", gap: 5, flexShrink: 0 }}>
+      <img
+        src={`https://flagcdn.com/${region.flag}.svg`}
+        alt={region.name}
+        loading="lazy"
+        onError={(e) => { e.currentTarget.parentElement!.style.display = "none"; }}
+        style={{
+          height,
+          width: Math.round(height * 1.5),
+          objectFit: "cover",
+          borderRadius: 2,
+          border: "1px solid var(--line)",
+          display: "block"
+        }}
+      />
+      {showAbbr && (
+        <span style={{ fontSize: "0.76rem", fontWeight: 600, color: "var(--ink-faint)" }}>{region.abbr}</span>
+      )}
+    </span>
+  );
+}
+
 const AREA_SUGGESTIONS = [
-  { code: "415", city: "San Francisco" },
-  { code: "212", city: "New York" },
-  { code: "312", city: "Chicago" },
-  { code: "305", city: "Miami" },
-  { code: "206", city: "Seattle" },
-  { code: "617", city: "Boston" },
+  { code: "470", city: "Atlanta" },
+  { code: "872", city: "Chicago" },
+  { code: "945", city: "Dallas" },
+  { code: "629", city: "Nashville" },
+  { code: "689", city: "Orlando" },
+  { code: "984", city: "Raleigh" },
   { code: "787", city: "Puerto Rico" },
 ];
 
@@ -7449,16 +7503,20 @@ function fetchNumbers(areaCode: string, count = 6) {
   return out;
 }
 
-// Fetches real available numbers from Twilio, falling back to the mock
-// generator when the API is unconfigured, errors, or returns nothing.
+// Fetches real available numbers from Twilio. Falls back to the mock
+// generator only when Twilio is unconfigured (local dev); when Twilio is
+// live, an out-of-stock area code returns an empty list so the UI can show
+// its "no numbers found" state instead of fake numbers.
 async function fetchNumbersLive(areaCode: string, count = 6): Promise<{ id: string; number: string; area: string; memorable: string | null }[]> {
-  const ac = areaCode.replace(/\D/g, "").slice(0, 3) || "415";
+  const ac = areaCode.replace(/\D/g, "").slice(0, 3) || "470";
   try {
     const res = await fetch(`/api/twilio/numbers?areaCode=${ac}`);
     if (res.ok) {
       const data = await res.json();
-      if (data?.success && Array.isArray(data.results) && data.results.length) {
-        return data.results.slice(0, count).map((n: any) => ({
+      if (data?.success) {
+        if (data.configured === false) return fetchNumbers(ac, count);
+        const results = Array.isArray(data.results) ? data.results : [];
+        return results.slice(0, count).map((n: any) => ({
           id: n.phoneNumber,
           number: n.friendlyName || n.phoneNumber,
           area: ac,
@@ -7467,8 +7525,8 @@ async function fetchNumbersLive(areaCode: string, count = 6): Promise<{ id: stri
       }
     }
   } catch {
-    // fall through to mock
+    // network/API failure: show the empty state rather than fake numbers
   }
-  return fetchNumbers(ac, count);
+  return [];
 }
 

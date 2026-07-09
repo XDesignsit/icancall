@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { searchAvailableNumbers } from '@/lib/twilio';
+import { searchAvailableNumbers, isTwilioConfigured } from '@/lib/twilio';
 
 export async function GET(request: Request) {
   try {
@@ -14,6 +14,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json({
       success: true,
+      configured: isTwilioConfigured(),
       areaCode,
       results: availableNumbers,
     });

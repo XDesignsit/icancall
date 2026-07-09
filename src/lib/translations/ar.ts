@@ -313,6 +313,7 @@ const t: HomepageTranslations = {
   "metaLocal": "رقم محلي",
   "metaMemorable": "رقم مميز",
   "errNoNumbers": "لم يتم العثور على أرقام لرمز المنطقة هذا. جرب رمزًا آخر.",
+  "prRateNotice": "هذه أرقام هواتف من بورتوريكو. قد تكون أسعار المكالمات أعلى من أسعار أرقام الولايات المتحدة القارية.",
   "checkoutSecure": "دفع آمن",
   "checkoutSecuring": "جاري تأمين قناة الدفع...",
   "step4Eyebrow": "الخطوة 4 من 4 · تأكيد",
