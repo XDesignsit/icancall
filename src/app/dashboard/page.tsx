@@ -3,6 +3,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { dashboardTranslations } from "@/lib/dashboardTranslations";
 import { dashboardExtraTranslations } from "@/lib/dashboardExtraTranslations";
+import { stateForAreaCode } from "@/lib/areaCodeStates";
 
 /* ============ DEMO DATA & HELPERS ============ */
 const AVATAR_COLORS = [
@@ -4510,6 +4511,7 @@ export function AccountView({
                             color: "var(--ink)"
                           }}
                         />
+                        {upgradeAreaCode.length === 3 && <AreaFlag areaCode={upgradeAreaCode} height={15} showAbbr />}
                       </div>
                       <button
                         className="btn btn-ghost"
@@ -4576,7 +4578,10 @@ export function AccountView({
                                 gap: 2
                               }}
                             >
-                              <span style={{ fontSize: "0.9rem", fontWeight: 700, color: "var(--ink)" }}>{n.number}</span>
+                              <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                                <AreaFlag areaCode={n.area} />
+                                <span style={{ fontSize: "0.9rem", fontWeight: 700, color: "var(--ink)" }}>{n.number}</span>
+                              </span>
                               <span style={{ fontSize: "0.72rem", color: isSelected ? "var(--blue)" : "var(--ink-faint)" }}>
                                 {n.memorable || (lang === "es" ? "Número local" : lang === "fr" ? "Numéro local" : "Local number")}
                               </span>
@@ -4969,6 +4974,7 @@ export function AccountView({
                               color: "var(--ink)"
                             }}
                           />
+                          {config.areaCode.length === 3 && <AreaFlag areaCode={config.areaCode} height={15} showAbbr />}
                         </div>
                         <button
                           className="btn btn-ghost"
@@ -5038,7 +5044,10 @@ export function AccountView({
                                   gap: 2
                                 }}
                               >
-                                <span style={{ fontSize: "0.9rem", fontWeight: 700, color: "var(--ink)" }}>{n.number}</span>
+                                <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                                  <AreaFlag areaCode={n.area} />
+                                  <span style={{ fontSize: "0.9rem", fontWeight: 700, color: "var(--ink)" }}>{n.number}</span>
+                                </span>
                                 <span style={{ fontSize: "0.72rem", color: isSelected ? "var(--blue)" : "var(--ink-faint)" }}>
                                   {n.memorable || (lang === "es" ? "Número local" : lang === "fr" ? "Numéro local" : "Local number")}
                                 </span>
@@ -7239,7 +7248,7 @@ export default function DashboardApp() {
               })()}
 
               {/* Area Code Search */}
-              <div style={{ display: "flex", gap: 10, marginBottom: 16 }}>
+              <div style={{ display: "flex", gap: 10, marginBottom: 16, alignItems: "center" }}>
                 <input
                   type="text"
                   maxLength={3}
@@ -7255,6 +7264,7 @@ export default function DashboardApp() {
                   className="input"
                   style={{ width: 120, height: 38, padding: "0 12px", border: "1px solid var(--border)", borderRadius: "var(--r-md)", background: "var(--bg)", color: "var(--ink)" }}
                 />
+                {headerAreaCode.length === 3 && <AreaFlag areaCode={headerAreaCode} height={15} showAbbr />}
                 <button
                   className="btn btn-ghost"
                   disabled={headerAreaCode.length !== 3 || headerIsSearching}
@@ -7301,7 +7311,10 @@ export default function DashboardApp() {
                           gap: 4,
                         }}
                       >
-                        <span style={{ fontWeight: 600, fontSize: "0.9rem", color: "var(--ink)" }}>{num.number}</span>
+                        <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                          <AreaFlag areaCode={num.area} />
+                          <span style={{ fontWeight: 600, fontSize: "0.9rem", color: "var(--ink)" }}>{num.number}</span>
+                        </span>
                         {num.memorable ? (
                           <span style={{ fontSize: "0.72rem", color: isSelected ? "var(--blue)" : "var(--ink-faint)" }}>
                             {num.memorable}
@@ -7392,6 +7405,32 @@ export default function DashboardApp() {
       <Toast msg={toast} />
       </div>
     </div>
+  );
+}
+
+function AreaFlag({ areaCode, height = 13, showAbbr = false }: { areaCode: string; height?: number; showAbbr?: boolean }) {
+  const region = stateForAreaCode(areaCode);
+  if (!region) return null;
+  return (
+    <span title={region.name} style={{ display: "inline-flex", alignItems: "center", gap: 5, flexShrink: 0 }}>
+      <img
+        src={`https://flagcdn.com/${region.flag}.svg`}
+        alt={region.name}
+        loading="lazy"
+        onError={(e) => { e.currentTarget.parentElement!.style.display = "none"; }}
+        style={{
+          height,
+          width: Math.round(height * 1.5),
+          objectFit: "cover",
+          borderRadius: 2,
+          border: "1px solid var(--line)",
+          display: "block"
+        }}
+      />
+      {showAbbr && (
+        <span style={{ fontSize: "0.76rem", fontWeight: 600, color: "var(--ink-faint)" }}>{region.abbr}</span>
+      )}
+    </span>
   );
 }
 
