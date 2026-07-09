@@ -45,7 +45,7 @@ export async function POST(request: Request) {
     if (!digits) {
       // 1. Play transfer options to the caregiver
       twiml += `\n  <Gather numDigits="1" action="/api/twilio/agent-transfer?room=${encodeURIComponent(room)}" method="POST" timeout="8">`;
-      contacts.forEach((c: any, index: number) => {
+      contacts.forEach((c, index) => {
         const digit = index + 1;
         twiml += `\n    ${getTtsPlayTag("Press " + digit + " to transfer to " + c.name)}`;
       });

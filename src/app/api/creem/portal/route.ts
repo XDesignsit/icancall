@@ -7,7 +7,7 @@ const CREEM_API = process.env.CREEM_API_KEY?.startsWith("creem_test_")
   ? "https://test-api.creem.io/v1"
   : "https://api.creem.io/v1";
 
-export async function POST(req: NextRequest) {
+export async function POST(_req: NextRequest) {
   // Verify the logged-in user
   const cookieStore = await cookies();
   const sessionToken = cookieStore.get("session")?.value;

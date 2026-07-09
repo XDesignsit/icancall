@@ -785,10 +785,10 @@ export default function ComparisonChartPage() {
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
-    const savedLang = localStorage.getItem("lang") as any;
+    const savedLang = localStorage.getItem("lang");
     const validLangs = ["en", "es", "fr", "ja", "zh", "ar", "hi", "pt", "de", "it", "ko"];
-    if (validLangs.includes(savedLang)) {
-      setLang(savedLang);
+    if (savedLang && validLangs.includes(savedLang)) {
+      setLang(savedLang as typeof lang);
     }
 
     const handleScroll = () => {
@@ -796,9 +796,9 @@ export default function ComparisonChartPage() {
     };
 
     const handleStorage = () => {
-      const activeLang = localStorage.getItem("lang") as any;
-      if (validLangs.includes(activeLang)) {
-        setLang(activeLang);
+      const activeLang = localStorage.getItem("lang");
+      if (activeLang && validLangs.includes(activeLang)) {
+        setLang(activeLang as typeof lang);
       }
     };
 
@@ -878,7 +878,7 @@ export default function ComparisonChartPage() {
             <Link className="btn btn-primary" href="/#pricing">{t.nav.selectPlanBtn}</Link>
             <select
               value={lang}
-              onChange={(e) => changeLanguage(e.target.value as any)}
+              onChange={(e) => changeLanguage(e.target.value as typeof lang)}
               className="lang-select"
               style={{
                 background: "transparent",

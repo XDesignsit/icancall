@@ -26,7 +26,7 @@ export async function POST(request: Request) {
       try {
         const { data: { users }, error: listError } = await supabase.auth.admin.listUsers();
         if (listError) throw listError;
-        const existingUser = (users || []).find((u: any) => u.email === email);
+        const existingUser = (users || []).find((u) => u.email === email);
         if (existingUser) {
           userId = existingUser.id;
         } else {

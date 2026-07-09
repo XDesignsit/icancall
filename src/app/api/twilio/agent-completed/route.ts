@@ -6,19 +6,6 @@ export async function POST(request: Request) {
   try {
     const requestUrl = new URL(request.url);
     const parentCallSid = requestUrl.searchParams.get('parentCallSid');
-    let callStatus = requestUrl.searchParams.get('CallStatus');
-
-    if (request.method === 'POST') {
-      try {
-        const contentType = request.headers.get('content-type') || '';
-        if (contentType.includes('form-data') || contentType.includes('x-www-form-urlencoded')) {
-          const formData = await request.formData();
-          callStatus = formData.get('CallStatus')?.toString() || callStatus;
-        }
-      } catch (err) {
-        console.warn('Could not parse form data:', err);
-      }
-    }
 
     // When the caregiver hangs up, terminate the caller's leg (parentCallSid)
     const twilioClient = (await import('@/lib/twilio')).default;

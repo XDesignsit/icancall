@@ -18,7 +18,7 @@ export async function GET(request: Request) {
       areaCode,
       results: availableNumbers,
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Numbers API Route Failure:', error);
     return NextResponse.json({ error: 'Failed to retrieve phone numbers' }, { status: 500 });
   }

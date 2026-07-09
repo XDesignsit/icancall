@@ -3,7 +3,6 @@ import { cookies } from "next/headers";
 import { z } from "zod";
 import { supabase } from "@/lib/supabase";
 import { verifySession } from "@/lib/session";
-import { verifyTurnstile } from "@/lib/rateLimit";
 
 const signupSchema = z.object({
   email: z.string().email(),
@@ -74,7 +73,6 @@ export async function POST(request: Request) {
       }
 
       // CAPTCHA verification is bypassed on signup since the flow requires a successful paid Creem checkout, preventing automated spam registration.
-      const ip = request.headers.get("x-forwarded-for")?.split(",")[0] || "127.0.0.1";
 
       // Sign up the user in Supabase Auth
       const { data: authData, error: authError } = await supabase.auth.signUp({
@@ -122,9 +120,9 @@ export async function POST(request: Request) {
       // First clear any existing seeded phone lines to avoid duplicates
       await supabase.from("phone_lines").delete().eq("user_id", userId);
 
-      const phoneLinesRows = numbers.map((num: any) => ({
+      const phoneLinesRows = numbers.map((num) => ({
         user_id: userId,
-        number: num.number || num,
+        number: num,
         name: "My Priority Line",
         type: "seniors",
         contacts: [

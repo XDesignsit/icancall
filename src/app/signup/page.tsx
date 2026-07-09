@@ -1,9 +1,9 @@
 "use client";
 
 import React, { useState, useEffect, Suspense, useRef } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { translations } from "@/lib/translations";
+import { translations, type HomepageTranslations } from "@/lib/translations";
 import Turnstile from "@/components/Turnstile";
 
 /* ============ TYPES ============ */
@@ -150,7 +150,7 @@ async function fetchNumbersLive(areaCode: string, count = 6): Promise<NumberData
       if (data?.success) {
         if (data.configured === false) return fetchNumbers(ac, count);
         const results = Array.isArray(data.results) ? data.results : [];
-        return results.slice(0, count).map((n: any) => ({
+        return results.slice(0, count).map((n: { phoneNumber: string; friendlyName?: string }) => ({
           id: n.phoneNumber,
           number: n.friendlyName || n.phoneNumber,
           area: ac,
@@ -440,7 +440,7 @@ function BrandMark({ dark, lang }: { dark?: boolean; lang: string }) {
   );
 }
 
-function VSteps({ stepIndex, t }: { stepIndex: number; t: any }) {
+function VSteps({ stepIndex, t }: { stepIndex: number; t: HomepageTranslations }) {
   const steps = [
     { key: "account", label: t.onboarding.stepAccount },
     { key: "plan",    label: t.onboarding.stepPlan },
@@ -462,7 +462,7 @@ function VSteps({ stepIndex, t }: { stepIndex: number; t: any }) {
   );
 }
 
-function HSteps({ stepIndex, t }: { stepIndex: number; t: any }) {
+function HSteps({ stepIndex, t }: { stepIndex: number; t: HomepageTranslations }) {
   const steps = [
     { key: "account", label: t.onboarding.stepAccount },
     { key: "plan",    label: t.onboarding.stepPlan },
@@ -484,7 +484,7 @@ function HSteps({ stepIndex, t }: { stepIndex: number; t: any }) {
   );
 }
 
-function Rail({ stepIndex, t, lang }: { stepIndex: number; t: any; lang: string }) {
+function Rail({ stepIndex, t, lang }: { stepIndex: number; t: HomepageTranslations; lang: string }) {
   return (
     <aside className="rail">
       <div className="rail-head"><BrandMark dark lang={lang} /></div>
@@ -500,7 +500,7 @@ function Rail({ stepIndex, t, lang }: { stepIndex: number; t: any; lang: string 
   );
 }
 
-function Shell({ layout, stepIndex, hideChrome, lang, t, children }: { layout: string; stepIndex: number; hideChrome: boolean; lang: string; t: any; children: React.ReactNode }) {
+function Shell({ layout, stepIndex, hideChrome, lang, t, children }: { layout: string; stepIndex: number; hideChrome: boolean; lang: string; t: HomepageTranslations; children: React.ReactNode }) {
   const split = layout === "split" && !hideChrome;
   const prompt = SIGNIN_PROMPTS[lang] || SIGNIN_PROMPTS.en;
   return (
@@ -518,7 +518,7 @@ function Shell({ layout, stepIndex, hideChrome, lang, t, children }: { layout: s
   );
 }
 
-function StepNav({ onBack, onNext, nextLabel, nextDisabled, backLabel, t }: { onBack?: () => void; onNext: () => void; nextLabel?: string; nextDisabled?: boolean; backLabel?: string; t: any }) {
+function StepNav({ onBack, onNext, nextLabel, nextDisabled, backLabel, t }: { onBack?: () => void; onNext: () => void; nextLabel?: string; nextDisabled?: boolean; backLabel?: string; t: HomepageTranslations }) {
   return (
     <div className="step-nav">
       {onBack && <button className="btn-text" onClick={onBack}><Ico.arrowL className="w-[17px] h-[17px]" /> {backLabel || t.onboarding.btnBack}</button>}
@@ -531,7 +531,7 @@ function StepNav({ onBack, onNext, nextLabel, nextDisabled, backLabel, t }: { on
 }
 
 /* ============ STEP 1 — Plan ============ */
-function PlanStep({ data, set, onNext, onBack, t, lang }: { data: OnboardingData; set: (patch: Partial<OnboardingData>) => void; onNext: () => void; onBack?: () => void; t: any; lang: string }) {
+function PlanStep({ data, set, onNext, onBack, t }: { data: OnboardingData; set: (patch: Partial<OnboardingData>) => void; onNext: () => void; onBack?: () => void; t: HomepageTranslations; lang: string }) {
   const { plan, billing } = data;
 
   const essentialFeats = [
@@ -642,7 +642,7 @@ function OtpCodeRow({ value, onChange, onVerify, loading, touched: ct, onBlur, l
 }
 
 /* ============ STEP 2 — Account ============ */
-function AccountStep({ data, set, onNext, onBack, t, lang }: { data: OnboardingData; set: (patch: Partial<OnboardingData>) => void; onNext: () => void; onBack?: () => void; t: any; lang: string }) {
+function AccountStep({ data, set, onNext, onBack, t, lang }: { data: OnboardingData; set: (patch: Partial<OnboardingData>) => void; onNext: () => void; onBack?: () => void; t: HomepageTranslations; lang: string }) {
   const a = data.account;
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   const [smsConsent, setSmsConsent] = useState(false);
@@ -746,8 +746,8 @@ function AccountStep({ data, set, onNext, onBack, t, lang }: { data: OnboardingD
       setPhoneOtp("");
       set({ account: { ...a, phoneVerified: false } });
       setPhoneSuccessMsg(t.onboarding.codeSent);
-    } catch (e: any) {
-      setPhoneApiErr(e.message);
+    } catch (e) {
+      setPhoneApiErr(e instanceof Error ? e.message : String(e));
     } finally {
       setPhoneLoading(false);
     }
@@ -769,8 +769,8 @@ function AccountStep({ data, set, onNext, onBack, t, lang }: { data: OnboardingD
       if (!res.ok) throw new Error(json.error || "Verification failed.");
       set({ account: { ...a, phoneVerified: true } });
       setPhoneSuccessMsg("");
-    } catch (e: any) {
-      setPhoneApiErr(e.message);
+    } catch (e) {
+      setPhoneApiErr(e instanceof Error ? e.message : String(e));
     } finally {
       setPhoneLoading(false);
     }
@@ -795,8 +795,8 @@ function AccountStep({ data, set, onNext, onBack, t, lang }: { data: OnboardingD
       setEmailOtp("");
       set({ account: { ...a, emailVerified: false } });
       setEmailSuccessMsg(t.onboarding.emailCodeSent);
-    } catch (e: any) {
-      setEmailApiErr(e.message);
+    } catch (e) {
+      setEmailApiErr(e instanceof Error ? e.message : String(e));
     } finally {
       setEmailLoading(false);
     }
@@ -818,8 +818,8 @@ function AccountStep({ data, set, onNext, onBack, t, lang }: { data: OnboardingD
       if (!res.ok) throw new Error(json.error || "Verification failed.");
       set({ account: { ...a, emailVerified: true } });
       setEmailSuccessMsg("");
-    } catch (e: any) {
-      setEmailApiErr(e.message);
+    } catch (e) {
+      setEmailApiErr(e instanceof Error ? e.message : String(e));
     } finally {
       setEmailLoading(false);
     }
@@ -1030,7 +1030,7 @@ function AccountStep({ data, set, onNext, onBack, t, lang }: { data: OnboardingD
 }
 
 /* ============ STEP 3 — Number ============ */
-function NumberStep({ data, set, onNext, onBack, t, lang }: { data: OnboardingData; set: (patch: Partial<OnboardingData>) => void; onNext: () => void; onBack: () => void; t: any; lang: string }) {
+function NumberStep({ data, set, onNext, onBack, t, lang }: { data: OnboardingData; set: (patch: Partial<OnboardingData>) => void; onNext: () => void; onBack: () => void; t: HomepageTranslations; lang: string }) {
   const need = planById(data.plan).numbers;
   const selected = data.numbers;
   const [area, setArea] = useState("470");
@@ -1173,10 +1173,10 @@ interface CheckoutModalProps {
   isOpen: boolean;
   checkoutUrl: string;
   onClose: () => void;
-  t: any;
+  t: HomepageTranslations;
 }
 
-function CheckoutModal({ isOpen, checkoutUrl, onClose, t }: CheckoutModalProps) {
+function CheckoutModal({ isOpen, onClose, t }: CheckoutModalProps) {
   if (!isOpen) return null;
 
   return (
@@ -1197,7 +1197,7 @@ function CheckoutModal({ isOpen, checkoutUrl, onClose, t }: CheckoutModalProps) 
 }
 
 /* ============ STEP 4 — Payment ============ */
-function PaymentStep({ data, set, onNext, onBack, t, lang }: { data: OnboardingData; set: (patch: Partial<OnboardingData>) => void; onNext: () => void; onBack: () => void; t: any; lang: string }) {
+function PaymentStep({ data, onNext, onBack, t, lang }: { data: OnboardingData; set: (patch: Partial<OnboardingData>) => void; onNext: () => void; onBack: () => void; t: HomepageTranslations; lang: string }) {
   const plan = planById(data.plan);
   const price = data.billing === "yearly" ? plan.annual : plan.monthly;
   const [modalOpen, setModalOpen] = useState(false);
@@ -1350,7 +1350,7 @@ function PaymentStep({ data, set, onNext, onBack, t, lang }: { data: OnboardingD
 }
 
 /* ============ STEP 5 — Success ============ */
-function SuccessStep({ data, t, lang }: { data: OnboardingData; t: any; lang: string }) {
+function SuccessStep({ data, t, lang }: { data: OnboardingData; t: HomepageTranslations; lang: string }) {
   const plan = planById(data.plan);
   const contactCap = plan.id === "pro" ? 6 : 3;
   const shown = Math.min(contactCap, 4);
@@ -1423,7 +1423,6 @@ function SuccessStep({ data, t, lang }: { data: OnboardingData; t: any; lang: st
 /* ============ MAIN ONBOARDING PROCESS ============ */
 function OnboardingContent() {
   const searchParams = useSearchParams();
-  const router = useRouter();
 
   // Onboarding Page Language State Hook
   const [lang, setLang] = useState<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi" | "pt" | "de" | "it" | "ko">("en");
@@ -1432,12 +1431,12 @@ function OnboardingContent() {
     const validLangs = ["en", "es", "fr", "ja", "zh", "ar", "hi", "pt", "de", "it", "ko"];
     const paramLang = searchParams.get("lang");
     if (paramLang && validLangs.includes(paramLang)) {
-      setLang(paramLang as any);
+      setLang(paramLang as typeof lang);
       localStorage.setItem("lang", paramLang);
     } else {
-      const savedLang = localStorage.getItem("lang") as any;
-      if (validLangs.includes(savedLang)) {
-        setLang(savedLang);
+      const savedLang = localStorage.getItem("lang");
+      if (savedLang && validLangs.includes(savedLang)) {
+        setLang(savedLang as typeof lang);
       }
     }
   }, [searchParams]);

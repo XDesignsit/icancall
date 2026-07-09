@@ -11,7 +11,7 @@ export async function GET() {
         'Content-Type': 'text/html',
       },
     });
-  } catch (error) {
+  } catch {
     return new Response('File not found', { status: 404 });
   }
 }

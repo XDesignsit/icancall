@@ -76,14 +76,14 @@ export async function GET(request: Request) {
         contentType: 'audio/mpeg',
         upsert: true,
       })
-      .then((res: any) => {
+      .then((res) => {
         if (res.error) {
           console.error('❌ Supabase storage upload error:', res.error);
         } else {
           console.log(`✅ Cached generated TTS in Supabase Storage at: ${filePath}`);
         }
       })
-      .catch((uploadErr: any) => {
+      .catch((uploadErr) => {
         console.error('❌ Background upload exception:', uploadErr);
       });
 
@@ -94,9 +94,9 @@ export async function GET(request: Request) {
       },
     });
 
-  } catch (err: any) {
+  } catch (err) {
     console.error('❌ TTS API route failure:', err);
-    return NextResponse.json({ error: err.message || 'Internal Server Error' }, { status: 500 });
+    return NextResponse.json({ error: err instanceof Error ? err.message : 'Internal Server Error' }, { status: 500 });
   }
 }
 
