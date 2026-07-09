@@ -40,7 +40,7 @@ async function sendTestSms() {
 
   console.log('🔑 Credentials check:');
   console.log('  TWILIO_ACCOUNT_SID:', accountSid ? `${accountSid.substring(0, 8)}...` : '(Not configured)');
-  console.log('  TWILIO_AUTH_TOKEN: ', authToken ? '********' : '(Not configured)');
+  console.log('  TWILIO_AUTH_TOKEN: ', authToken ? `set (${authToken.length} chars)` : '(Not configured)');
   console.log('  TWILIO_PHONE_NUMBER:', fromPhone);
 
   if (!accountSid || !authToken) {
