@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { randomInt } from "crypto";
 
 // In-memory store: normalizedPhone -> { code, expiresAt, attempts }
 const otpStore = new Map<string, { code: string; expiresAt: number; attempts: number }>();
@@ -26,7 +27,7 @@ export async function POST(request: Request) {
 
     // ── SEND ──────────────────────────────────────────────────────────────────
     if (action === "send") {
-      const otp = String(Math.floor(100000 + Math.random() * 900000));
+      const otp = String(randomInt(100000, 1000000));
       otpStore.set(normalized, { code: otp, expiresAt: Date.now() + OTP_TTL_MS, attempts: 0 });
 
       const { sendSms } = await import("@/lib/twilio");

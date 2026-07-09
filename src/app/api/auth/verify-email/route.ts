@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { randomInt } from "crypto";
 import { sendEmail } from "@/lib/mail";
 
 // In-memory store: email -> { code, expiresAt, attempts }
@@ -18,7 +19,7 @@ export async function POST(request: Request) {
 
     // ── SEND ──────────────────────────────────────────────────────────────────
     if (action === "send") {
-      const otp = String(Math.floor(100000 + Math.random() * 900000));
+      const otp = String(randomInt(100000, 1000000));
       otpStore.set(email.toLowerCase(), { code: otp, expiresAt: Date.now() + OTP_TTL_MS, attempts: 0 });
 
       await sendEmail({

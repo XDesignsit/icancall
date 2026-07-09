@@ -1,6 +1,15 @@
 import { SignJWT, jwtVerify } from "jose";
 
-const JWT_SECRET = process.env.JWT_SECRET || "icancall_dev_fallback_secret_key_12345";
+const JWT_SECRET =
+  process.env.JWT_SECRET ||
+  (process.env.NODE_ENV !== "production"
+    ? "icancall_dev_only_insecure_secret"
+    : undefined);
+
+if (!JWT_SECRET) {
+  throw new Error("JWT_SECRET environment variable must be set in production.");
+}
+
 const secret = new TextEncoder().encode(JWT_SECRET);
 
 export interface SessionPayload {
