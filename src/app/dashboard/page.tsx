@@ -3612,7 +3612,7 @@ export function AccountView({
   }, [autoOpenPlanModal, tab, setAutoOpenPlanModal]);
 
   // Upgrade to Pro number selection state
-  const [upgradeAreaCode, setUpgradeAreaCode] = useState("415");
+  const [upgradeAreaCode, setUpgradeAreaCode] = useState("470");
   const [upgradeNumbersList, setUpgradeNumbersList] = useState<any[]>([]);
   const [upgradeSelectedNumber, setUpgradeSelectedNumber] = useState<any | null>(null);
   const [isSearchingNumbers, setIsSearchingNumbers] = useState(false);
@@ -5561,13 +5561,13 @@ export function AccountView({
                   // Initialize configuration slots for the newly added numbers
                   const initialConfig: AddonNumberSlotConfig[] = Array.from({ length: delta }).map((_, idx) => ({
                     index: idx,
-                    areaCode: "415",
+                    areaCode: "470",
                     numbersList: [],
                     selectedNumber: null,
                     isSearching: true,
                   }));
                   setAddedNumbersConfig(initialConfig);
-                  initialConfig.forEach((c) => loadAddonNumberSlot(c.index, "415"));
+                  initialConfig.forEach((c) => loadAddonNumberSlot(c.index, "470"));
                 } else {
                   setAddedNumbersConfig([]);
                 }
@@ -6460,7 +6460,7 @@ export default function DashboardApp() {
 
   // Header Add-on configuration states
   const [headerAddonModalOpen, setHeaderAddonModalOpen] = useState(false);
-  const [headerAreaCode, setHeaderAreaCode] = useState("415");
+  const [headerAreaCode, setHeaderAreaCode] = useState("470");
   const [headerNumbersList, setHeaderNumbersList] = useState<any[]>([]);
   const [headerSelectedNumber, setHeaderSelectedNumber] = useState<any | null>(null);
   const [headerIsSearching, setHeaderIsSearching] = useState(false);
@@ -7381,12 +7381,12 @@ export default function DashboardApp() {
 }
 
 const AREA_SUGGESTIONS = [
-  { code: "415", city: "San Francisco" },
-  { code: "212", city: "New York" },
-  { code: "312", city: "Chicago" },
-  { code: "305", city: "Miami" },
-  { code: "206", city: "Seattle" },
-  { code: "617", city: "Boston" },
+  { code: "470", city: "Atlanta" },
+  { code: "872", city: "Chicago" },
+  { code: "945", city: "Dallas" },
+  { code: "629", city: "Nashville" },
+  { code: "689", city: "Orlando" },
+  { code: "984", city: "Raleigh" },
   { code: "787", city: "Puerto Rico" },
 ];
 
@@ -7449,16 +7449,20 @@ function fetchNumbers(areaCode: string, count = 6) {
   return out;
 }
 
-// Fetches real available numbers from Twilio, falling back to the mock
-// generator when the API is unconfigured, errors, or returns nothing.
+// Fetches real available numbers from Twilio. Falls back to the mock
+// generator only when Twilio is unconfigured (local dev); when Twilio is
+// live, an out-of-stock area code returns an empty list so the UI can show
+// its "no numbers found" state instead of fake numbers.
 async function fetchNumbersLive(areaCode: string, count = 6): Promise<{ id: string; number: string; area: string; memorable: string | null }[]> {
-  const ac = areaCode.replace(/\D/g, "").slice(0, 3) || "415";
+  const ac = areaCode.replace(/\D/g, "").slice(0, 3) || "470";
   try {
     const res = await fetch(`/api/twilio/numbers?areaCode=${ac}`);
     if (res.ok) {
       const data = await res.json();
-      if (data?.success && Array.isArray(data.results) && data.results.length) {
-        return data.results.slice(0, count).map((n: any) => ({
+      if (data?.success) {
+        if (data.configured === false) return fetchNumbers(ac, count);
+        const results = Array.isArray(data.results) ? data.results : [];
+        return results.slice(0, count).map((n: any) => ({
           id: n.phoneNumber,
           number: n.friendlyName || n.phoneNumber,
           area: ac,
@@ -7467,8 +7471,8 @@ async function fetchNumbersLive(areaCode: string, count = 6): Promise<{ id: stri
       }
     }
   } catch {
-    // fall through to mock
+    // network/API failure: show the empty state rather than fake numbers
   }
-  return fetchNumbers(ac, count);
+  return [];
 }
 

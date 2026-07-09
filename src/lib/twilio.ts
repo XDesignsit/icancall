@@ -6,6 +6,11 @@ const authToken = process.env.TWILIO_AUTH_TOKEN;
 // Initialize Twilio client dynamically
 const client = accountSid && authToken ? twilio(accountSid, authToken) : null;
 
+/** Whether real Twilio credentials are present in this environment. */
+export function isTwilioConfigured() {
+  return !!client;
+}
+
 // U.S. territories share the +1 NANP but are separate countries in Twilio's
 // AvailablePhoneNumber API, so an area-code search under 'US' does not return
 // them. Map their area codes to the correct ISO country code.
