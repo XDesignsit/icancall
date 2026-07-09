@@ -313,6 +313,7 @@ const t: HomepageTranslations = {
   "metaLocal": "普通号码",
   "metaMemorable": "好记的号码",
   "errNoNumbers": "该区号下未找到可用号码。请尝试其他区号。",
+  "prRateNotice": "这些是波多黎各电话号码。通话费率可能高于美国本土号码。",
   "checkoutSecure": "安全支付",
   "checkoutSecuring": "正在建立安全支付通道...",
   "step4Eyebrow": "步骤 4 / 4 · 确认",

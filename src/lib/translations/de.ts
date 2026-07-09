@@ -313,6 +313,7 @@ const t: HomepageTranslations = {
   "metaLocal": "Lokale Rufnummer",
   "metaMemorable": "Einprägsam",
   "errNoNumbers": "Keine Nummern für diese Vorwahl gefunden. Versuchen Sie eine andere.",
+  "prRateNotice": "Dies sind Telefonnummern aus Puerto Rico. Die Anrufkosten können höher sein als bei Nummern auf dem US-Festland.",
   "checkoutSecure": "Sichere Zahlung",
   "checkoutSecuring": "Sichere Verbindung zum Zahlungskanal wird hergestellt...",
   "step4Eyebrow": "Schritt 4 von 4 · Bestätigen",

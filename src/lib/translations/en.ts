@@ -313,6 +313,7 @@ const t: HomepageTranslations = {
   "metaLocal": "Local number",
   "metaMemorable": "Memorable",
   "errNoNumbers": "No numbers found for that area code. Try another.",
+  "prRateNotice": "These are Puerto Rico phone numbers. Calling rates may be higher than mainland US numbers.",
   "checkoutSecure": "Secure Payment",
   "checkoutSecuring": "Securing payment channel...",
   "step4Eyebrow": "Step 4 of 4 · Confirm",

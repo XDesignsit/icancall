@@ -313,6 +313,7 @@ const t: HomepageTranslations = {
   "metaLocal": "通常の番号",
   "metaMemorable": "覚えやすい番号",
   "errNoNumbers": "該当エリアの番号が見つかりませんでした。別の番号で検索してください。",
+  "prRateNotice": "これらはプエルトリコの電話番号です。通話料金が米国本土の番号より高くなる場合があります。",
   "checkoutSecure": "安全なお支払い",
   "checkoutSecuring": "決済用の通信接続を確立しています...",
   "step4Eyebrow": "ステップ 4 / 4 · 確認",

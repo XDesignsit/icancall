@@ -1121,6 +1121,12 @@ function NumberStep({ data, set, onNext, onBack, t, lang }: { data: OnboardingDa
         ))}
       </div>
 
+      {!loading && (results[0]?.area === "787" || results[0]?.area === "939") && (
+        <div className="num-need" style={{ background: "rgba(217, 119, 6, 0.07)", borderColor: "rgba(217, 119, 6, 0.35)", color: "#92400e", marginTop: 12 }}>
+          <span>{t.onboarding.prRateNotice}</span>
+        </div>
+      )}
+
       <div className="results-head">
         <span className="rh-title">Available in <b>({area || "—"})</b></span>
         <button className={"refresh-btn" + (spin ? " spin" : "")} onClick={() => load(area)} disabled={loading}>

@@ -313,6 +313,7 @@ const t: HomepageTranslations = {
   "metaLocal": "Numero locale",
   "metaMemorable": "Facile da ricordare",
   "errNoNumbers": "Nessun numero trovato per questo prefisso. Provane un altro.",
+  "prRateNotice": "Questi sono numeri di telefono di Porto Rico. Le tariffe delle chiamate potrebbero essere più alte rispetto ai numeri degli Stati Uniti continentali.",
   "checkoutSecure": "Pagamento Sicuro",
   "checkoutSecuring": "Connessione al canale di pagamento sicuro...",
   "step4Eyebrow": "Passo 4 di 4 · Conferma",

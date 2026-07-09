@@ -4551,6 +4551,11 @@ export function AccountView({
                       </div>
                     ) : upgradeNumbersList.length > 0 ? (
                       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, maxHeight: 160, overflowY: "auto", padding: 2 }}>
+                        {(upgradeNumbersList[0]?.area === "787" || upgradeNumbersList[0]?.area === "939") && (
+                          <div style={{ gridColumn: "1 / -1", fontSize: "0.8rem", color: "#92400e", background: "rgba(217, 119, 6, 0.07)", border: "1px solid rgba(217, 119, 6, 0.35)", borderRadius: "var(--r-md)", padding: "8px 12px" }}>
+                            {lang === "es" ? "Estos son números de Puerto Rico. Las tarifas de llamada pueden ser más altas que las de números del territorio continental de EE. UU." : lang === "fr" ? "Ce sont des numéros de Porto Rico. Les tarifs d'appel peuvent être plus élevés que ceux des numéros des États-Unis continentaux." : "These are Puerto Rico phone numbers. Calling rates may be higher than mainland US numbers."}
+                          </div>
+                        )}
                         {upgradeNumbersList.map((n) => {
                           const isSelected = upgradeSelectedNumber?.number === n.number;
                           return (
@@ -5008,6 +5013,11 @@ export function AccountView({
                         </div>
                       ) : config.numbersList && config.numbersList.length > 0 ? (
                         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, maxHeight: 160, overflowY: "auto", padding: 2 }}>
+                          {(config.numbersList[0]?.area === "787" || config.numbersList[0]?.area === "939") && (
+                            <div style={{ gridColumn: "1 / -1", fontSize: "0.8rem", color: "#92400e", background: "rgba(217, 119, 6, 0.07)", border: "1px solid rgba(217, 119, 6, 0.35)", borderRadius: "var(--r-md)", padding: "8px 12px" }}>
+                              {lang === "es" ? "Estos son números de Puerto Rico. Las tarifas de llamada pueden ser más altas que las de números del territorio continental de EE. UU." : lang === "fr" ? "Ce sont des numéros de Porto Rico. Les tarifs d'appel peuvent être plus élevés que ceux des numéros des États-Unis continentaux." : "These are Puerto Rico phone numbers. Calling rates may be higher than mainland US numbers."}
+                            </div>
+                          )}
                           {config.numbersList.map((n) => {
                             const isSelected = config.selectedNumber?.number === n.number;
                             return (
@@ -7266,6 +7276,11 @@ export default function DashboardApp() {
                 </div>
               ) : headerNumbersList.length > 0 ? (
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 10 }}>
+                  {(headerNumbersList[0]?.area === "787" || headerNumbersList[0]?.area === "939") && (
+                    <div style={{ gridColumn: "1 / -1", fontSize: "0.8rem", color: "#92400e", background: "rgba(217, 119, 6, 0.07)", border: "1px solid rgba(217, 119, 6, 0.35)", borderRadius: "var(--r-md)", padding: "8px 12px" }}>
+                      {lang === "es" ? "Estos son números de Puerto Rico. Las tarifas de llamada pueden ser más altas que las de números del territorio continental de EE. UU." : lang === "fr" ? "Ce sont des numéros de Porto Rico. Les tarifs d'appel peuvent être plus élevés que ceux des numéros des États-Unis continentaux." : "These are Puerto Rico phone numbers. Calling rates may be higher than mainland US numbers."}
+                    </div>
+                  )}
                   {headerNumbersList.map((num) => {
                     const isSelected = headerSelectedNumber?.number === num.number;
                     return (

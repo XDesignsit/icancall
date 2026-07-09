@@ -186,6 +186,7 @@ export interface HomepageTranslations {
     metaLocal: string;
     metaMemorable: string;
     errNoNumbers: string;
+    prRateNotice: string;
     checkoutSecure: string;
     checkoutSecuring: string;
     step4Eyebrow: string;
