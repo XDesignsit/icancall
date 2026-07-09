@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-import { dashboardTranslations } from "@/lib/dashboardTranslations";
+import { dashboardTranslations, type DashboardTranslations } from "@/lib/dashboardTranslations";
 import { dashboardExtraTranslations } from "@/lib/dashboardExtraTranslations";
 import { stateForAreaCode } from "@/lib/areaCodeStates";
 
@@ -1040,7 +1040,9 @@ const ICONS = {
   refresh: <><path d="M21 12a9 9 0 1 1-2.6-6.3M21 3v5h-5"/></>,
 };
 
-function Icon({ name, className, ...rest }: { name: keyof typeof ICONS; className?: string; [key: string]: any }) {
+type PickerNumber = { id: string; number: string; area: string; memorable: string | null };
+
+function Icon({ name, className, ...rest }: { name: keyof typeof ICONS; className?: string } & React.SVGProps<SVGSVGElement>) {
   return (
     <svg
       viewBox="0 0 24 24"
@@ -1205,7 +1207,7 @@ function OverviewView({
   line: Line;
   setView: (v: string) => void;
   setActiveLineId: (id: string) => void;
-  d: any;
+  d: DashboardTranslations;
   lang: string;
 }) {
   const allCalls = Object.values(log).flat();
@@ -1354,7 +1356,7 @@ function ContactModal({
   order: number;
   onSave: (c: Contact) => void;
   onClose: () => void;
-  d: any;
+  d: DashboardTranslations;
   voiceId?: string;
   lang: string;
 }) {
@@ -1481,7 +1483,7 @@ function ContactModal({
       // Start recording with 100ms timeslices to force continuous dataavailable events (vital for Safari)
       mediaRecorder.start(100);
       setRecording(true);
-    } catch (err: any) {
+    } catch (err) {
       console.error('Failed to start recording:', err);
       alert((lang === "es" ? "No se pudo iniciar la grabación: "
         : lang === "fr" ? "Impossible de démarrer l'enregistrement: "
@@ -1493,7 +1495,7 @@ function ContactModal({
         : lang === "de" ? "Aufnahme konnte nicht gestartet werden: "
         : lang === "it" ? "Impossibile avviare la registrazione: "
         : lang === "ko" ? "녹음을 시작할 수 없습니다: "
-        : "Could not start recording: ") + (err.message || 'Microphone permissions denied.'));
+        : "Could not start recording: ") + (err instanceof Error ? err.message : 'Microphone permissions denied.'));
     }
   };
 
@@ -1773,7 +1775,7 @@ function ContactsView({
   line: Line;
   setLine: React.Dispatch<React.SetStateAction<Line[]>>;
   showToast: (msg: string) => void;
-  d: any;
+  d: DashboardTranslations;
   lang: string;
   plan: "essential" | "pro";
 }) {
@@ -1932,7 +1934,7 @@ function ContactsView({
 }
 
 /* Call Simulator */
-function TestCall({ line, d, lang }: { line: Line; d: any; lang: string }) {
+function TestCall({ line, d, lang }: { line: Line; d: DashboardTranslations; lang: string }) {
   const [screen, setScreen] = useState({
     cls: "",
     av: "—",
@@ -2370,7 +2372,7 @@ function RoutingView({
   line: Line;
   setLine: React.Dispatch<React.SetStateAction<Line[]>>;
   showToast: (msg: string) => void;
-  d: any;
+  d: DashboardTranslations;
   lang: string;
   plan: "essential" | "pro";
   setView: (v: string) => void;
@@ -2511,7 +2513,7 @@ function RoutingView({
 
   let hasOverlap = false;
   let hasGap = false;
-  let gapsList: { start: number; end: number }[] = [];
+  const gapsList: { start: number; end: number }[] = [];
 
   if (localSchedule.length === 0) {
     hasGap = true;
@@ -3171,7 +3173,7 @@ function RoutingView({
 }
 
 /* Call log */
-function CallLogView({ line, log, d, lang }: { line: Line; log: Record<string, CallLogEntry[]>; d: any; lang: string }) {
+function CallLogView({ line, log, d, lang }: { line: Line; log: Record<string, CallLogEntry[]>; d: DashboardTranslations; lang: string }) {
   const [filter, setFilter] = useState("all");
   const calls = log[line.id] || [];
   const counts = {
@@ -3297,7 +3299,7 @@ function SettingsView({
   line: Line;
   setLine: React.Dispatch<React.SetStateAction<Line[]>>;
   showToast: (msg: string) => void;
-  d: any;
+  d: DashboardTranslations;
   lang: string;
   preferredName: string;
 }) {
@@ -3576,7 +3578,7 @@ export function AccountView({
   showToast: (msg: string) => void;
   tab: string;
   setTab: (t: string) => void;
-  d: any;
+  d: DashboardTranslations;
   lang: string;
   lines: Line[];
   setLines: React.Dispatch<React.SetStateAction<Line[]>>;
@@ -3614,8 +3616,8 @@ export function AccountView({
 
   // Upgrade to Pro number selection state
   const [upgradeAreaCode, setUpgradeAreaCode] = useState("470");
-  const [upgradeNumbersList, setUpgradeNumbersList] = useState<any[]>([]);
-  const [upgradeSelectedNumber, setUpgradeSelectedNumber] = useState<any | null>(null);
+  const [upgradeNumbersList, setUpgradeNumbersList] = useState<PickerNumber[]>([]);
+  const [upgradeSelectedNumber, setUpgradeSelectedNumber] = useState<PickerNumber | null>(null);
   const [isSearchingNumbers, setIsSearchingNumbers] = useState(false);
 
   // States for Add-on changes
@@ -3680,9 +3682,9 @@ export function AccountView({
         });
         showToast(lang === "es" ? "¡Foto de perfil actualizada!" : lang === "fr" ? "Photo de profil mise à jour !" : "Profile photo updated successfully!");
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error(err);
-      showToast(err.message || (lang === "es" ? "Error al subir la foto" : lang === "fr" ? "Échec du téléchargement de la photo" : "Failed to upload photo"));
+      showToast(err instanceof Error ? err.message : (lang === "es" ? "Error al subir la foto" : lang === "fr" ? "Échec du téléchargement de la photo" : "Failed to upload photo"));
     } finally {
       setUploadingPhoto(false);
     }
@@ -3691,8 +3693,8 @@ export function AccountView({
   interface AddonNumberSlotConfig {
     index: number;
     areaCode: string;
-    numbersList: any[];
-    selectedNumber: any | null;
+    numbersList: PickerNumber[];
+    selectedNumber: PickerNumber | null;
     isSearching: boolean;
   }
 
@@ -4709,7 +4711,7 @@ export function AccountView({
                           id: "line_" + Date.now() + "_" + index,
                           label: getLineDefaultLabel(lines.length + index, account.plan, lang),
                           person: lang === "es" ? "Línea del círculo de confianza" : lang === "fr" ? "Ligne du cercle de confiance" : "Trusted contact line",
-                          number: config.selectedNumber.number,
+                          number: config.selectedNumber!.number,
                           color: AVATAR_COLORS[(lines.length + index) % AVATAR_COLORS.length],
                           mode: "cascade" as const,
                           minutesUsed: 0,
@@ -6109,13 +6111,68 @@ const SEED_CONTACT_DATA = [
   { first: "Thomas", rel: "Nephew" },
 ];
 
-function generateDynamicLines(accountData: any): Line[] {
+interface StoredLineData {
+  label: string;
+  person: string;
+  number: string;
+  mode?: Line["mode"];
+  minutesUsed?: number;
+  contacts?: number | Contact[];
+}
+
+interface StoredAccountData {
+  owner?: string;
+  name?: string;
+  area?: string;
+  lines?: StoredLineData[];
+}
+
+interface ProfileSettings {
+  role?: string;
+  notifyEmail?: string;
+  phone?: string;
+  smsPhone?: string;
+  address?: string;
+  billingAddr?: string;
+  timezone?: string;
+  language?: string;
+  twoFactor?: boolean;
+  card?: Account["card"];
+  plan?: Account["plan"];
+  billingCycle?: Account["billingCycle"];
+  addons?: Account["addons"];
+  avatarUrl?: string;
+}
+
+interface ProfileRow {
+  name?: string;
+  preferred_name?: string;
+  email?: string;
+  settings?: ProfileSettings;
+}
+
+interface DbLineRow {
+  id: string;
+  number: string;
+  name: string;
+  type: string;
+  contacts?: Contact[];
+  settings?: {
+    color?: string;
+    mode?: Line["mode"];
+    minutesUsed?: number;
+    schedule?: CoverageSlot[];
+    extraSettings?: Line["settings"];
+  };
+}
+
+function generateDynamicLines(accountData: StoredAccountData | null): Line[] {
   if (!accountData || !accountData.lines) return [];
   const ownerName = accountData.owner || accountData.name || "";
   const ownerLastName = ownerName ? (ownerName.split(" ").slice(-1)[0] || "") : "";
   const areaCode = accountData.area || "415";
 
-  return accountData.lines.map((ln: any, idx: number) => {
+  return accountData.lines.map((ln, idx) => {
     const slug = ln.label.toLowerCase().replace(/[^a-z0-9]+/g, "-");
     const count = typeof ln.contacts === "number" ? ln.contacts : 3;
 
@@ -6414,7 +6471,7 @@ export default function DashboardApp() {
   const serverDataLoadedRef = useRef(false);
 
   // 2. Client-side profile to account mapping
-  const mapProfileToAccount = (profile: any): Account => {
+  const mapProfileToAccount = (profile: ProfileRow): Account => {
     const settings = profile.settings || {};
     return {
       name: profile.name || "",
@@ -6459,8 +6516,8 @@ export default function DashboardApp() {
     };
   };
 
-  const mapDbLinesToFrontend = (dbLines: any[]): Line[] => {
-    return dbLines.map((row: any) => {
+  const mapDbLinesToFrontend = (dbLines: DbLineRow[]): Line[] => {
+    return dbLines.map((row) => {
       const s = row.settings || {};
       return {
         id: row.id,
@@ -6480,8 +6537,8 @@ export default function DashboardApp() {
   // Header Add-on configuration states
   const [headerAddonModalOpen, setHeaderAddonModalOpen] = useState(false);
   const [headerAreaCode, setHeaderAreaCode] = useState("470");
-  const [headerNumbersList, setHeaderNumbersList] = useState<any[]>([]);
-  const [headerSelectedNumber, setHeaderSelectedNumber] = useState<any | null>(null);
+  const [headerNumbersList, setHeaderNumbersList] = useState<PickerNumber[]>([]);
+  const [headerSelectedNumber, setHeaderSelectedNumber] = useState<PickerNumber | null>(null);
   const [headerIsSearching, setHeaderIsSearching] = useState(false);
 
   const loadHeaderNumbers = (ac: string) => {
@@ -6516,7 +6573,7 @@ export default function DashboardApp() {
         if (!linesRes.ok) throw new Error("lines_fetch_failed");
         const linesData = await linesRes.json();
 
-        let currentAccount = profileData.profile ? mapProfileToAccount(profileData.profile) : null;
+        const currentAccount = profileData.profile ? mapProfileToAccount(profileData.profile) : null;
         if (currentAccount) {
           setAccount(currentAccount);
           localStorage.setItem("isLoggedIn", "true");
@@ -6612,10 +6669,10 @@ export default function DashboardApp() {
   }, [lines, initialLoadComplete]);
 
   useEffect(() => {
-    const savedLang = localStorage.getItem("lang") as any;
+    const savedLang = localStorage.getItem("lang");
     const validLangs = ["en", "es", "fr", "ja", "zh", "ar", "hi", "pt", "de", "it", "ko"];
-    if (validLangs.includes(savedLang)) {
-      setLang(savedLang);
+    if (savedLang && validLangs.includes(savedLang)) {
+      setLang(savedLang as typeof lang);
     }
   }, []);
 
@@ -6625,10 +6682,10 @@ export default function DashboardApp() {
 
   useEffect(() => {
     const syncLang = () => {
-      const savedLang = localStorage.getItem("lang") as any;
+      const savedLang = localStorage.getItem("lang");
       const validLangs = ["en", "es", "fr", "ja", "zh", "ar", "hi", "pt", "de", "it", "ko"];
-      if (validLangs.includes(savedLang)) {
-        setLang(savedLang);
+      if (savedLang && validLangs.includes(savedLang)) {
+        setLang(savedLang as typeof lang);
       }
     };
     window.addEventListener("storage", syncLang);
@@ -6861,7 +6918,7 @@ export default function DashboardApp() {
                 >
                   <Icon name={it.icon} />
                   {it.label}
-                  {(it as any).badge && missedCount > 0 && <span className="badge-dot">{missedCount}</span>}
+                  {"badge" in it && missedCount > 0 && <span className="badge-dot">{missedCount}</span>}
                 </button>
               ))}
             </div>
@@ -6935,7 +6992,7 @@ export default function DashboardApp() {
 
           <select
             value={lang}
-            onChange={(e) => changeLanguage(e.target.value as any)}
+            onChange={(e) => changeLanguage(e.target.value as typeof lang)}
             className="lang-select"
             style={{
               background: 'transparent',
@@ -7083,7 +7140,7 @@ export default function DashboardApp() {
                 </div>
                 
                 <div style={{ background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 'var(--r-md)', padding: '12px 16px' }}>
-                  <p style={{ fontStyle: 'italic', margin: 0, color: 'var(--ink)', fontSize: '0.92rem', lineHeight: 1.5 }}>"{activeVoicemail.transcription}"</p>
+                  <p style={{ fontStyle: 'italic', margin: 0, color: 'var(--ink)', fontSize: '0.92rem', lineHeight: 1.5 }}>&ldquo;{activeVoicemail.transcription}&rdquo;</p>
                 </div>
 
                 <div>
@@ -7186,7 +7243,7 @@ export default function DashboardApp() {
                     id: "line_" + Date.now() + "_" + index,
                     label: getLineDefaultLabel(index, updatedAccount.plan, lang),
                     person: lang === "es" ? "Línea del círculo de confianza" : lang === "fr" ? "Ligne du cercle de confiance" : "Trusted contact line",
-                    number: headerSelectedNumber.number,
+                    number: headerSelectedNumber!.number,
                     color: AVATAR_COLORS[index % AVATAR_COLORS.length],
                     mode: "cascade",
                     minutesUsed: 0,
@@ -7516,7 +7573,7 @@ async function fetchNumbersLive(areaCode: string, count = 6): Promise<{ id: stri
       if (data?.success) {
         if (data.configured === false) return fetchNumbers(ac, count);
         const results = Array.isArray(data.results) ? data.results : [];
-        return results.slice(0, count).map((n: any) => ({
+        return results.slice(0, count).map((n: { phoneNumber: string; friendlyName?: string }) => ({
           id: n.phoneNumber,
           number: n.friendlyName || n.phoneNumber,
           area: ac,

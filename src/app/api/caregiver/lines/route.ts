@@ -20,10 +20,11 @@ export async function GET() {
     }
 
     // 1. Fetch phone lines from Supabase
-    let { data: lines, error } = await supabase
+    const { data: fetchedLines, error } = await supabase
       .from("phone_lines")
       .select("*")
       .eq("user_id", userId);
+    let lines = fetchedLines;
 
     if (error) {
       console.error("Failed to fetch phone lines:", error);
@@ -84,7 +85,7 @@ export async function POST(request: Request) {
     //    identical keys on every row, and new lines from the UI carry
     //    client-generated non-UUID ids anyway — the unique `number` column is
     //    the conflict target, so existing rows keep their ids.
-    const rows = lines.map((l: any) => {
+    const rows = lines.map((l) => {
       return {
         user_id: userId,
         number: l.number,
@@ -113,7 +114,7 @@ export async function POST(request: Request) {
     }
 
     // Invalidate cached account details to reflect the updated settings immediately
-    (updatedLines || []).forEach((l: any) => {
+    (updatedLines || []).forEach((l) => {
       if (l.number) {
         invalidateCachedAccount(l.number);
       }
@@ -121,7 +122,7 @@ export async function POST(request: Request) {
 
     // 3. Delete any lines that were removed from the UI
     // (PostgREST `in` lists take bare/double-quoted values; single quotes fail on uuid columns)
-    const activeIds = (updatedLines || []).map((l: any) => l.id);
+    const activeIds = (updatedLines || []).map((l) => l.id);
     if (activeIds.length > 0) {
       await supabase
         .from("phone_lines")
@@ -136,7 +137,7 @@ export async function POST(request: Request) {
     }
 
     // Map back to frontend shape
-    const frontendLines = updatedLines.map((row: any) => {
+    const frontendLines = updatedLines.map((row) => {
       const s = row.settings || {};
       return {
         id: row.id,

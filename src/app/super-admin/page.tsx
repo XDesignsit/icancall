@@ -671,11 +671,25 @@ function ProfileModal({
   );
 }
 
+interface AdminAccount {
+  id: string;
+  owner: string;
+  email: string;
+  color: string;
+  numbers: number;
+  city: string;
+  area: string;
+  mrr: number;
+  joined: string;
+  status: string;
+  [key: string]: unknown;
+}
+
 export default function SuperAdminApp() {
   const [view, setView] = useState("overview");
   const [searchQuery, setSearchQuery] = useState("");
   const [toast, setToast] = useState<string | null>(null);
-  const [accounts, setAccounts] = useState<any[]>([]);
+  const [accounts, setAccounts] = useState<AdminAccount[]>([]);
   const [loading, setLoading] = useState(true);
 
   const [profile, setProfile] = useState({
@@ -851,7 +865,7 @@ export default function SuperAdminApp() {
                 cursor: "pointer",
               }}
             >
-              <Icon name={item.icon as any} style={{ color: "#fff" }} />
+              <Icon name={item.icon as keyof typeof ICONS} style={{ color: "#fff" }} />
               {item.label}
             </button>
           ))}

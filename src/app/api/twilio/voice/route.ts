@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { findAccountByTwilioNumber, getAvailableMinutes, deductMinutes } from '@/lib/db';
+import { findAccountByTwilioNumber, getAvailableMinutes, deductMinutes, type LineContact } from '@/lib/db';
 import { supabase } from '@/lib/supabase';
 import twilioClient from '@/lib/twilio';
 
@@ -99,7 +99,7 @@ export async function POST(request: Request) {
         // Construct Caller Menu Routing options dynamically
         // Using Promise.all to fetch signed URLs in parallel for low latency
         const menuPrompts = await Promise.all(
-          contacts.map(async (c: any, index: number) => {
+          contacts.map(async (c, index) => {
             const digit = index + 1;
             let voiceUrl = null;
             if (c.voicePath) {
@@ -145,7 +145,9 @@ export async function POST(request: Request) {
         }
         twiml += '\n  <Hangup />';
       } else {
-        const availableContacts = contacts.filter((c: any) => c.available && c.phone) || [];
+        const availableContacts = contacts.filter(
+          (c): c is LineContact & { phone: string } => Boolean(c.available && c.phone)
+        );
         const nextIdx = contactIndexStr ? parseInt(contactIndexStr.toString(), 10) : 0;
         if (nextIdx < availableContacts.length) {
           const nextContact = availableContacts[nextIdx];
@@ -246,7 +248,9 @@ export async function POST(request: Request) {
     } else {
       // 4. Process digits for Cascade or Simultaneous mode
       if (digits === '1') {
-        const availableContacts = contacts.filter((c: any) => c.available && c.phone) || [];
+        const availableContacts = contacts.filter(
+          (c): c is LineContact & { phone: string } => Boolean(c.available && c.phone)
+        );
 
         if (availableContacts.length > 0) {
           const timeLimitSeconds = Math.floor(availableMinutes * 60);
@@ -264,7 +268,7 @@ export async function POST(request: Request) {
 
             if (lineMode === 'simultaneous') {
               // Outbound calls to all available contacts in parallel
-              availableContacts.forEach(async (c: any) => {
+              availableContacts.forEach(async (c) => {
                 try {
                   await twilioClient!.calls.create({
                     to: c.phone,
@@ -304,7 +308,7 @@ export async function POST(request: Request) {
                   method="POST" 
                   timeLimit="${timeLimitSeconds}"
                 >`;
-              availableContacts.forEach((c: any) => {
+              availableContacts.forEach((c) => {
                 twiml += `\n              <Number>${c.phone}</Number>`;
               });
               twiml += `\n            </Dial>`;

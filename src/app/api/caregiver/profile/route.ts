@@ -19,11 +19,12 @@ export async function GET() {
     }
 
     // 1. Fetch profile from Supabase
-    let { data: profile, error } = await supabase
+    const { data: fetchedProfile, error } = await supabase
       .from("profiles")
       .select("*")
       .eq("id", userId)
       .maybeSingle();
+    let profile = fetchedProfile;
 
     if (error) {
       console.error("Failed to fetch profile:", error);

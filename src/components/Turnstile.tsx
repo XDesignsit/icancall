@@ -8,6 +8,25 @@ interface TurnstileProps {
   onExpire?: () => void;
 }
 
+interface TurnstileApi {
+  render: (
+    container: HTMLElement,
+    options: {
+      sitekey: string;
+      callback: (token: string) => void;
+      "error-callback": () => void;
+      "expired-callback": () => void;
+    }
+  ) => string;
+  remove: (widgetId: string) => void;
+}
+
+declare global {
+  interface Window {
+    turnstile?: TurnstileApi;
+  }
+}
+
 export default function Turnstile({ onVerify, onError, onExpire }: TurnstileProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const widgetIdRef = useRef<string | null>(null);
@@ -43,7 +62,7 @@ export default function Turnstile({ onVerify, onError, onExpire }: TurnstileProp
     let timeout: NodeJS.Timeout;
     
     const initialize = () => {
-      const turnstile = (window as any).turnstile;
+      const turnstile = window.turnstile;
       if (turnstile && containerRef.current) {
         clearInterval(interval);
         clearTimeout(timeout);
@@ -75,7 +94,7 @@ export default function Turnstile({ onVerify, onError, onExpire }: TurnstileProp
       }
     };
 
-    if ((window as any).turnstile) {
+    if (window.turnstile) {
       initialize();
     } else {
       interval = setInterval(initialize, 100);
@@ -99,7 +118,7 @@ export default function Turnstile({ onVerify, onError, onExpire }: TurnstileProp
       clearInterval(interval);
       clearTimeout(timeout);
       clearTimeout(fallbackTimer);
-      const turnstile = (window as any).turnstile;
+      const turnstile = window.turnstile;
       if (turnstile && widgetIdRef.current) {
         try {
           turnstile.remove(widgetIdRef.current);

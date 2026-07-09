@@ -106,12 +106,12 @@ export default function PrivacyPolicyPage() {
       const searchParams = new URLSearchParams(window.location.search);
       const paramLang = searchParams.get("lang");
       if (paramLang && validLangs.includes(paramLang)) {
-        setLang(paramLang as any);
+        setLang(paramLang as typeof lang);
         localStorage.setItem("lang", paramLang);
       } else {
-        const savedLang = localStorage.getItem("lang") as any;
-        if (validLangs.includes(savedLang)) {
-          setLang(savedLang);
+        const savedLang = localStorage.getItem("lang");
+        if (savedLang && validLangs.includes(savedLang)) {
+          setLang(savedLang as typeof lang);
         }
       }
     }

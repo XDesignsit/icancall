@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { findAccountByTwilioNumber } from '@/lib/db';
+import { findAccountByTwilioNumber, type LineContact } from '@/lib/db';
 
 export const preferredRegion = 'iad1';
 
@@ -51,7 +51,9 @@ export async function POST(request: Request) {
     const activeNumber = '+' + parts[1];
     const account = await findAccountByTwilioNumber(activeNumber);
     const contacts = account?.line?.contacts || [];
-    const availableContacts = contacts.filter((c: any) => c.available && c.phone) || [];
+    const availableContacts = contacts.filter(
+      (c): c is LineContact & { phone: string } => Boolean(c.available && c.phone)
+    );
 
     const baseUrl = `${requestUrl.protocol}//${requestUrl.host}`;
 
