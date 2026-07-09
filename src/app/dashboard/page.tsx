@@ -3618,20 +3618,20 @@ export function AccountView({
   const [upgradeSelectedNumber, setUpgradeSelectedNumber] = useState<any | null>(null);
   const [isSearchingNumbers, setIsSearchingNumbers] = useState(false);
 
-  // States for Add-on changes
-  const [tempExtraNumbers, setTempExtraNumbers] = useState(a.addons?.extraNumbers || 0);
+  // States for Add-on changes. tempExtraNumbers is a delta relative to the
+  // current lines: 0 = no change, +N = add N numbers, -N = return N numbers.
+  const [tempExtraNumbers, setTempExtraNumbers] = useState(0);
   const [tempMinuteBlocks, setTempMinuteBlocks] = useState(0);
 
   const planMaxIncluded = a.plan === "pro" ? 2 : 1;
   const unusedPlanLines = Math.max(0, planMaxIncluded - lines.length);
-  const newExtraNumbers = tempExtraNumbers - (a.addons?.extraNumbers || 0);
-  const chargeableNewNumbers = newExtraNumbers > 0 ? Math.max(0, newExtraNumbers - unusedPlanLines) : 0;
+  const chargeableNewNumbers = tempExtraNumbers > 0 ? Math.max(0, tempExtraNumbers - unusedPlanLines) : 0;
 
   const [lastPropExtraNumbers, setLastPropExtraNumbers] = useState(a.addons?.extraNumbers || 0);
 
   if ((a.addons?.extraNumbers || 0) !== lastPropExtraNumbers) {
     setLastPropExtraNumbers(a.addons?.extraNumbers || 0);
-    setTempExtraNumbers(a.addons?.extraNumbers || 0);
+    setTempExtraNumbers(0);
   }
   const [addonModalOpen, setAddonModalOpen] = useState(false);
   const [addonCheckoutLoading, setAddonCheckoutLoading] = useState(false);
@@ -4703,6 +4703,7 @@ export function AccountView({
                           localStorage.setItem("ic_account_data", JSON.stringify(updated));
                           return updated;
                         });
+                        setTempExtraNumbers(0);
                         setTempMinuteBlocks(0);
 
                         const newLines = addedNumbersConfig.map((config, index) => ({
@@ -5083,7 +5084,7 @@ export function AccountView({
                   </button>
                   <button
                     className="btn btn-primary"
-                    disabled={selectedLinesToRemove.length !== (Math.max(0, lines.length - (a.plan === "pro" ? 2 : 1)) - tempExtraNumbers)}
+                    disabled={selectedLinesToRemove.length !== Math.max(0, -tempExtraNumbers)}
                     onClick={() => {
                       // Filter out returned lines
                       const nextLines = lines.filter(l => !selectedLinesToRemove.includes(l.id));
@@ -5096,14 +5097,14 @@ export function AccountView({
                           ...prev,
                           addons: {
                             ...(prev.addons || {}),
-                            extraNumbers: tempExtraNumbers,
-                            minuteBlocks: tempMinuteBlocks,
+                            extraNumbers: Math.max(0, (prev.addons?.extraNumbers || 0) + tempExtraNumbers),
                           } as Account["addons"],
                         };
                         localStorage.setItem("ic_account_data", JSON.stringify(updated));
                         return updated;
                       });
 
+                      setTempExtraNumbers(0);
                       setAddonRemovalModalOpen(false);
                       showToast(ext.addonsUpdatedToast);
                     }}
@@ -5116,10 +5117,10 @@ export function AccountView({
               <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
                 <p style={{ color: "var(--ink-soft)", fontSize: "0.95rem", textAlign: "left" }}>
                   {lang === "es"
-                    ? `Debe seleccionar exactamente ${Math.max(0, lines.length - (a.plan === "pro" ? 2 : 1)) - tempExtraNumbers} número(s) para devolver:`
+                    ? `Debe seleccionar exactamente ${Math.max(0, -tempExtraNumbers)} número(s) para devolver:`
                     : lang === "fr"
-                    ? `Vous devez sélectionner exactement ${Math.max(0, lines.length - (a.plan === "pro" ? 2 : 1)) - tempExtraNumbers} numéro(s) à restituer :`
-                    : `You must select exactly ${Math.max(0, lines.length - (a.plan === "pro" ? 2 : 1)) - tempExtraNumbers} phone number(s) to return:`}
+                    ? `Vous devez sélectionner exactement ${Math.max(0, -tempExtraNumbers)} numéro(s) à restituer :`
+                    : `You must select exactly ${Math.max(0, -tempExtraNumbers)} phone number(s) to return:`}
                 </p>
 
                 <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
@@ -5574,8 +5575,7 @@ export function AccountView({
             const maxBlocks = 10;
 
             const proceedWithSaveAddons = (delta: number, minBlocksToSave: number) => {
-              const newExtraNumbers = tempExtraNumbers - (a.addons?.extraNumbers || 0);
-              if (delta > 0 || newExtraNumbers > 0 || minBlocksToSave > 0) {
+              if (delta > 0 || minBlocksToSave > 0) {
                 if (delta > 0) {
                   // Initialize configuration slots for the newly added numbers
                   const initialConfig: AddonNumberSlotConfig[] = Array.from({ length: delta }).map((_, idx) => ({
@@ -5603,11 +5603,7 @@ export function AccountView({
             };
 
             const handleSaveAddons = () => {
-              const baseLinesCount = a.plan === "pro" ? 2 : 1;
-              const currentExtraLines = Math.max(0, lines.length - baseLinesCount);
-              const delta = tempExtraNumbers - currentExtraLines;
-
-              proceedWithSaveAddons(delta, tempMinuteBlocks);
+              proceedWithSaveAddons(tempExtraNumbers, tempMinuteBlocks);
             };
 
             return (
@@ -5637,9 +5633,7 @@ export function AccountView({
                       <div className="stepper">
                         <button
                           onClick={() => {
-                            const val = Math.max(-currentExtraLines, tempExtraNumbers - 1);
-                            console.log("Stepper - clicked", { tempExtraNumbers, newVal: val });
-                            setTempExtraNumbers(val);
+                            setTempExtraNumbers(Math.max(-currentExtraLines, tempExtraNumbers - 1));
                           }}
                           disabled={tempExtraNumbers === -currentExtraLines}
                           aria-label="Remove one"
@@ -5649,9 +5643,7 @@ export function AccountView({
                         <span className="v">{tempExtraNumbers > 0 ? `+${tempExtraNumbers}` : tempExtraNumbers}</span>
                         <button
                           onClick={() => {
-                            const val = Math.min(8 - currentExtraLines, tempExtraNumbers + 1);
-                            console.log("Stepper + clicked", { tempExtraNumbers, newVal: val });
-                            setTempExtraNumbers(val);
+                            setTempExtraNumbers(Math.min(8 - currentExtraLines, tempExtraNumbers + 1));
                           }}
                           disabled={tempExtraNumbers === 8 - currentExtraLines}
                           aria-label="Add one"
