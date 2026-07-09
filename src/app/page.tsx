@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import type { HomepageTranslations } from "@/lib/translations";
 import enTranslations from "@/lib/translations/en";
@@ -26,16 +26,6 @@ interface SimulatedCallConfig {
 const PALETTE = [
   "oklch(0.58 0.115 232)", "oklch(0.62 0.10 198)", "oklch(0.55 0.11 280)",
   "oklch(0.60 0.12 30)", "oklch(0.58 0.12 145)", "oklch(0.55 0.12 330)"
-];
-
-const VANITY_WORDS = [
-  { word: "CARE", digits: "2273" },
-  { word: "HOME", digits: "4663" },
-  { word: "HELP", digits: "4357" },
-  { word: "SAFE", digits: "7233" },
-  { word: "CALL", digits: "2255" },
-  { word: "LOVE", digits: "5683" },
-  { word: "FAMILY", digits: "3264" },
 ];
 
 /* ============ ICONS ============ */
@@ -217,7 +207,6 @@ export default function Home() {
 
   // Live Auto Routing Demo state
   const [demoStatus, setDemoStatus] = useState("Incoming call");
-  const [demoStateIndex, setDemoStateIndex] = useState(-1); // -1 = standby, 0-3 = ringing/connected index
   const [demoRinging, setDemoRinging] = useState<number | null>(null);
   const [demoConnected, setDemoConnected] = useState<number | null>(null);
   const [demoMissed, setDemoMissed] = useState<number[]>([]);
@@ -242,7 +231,6 @@ export default function Home() {
   const [simRingingRow, setSimRingingRow] = useState<number | null>(null);
   const [simConnectedRow, setSimConnectedRow] = useState<number | null>(null);
   const [simMissedRows, setSimMissedRows] = useState<number[]>([]);
-  const [simMenuChoice, setSimMenuChoice] = useState<number | null>(null);
 
   // Initials and color helpers
   const getInitials = (n: string) => initials(n);
@@ -264,7 +252,6 @@ export default function Home() {
   useEffect(() => {
     const answerPlan = [1, 0, 2, 1, 3];
     let planIdx = 0;
-    let timer: NodeJS.Timeout;
 
     const runDemoLoop = async () => {
       while (true) {

@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import Link from "next/link";
 import Turnstile from "@/components/Turnstile";
 
 const LOGIN_DICTS = {
@@ -322,7 +321,7 @@ export default function LoginPage() {
       setMessage(t.successSentToast);
       setStep("otp");
       setIsLoading(false);
-    } catch (err) {
+    } catch {
       setError(t.errorUnexpected);
       setIsLoading(false);
     }
@@ -355,7 +354,7 @@ export default function LoginPage() {
         localStorage.setItem("userEmail", email);
         window.location.href = "/dashboard";
       }
-    } catch (err) {
+    } catch {
       setError(t.errorUnexpected);
       setIsLoading(false);
     }

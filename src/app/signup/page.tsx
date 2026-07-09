@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, Suspense, useRef } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { translations, type HomepageTranslations } from "@/lib/translations";
 import Turnstile from "@/components/Turnstile";
@@ -531,7 +531,7 @@ function StepNav({ onBack, onNext, nextLabel, nextDisabled, backLabel, t }: { on
 }
 
 /* ============ STEP 1 — Plan ============ */
-function PlanStep({ data, set, onNext, onBack, t, lang }: { data: OnboardingData; set: (patch: Partial<OnboardingData>) => void; onNext: () => void; onBack?: () => void; t: HomepageTranslations; lang: string }) {
+function PlanStep({ data, set, onNext, onBack, t }: { data: OnboardingData; set: (patch: Partial<OnboardingData>) => void; onNext: () => void; onBack?: () => void; t: HomepageTranslations; lang: string }) {
   const { plan, billing } = data;
 
   const essentialFeats = [
@@ -1176,7 +1176,7 @@ interface CheckoutModalProps {
   t: HomepageTranslations;
 }
 
-function CheckoutModal({ isOpen, checkoutUrl, onClose, t }: CheckoutModalProps) {
+function CheckoutModal({ isOpen, onClose, t }: CheckoutModalProps) {
   if (!isOpen) return null;
 
   return (
@@ -1197,7 +1197,7 @@ function CheckoutModal({ isOpen, checkoutUrl, onClose, t }: CheckoutModalProps) 
 }
 
 /* ============ STEP 4 — Payment ============ */
-function PaymentStep({ data, set, onNext, onBack, t, lang }: { data: OnboardingData; set: (patch: Partial<OnboardingData>) => void; onNext: () => void; onBack: () => void; t: HomepageTranslations; lang: string }) {
+function PaymentStep({ data, onNext, onBack, t, lang }: { data: OnboardingData; set: (patch: Partial<OnboardingData>) => void; onNext: () => void; onBack: () => void; t: HomepageTranslations; lang: string }) {
   const plan = planById(data.plan);
   const price = data.billing === "yearly" ? plan.annual : plan.monthly;
   const [modalOpen, setModalOpen] = useState(false);
@@ -1423,7 +1423,6 @@ function SuccessStep({ data, t, lang }: { data: OnboardingData; t: HomepageTrans
 /* ============ MAIN ONBOARDING PROCESS ============ */
 function OnboardingContent() {
   const searchParams = useSearchParams();
-  const router = useRouter();
 
   // Onboarding Page Language State Hook
   const [lang, setLang] = useState<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi" | "pt" | "de" | "it" | "ko">("en");

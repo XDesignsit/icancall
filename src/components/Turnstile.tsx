@@ -122,7 +122,7 @@ export default function Turnstile({ onVerify, onError, onExpire }: TurnstileProp
       if (turnstile && widgetIdRef.current) {
         try {
           turnstile.remove(widgetIdRef.current);
-        } catch (e) {
+        } catch {
           // ignore cleanup errors on unmount
         }
       }

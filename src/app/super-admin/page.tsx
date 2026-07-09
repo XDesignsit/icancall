@@ -4,15 +4,6 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 
 /* ============ MOCK DATA ============ */
-const AVATAR_COLORS = [
-  "oklch(0.58 0.115 232)",
-  "oklch(0.62 0.10 198)",
-  "oklch(0.55 0.13 285)",
-  "oklch(0.60 0.13 30)",
-  "oklch(0.58 0.13 145)",
-  "oklch(0.6 0.14 350)",
-];
-
 const fmtUSD = (n: number, dp: number = 0) =>
   "$" + Number(n).toLocaleString("en-US", { minimumFractionDigits: dp, maximumFractionDigits: dp });
 const fmtNum = (n: number) => Number(n).toLocaleString("en-US");
@@ -34,10 +25,6 @@ const KPI = {
 };
 
 const MRR_SERIES = [4180, 4620, 5050, 5380, 5910, 6340, 6880, 7390, 7920, 8510, 9180, 9847];
-const SIGNUP_SERIES = [21, 24, 22, 28, 26, 31, 29, 34, 33, 38, 41, 44];
-const CHURN_SERIES = [3, 2, 4, 3, 5, 4, 6, 5, 7, 6, 8, 9];
-const ACCOUNTS_SERIES = [188, 210, 228, 253, 274, 301, 324, 353, 379, 411, 448, 487];
-
 const PLAN_SPLIT = [
   {
     id: "pro",
@@ -63,12 +50,6 @@ const PLAN_SPLIT = [
   },
 ];
 
-const STATUS_SPLIT = [
-  { id: "active", label: "Active", count: 470, kind: "green" },
-  { id: "past_due", label: "Past due", count: 12, kind: "amber" },
-  { id: "suspended", label: "Suspended", count: 5, kind: "rose" },
-];
-
 const MRR_MOVEMENT = [
   { label: "New business", amt: 1024, kind: "pos" },
   { label: "Expansion", amt: 388, kind: "pos" },
@@ -76,24 +57,6 @@ const MRR_MOVEMENT = [
   { label: "Contraction", amt: -214, kind: "neg" },
   { label: "Churn", amt: -529, kind: "neg" },
 ];
-
-const FEATURES = {
-  routing: [
-    { id: "menu", label: "Caller Menu", pct: 58, color: "var(--blue)" },
-    { id: "cascade", label: "Cascade", pct: 42, color: "var(--violet)" },
-  ],
-  voicemailEnabledPct: 71,
-  voicemailOfCallsPct: 5.8,
-  avgContacts: 4.3,
-  contactsDist: [
-    { n: "1", pct: 6 },
-    { n: "2", pct: 11 },
-    { n: "3", pct: 22 },
-    { n: "4", pct: 24 },
-    { n: "5", pct: 19 },
-    { n: "6", pct: 18 },
-  ],
-};
 
 const MAILEROO = {
   totalSent: 2845,
@@ -162,240 +125,6 @@ const HEALTH = {
     { code: "617", city: "Boston", numbers: 61, connect: 94.9 },
   ],
 };
-
-const ACCOUNTS = [
-  {
-    id: "ACC-2041",
-    owner: "Maria Delgado",
-    email: "maria.delgado@gmail.com",
-    color: "oklch(0.55 0.13 285)",
-    plan: "pro",
-    billing: "annual",
-    status: "active",
-    joined: "Nov 2, 2024",
-    last: "8m ago",
-    city: "San Francisco",
-    area: "415",
-    numbers: 2,
-    contacts: 8,
-    calls30: 142,
-    connect: 95.1,
-    vmRate: 4.2,
-    minutesUsed: 49,
-    minutesCap: 120,
-    mrr: 16.58,
-    ltv: 298,
-    next: "Nov 2, 2025",
-    isHero: true,
-    lines: [
-      {
-        label: "Eleanor's line",
-        person: "Eleanor Delgado · Mom",
-        number: "(415) 555-0142",
-        mode: "menu",
-        minutesUsed: 38,
-        contacts: 5,
-      },
-      {
-        label: "Robert's line",
-        person: "Robert Hale · Dad",
-        number: "(415) 555-0188",
-        mode: "cascade",
-        minutesUsed: 11,
-        contacts: 3,
-      },
-    ],
-  },
-  {
-    id: "ACC-2038",
-    owner: "Daniel Okonkwo",
-    email: "d.okonkwo@outlook.com",
-    color: "oklch(0.58 0.115 232)",
-    plan: "pro",
-    billing: "monthly",
-    status: "active",
-    joined: "Oct 19, 2024",
-    last: "2h ago",
-    city: "Chicago",
-    area: "312",
-    numbers: 2,
-    contacts: 9,
-    calls30: 96,
-    connect: 93.4,
-    vmRate: 6.1,
-    minutesUsed: 71,
-    minutesCap: 120,
-    mrr: 24.99,
-    ltv: 188,
-    next: "Jun 19, 2025",
-    lines: [
-      {
-        label: "Grace's line",
-        person: "Grace Okonkwo · Mother",
-        number: "(312) 555-0177",
-        mode: "menu",
-        minutesUsed: 44,
-        contacts: 6,
-      },
-      {
-        label: "Joseph's line",
-        person: "Joseph Okonkwo · Uncle",
-        number: "(312) 555-0204",
-        mode: "cascade",
-        minutesUsed: 27,
-        contacts: 3,
-      },
-    ],
-  },
-  {
-    id: "ACC-2035",
-    owner: "Priya Nair",
-    email: "priya.nair@gmail.com",
-    color: "oklch(0.6 0.14 350)",
-    plan: "essential",
-    billing: "monthly",
-    status: "active",
-    joined: "Oct 11, 2024",
-    last: "1d ago",
-    city: "New York",
-    area: "212",
-    numbers: 1,
-    contacts: 3,
-    calls30: 54,
-    connect: 96.0,
-    vmRate: 3.1,
-    minutesUsed: 22,
-    minutesCap: 30,
-    mrr: 14.99,
-    ltv: 104,
-    next: "Jun 11, 2025",
-    lines: [
-      {
-        label: "Asha's line",
-        person: "Asha Nair · Grandmother",
-        number: "(212) 555-0166",
-        mode: "menu",
-        minutesUsed: 22,
-        contacts: 3,
-      },
-    ],
-  },
-  {
-    id: "ACC-2033",
-    owner: "Robert Chen",
-    email: "rchen.family@gmail.com",
-    color: "oklch(0.62 0.10 198)",
-    plan: "pro",
-    billing: "annual",
-    status: "active",
-    joined: "Sep 28, 2024",
-    last: "4h ago",
-    city: "Seattle",
-    area: "206",
-    numbers: 2,
-    contacts: 7,
-    calls30: 88,
-    connect: 95.7,
-    vmRate: 4.8,
-    minutesUsed: 58,
-    minutesCap: 120,
-    mrr: 16.58,
-    ltv: 232,
-    next: "Sep 28, 2025",
-    lines: [
-      {
-        label: "Wei's line",
-        person: "Wei Chen · Father",
-        number: "(206) 555-0143",
-        mode: "cascade",
-        minutesUsed: 33,
-        contacts: 4,
-      },
-      {
-        label: "Mei's line",
-        person: "Mei Chen · Mother",
-        number: "(206) 555-0151",
-        mode: "menu",
-        minutesUsed: 25,
-        contacts: 3,
-      },
-    ],
-  },
-  {
-    id: "ACC-2030",
-    owner: "Sofia Martinez",
-    email: "sofia.m@icloud.com",
-    color: "oklch(0.60 0.13 30)",
-    plan: "essential",
-    billing: "annual",
-    status: "active",
-    joined: "Sep 14, 2024",
-    last: "3d ago",
-    city: "Miami",
-    area: "305",
-    numbers: 1,
-    contacts: 4,
-    calls30: 41,
-    connect: 92.4,
-    vmRate: 7.0,
-    minutesUsed: 19,
-    minutesCap: 30,
-    mrr: 10.75,
-    ltv: 129,
-    next: "Sep 14, 2025",
-    lines: [
-      {
-        label: "Carmen's line",
-        person: "Carmen Ruiz · Aunt",
-        number: "(305) 555-0188",
-        mode: "menu",
-        minutesUsed: 19,
-        contacts: 4,
-      },
-    ],
-  },
-  {
-    id: "ACC-2029",
-    owner: "James Patel",
-    email: "james.patel@gmail.com",
-    color: "oklch(0.58 0.13 145)",
-    plan: "pro",
-    billing: "monthly",
-    status: "past_due",
-    joined: "Sep 6, 2024",
-    last: "6d ago",
-    city: "Boston",
-    area: "617",
-    numbers: 2,
-    contacts: 6,
-    calls30: 33,
-    connect: 90.1,
-    vmRate: 9.2,
-    minutesUsed: 64,
-    minutesCap: 120,
-    mrr: 24.99,
-    ltv: 160,
-    next: "Overdue · May 6",
-    lines: [
-      {
-        label: "Nana's line",
-        person: "Vimala Patel · Grandmother",
-        number: "(617) 555-0122",
-        mode: "cascade",
-        minutesUsed: 40,
-        contacts: 4,
-      },
-      {
-        label: "Papa's line",
-        person: "Arun Patel · Grandfather",
-        number: "(617) 555-0139",
-        mode: "menu",
-        minutesUsed: 24,
-        contacts: 2,
-      },
-    ],
-  },
-];
 
 const TRANSACTIONS = [
   { id: "in_8841", acct: "Aisha Bello", amt: 24.99, kind: "paid", when: "Today · 11:04 AM", plan: "Pro · Monthly" },
@@ -688,7 +417,7 @@ interface AdminAccount {
 export default function SuperAdminApp() {
   const [view, setView] = useState("overview");
   const [searchQuery, setSearchQuery] = useState("");
-  const [toast, setToast] = useState<string | null>(null);
+  const [, setToast] = useState<string | null>(null);
   const [accounts, setAccounts] = useState<AdminAccount[]>([]);
   const [loading, setLoading] = useState(true);
 

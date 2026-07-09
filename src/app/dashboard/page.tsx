@@ -902,8 +902,6 @@ const getLocalizedPersonName = (person: string, lang: string) => {
 const initials = (name: string) =>
   (name || "").trim().split(/\s+/).map((w) => w[0]).slice(0, 2).join("").toUpperCase() || "?";
 
-const PLAN_MINUTES = 60; // per line, Pro
-
 const STATUS_META = {
   connected: { badge: "badge-green", label: "Connected", dirCls: "dir-in" },
   missed: { badge: "badge-rose", label: "Missed → alerted", dirCls: "dir-miss" },
@@ -1989,7 +1987,7 @@ function TestCall({ line, d, lang }: { line: Line; d: DashboardTranslations; lan
     });
   }
 
-  async function ringConnect(c: Contact, idx: number) {
+  async function ringConnect(c: Contact, _idx: number) {
     setScreen({
       cls: "ring-state",
       av: initials(c.name),
@@ -2430,6 +2428,9 @@ function RoutingView({
         color: line.contacts[2]?.color || "oklch(0.55 0.11 280)",
       },
     ]);
+    // Reseed the schedule only when switching lines; depending on line.schedule
+    // would clobber in-progress edits whenever the schedule state changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [line.id, line.contacts]);
 
   useEffect(() => {
@@ -2509,7 +2510,6 @@ function RoutingView({
   };
 
   const sortedSlots = [...localSchedule].sort((a, b) => a.startHour - b.startHour);
-  const totalHours = localSchedule.reduce((sum, slot) => sum + (slot.endHour - slot.startHour), 0);
 
   let hasOverlap = false;
   let hasGap = false;
@@ -3553,13 +3553,6 @@ function SettingsView({
 }
 
 /* Account & billing */
-const ACCT_TABS = [
-  { id: "profile", label: "Profile" },
-  { id: "security", label: "Login & security" },
-  { id: "contact", label: "Contact info" },
-  { id: "billing", label: "Payment & billing" },
-];
-
 export function AccountView({
   account,
   setAccount,
@@ -3725,6 +3718,9 @@ export function AccountView({
       loadUpgradeNumbers(upgradeAreaCode);
       setUpgradeSelectedNumber(null);
     }
+    // Fetch numbers only when the modal opens; the area-code input has its own
+    // handler, so re-running on upgradeAreaCode changes would double-fetch.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [planModalOpen]);
 
   const save17Map: Record<string, string> = {
@@ -6059,36 +6055,8 @@ export function AccountView({
 }
 
 /* ============ MAIN APPLICATION SHELL ============ */
-const NAV = [
-  {
-    group: "Manage",
-    items: [
-      { id: "overview", label: "Overview", icon: "overview" as keyof typeof ICONS },
-      { id: "contacts", label: "Contacts", icon: "contacts" as keyof typeof ICONS },
-      { id: "routing", label: "Routing", icon: "routing" as keyof typeof ICONS },
-    ],
-  },
-  {
-    group: "Activity",
-    items: [{ id: "log", label: "Call log", icon: "log" as keyof typeof ICONS, badge: true }],
-  },
-  {
-    group: "Settings",
-    items: [
-      { id: "settings", label: "Greetings & alerts", icon: "settings" as keyof typeof ICONS },
-      { id: "account", label: "Account & billing", icon: "user" as keyof typeof ICONS },
-    ],
-  },
-];
-
-const TITLES = {
-  overview: ["Overview", "Welcome back, Maria"],
-  contacts: ["Contacts", "Manage who can be reached"],
-  routing: ["Routing", "Choose how callers connect"],
-  log: ["Call log", "Every call, including missed attempts"],
-  settings: ["Greetings & alerts", "Greeting and notification settings"],
-  account: ["Account", "Profile, security and billing"],
-};
+// NAV and TITLES are built inside the component from translated strings; the
+// English-only module-level copies were dead and have been removed.
 
 const LINE_SCOPED = {
   overview: false,

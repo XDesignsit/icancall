@@ -40,7 +40,7 @@ export async function POST(request: Request) {
     const filePath = `${userId}/${contactId}.${extension}`;
 
     // Upload to Supabase storage 'voice-prompts' bucket
-    const { data, error } = await supabase.storage
+    const { error } = await supabase.storage
       .from('voice-prompts')
       .upload(filePath, buffer, {
         contentType,

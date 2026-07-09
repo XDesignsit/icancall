@@ -43,7 +43,7 @@ const ADDON_PRODUCT_IDS: Record<string, string> = {
 
 export async function POST(req: NextRequest) {
   try {
-    const { plan, billing, email, addon, quantity } = await req.json();
+    const { plan, billing, addon, quantity } = await req.json();
 
     const host = req.headers.get("host") || "localhost:3000";
     const proto = host.startsWith("localhost") ? "http" : "https";
