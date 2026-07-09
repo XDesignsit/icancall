@@ -75,6 +75,7 @@ const AREA_SUGGESTIONS = [
   { code: "305", city: "Miami" },
   { code: "206", city: "Seattle" },
   { code: "617", city: "Boston" },
+  { code: "787", city: "Puerto Rico" },
 ];
 
 const VANITY_WORDS = [
@@ -134,6 +135,29 @@ function fetchNumbers(areaCode: string, count = 6): NumberData[] {
     });
   }
   return out;
+}
+
+// Fetches real available numbers from Twilio, falling back to the mock
+// generator when the API is unconfigured, errors, or returns nothing.
+async function fetchNumbersLive(areaCode: string, count = 6): Promise<NumberData[]> {
+  const ac = areaCode.replace(/\D/g, "").slice(0, 3) || "415";
+  try {
+    const res = await fetch(`/api/twilio/numbers?areaCode=${ac}`);
+    if (res.ok) {
+      const data = await res.json();
+      if (data?.success && Array.isArray(data.results) && data.results.length) {
+        return data.results.slice(0, count).map((n: any) => ({
+          id: n.phoneNumber,
+          number: n.friendlyName || n.phoneNumber,
+          area: ac,
+          memorable: null,
+        }));
+      }
+    }
+  } catch {
+    // fall through to mock
+  }
+  return fetchNumbers(ac, count);
 }
 
 const initials = (name: string) =>
@@ -1013,11 +1037,11 @@ function NumberStep({ data, set, onNext, onBack, t, lang }: { data: OnboardingDa
   const load = (ac: string) => {
     setLoading(true);
     setSpin(true);
-    setTimeout(() => {
-      setResults(fetchNumbers(ac, 6));
+    fetchNumbersLive(ac, 6).then((nums) => {
+      setResults(nums);
       setLoading(false);
       setTimeout(() => setSpin(false), 120);
-    }, 650);
+    });
   };
 
   useEffect(() => { load(area); }, []); // eslint-disable-line

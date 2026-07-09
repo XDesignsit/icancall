@@ -3700,21 +3700,21 @@ export function AccountView({
 
   const loadAddonNumberSlot = (index: number, ac: string) => {
     setAddedNumbersConfig(prev => prev.map(c => c.index === index ? { ...c, isSearching: true, areaCode: ac } : c));
-    setTimeout(() => {
+    fetchNumbersLive(ac, 6).then((nums) => {
       setAddedNumbersConfig(prev => prev.map(c => c.index === index ? {
         ...c,
         isSearching: false,
-        numbersList: fetchNumbers(ac, 6)
+        numbersList: nums
       } : c));
-    }, 650);
+    });
   };
 
   const loadUpgradeNumbers = (ac: string) => {
     setIsSearchingNumbers(true);
-    setTimeout(() => {
-      setUpgradeNumbersList(fetchNumbers(ac, 6));
+    fetchNumbersLive(ac, 6).then((nums) => {
+      setUpgradeNumbersList(nums);
       setIsSearchingNumbers(false);
-    }, 650);
+    });
   };
 
   useEffect(() => {
@@ -5562,11 +5562,12 @@ export function AccountView({
                   const initialConfig: AddonNumberSlotConfig[] = Array.from({ length: delta }).map((_, idx) => ({
                     index: idx,
                     areaCode: "415",
-                    numbersList: fetchNumbers("415", 6),
+                    numbersList: [],
                     selectedNumber: null,
-                    isSearching: false,
+                    isSearching: true,
                   }));
                   setAddedNumbersConfig(initialConfig);
+                  initialConfig.forEach((c) => loadAddonNumberSlot(c.index, "415"));
                 } else {
                   setAddedNumbersConfig([]);
                 }
@@ -6466,10 +6467,10 @@ export default function DashboardApp() {
 
   const loadHeaderNumbers = (ac: string) => {
     setHeaderIsSearching(true);
-    setTimeout(() => {
-      setHeaderNumbersList(fetchNumbers(ac, 6));
+    fetchNumbersLive(ac, 6).then((nums) => {
+      setHeaderNumbersList(nums);
       setHeaderIsSearching(false);
-    }, 650);
+    });
   };
 
   const [headerRemovalLine, setHeaderRemovalLine] = useState<Line | null>(null);
@@ -7386,6 +7387,7 @@ const AREA_SUGGESTIONS = [
   { code: "305", city: "Miami" },
   { code: "206", city: "Seattle" },
   { code: "617", city: "Boston" },
+  { code: "787", city: "Puerto Rico" },
 ];
 
 const VANITY_WORDS = [
@@ -7445,5 +7447,28 @@ function fetchNumbers(areaCode: string, count = 6) {
     });
   }
   return out;
+}
+
+// Fetches real available numbers from Twilio, falling back to the mock
+// generator when the API is unconfigured, errors, or returns nothing.
+async function fetchNumbersLive(areaCode: string, count = 6): Promise<{ id: string; number: string; area: string; memorable: string | null }[]> {
+  const ac = areaCode.replace(/\D/g, "").slice(0, 3) || "415";
+  try {
+    const res = await fetch(`/api/twilio/numbers?areaCode=${ac}`);
+    if (res.ok) {
+      const data = await res.json();
+      if (data?.success && Array.isArray(data.results) && data.results.length) {
+        return data.results.slice(0, count).map((n: any) => ({
+          id: n.phoneNumber,
+          number: n.friendlyName || n.phoneNumber,
+          area: ac,
+          memorable: null,
+        }));
+      }
+    }
+  } catch {
+    // fall through to mock
+  }
+  return fetchNumbers(ac, count);
 }
 
