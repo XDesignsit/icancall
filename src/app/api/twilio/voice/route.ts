@@ -69,7 +69,10 @@ export async function POST(request: Request) {
 
     let twiml = '<?xml version="1.0" encoding="UTF-8"?>\n<Response>';
 
-    const lineMode = (account?.line?.mode as string) || 'menu';
+    let lineMode = (account?.line?.mode as string) || 'menu';
+    if (account?.plan === 'essential') {
+      lineMode = 'cascade';
+    }
     const customGreeting = account?.line?.settings?.greeting;
     const greetingText = customGreeting || "Thank you for calling the iCanCall priority line.";
     const greetingAudioPath = account?.line?.settings?.greetingAudioPath;
