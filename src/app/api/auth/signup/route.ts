@@ -76,12 +76,16 @@ export async function POST(request: Request) {
       // CAPTCHA verification is bypassed on signup since the flow requires a successful paid Creem checkout, preventing automated spam registration.
       const ip = request.headers.get("x-forwarded-for")?.split(",")[0] || "127.0.0.1";
 
-      // Sign up the user in Supabase Auth
+      // Sign up the user in Supabase Auth. Pass emailRedirectTo explicitly so the
+      // confirmation link points at the deployment's real host instead of falling
+      // back to the Supabase project's Site URL (which was set to localhost).
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
         password,
         options: {
           captchaToken: captchaToken || undefined,
+          emailRedirectTo: `${appUrl}/dashboard`,
         },
       });
 
