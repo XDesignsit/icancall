@@ -6739,6 +6739,20 @@ export default function DashboardApp() {
 
   const [toast, setToast] = useState<string | null>(null);
   const [switchOpen, setSwitchOpen] = useState(false);
+  const switchRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (switchRef.current && !switchRef.current.contains(event.target as Node)) {
+        setSwitchOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
   const [sideOpen, setSideOpen] = useState(false);
   const toastTimer = useRef<NodeJS.Timeout | null>(null);
 
@@ -6957,7 +6971,7 @@ export default function DashboardApp() {
           </select>
 
           {/* number switcher */}
-          <div className={`numswitch ${switchOpen ? "open" : ""}`}>
+          <div ref={switchRef} className={`numswitch ${switchOpen ? "open" : ""}`}>
             <button className="numswitch-btn" onClick={() => setSwitchOpen((o) => !o)}>
               <span className="ava" style={{ background: line.color }}>
                 {initials(getLocalizedPersonName(line.person, lang))}
