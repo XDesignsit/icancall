@@ -43,6 +43,20 @@ function App() {
   });
   const [toast, setToast] = React.useState(null);
   const [switchOpen, setSwitchOpen] = React.useState(false);
+  const switchRef = React.useRef(null);
+
+  React.useEffect(() => {
+    function handleClickOutside(event) {
+      if (switchRef.current && !switchRef.current.contains(event.target)) {
+        setSwitchOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
   const [sideOpen, setSideOpen] = React.useState(false);
   const toastTimer = React.useRef(null);
 
@@ -112,7 +126,7 @@ function App() {
           <div className="topbar-spacer"></div>
 
           {/* number switcher */}
-          <div className={`numswitch ${switchOpen ? 'open' : ''}`}>
+          <div ref={switchRef} className={`numswitch ${switchOpen ? 'open' : ''}`}>
             <button className="numswitch-btn" onClick={() => setSwitchOpen((o) => !o)}>
               <span className="ava" style={{ background: line.color }}>{initials(line.person)}</span>
               <span className="meta"><b>{line.label}</b><span>{line.number}</span></span>
