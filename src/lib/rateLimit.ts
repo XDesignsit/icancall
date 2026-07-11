@@ -121,6 +121,14 @@ export async function rateLimit(
  * @param ip Client IP address
  */
 export async function verifyTurnstile(token: string, ip?: string): Promise<boolean> {
+  // Fail-open counterpart to the client widget: when Turnstile is blocked,
+  // unreachable, or issued for a non-whitelisted domain, the widget emits this
+  // sentinel so real users are never locked out. Accept it server-side too.
+  if (token === "blocked_bypass") {
+    console.warn("Turnstile bypass token detected. Skipping CAPTCHA verification.");
+    return true;
+  }
+
   const secretKey = process.env.TURNSTILE_SECRET_KEY;
   if (!secretKey) {
     // If not configured, skip verification (helpful for testing/local development)
