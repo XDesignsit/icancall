@@ -15,6 +15,7 @@ interface AccountData {
   email: string;
   password?: string;
   captchaToken?: string;
+  smsConsent?: boolean;
   smsPhone?: string;
   phoneVerified?: boolean;
   emailVerified?: boolean;
@@ -645,7 +646,7 @@ function OtpCodeRow({ value, onChange, onVerify, loading, touched: ct, onBlur, l
 function AccountStep({ data, set, onNext, onBack, t, lang }: { data: OnboardingData; set: (patch: Partial<OnboardingData>) => void; onNext: () => void; onBack?: () => void; t: HomepageTranslations; lang: string }) {
   const a = data.account;
   const [touched, setTouched] = useState<Record<string, boolean>>({});
-  const [smsConsent, setSmsConsent] = useState(false);
+  const smsConsent = !!a.smsConsent;
   const [smsTouched, setSmsTouched] = useState(false);
 
   // Phone OTP state
@@ -924,14 +925,14 @@ function AccountStep({ data, set, onNext, onBack, t, lang }: { data: OnboardingD
             type="checkbox"
             checked={smsConsent}
             onChange={(e) => {
-              setSmsConsent(e.target.checked);
               setSmsTouched(true);
-              // Reset whichever verification path is now inactive
+              // Persist consent in wizard data (sent to the signup API) and
+              // reset whichever verification path is now inactive
               if (e.target.checked) {
-                set({ account: { ...a, emailVerified: false } });
+                set({ account: { ...a, smsConsent: true, emailVerified: false } });
                 setEmailCodeSent(false); setEmailOtp(""); setEmailApiErr(""); setEmailSuccessMsg("");
               } else {
-                set({ account: { ...a, phoneVerified: false } });
+                set({ account: { ...a, smsConsent: false, phoneVerified: false } });
                 setPhoneCodeSent(false); setPhoneOtp(""); setPhoneApiErr(""); setPhoneSuccessMsg("");
               }
             }}
@@ -1259,7 +1260,10 @@ function PaymentStep({ data, onNext, onBack, t, lang }: { data: OnboardingData; 
               name: data.account.name,
               numbers: data.numbers,
               captchaToken: data.account.captchaToken,
+              smsConsent: !!data.account.smsConsent,
               smsPhone: data.account.smsPhone,
+              plan: data.plan,
+              billing: data.billing,
             }),
           });
           if (!res.ok) {
@@ -1452,7 +1456,7 @@ function OnboardingContent() {
   const [data, setData] = useState<OnboardingData>({
     plan: "essential",
     billing: "monthly",
-    account: { name: "", email: "", password: "", smsPhone: "", phoneVerified: false, emailVerified: false },
+    account: { name: "", email: "", password: "", smsConsent: false, smsPhone: "", phoneVerified: false, emailVerified: false },
     numbers: [],
     payment: { name: "", card: "", exp: "", cvc: "" },
   });
