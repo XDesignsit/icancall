@@ -10,9 +10,19 @@ const signupSchema = z.object({
   password: z.string().min(8).optional(),
   name: z.string().min(1).optional(),
   preferredName: z.string().optional(),
-  numbers: z.array(z.string()).optional(),
+  // The wizard posts full number objects ({ id, number, area, memorable }); plain strings also accepted
+  numbers: z.array(z.union([z.string(), z.looseObject({ number: z.string() })])).optional(),
   captchaToken: z.string().optional(),
+  smsConsent: z.boolean().optional(),
+  plan: z.enum(["essential", "pro"]).optional(),
+  billing: z.enum(["monthly", "yearly"]).optional(),
 });
+
+// Mirrors the wizard's PLANS config for the confirmation email summary
+const PLAN_DETAILS = {
+  essential: { name: "Essential Plan", lines: "1 Virtual Line", monthly: "$14.99", yearly: "$149" },
+  pro: { name: "Pro Plan", lines: "2 Virtual Lines", monthly: "$24.99", yearly: "$249" },
+} as const;
 
 export async function POST(request: Request) {
   try {
@@ -21,9 +31,14 @@ export async function POST(request: Request) {
     if (!parsed.success) {
       return NextResponse.json({ error: "Invalid request data" }, { status: 400 });
     }
-    const { email, password, name, preferredName, numbers, captchaToken } = parsed.data;
+    const { email, password, name, preferredName, numbers, captchaToken, billing } = parsed.data;
+    const smsConsent = parsed.data.smsConsent === true;
     const smsPhone: string = (body.smsPhone || "").replace(/\D/g, "");
-    const normalizedSmsPhone = smsPhone.length === 10 ? `+1${smsPhone}` : smsPhone.length === 11 ? `+${smsPhone}` : "";
+    // Only retain the phone number when the user actually opted in to SMS
+    const rawNormalized = smsPhone.length === 10 ? `+1${smsPhone}` : smsPhone.length === 11 ? `+${smsPhone}` : "";
+    const normalizedSmsPhone = smsConsent ? rawNormalized : "";
+    const plan = parsed.data.plan || (numbers && numbers.length > 0 ? "pro" : "essential");
+    const billingCycle = billing || "monthly";
 
     // 1. Check if user already has an active session cookie (e.g. logged in via Google)
     const cookieStore = await cookies();
@@ -44,13 +59,13 @@ export async function POST(request: Request) {
           preferred_name: preferredName || (name ?? "").split(" ")[0],
           settings: {
             notifyEmail: email,
-            smsConsent: true,
+            smsConsent,
             smsPhone: normalizedSmsPhone,
             twoFactor: false,
             card: { brand: "Visa", last4: "4242", exp: "12 / 28" },
             billingAddr: "123 Main St, Oakland, CA 94607",
-            plan: numbers && numbers.length > 0 ? "pro" : "essential",
-            billingCycle: "monthly",
+            plan,
+            billingCycle,
             addons: { extraNumbers: 0, minuteBlocks: 0, usedMin: 0, rolloverMin: 0 },
           }
         })
@@ -105,13 +120,13 @@ export async function POST(request: Request) {
           preferred_name: preferredName || (name ?? "").split(" ")[0],
           settings: {
             notifyEmail: email,
-            smsConsent: true,
+            smsConsent,
             smsPhone: normalizedSmsPhone,
             twoFactor: false,
             card: { brand: "Visa", last4: "4242", exp: "12 / 28" },
             billingAddr: "123 Main St, Oakland, CA 94607",
-            plan: numbers && numbers.length > 0 ? "pro" : "essential",
-            billingCycle: "monthly",
+            plan,
+            billingCycle,
             addons: { extraNumbers: 0, minuteBlocks: 0, usedMin: 0, rolloverMin: 0 },
           }
         });
@@ -148,6 +163,33 @@ export async function POST(request: Request) {
 
       if (linesError) {
         console.error("Failed to seed phone lines:", linesError);
+      }
+    }
+
+    // 3. Send signup confirmations. Failures here must never fail the signup itself.
+    if (userId) {
+      const details = PLAN_DETAILS[plan];
+      const price = billingCycle === "yearly" ? details.yearly : details.monthly;
+      const interval = billingCycle === "yearly" ? "year" : "month";
+      const firstName = preferredName || (name ?? "").split(" ")[0] || "there";
+
+      try {
+        const { sendWelcomeBillingEmail } = await import("@/lib/mail");
+        await sendWelcomeBillingEmail(email, name || firstName, details.name, price, interval, "Active (Paid)", details.lines);
+      } catch (mailErr) {
+        console.error("Failed to send signup confirmation email:", mailErr);
+      }
+
+      if (smsConsent && normalizedSmsPhone) {
+        try {
+          const { sendSms } = await import("@/lib/twilio");
+          await sendSms(
+            normalizedSmsPhone,
+            `Welcome to iCanCall, ${firstName}! Your ${details.name} is active. Manage your lines and trusted contacts at https://app.icancall.co/dashboard — Reply STOP to opt out.`
+          );
+        } catch (smsErr) {
+          console.error("Failed to send signup confirmation SMS:", smsErr);
+        }
       }
     }
 
