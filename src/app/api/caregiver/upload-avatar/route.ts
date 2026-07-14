@@ -83,9 +83,9 @@ export async function POST(request: Request) {
               contentType,
               upsert: true,
             });
-        } catch (bucketErr: any) {
+        } catch (bucketErr) {
           console.error("Failed to create bucket or retry upload:", bucketErr);
-          return NextResponse.json({ error: "Storage setup failed: " + (bucketErr.message || "Cannot create bucket") }, { status: 500 });
+          return NextResponse.json({ error: "Storage setup failed: " + (bucketErr instanceof Error ? bucketErr.message : "Cannot create bucket") }, { status: 500 });
         }
       }
 
@@ -118,8 +118,8 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json({ success: true, avatarUrl });
-  } catch (err: any) {
+  } catch (err) {
     console.error("Avatar upload API error:", err);
-    return NextResponse.json({ error: err.message || "Internal Server Error" }, { status: 500 });
+    return NextResponse.json({ error: err instanceof Error ? err.message : "Internal Server Error" }, { status: 500 });
   }
 }

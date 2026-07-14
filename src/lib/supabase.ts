@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import fs from 'fs';
 import path from 'path';
 
@@ -12,6 +12,10 @@ if (isMock) {
     'Warning: Missing or placeholder Supabase environment variables. Bypassing database and running local mock client (saving state in scratch/local_db.json).'
   );
 }
+
+type MockRow = Record<string, unknown>;
+type MockDb = Record<string, MockRow[]>;
+type MockResult = { data: MockRow[]; error: Error | null };
 
 class MockSupabaseClient {
   private dbPath: string;
@@ -31,7 +35,7 @@ class MockSupabaseClient {
     }
   }
 
-  private readDb() {
+  private readDb(): MockDb {
     this.ensureDbExists();
     try {
       return JSON.parse(fs.readFileSync(this.dbPath, 'utf8'));
@@ -40,7 +44,7 @@ class MockSupabaseClient {
     }
   }
 
-  private writeDb(data: any) {
+  private writeDb(data: MockDb) {
     fs.writeFileSync(this.dbPath, JSON.stringify(data, null, 2), 'utf8');
   }
 
@@ -67,7 +71,7 @@ class MockSupabaseClient {
     admin: {
       listUsers: async () => {
         const db = this.readDb();
-        const users = db.profiles.map((p: any) => ({ id: p.id, email: p.email }));
+        const users = db.profiles.map((p) => ({ id: p.id, email: p.email }));
         return { data: { users }, error: null };
       },
       createUser: async ({ email }: { email: string }) => {
@@ -79,7 +83,7 @@ class MockSupabaseClient {
 
   storage = {
     from: (bucket: string) => ({
-      upload: async (filePath: string, fileBody: any) => {
+      upload: async (filePath: string, _fileBody: unknown) => {
         console.log(`[MOCK] Storage upload to ${bucket}/${filePath}`);
         return { data: { path: filePath }, error: null };
       },
@@ -96,17 +100,17 @@ class MockSupabaseClient {
     }
 
     let action: 'select' | 'insert' | 'update' | 'upsert' | 'delete' = 'select';
-    let actionPayload: any = null;
-    const filters: { type: 'eq' | 'not'; column: string; value: any; operator?: string }[] = [];
+    let actionPayload: MockRow | MockRow[] | null = null;
+    const filters: { type: 'eq' | 'not'; column: string; value: unknown; operator?: string }[] = [];
 
     const builder = {
-      select: (columns: string = '*') => {
+      select: (_columns: string = '*') => {
         if (action !== 'insert' && action !== 'update' && action !== 'upsert' && action !== 'delete') {
           action = 'select';
         }
         return builder;
       },
-      eq: (column: string, value: any) => {
+      eq: (column: string, value: unknown) => {
         filters.push({ type: 'eq', column, value });
         return builder;
       },
@@ -114,17 +118,17 @@ class MockSupabaseClient {
         filters.push({ type: 'not', column, value, operator });
         return builder;
       },
-      insert: (rowOrRows: any) => {
+      insert: (rowOrRows: MockRow | MockRow[]) => {
         action = 'insert';
         actionPayload = rowOrRows;
         return builder;
       },
-      update: (updates: any) => {
+      update: (updates: MockRow) => {
         action = 'update';
         actionPayload = updates;
         return builder;
       },
-      upsert: (rowOrRows: any) => {
+      upsert: (rowOrRows: MockRow | MockRow[]) => {
         action = 'upsert';
         actionPayload = rowOrRows;
         return builder;
@@ -134,24 +138,24 @@ class MockSupabaseClient {
         return builder;
       },
 
-      execute: () => {
+      execute: (): MockResult => {
         let data = [...db[table]];
 
         // 1. Apply filters
         filters.forEach(f => {
           if (f.type === 'eq') {
-            data = data.filter((item: any) => item[f.column] === f.value);
+            data = data.filter((item) => item[f.column] === f.value);
           } else if (f.type === 'not' && f.operator === 'in') {
-            const ids = f.value.replace(/[()']/g, '').split(',').map((s: string) => s.trim());
-            data = data.filter((item: any) => !ids.includes(item[f.column]));
+            const ids = String(f.value).replace(/[()']/g, '').split(',').map((s) => s.trim());
+            data = data.filter((item) => !ids.includes(String(item[f.column])));
           }
         });
 
         // 2. Perform action
         if (action === 'insert') {
-          const rows = Array.isArray(actionPayload) ? actionPayload : [actionPayload];
-          const added: any[] = [];
-          rows.forEach((r: any) => {
+          const rows = Array.isArray(actionPayload) ? actionPayload : [actionPayload || {}];
+          const added: MockRow[] = [];
+          rows.forEach((r) => {
             const newRow = { ...r };
             if (!newRow.id) {
               newRow.id = `mock-row-${Math.random().toString(36).substring(2, 11)}`;
@@ -161,30 +165,30 @@ class MockSupabaseClient {
           });
           this.writeDb(db);
           return { data: added, error: null };
-        } 
-        
+        }
+
         if (action === 'update') {
-          const matchingIds = data.map((item: any) => item.id);
-          db[table] = db[table].map((item: any) => {
+          const matchingIds = data.map((item) => item.id);
+          db[table] = db[table].map((item) => {
             if (matchingIds.includes(item.id)) {
               return { ...item, ...actionPayload, updated_at: new Date().toISOString() };
             }
             return item;
           });
           this.writeDb(db);
-          const updated = db[table].filter((item: any) => matchingIds.includes(item.id));
+          const updated = db[table].filter((item) => matchingIds.includes(item.id));
           return { data: updated, error: null };
         }
 
         if (action === 'upsert') {
-          const rows = Array.isArray(actionPayload) ? actionPayload : [actionPayload];
-          const upserted: any[] = [];
-          rows.forEach((r: any) => {
+          const rows = Array.isArray(actionPayload) ? actionPayload : [actionPayload || {}];
+          const upserted: MockRow[] = [];
+          rows.forEach((r) => {
             let existingIdx = -1;
             if (r.id) {
-              existingIdx = db[table].findIndex((item: any) => item.id === r.id);
+              existingIdx = db[table].findIndex((item) => item.id === r.id);
             } else if (r.user_id && r.number) {
-              existingIdx = db[table].findIndex((item: any) => item.user_id === r.user_id && item.number === r.number);
+              existingIdx = db[table].findIndex((item) => item.user_id === r.user_id && item.number === r.number);
             }
 
             const targetRow = { ...r };
@@ -205,8 +209,8 @@ class MockSupabaseClient {
         }
 
         if (action === 'delete') {
-          const matchingIds = data.map((item: any) => item.id);
-          db[table] = db[table].filter((item: any) => !matchingIds.includes(item.id));
+          const matchingIds = data.map((item) => item.id);
+          db[table] = db[table].filter((item) => !matchingIds.includes(item.id));
           this.writeDb(db);
           return { data, error: null };
         }
@@ -222,7 +226,7 @@ class MockSupabaseClient {
         const { data, error } = builder.execute();
         return { data: data ? data[0] || null : null, error: data && data[0] ? null : (error || new Error("No row found")) };
       },
-      then: (onfulfilled?: (value: any) => any) => {
+      then: (onfulfilled?: (value: MockResult) => unknown) => {
         const promise = Promise.resolve(builder.execute());
         return promise.then(onfulfilled);
       }
@@ -233,7 +237,7 @@ class MockSupabaseClient {
 }
 
 export const supabase = isMock
-  ? (new MockSupabaseClient() as any)
+  ? (new MockSupabaseClient() as unknown as SupabaseClient)
   : createClient(
       supabaseUrl,
       supabaseServiceKey,

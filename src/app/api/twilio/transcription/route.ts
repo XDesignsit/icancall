@@ -55,7 +55,7 @@ export async function POST(request: Request) {
         const fromClean = String(fromNumber).replace(/\D/g, '');
         if (fromClean.length >= 7) {
           const contacts = account.line?.contacts || [];
-          const match = contacts.find((c: any) => {
+          const match = contacts.find((c) => {
             if (!c.phone) return false;
             const cleanPhone = String(c.phone).replace(/\D/g, '');
             // Match last 10 digits to bypass country prefix matching differences
@@ -111,7 +111,7 @@ export async function POST(request: Request) {
       console.error('❌ Failed to dispatch voicemail email alert:', result.error);
       return NextResponse.json({ success: false, error: 'Email dispatch failure' }, { status: 500 });
     }
-  } catch (error: any) {
+  } catch (error) {
     console.error('Twilio Callback Endpoint Error:', error);
     return NextResponse.json({ error: 'Internal server processing error' }, { status: 500 });
   }

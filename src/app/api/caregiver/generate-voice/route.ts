@@ -78,8 +78,8 @@ export async function POST(request: Request) {
       filePath: filePath,
       audioUrl: signData?.signedUrl || null,
     });
-  } catch (err: any) {
+  } catch (err) {
     console.error('generate-voice API route error:', err);
-    return NextResponse.json({ error: err.message || 'Internal Server Error' }, { status: 500 });
+    return NextResponse.json({ error: err instanceof Error ? err.message : 'Internal Server Error' }, { status: 500 });
   }
 }

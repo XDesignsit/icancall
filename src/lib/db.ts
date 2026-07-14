@@ -1,5 +1,20 @@
 import { supabase } from './supabase';
 
+export interface LineContact {
+  name?: string;
+  phone?: string;
+  voicePath?: string;
+  available?: boolean;
+  [key: string]: unknown;
+}
+
+export interface LineSettings {
+  voiceId?: string;
+  greeting?: string;
+  greetingAudioPath?: string;
+  [key: string]: unknown;
+}
+
 export interface Account {
   id: string;
   name: string;
@@ -13,9 +28,9 @@ export interface Account {
     id: string;
     name: string;
     type: string;
-    contacts: any[];
+    contacts: LineContact[];
     mode: 'menu' | 'cascade' | 'schedule';
-    settings: any;
+    settings: LineSettings;
   };
 }
 
