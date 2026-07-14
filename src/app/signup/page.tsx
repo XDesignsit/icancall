@@ -53,7 +53,7 @@ const PLANS = [
     numbers: 1,
     monthly: { amt: 14.99, label: "$14.99", per: "/mo", note: "Billed monthly" },
     annual:  { amt: 149,   label: "$149",   per: "/yr", note: "$12.42/mo, billed yearly" },
-    feats: ["1 phone number", "3 trusted contacts", "Cascade + Caller Menu", "30 voice minutes"],
+    feats: ["1 phone number", "3 trusted contacts", "Call Cascade (Sequential)", "30 voice minutes"],
   },
   {
     id: "pro" as Plan,
@@ -63,7 +63,7 @@ const PLANS = [
     numbers: 2,
     monthly: { amt: 24.99, label: "$24.99", per: "/mo", note: "Billed monthly" },
     annual:  { amt: 249,   label: "$249",   per: "/yr", note: "$20.75/mo, billed yearly" },
-    feats: ["2 phone numbers", "6 trusted contacts", "Cascade + Caller Menu", "60 minutes + alerts"],
+    feats: ["2 phone numbers", "6 trusted contacts", "All routing modes + scheduling", "60 minutes + alerts"],
   },
 ];
 

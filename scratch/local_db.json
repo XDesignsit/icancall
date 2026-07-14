@@ -23,14 +23,14 @@
         "plan": "pro",
         "billingCycle": "monthly",
         "addons": {
-          "extraNumbers": 0,
+          "extraNumbers": 1,
           "minuteBlocks": 0,
           "usedMin": 0,
           "rolloverMin": 0
         },
         "avatarUrl": ""
       },
-      "updated_at": "2026-07-02T23:05:08.503Z"
+      "updated_at": "2026-07-09T21:55:53.358Z"
     }
   ],
   "phone_lines": [
@@ -48,14 +48,76 @@
           "available": true
         }
       ],
-      "id": "mock-row-tslf9cfks",
+      "id": "mock-row-fpr851mxk",
       "settings": {
         "color": "oklch(0.58 0.115 232)",
-        "mode": "menu",
+        "mode": "simultaneous",
         "minutesUsed": 0,
         "schedule": [],
         "extraSettings": {}
       }
+    },
+    {
+      "user_id": "mock-user-support-icancall-co",
+      "number": "(787) 640-1746",
+      "name": "Secondary line",
+      "type": "Trusted contact line",
+      "contacts": [
+        {
+          "id": 1,
+          "name": "Support Demo",
+          "phone": "+14155550192",
+          "rel": "Primary Caregiver",
+          "available": true
+        }
+      ],
+      "settings": {
+        "color": "oklch(0.62 0.10 198)",
+        "mode": "cascade",
+        "minutesUsed": 0,
+        "schedule": [],
+        "extraSettings": {
+          "greeting": "",
+          "bilingual": false,
+          "language2": "es",
+          "notifSMS": true,
+          "notifEmail": true,
+          "notifMissed": true,
+          "notifWeekly": false
+        }
+      },
+      "id": "mock-row-ql5g9rvdp"
+    },
+    {
+      "user_id": "mock-user-support-icancall-co",
+      "number": "(868) 280-9180",
+      "name": "Additional line 1",
+      "type": "Trusted contact line",
+      "contacts": [
+        {
+          "id": 1,
+          "name": "Support Demo",
+          "phone": "+14155550192",
+          "rel": "Primary Caregiver",
+          "available": true
+        }
+      ],
+      "settings": {
+        "color": "oklch(0.62 0.10 198)",
+        "mode": "cascade",
+        "minutesUsed": 0,
+        "schedule": [],
+        "extraSettings": {
+          "greeting": "",
+          "bilingual": false,
+          "language2": "es",
+          "notifSMS": true,
+          "notifEmail": true,
+          "notifMissed": true,
+          "notifWeekly": false
+        }
+      },
+      "id": "mock-row-zezbb320s"
     }
   ]
 }

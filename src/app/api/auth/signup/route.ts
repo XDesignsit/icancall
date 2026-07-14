@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { z } from "zod";
 import { supabase } from "@/lib/supabase";
 import { verifySession } from "@/lib/session";
+import { verifyTurnstile } from "@/lib/rateLimit";
 
 const signupSchema = z.object({
   email: z.string().email(),
@@ -88,6 +89,7 @@ export async function POST(request: Request) {
       }
 
       // CAPTCHA verification is bypassed on signup since the flow requires a successful paid Creem checkout, preventing automated spam registration.
+      const ip = request.headers.get("x-forwarded-for")?.split(",")[0] || "127.0.0.1";
 
       // Sign up the user in Supabase Auth. Pass emailRedirectTo explicitly so the
       // confirmation link points at the deployment's real host instead of falling
@@ -141,7 +143,7 @@ export async function POST(request: Request) {
 
       const phoneLinesRows = numbers.map((num) => ({
         user_id: userId,
-        number: num,
+        number: typeof num === "string" ? num : num.number,
         name: "My Priority Line",
         type: "seniors",
         contacts: [
@@ -167,15 +169,21 @@ export async function POST(request: Request) {
     // 3. Send signup confirmations. Failures here must never fail the signup itself.
     if (userId) {
       const details = PLAN_DETAILS[plan];
-      const price = billingCycle === "yearly" ? details.yearly : details.monthly;
-      const interval = billingCycle === "yearly" ? "year" : "month";
       const firstName = preferredName || (name ?? "").split(" ")[0] || "there";
 
+      // Import the paid customer into the Acumbamail Subscribers list. The
+      // welcome email is sent by Acumbamail's list autoresponder (welcome_email),
+      // so we intentionally do not also send an SMTP welcome here.
       try {
-        const { sendWelcomeBillingEmail } = await import("@/lib/mail");
-        await sendWelcomeBillingEmail(email, name || firstName, details.name, price, interval, "Active (Paid)", details.lines);
-      } catch (mailErr) {
-        console.error("Failed to send signup confirmation email:", mailErr);
+        const { addAcumbamailSubscriber } = await import("@/lib/acumbamail");
+        await addAcumbamailSubscriber({
+          listId: process.env.ACUMBAMAIL_SUBSCRIBERS_LIST_ID,
+          email,
+          mergeFields: { name: name || firstName },
+          welcomeEmail: true,
+        });
+      } catch (acumbaErr) {
+        console.error("Failed to import subscriber to Acumbamail:", acumbaErr);
       }
 
       if (smsConsent && normalizedSmsPhone) {

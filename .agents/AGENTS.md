@@ -26,3 +26,16 @@ When building serverless endpoints (Next.js API routes or Server Actions) that q
 ## Development & Tooling Limitations
 
 1. **Browser Automation**: The `browser_subagent` tool is constrained by platform capabilities and only supports local Chrome mode on Linux. When the host OS is macOS, do not attempt to spawn browser subagents for dashboard settings or configurations; instead, provide step-by-step manual instructions for the user.
+
+## Standalone HTML Mockup Synchronization
+
+When modifying core React components that also exist in the standalone HTML mockups (e.g., `iCanCall Dashboard (standalone).html`, `iCanCall Parents Landing (standalone).html`, etc.):
+1. **Locate the Extracted Asset**: Find the matching component source file within the `extracted_designs/` subdirectories.
+2. **Apply Identical Changes**: Modify the component code in the extracted JS file.
+3. **Repack the HTML Bundle**: Run the corresponding python script in `scratch/` (such as `python3 scratch/repack_dashboard.py` or `python3 scratch/repack_all.py`) to re-compress, base64-encode, and update the manifest within the standalone HTML file.
+
+## Cross-Device UI Interactions
+
+1. **Outside Click Dismissals**: When implementing document-level event listeners to dismiss or close custom dropdowns, popovers, or modals upon clicking outside:
+   - Always register both `mousedown` and `touchstart` event listeners on the document to ensure reliable dismissal behavior across both desktop mice and mobile touch screens.
+   - Clean up both event listeners when the component unmounts.
