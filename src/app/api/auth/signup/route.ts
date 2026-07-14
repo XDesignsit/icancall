@@ -169,15 +169,21 @@ export async function POST(request: Request) {
     // 3. Send signup confirmations. Failures here must never fail the signup itself.
     if (userId) {
       const details = PLAN_DETAILS[plan];
-      const price = billingCycle === "yearly" ? details.yearly : details.monthly;
-      const interval = billingCycle === "yearly" ? "year" : "month";
       const firstName = preferredName || (name ?? "").split(" ")[0] || "there";
 
+      // Import the paid customer into the Acumbamail Subscribers list. The
+      // welcome email is sent by Acumbamail's list autoresponder (welcome_email),
+      // so we intentionally do not also send an SMTP welcome here.
       try {
-        const { sendWelcomeBillingEmail } = await import("@/lib/mail");
-        await sendWelcomeBillingEmail(email, name || firstName, details.name, price, interval, "Active (Paid)", details.lines);
-      } catch (mailErr) {
-        console.error("Failed to send signup confirmation email:", mailErr);
+        const { addAcumbamailSubscriber } = await import("@/lib/acumbamail");
+        await addAcumbamailSubscriber({
+          listId: process.env.ACUMBAMAIL_SUBSCRIBERS_LIST_ID,
+          email,
+          mergeFields: { name: name || firstName },
+          welcomeEmail: true,
+        });
+      } catch (acumbaErr) {
+        console.error("Failed to import subscriber to Acumbamail:", acumbaErr);
       }
 
       if (smsConsent && normalizedSmsPhone) {
