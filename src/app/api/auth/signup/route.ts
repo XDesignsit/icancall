@@ -141,9 +141,9 @@ export async function POST(request: Request) {
       // First clear any existing seeded phone lines to avoid duplicates
       await supabase.from("phone_lines").delete().eq("user_id", userId);
 
-      const phoneLinesRows = numbers.map((num: any) => ({
+      const phoneLinesRows = numbers.map((num) => ({
         user_id: userId,
-        number: num.number || num,
+        number: typeof num === "string" ? num : num.number,
         name: "My Priority Line",
         type: "seniors",
         contacts: [
