@@ -75,6 +75,10 @@ const REGION_AREA_CODES: [AreaCodeRegion, string[]][] = [
   [{ abbr: "GU", name: "Guam", flag: "gu" }, ["671"]],
   [{ abbr: "AS", name: "American Samoa", flag: "as" }, ["684"]],
   [{ abbr: "MP", name: "Northern Mariana Islands", flag: "mp" }, ["670"]],
+  // NANP Caribbean markets served by Telnyx (national flags on FlagCDN).
+  [{ abbr: "TT", name: "Trinidad & Tobago", flag: "tt" }, ["868"]],
+  [{ abbr: "BB", name: "Barbados", flag: "bb" }, ["246"]],
+  [{ abbr: "JM", name: "Jamaica", flag: "jm" }, ["876", "658"]],
 ];
 
 const AREA_CODE_TO_REGION: Record<string, AreaCodeRegion> = {};

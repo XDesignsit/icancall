@@ -1,5 +1,13 @@
 import { NextResponse } from 'next/server';
-import { searchAvailableNumbers, isTwilioConfigured } from '@/lib/twilio';
+import {
+  searchAvailableNumbers as searchTwilioNumbers,
+  isTwilioConfigured,
+  telnyxCountryForAreaCode,
+} from '@/lib/twilio';
+import {
+  searchAvailableNumbers as searchTelnyxNumbers,
+  isTelnyxConfigured,
+} from '@/lib/telnyx';
 
 export async function GET(request: Request) {
   try {
@@ -10,11 +18,29 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'Area code must be a 3-digit number' }, { status: 400 });
     }
 
-    const availableNumbers = await searchAvailableNumbers(areaCode);
+    // NANP Caribbean area codes (868/246/876/658) are stocked by Telnyx, not
+    // Twilio, so route those searches to Telnyx. `configured` reflects the
+    // provider actually queried so the client mock-fallback only kicks in when
+    // that provider is unconfigured (local dev).
+    const telnyxCountry = telnyxCountryForAreaCode(areaCode);
+
+    if (telnyxCountry) {
+      const availableNumbers = await searchTelnyxNumbers(telnyxCountry);
+      return NextResponse.json({
+        success: true,
+        configured: isTelnyxConfigured(),
+        provider: 'telnyx',
+        areaCode,
+        results: availableNumbers,
+      });
+    }
+
+    const availableNumbers = await searchTwilioNumbers(areaCode);
 
     return NextResponse.json({
       success: true,
       configured: isTwilioConfigured(),
+      provider: 'twilio',
       areaCode,
       results: availableNumbers,
     });

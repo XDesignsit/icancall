@@ -7475,6 +7475,9 @@ const AREA_SUGGESTIONS = [
   { code: "689", city: "Orlando" },
   { code: "984", city: "Raleigh" },
   { code: "787", city: "Puerto Rico" },
+  { code: "868", city: "Trinidad & Tobago" },
+  { code: "246", city: "Barbados" },
+  { code: "876", city: "Jamaica" },
 ];
 
 const VANITY_WORDS = [
