@@ -12,6 +12,7 @@ interface Contact {
   name: string;
   rel: string;
   available: boolean;
+  timeSlot?: "day" | "night" | "always";
 }
 
 interface SimulatedCallConfig {
@@ -214,13 +215,15 @@ export default function Home() {
 
   // Circle builder simulator state
   const [contacts, setContacts] = useState<Contact[]>([
-    { id: 1, name: "Sarah R.", rel: "Daughter", available: false },
-    { id: 2, name: "David M.", rel: "Son", available: true },
-    { id: 3, name: "Lena N.", rel: "Neighbor", available: true },
+    { id: 1, name: "Sarah R.", rel: "Daughter", available: false, timeSlot: "day" },
+    { id: 2, name: "David M.", rel: "Son", available: true, timeSlot: "day" },
+    { id: 3, name: "Lena N.", rel: "Neighbor", available: true, timeSlot: "day" },
+    { id: 4, name: "Dr. Patel", rel: "Care team", available: true, timeSlot: "night" },
   ]);
   const [addName, setAddName] = useState("");
   const [addRel, setAddRel] = useState("");
   const [simMode, setSimMode] = useState<"cascade" | "menu" | "simultaneous" | "schedule">("cascade");
+  const [simTime, setSimTime] = useState("09:00");
   const [simCalling, setSimCalling] = useState(false);
   const [simScreen, setSimScreen] = useState<SimulatedCallConfig>({
     av: "—",
@@ -299,7 +302,8 @@ export default function Home() {
       id: Math.max(...prev.map(c => c.id), 0) + 1,
       name: addName.trim(),
       rel: addRel.trim(),
-      available: true
+      available: true,
+      timeSlot: "always"
     }]);
     setAddName("");
     setAddRel("");
@@ -415,73 +419,90 @@ export default function Home() {
       setSimMissedRows([]);
     } else if (simMode === "schedule") {
       // Schedule Mode Simulation
-      setSimDots(Array(contacts.length).fill("standingby"));
-      setSimScreen({ av: "\u2022", name: "Connecting\u2026", state: "Placing your call" });
-      await new Promise(r => setTimeout(r, 900));
+      const hour = Number(simTime.split(":")[0]);
+      const scheduleTime = (hour >= 8 && hour < 20) ? "day" : "night";
+      const slotDescription = scheduleTime === "day" ? "Daytime Routing" : "Nighttime Routing";
 
-      const hour = new Date().getHours();
-      let activeContact = null;
-      let slotDescription = "";
+      const activeContacts = contacts.filter(c => c.timeSlot === scheduleTime || c.timeSlot === "always");
 
-      if (hour >= 0 && hour < 7) {
-        activeContact = contacts.find(c => c.name.toLowerCase().includes("dawn") || c.rel.toLowerCase().includes("paid")) || contacts[2] || contacts[0];
-        slotDescription = "Night Coverage";
-      } else if (hour >= 7 && hour < 15) {
-        activeContact = contacts.find(c => c.name.toLowerCase().includes("sarah") || c.rel.toLowerCase().includes("daughter")) || contacts[0];
-        slotDescription = "Daytime Coverage";
-      } else {
-        activeContact = contacts.find(c => c.name.toLowerCase().includes("david") || c.rel.toLowerCase().includes("son")) || contacts[1] || contacts[0];
-        slotDescription = "Evening Coverage";
+      setSimDots(Array(activeContacts.length).fill("standingby"));
+      setSimScreen({
+        av: scheduleTime === "day" ? "☀️" : "🌙",
+        name: slotDescription,
+        state: `Routing to ${scheduleTime} contacts\u2026`
+      });
+      await new Promise(r => setTimeout(r, 1000));
+
+      if (activeContacts.length === 0) {
+        setSimScreen({
+          av: "!",
+          name: `No ${scheduleTime} contacts`,
+          state: `No contacts active during ${scheduleTime}`,
+          cls: "voicemail"
+        });
+        await new Promise(r => setTimeout(r, 2000));
+        resetSimScreen();
+        setSimCalling(false);
+        return;
       }
 
-      if (activeContact) {
-        const idx = contacts.findIndex(c => c.id === activeContact.id);
+      let connectedIdx = -1;
+      for (let i = 0; i < activeContacts.length; i++) {
+        const c = activeContacts[i];
+        const originalIndex = contacts.findIndex(item => item.id === c.id);
+
         setSimDots(prev => {
           const copy = [...prev];
-          copy[idx] = "active";
+          copy[i] = "active";
           return copy;
         });
-        setSimRingingRow(activeContact.id);
+        setSimRingingRow(c.id);
         setSimScreen({
-          av: getInitials(activeContact.name),
-          avColor: getColor(idx),
-          name: activeContact.name,
-          state: `Ringing active contact (${slotDescription})…`,
+          av: getInitials(c.name),
+          avColor: getColor(originalIndex),
+          name: c.name,
+          state: `Ringing ${c.rel || "contact"} (${scheduleTime === "day" ? "Daytime" : "Nighttime"})\u2026`,
           cls: "ringing-state"
         });
 
-        await new Promise(r => setTimeout(r, 1800));
+        await new Promise(r => setTimeout(r, 1500));
 
-        if (activeContact.available) {
+        if (c.available) {
           setSimRingingRow(null);
-          setSimConnectedRow(activeContact.id);
+          setSimConnectedRow(c.id);
           setSimScreen({
-            av: getInitials(activeContact.name),
-            avColor: getColor(idx),
-            name: activeContact.name,
-            state: `✓ Connected — ${slotDescription}`,
+            av: getInitials(c.name),
+            avColor: getColor(originalIndex),
+            name: c.name,
+            state: "\u2713 Connected \u2014 say hello!",
             cls: "connected"
           });
+          connectedIdx = i;
+          break;
         } else {
           setSimRingingRow(null);
-          setSimMissedRows([activeContact.id]);
+          setSimMissedRows(prev => [...prev, c.id]);
           setSimDots(prev => {
             const copy = [...prev];
-            copy[idx] = "done";
+            copy[i] = "done";
             return copy;
           });
           setSimScreen({
-            av: "\u2709",
-            name: `${activeContact.name} is busy`,
-            state: "Voicemail sent — they’ve been alerted",
-            cls: "voicemail"
+            av: getInitials(c.name),
+            avColor: getColor(originalIndex),
+            name: c.name,
+            state: "No answer \u2014 trying next\u2026",
+            cls: "ringing-state"
           });
+          await new Promise(r => setTimeout(r, 550));
         }
-      } else {
+      }
+
+      if (connectedIdx === -1) {
         setSimScreen({
-          av: "!",
-          name: "No active caregiver",
-          state: "No contact is currently scheduled",
+          av: "\u2709",
+          name: "Voicemail",
+          state: "Message sent \u2014 whole circle alerted",
           cls: "voicemail"
         });
       }
@@ -491,6 +512,7 @@ export default function Home() {
       setSimCalling(false);
       setSimRingingRow(null);
       setSimConnectedRow(null);
+      setSimMissedRows([]);
       setSimMissedRows([]);
     } else {
       // Cascade Mode Simulation
@@ -606,17 +628,29 @@ export default function Home() {
   };
 
   const resetSimScreen = () => {
-    setSimScreen({
-      av: simMode === "menu" ? "\u2630" : simMode === "schedule" ? "🕒" : "—",
-      name: simMode === "menu" ? "Caller menu" : simMode === "schedule" ? "Around the Clock" : "Ready",
-      state: simMode === "menu" ? (t ? `${t.demo.startSim} to hear the options` : "Run a test call") : "Press call to start routing"
-    });
+    if (simMode === "schedule") {
+      const hour = Number(simTime.split(":")[0]);
+      const isDay = hour >= 8 && hour < 20;
+      setSimScreen({
+        av: isDay ? "☀️" : "🌙",
+        name: isDay ? "Daytime Routing" : "Nighttime Routing",
+        state: isDay
+          ? "Calls cascade to family. Press call to start."
+          : "Calls route to Care Team. Press call to start."
+      });
+    } else {
+      setSimScreen({
+        av: simMode === "menu" ? "\u2630" : "—",
+        name: simMode === "menu" ? "Caller menu" : "Ready",
+        state: simMode === "menu" ? (t ? `${t.demo.startSim} to hear the options` : "Run a test call") : "Press call to start routing"
+      });
+    }
     setSimDots([]);
   };
 
   useEffect(() => {
     resetSimScreen();
-  }, [simMode]); // eslint-disable-line
+  }, [simMode, simTime]); // eslint-disable-line
 
   if (!t) return null;
 
@@ -834,16 +868,43 @@ export default function Home() {
                           <span className="avatar" style={{ background: getColor(i) }}>{getInitials(c.name)}</span>
                           <span className="who"><b>{c.name}</b><span>{c.rel}</span></span>
                           
-                          <button
-                            type="button"
-                            disabled={simCalling}
-                            className={`avail ${c.available ? "on" : ""}`}
-                            onClick={() => handleToggleAvail(c.id)}
-                            aria-pressed={c.available}
-                          >
-                            <span className="track" />
-                            <span className="lbl">{c.available ? t.demo.available : t.demo.offline}</span>
-                          </button>
+                          {simMode === "schedule" ? (
+                            <select
+                              disabled={simCalling}
+                              value={c.timeSlot || "always"}
+                              onChange={(e) => {
+                                const val = e.target.value as "day" | "night" | "always";
+                                setContacts(prev => prev.map(item => item.id === c.id ? { ...item, timeSlot: val } : item));
+                              }}
+                              style={{
+                                background: "oklch(0.975 0.008 220)",
+                                border: "1px solid oklch(0.905 0.012 225)",
+                                color: "oklch(0.46 0.022 245)",
+                                padding: "6px 8px",
+                                borderRadius: 8,
+                                fontSize: "0.78rem",
+                                fontWeight: 600,
+                                cursor: "pointer",
+                                outline: "none",
+                                marginRight: 4,
+                              }}
+                            >
+                              <option value="day">☀️ Day</option>
+                              <option value="night">🌙 Night</option>
+                              <option value="always">⏰ 24/7</option>
+                            </select>
+                          ) : (
+                            <button
+                              type="button"
+                              disabled={simCalling}
+                              className={`avail ${c.available ? "on" : ""}`}
+                              onClick={() => handleToggleAvail(c.id)}
+                              aria-pressed={c.available}
+                            >
+                              <span className="track" />
+                              <span className="lbl">{c.available ? t.demo.available : t.demo.offline}</span>
+                            </button>
+                          )}
 
                           <span className="row-tools">
                             <button className="icon-btn" disabled={simCalling || i === 0} onClick={() => handleMoveUp(i)} title="Move up">
@@ -873,6 +934,40 @@ export default function Home() {
 
               {/* Simulator phone screen panel */}
               <div className="sim-panel">
+                {simMode === "schedule" && (
+                  <div
+                    style={{
+                      marginBottom: 15,
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 8,
+                      justifyContent: "center",
+                    }}
+                  >
+                    <span style={{ fontSize: "0.82rem", fontWeight: 600, color: "oklch(0.46 0.022 245)" }}>
+                      Simulated Time:
+                    </span>
+                    <input
+                      type="time"
+                      disabled={simCalling}
+                      value={simTime}
+                      onChange={(e) => setSimTime(e.target.value)}
+                      style={{
+                        background: "oklch(0.975 0.008 220)",
+                        border: "1px solid oklch(0.905 0.012 225)",
+                        color: "oklch(0.26 0.028 248)",
+                        padding: "8px 12px",
+                        borderRadius: 999,
+                        fontSize: "0.88rem",
+                        fontWeight: 600,
+                        cursor: "pointer",
+                        outline: "none",
+                        fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif',
+                        boxShadow: "0 1px 2px oklch(0.4 0.05 240 / 0.06)",
+                      }}
+                    />
+                  </div>
+                )}
                 <div className={`sim-screen ${simScreen.cls || ""}`}>
                   <span className="num-line">(415) 200-CARE</span>
                   
