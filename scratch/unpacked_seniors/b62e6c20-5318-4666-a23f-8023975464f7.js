@@ -112,7 +112,7 @@ document.querySelectorAll('.faq-item').forEach((item) => {
     : [
         { name: 'Sarah R.', rel: 'Daughter', available: false, timeSlot: 'day' },
         { name: 'David M.', rel: 'Son', available: true, timeSlot: 'day' },
-        { name: 'Lena N.', rel: 'Neighbor', available: true, timeSlot: 'always' },
+        { name: 'Lena N.', rel: 'Neighbor', available: true, timeSlot: 'day' },
         { name: 'Dr. Patel', rel: 'Care team', available: true, timeSlot: 'night' },
       ];
   let contacts = defaults.map((c) => ({ id: ++uid, name: c.name, rel: c.rel, available: c.available !== false, timeSlot: c.timeSlot || 'always' }));
