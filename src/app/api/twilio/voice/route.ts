@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { findAccountByTwilioNumber, getAvailableMinutes, deductMinutes, type LineContact } from '@/lib/db';
 import { supabase } from '@/lib/supabase';
-import twilioClient from '@/lib/twilio';
+import twilioClient, { providerForNumber } from '@/lib/twilio';
 
 export const preferredRegion = 'iad1';
 
@@ -260,7 +260,12 @@ export async function POST(request: Request) {
           const activeCallSid = callSid || 'mockCallSid';
           const roomName = `conf_${activeNumber.replace('+', '')}_${activeCallSid}`;
 
-          if (twilioClient) {
+          // Telnyx (Caribbean) numbers execute this same markup as TeXML but do
+          // not use Twilio's Conference + calls.create bridging, so they fall
+          // through to the provider-agnostic <Dial> path below.
+          const useTwilioConference = twilioClient && providerForNumber(activeNumber) === 'twilio';
+
+          if (useTwilioConference) {
             // PRODUCTION mode: Twilio Conference call-bridging with * transfer capability
             twiml += `
               ${getTtsPlayTag("Connecting you to your primary trusted contacts. Please stand by.")}

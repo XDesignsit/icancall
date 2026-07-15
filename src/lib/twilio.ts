@@ -20,6 +20,40 @@ const TERRITORY_COUNTRY_BY_AREA_CODE: Record<string, string> = {
   '340': 'VI', // U.S. Virgin Islands
 };
 
+// NANP Caribbean markets Twilio does not stock but Telnyx does. These are +1
+// numbers, so the app's 3-digit area-code pickers reach them naturally; the
+// country code routes the search to Telnyx and its inventory.
+const TELNYX_COUNTRY_BY_AREA_CODE: Record<string, string> = {
+  '868': 'TT', // Trinidad & Tobago
+  '246': 'BB', // Barbados
+  '876': 'JM', // Jamaica
+  '658': 'JM', // Jamaica (overlay)
+};
+
+export type TelephonyProvider = 'twilio' | 'telnyx';
+
+/** ISO country served by Telnyx for a NANP area code, or null if Twilio handles it. */
+export function telnyxCountryForAreaCode(areaCode: string): string | null {
+  const ac = (areaCode || '').replace(/\D/g, '').slice(0, 3);
+  return TELNYX_COUNTRY_BY_AREA_CODE[ac] || null;
+}
+
+/** Which provider owns numbers in a given NANP area code. */
+export function providerForAreaCode(areaCode: string): TelephonyProvider {
+  return telnyxCountryForAreaCode(areaCode) ? 'telnyx' : 'twilio';
+}
+
+/**
+ * Which provider a full phone number belongs to, by its NANP area code. Accepts
+ * E.164 (+1868…) or raw digits; anything non-Caribbean defaults to Twilio.
+ */
+export function providerForNumber(phoneNumber: string): TelephonyProvider {
+  const digits = (phoneNumber || '').replace(/\D/g, '');
+  // Strip a leading NANP country code '1' to expose the 3-digit area code.
+  const nanp = digits.length === 11 && digits.startsWith('1') ? digits.slice(1) : digits;
+  return providerForAreaCode(nanp.slice(0, 3));
+}
+
 /**
  * Searches for real available local phone numbers by area code. Mainland US
  * area codes search 'US' inventory; U.S. territory area codes (Puerto Rico,
