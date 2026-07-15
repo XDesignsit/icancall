@@ -23,8 +23,31 @@ function authHeaders() {
 
 interface TelnyxAvailableNumber {
   phone_number: string;
+  phone_number_type?: string;
   region_information?: { region_type: string; region_name: string }[];
   cost_information?: { monthly_cost: string; upfront_cost: string; currency: string };
+}
+
+async function fetchAvailableNumbers(countryCode: string, phoneNumberType?: string) {
+  const params = new URLSearchParams();
+  params.set('filter[country_code]', countryCode);
+  if (phoneNumberType) params.set('filter[phone_number_type]', phoneNumberType);
+  params.set('filter[limit]', '10');
+
+  const res = await fetch(`${TELNYX_API}/available_phone_numbers?${params.toString()}`, {
+    headers: authHeaders(),
+    cache: 'no-store',
+  });
+
+  if (!res.ok) {
+    console.error(
+      `❌ Telnyx number search failed for country ${countryCode} (type ${phoneNumberType || 'any'}): ${res.status} ${await res.text()}`
+    );
+    return [];
+  }
+
+  const body = (await res.json()) as { data?: TelnyxAvailableNumber[] };
+  return body.data || [];
 }
 
 /**
@@ -39,27 +62,17 @@ export async function searchAvailableNumbers(countryCode: string) {
     return [];
   }
 
-  // filter[country_code] is required on every Telnyx number search; local
-  // (geographic) numbers are what iCanCall provisions for these markets.
-  const params = new URLSearchParams();
-  params.set('filter[country_code]', countryCode);
-  params.set('filter[phone_number_type]', 'local');
-  params.set('filter[limit]', '10');
-
   try {
-    const res = await fetch(`${TELNYX_API}/available_phone_numbers?${params.toString()}`, {
-      headers: authHeaders(),
-      // Number inventory is not user-specific; let Next cache briefly.
-      cache: 'no-store',
-    });
-
-    if (!res.ok) {
-      console.error(`❌ Telnyx number search failed for country ${countryCode}: ${res.status} ${await res.text()}`);
-      return [];
+    // Prefer local (geographic) numbers, but Telnyx types much of its
+    // international inventory as 'national' or 'mobile' instead — so when the
+    // local-typed search comes back empty, retry untyped and just exclude
+    // toll-free results.
+    let numbers = await fetchAvailableNumbers(countryCode, 'local');
+    if (numbers.length === 0) {
+      numbers = (await fetchAvailableNumbers(countryCode)).filter(
+        (num) => num.phone_number_type !== 'toll_free'
+      );
     }
-
-    const body = (await res.json()) as { data?: TelnyxAvailableNumber[] };
-    const numbers = body.data || [];
 
     return numbers.map((num) => {
       const locality = num.region_information?.find((r) => r.region_type === 'locality')?.region_name;
