@@ -1,0 +1,41 @@
+{
+  "projectId": "2e4e9211-f1d0-45d4-a6bb-aa630000cded",
+  "shape": "package",
+  "pkg": "icancall-fresh",
+  "globalName": "ICanCallDS",
+  "srcDir": "src/components",
+  "tsconfig": "./tsconfig.json",
+  "buildCmd": "./.design-sync/prepare-css.sh",
+  "cssEntry": ".design-sync/.cache/styles.compiled.css",
+  "componentSrcMap": {
+    "Avatar": "src/components/ui/Avatar.tsx",
+    "Badge": "src/components/ui/Badge.tsx",
+    "Button": "src/components/ui/Button.tsx",
+    "Card": "src/components/ui/Card.tsx",
+    "EmptyState": "src/components/ui/EmptyState.tsx",
+    "Field": "src/components/ui/Field.tsx",
+    "Modal": "src/components/ui/Modal.tsx",
+    "QuantityStepper": "src/components/ui/QuantityStepper.tsx",
+    "Segmented": "src/components/ui/Segmented.tsx",
+    "Toggle": "src/components/ui/Toggle.tsx",
+    "AddonRow": "src/components/domain/AddonRow.tsx",
+    "ContactRow": "src/components/domain/ContactRow.tsx",
+    "LogRow": "src/components/domain/LogRow.tsx",
+    "NumberOption": "src/components/domain/NumberOption.tsx",
+    "PlanCard": "src/components/domain/PlanCard.tsx",
+    "StatCard": "src/components/domain/StatCard.tsx"
+  },
+  "overrides": {
+    "Modal": {
+      "cardMode": "single",
+      "primaryStory": "AddContact"
+    },
+    "AddonRow": {
+      "cardMode": "column"
+    },
+    "LogRow": {
+      "cardMode": "column"
+    }
+  },
+  "readmeHeader": ".design-sync/conventions.md"
+}

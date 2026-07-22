@@ -45,3 +45,8 @@ scratch/db.json
 
 # Claude Code local settings (machine-local, may contain keys)
 .claude/
+.ds-sync/
+ds-bundle/
+.design-sync/.cache/
+.design-sync/learnings/
+.design-sync/node_modules
