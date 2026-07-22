@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 
+import { buttonClass } from "@/components/ui";
+
 export default function NotFound() {
   return (
     <div className="min-h-screen flex flex-col">
@@ -43,7 +45,7 @@ export default function NotFound() {
             </svg>
           </Link>
           <div className="header-cta">
-            <Link className="btn btn-ghost" href="/">Back to home</Link>
+            <Link className={buttonClass({ variant: "ghost" })} href="/">Back to home</Link>
           </div>
         </div>
       </header>
@@ -74,8 +76,18 @@ export default function NotFound() {
           </p>
 
           <div className="nf-actions flex gap-3.5 flex-wrap justify-center mb-12">
-            <Link className="btn btn-primary btn-lg rounded-full" href="/">Back to home</Link>
-            <Link className="btn btn-ghost btn-lg rounded-full" href="/dashboard">Go to dashboard</Link>
+            <Link
+              className={buttonClass({ variant: "primary", large: true, className: "rounded-full" })}
+              href="/"
+            >
+              Back to home
+            </Link>
+            <Link
+              className={buttonClass({ variant: "ghost", large: true, className: "rounded-full" })}
+              href="/dashboard"
+            >
+              Go to dashboard
+            </Link>
           </div>
 
           <nav className="nf-route w-full max-w-[420px] bg-[var(--surface)] border border-[var(--line)] rounded-[var(--r-lg)] shadow-md p-[18px_18px_20px] text-left" aria-label="Suggested pages">
