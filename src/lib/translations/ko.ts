@@ -240,7 +240,7 @@ const t: HomepageTranslations = {
   "whyFamiliesChoose": "많은 가족들이 iCanCall을 선택하는 이유",
   "thoughtfulByDesign": "가족을 생각하는 세심한 디자인.",
   "dependableByDefault": "기본부터 철저히 안전하고 확실하게.",
-  "bothPlansInclude": "두 플랜 모두 순차 통화, 다이얼 선택 메뉴, 24시간 작동을 보장합니다. 언제든지 해지 가능.",
+  "bothPlansInclude": "모든 플랜에서 순차 통화, 다이얼 선택 메뉴, 24시간 작동을 보장합니다. 언제든지 해지 가능.",
   "save17": "17% 할인",
   "perYear": "/ 년",
   "perMonth": "/ 월",

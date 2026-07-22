@@ -154,6 +154,20 @@ const JSON_LD = JSON.stringify({
           priceCurrency: "USD",
           description: enTranslations.pricing.proDesc,
         },
+        {
+          "@type": "Offer",
+          name: `${enTranslations.pricing.careteamTitle} (monthly)`,
+          price: PLAN_PRICING.careteam.monthlyAmount,
+          priceCurrency: "USD",
+          description: enTranslations.pricing.careteamDesc,
+        },
+        {
+          "@type": "Offer",
+          name: `${enTranslations.pricing.careteamTitle} (annual)`,
+          price: PLAN_PRICING.careteam.annualAmount,
+          priceCurrency: "USD",
+          description: enTranslations.pricing.careteamDesc,
+        },
       ],
     },
     {
@@ -1204,6 +1218,27 @@ export default function Home() {
                   <li><Ico.check className="w-[19px] h-[19px]" /> {t.pricing.shortGuarantee}</li>
                 </ul>
                 <Link className="btn btn-primary" href={`/signup?plan=pro&billing=${billingCycle}&lang=${lang}`}>{t.pricing.selectPlan}</Link>
+              </div>
+
+              {/* Care Team Card */}
+              <div className="plan reveal in">
+                <h3>{t.pricing.careteamTitle}</h3>
+                <p className="desc">{t.pricing.careteamDesc}</p>
+                <div className="price">
+                  <b className="amt">{billingCycle === "annual" ? PLAN_PRICING.careteam.annualLabel : PLAN_PRICING.careteam.monthlyLabel}</b>
+                  <span className="per">{billingCycle === "annual" ? t.ui.perYear : t.ui.perMonth}</span>
+                </div>
+                <p className="price-yr">{billingCycle === "annual" ? t.ui.justPriceAnnualCareteam : t.ui.billedMonthlyCancelAnytime}</p>
+                <ul>
+                  <li><Ico.check className="w-[19px] h-[19px]" /> {t.pricing.cFeat1}</li>
+                  <li><Ico.check className="w-[19px] h-[19px]" /> {t.pricing.cFeat2}</li>
+                  <li><Ico.check className="w-[19px] h-[19px]" /> {t.pricing.cFeat3}</li>
+                  <li><Ico.check className="w-[19px] h-[19px]" /> {PLAN_PRICING.careteam.voiceMinutes} {t.ui.minutesIncluded}</li>
+                  <li><Ico.check className="w-[19px] h-[19px]" /> {t.pricing.cFeat5}</li>
+                  <li><Ico.check className="w-[19px] h-[19px]" /> {t.ui.worksOnAnyPhoneNoApp}</li>
+                  <li><Ico.check className="w-[19px] h-[19px]" /> {t.pricing.shortGuarantee}</li>
+                </ul>
+                <Link className="btn btn-ghost" href={`/signup?plan=careteam&billing=${billingCycle}&lang=${lang}`}>{t.pricing.selectPlan}</Link>
               </div>
             </div>
 

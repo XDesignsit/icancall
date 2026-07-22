@@ -240,7 +240,7 @@ const t: HomepageTranslations = {
   "whyFamiliesChoose": "为什么许多家庭选择 iCanCall",
   "thoughtfulByDesign": "充满人文关怀的设计。",
   "dependableByDefault": "默认可靠的安全防线。",
-  "bothPlansInclude": "两个套餐均包含级联顺次转发、语音菜单和 24/7 全天候在线保证。随时可取消。",
+  "bothPlansInclude": "所有套餐均包含级联顺次转发、语音菜单和 24/7 全天候在线保证。随时可取消。",
   "save17": "省 17%",
   "perYear": "/ 年",
   "perMonth": "/ 月",

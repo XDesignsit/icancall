@@ -22,4 +22,11 @@ export const PLAN_PRICING = {
     annualLabel: "$249",
     voiceMinutes: 60,
   },
+  careteam: {
+    monthlyAmount: 49.99,
+    annualAmount: 499,
+    monthlyLabel: "$49.99",
+    annualLabel: "$499",
+    voiceMinutes: 150,
+  },
 } as const;

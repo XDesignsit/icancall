@@ -240,7 +240,7 @@ const t: HomepageTranslations = {
   "whyFamiliesChoose": "لماذا تختار العائلات iCanCall",
   "thoughtfulByDesign": "تصميم مدروس وعاطفي.",
   "dependableByDefault": "موثوق به افتراضياً.",
-  "bothPlansInclude": "تشمل كلتا الخطتين التوجيه المتتالي وقائمة المتصل وموثوقية على مدار الساعة. إلغاء في أي وقت.",
+  "bothPlansInclude": "تشمل جميع الخطط التوجيه المتتالي وقائمة المتصل وموثوقية على مدار الساعة. إلغاء في أي وقت.",
   "save17": "وفر 17%",
   "perYear": "/ سنة",
   "perMonth": "/ شهر",

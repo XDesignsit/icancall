@@ -78,6 +78,16 @@ export function renderHomepageMarkdown(): string {
     t.pricing.shortGuarantee,
   ];
 
+  const careteamFeatures = [
+    t.pricing.cFeat1,
+    t.pricing.cFeat2,
+    t.pricing.cFeat3,
+    `${PLAN_PRICING.careteam.voiceMinutes} ${t.ui.minutesIncluded}`,
+    t.pricing.cFeat5,
+    t.ui.worksOnAnyPhoneNoApp,
+    t.pricing.shortGuarantee,
+  ];
+
   const faqs = [
     [t.faq.q1, t.faq.a1],
     [t.faq.q2, t.faq.a2],
@@ -141,6 +151,12 @@ ${essentialFeatures.map((f) => `- ${f}`).join("\n")}
 ${t.pricing.proDesc} Annual billing: ${t.ui.justPriceAnnualPro.toLowerCase()}.
 
 ${proFeatures.map((f) => `- ${f}`).join("\n")}
+
+### ${t.pricing.careteamTitle} — ${PLAN_PRICING.careteam.monthlyLabel}/month or ${PLAN_PRICING.careteam.annualLabel}/year
+
+${t.pricing.careteamDesc} Annual billing: ${t.ui.justPriceAnnualCareteam.toLowerCase()}.
+
+${careteamFeatures.map((f) => `- ${f}`).join("\n")}
 
 ### ${t.pricing.guaranteeTitle}
 

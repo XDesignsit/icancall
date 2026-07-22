@@ -240,7 +240,7 @@ const t: HomepageTranslations = {
   "whyFamiliesChoose": "多くの家族が iCanCall を選ぶ理由",
   "thoughtfulByDesign": "思いやりのあるデザイン。",
   "dependableByDefault": "標準で高い信頼性。",
-  "bothPlansInclude": "両プランとも順次転送、音声メニュー、24時間常時稼働が含まれます。解約はいつでも可能。",
+  "bothPlansInclude": "全プランとも順次転送、音声メニュー、24時間常時稼働が含まれます。解約はいつでも可能。",
   "save17": "17% お得",
   "perYear": "/ 年",
   "perMonth": "/ 月",
