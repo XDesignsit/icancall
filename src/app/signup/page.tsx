@@ -1486,8 +1486,10 @@ function OnboardingContent() {
     const planParam = searchParams.get("plan");
     const billingParam = searchParams.get("billing");
     
+    const plans: Plan[] = ["essential", "pro", "careteam"];
+
     set({
-      plan: planParam === "pro" ? "pro" : "essential",
+      plan: plans.includes(planParam as Plan) ? (planParam as Plan) : "essential",
       billing: billingParam === "annual" ? "yearly" : "monthly"
     });
   }, [searchParams]);
