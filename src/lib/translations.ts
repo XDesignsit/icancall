@@ -229,6 +229,8 @@ export interface HomepageTranslations {
     essentialDesc: string;
     proTitle: string;
     proDesc: string;
+    careteamTitle: string;
+    careteamDesc: string;
     mostPopular: string;
     selectPlan: string;
     featuresHeader: string;
@@ -243,6 +245,11 @@ export interface HomepageTranslations {
     pFeat4: string;
     pFeat5: string;
     pFeat6: string;
+    cFeat1: string;
+    cFeat2: string;
+    cFeat3: string;
+    cFeat4: string;
+    cFeat5: string;
     guaranteeTitle: string;
     guaranteeDesc: string;
     shortGuarantee: string;
@@ -332,6 +339,7 @@ export interface HomepageTranslations {
     perMonth: string;
     justPriceAnnualEssential: string;
     justPriceAnnualPro: string;
+    justPriceAnnualCareteam: string;
     billedMonthlyCancelAnytime: string;
     voiceMinutes: string;
     worksOnAnyPhoneNoApp: string;
@@ -481,6 +489,8 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "essentialDesc": "Perfect for single-family setups and basic sequential routing.",
     "proTitle": "Pro Plan",
     "proDesc": "Ideal for active care groups needing schedule routing and menus.",
+    "careteamTitle": "Care Team Plan",
+    "careteamDesc": "Built for shared caregiving across several loved ones, with room for a second caregiver.",
     "mostPopular": "Most Popular",
     "selectPlan": "Select Plan",
     "featuresHeader": "Everything included in the plan:",
@@ -495,6 +505,11 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "pFeat4": "Time-of-day Scheduling",
     "pFeat5": "Instant Voicemail Email Transcriptions",
     "pFeat6": "Bilingual Greeting Options",
+    "cFeat1": "5 Dedicated Safety Numbers",
+    "cFeat2": "Up to 15 Roster Contacts per Number",
+    "cFeat3": "All Routing Modes + Scheduling",
+    "cFeat4": "150 Pooled Voice Minutes",
+    "cFeat5": "2 Caregiver Logins",
     "guaranteeTitle": "30-Day Money-Back Guarantee",
     "guaranteeDesc": "Try ICanCall risk-free for 30 days. If it's not the right fit for your family, we'll refund you in full — no questions asked, no restocking fees, no hardware to return.",
     "shortGuarantee": "30-day money-back guarantee"
@@ -584,6 +599,7 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "perMonth": "/ month",
     "justPriceAnnualEssential": "Just $12.42/mo, billed annually",
     "justPriceAnnualPro": "Just $20.75/mo, billed annually",
+    "justPriceAnnualCareteam": "Just $41.58/mo, billed annually",
     "billedMonthlyCancelAnytime": "Billed monthly · cancel anytime",
     "voiceMinutes": "voice minutes",
     "worksOnAnyPhoneNoApp": "Works on any phone — no app needed",
@@ -825,6 +841,8 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "essentialDesc": "Perfecto para configuraciones de una sola familia y enrutamiento secuencial básico.",
     "proTitle": "Plan Pro",
     "proDesc": "Ideal para grupos de cuidado activos que necesitan enrutamiento por horarios y menús.",
+    "careteamTitle": "Plan Care Team",
+    "careteamDesc": "Pensado para el cuidado compartido de varios seres queridos, con espacio para un segundo cuidador.",
     "mostPopular": "Más Popular",
     "selectPlan": "Elegir Plan",
     "featuresHeader": "Todo lo incluido en el plan:",
@@ -839,6 +857,11 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "pFeat4": "Enrutamiento por Horario del Día",
     "pFeat5": "Transcripciones de Voz por Correo al Instante",
     "pFeat6": "Opciones de Saludo Bilingües",
+    "cFeat1": "5 Números de Seguridad Dedicados",
+    "cFeat2": "Hasta 15 Contactos en la Lista por Número",
+    "cFeat3": "Todos los Modos de Enrutamiento + Horarios",
+    "cFeat4": "150 Minutos de Voz Compartidos",
+    "cFeat5": "2 Accesos de Cuidador",
     "guaranteeTitle": "Garantía de Devolución de Dinero de 30 Días",
     "guaranteeDesc": "Pruebe ICanCall sin riesgos durante 30 días. Si no es la opción adecuada para su familia, le devolveremos el importe completo: sin preguntas, sin tarifas de reposición y sin hardware que devolver.",
     "shortGuarantee": "Garantía de devolución de 30 días"
@@ -928,6 +951,7 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "perMonth": "/ mes",
     "justPriceAnnualEssential": "Solo $12.42/mes, facturado anualmente",
     "justPriceAnnualPro": "Solo $20.75/mes, facturado anualmente",
+    "justPriceAnnualCareteam": "Solo $41.58/mes, facturado anualmente",
     "billedMonthlyCancelAnytime": "Facturado mensualmente · cancele en cualquier momento",
     "voiceMinutes": "minutos de voz",
     "worksOnAnyPhoneNoApp": "Funciona en cualquier teléfono — sin aplicaciones",
@@ -1169,6 +1193,8 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "essentialDesc": "Idéal pour les configurations mono-famille et le routage séquentiel de base.",
     "proTitle": "Forfait Pro",
     "proDesc": "Parfait pour les groupes d'aidants actifs ayant besoin de routage par plage horaire et de menus.",
+    "careteamTitle": "Forfait Care Team",
+    "careteamDesc": "Conçu pour l'aide partagée auprès de plusieurs proches, avec un accès pour un second aidant.",
     "mostPopular": "Le plus populaire",
     "selectPlan": "Choisir ce forfait",
     "featuresHeader": "Tout ce qui est inclus dans le forfait :",
@@ -1183,6 +1209,11 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "pFeat4": "Planification horaire avancée",
     "pFeat5": "Transcriptions instantanées de messagerie par e-mail",
     "pFeat6": "Options d'accueil bilingues",
+    "cFeat1": "5 numéros de sécurité dédiés",
+    "cFeat2": "Jusqu'à 15 contacts enregistrés par numéro",
+    "cFeat3": "Tous les modes de routage + planification",
+    "cFeat4": "150 minutes vocales partagées",
+    "cFeat5": "2 accès aidants",
     "guaranteeTitle": "Garantie Satisfait ou Remboursé de 30 Jours",
     "guaranteeDesc": "Essayez ICanCall sans risque pendant 30 jours. Si cela ne convient pas à votre famille, nous vous rembourserons intégralement — sans poser de questions, sans frais de restockage et sans matériel à renvoyer.",
     "shortGuarantee": "Garantie de remboursement de 30 jours"
@@ -1272,6 +1303,7 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "perMonth": "/ mois",
     "justPriceAnnualEssential": "Seulement 12,42 $/mois, facturé annuellement",
     "justPriceAnnualPro": "Seulement 20,75 $/mois, facturé annuellement",
+    "justPriceAnnualCareteam": "Seulement 41,58 $/mois, facturé annuellement",
     "billedMonthlyCancelAnytime": "Facturé mensuellement · sans engagement",
     "voiceMinutes": "minutes d'appel",
     "worksOnAnyPhoneNoApp": "Fonctionne sur tout téléphone — pas d'application",
@@ -1513,6 +1545,8 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "essentialDesc": "単一のご家族や、基本的な順番転送のみを必要とする場合に最適です。",
     "proTitle": "プロプラン",
     "proDesc": "時間帯別スケジュール転送や、音声選択メニューを必要とするグループに最適です。",
+    "careteamTitle": "ケアチームプラン",
+    "careteamDesc": "複数のご家族の見守りを分担するチームに最適。2人目の介護者アカウントも利用できます。",
     "mostPopular": "おすすめ",
     "selectPlan": "このプランを選ぶ",
     "featuresHeader": "プランに含まれるすべての機能:",
@@ -1527,6 +1561,11 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "pFeat4": "時間帯別スケジュール転送",
     "pFeat5": "留守電の自動テキスト化メール送信",
     "pFeat6": "バイリンガル音声ガイダンス対応",
+    "cFeat1": "専用安全番号 5個",
+    "cFeat2": "番号ごとに登録連絡先 最大15名",
+    "cFeat3": "全転送モード＋スケジュール対応",
+    "cFeat4": "共有通話時間 150分",
+    "cFeat5": "介護者ログイン 2名分",
     "guaranteeTitle": "30日間返金保証",
     "guaranteeDesc": "ICanCallを30日間リスクフリーでお試しください。ご家族に合わない場合は全額返金いたします。理由の確認、手数料の発生、機器の返却などは一切ありません。",
     "shortGuarantee": "30日間の返金保証"
@@ -1616,6 +1655,7 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "perMonth": "/ 月",
     "justPriceAnnualEssential": "年払いで実質月額わずか $12.42",
     "justPriceAnnualPro": "年払いで実質月額わずか $20.75",
+    "justPriceAnnualCareteam": "年払いで実質月額わずか $41.58",
     "billedMonthlyCancelAnytime": "月額課金 · いつでも解約可能",
     "voiceMinutes": "無料通話分",
     "worksOnAnyPhoneNoApp": "すべての電話機で動作 — アプリ不要",
@@ -1857,6 +1897,8 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "essentialDesc": "非常适合单家庭的基本配置及顺次转接需求。",
     "proTitle": "专业版方案",
     "proDesc": "非常适合需要分时段排班排班转接、按键菜单功能的多成员看护团队。",
+    "careteamTitle": "护理团队方案",
+    "careteamDesc": "适合多位亲人共同看护的团队，支持第二位看护人登录。",
     "mostPopular": "最受欢迎",
     "selectPlan": "选择此套餐",
     "featuresHeader": "套餐内包含的所有权益：",
@@ -1871,6 +1913,11 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "pFeat4": "时间段排班转发规则",
     "pFeat5": "语音留言自动文本化并同步发送邮件",
     "pFeat6": "支持双语欢迎致辞选项",
+    "cFeat1": "5 个专属虚拟安全号码",
+    "cFeat2": "每个号码最多可绑定 15 位联系人",
+    "cFeat3": "支持全部转接模式及排班功能",
+    "cFeat4": "150 分钟共享通话时长",
+    "cFeat5": "2 个看护人登录账号",
     "guaranteeTitle": "30天无忧退款保证",
     "guaranteeDesc": "无风险试用 ICanCall 30 天。如果它不适合您的家庭，我们将全额退款 —— 无需任何理由，无重新上架费，无需退回硬件。",
     "shortGuarantee": "30天退款保证"
@@ -1960,6 +2007,7 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "perMonth": "/ 月",
     "justPriceAnnualEssential": "仅需 $12.42/月，按年计费",
     "justPriceAnnualPro": "仅需 $20.75/月，按年计费",
+    "justPriceAnnualCareteam": "仅需 $41.58/月，按年计费",
     "billedMonthlyCancelAnytime": "按月结算 · 随时可取消",
     "voiceMinutes": "分钟通话时长",
     "worksOnAnyPhoneNoApp": "支持任何手机/座机 — 无需安装 APP",
@@ -2201,6 +2249,8 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "essentialDesc": "مثالية للعائلات الصغيرة التي تبحث عن توجيه مكالمات متتالي أساسي ورقم واحد.",
     "proTitle": "الخطة الاحترافية",
     "proDesc": "مثالية لمجموعات الرعاية النشطة التي تحتاج لتهيئة الجداول وقائمة خيارات المتصل.",
+    "careteamTitle": "خطة فريق الرعاية",
+    "careteamDesc": "مصممة للرعاية المشتركة لعدة أحباء، مع إمكانية إضافة مقدم رعاية ثانٍ.",
     "mostPopular": "الأكثر شيوعاً",
     "selectPlan": "اختر الخطة",
     "featuresHeader": "كل ما هو مشمول بالخطة:",
@@ -2215,6 +2265,11 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "pFeat4": "جدولة المكالمات حسب الوقت من اليوم",
     "pFeat5": "تحويل البريد الصوتي إلى نص وإرساله عبر البريد فوراً",
     "pFeat6": "خيارات رسائل الترحيب الصوتية ثنائية اللغة",
+    "cFeat1": "5 أرقام مخصصة للأمان والاتصال",
+    "cFeat2": "ما يصل لـ 15 جهة اتصال لكل رقم",
+    "cFeat3": "جميع أوضاع التوجيه مع الجدولة",
+    "cFeat4": "150 دقيقة صوتية مشتركة",
+    "cFeat5": "حسابا دخول لمقدمَي رعاية",
     "guaranteeTitle": "ضمان استرداد الأموال لمدة 30 يومًا",
     "guaranteeDesc": "جرب ICanCall الخالي من المخاطر لمدة 30 يومًا. إذا لم يكن مناسبًا لعائلتك، فسنقوم برد المبلغ بالكامل — دون طرح أسئلة، ودون رسوم إعادة تخزين، ودون أجهزة لإعادتها.",
     "shortGuarantee": "ضمان استرداد الأموال لمدة 30 يومًا"
@@ -2304,6 +2359,7 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "perMonth": "/ شهر",
     "justPriceAnnualEssential": "فقط 12.42 دولاراً شهرياً، تُدفع سنوياً",
     "justPriceAnnualPro": "فقط 20.75 دولاراً شهرياً، تُدفع سنوياً",
+    "justPriceAnnualCareteam": "فقط 41.58 دولاراً شهرياً، تُدفع سنوياً",
     "billedMonthlyCancelAnytime": "تُدفع شهرياً · إلغاء في أي وقت",
     "voiceMinutes": "دقائق صوتية",
     "worksOnAnyPhoneNoApp": "يعمل على أي هاتف — لا حاجة لتطبيقات",
@@ -2545,6 +2601,8 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "essentialDesc": "एकल-परिवार सेटअप और बुनियादी क्रमशः रूटिंग के लिए बिल्कुल सही।",
     "proTitle": "प्रो प्लान",
     "proDesc": "सक्रिय केयरटेकर्स समूहों के लिए आदर्श जिन्हें शेड्यूल रूटिंग और डायल मेनू की आवश्यकता होती है।",
+    "careteamTitle": "केयर टीम प्लान",
+    "careteamDesc": "कई प्रियजनों की साझा देखभाल के लिए, दूसरे केयरगिवर की लॉगिन सुविधा के साथ।",
     "mostPopular": "सबसे लोकप्रिय",
     "selectPlan": "प्लान चुनें",
     "featuresHeader": "प्लान में शामिल सभी सुविधाएं:",
@@ -2559,6 +2617,11 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "pFeat4": "समय-सारणी के अनुसार रूटिंग",
     "pFeat5": "वॉयस मेल का तुरंत टेक्स्ट रूपांतरण ईमेल",
     "pFeat6": "द्विभाषी अभिवादन के विकल्प",
+    "cFeat1": "5 समर्पित सुरक्षा नंबर",
+    "cFeat2": "प्रति नंबर अधिकतम 15 संपर्क सदस्य",
+    "cFeat3": "सभी रूटिंग मोड + शेड्यूलिंग",
+    "cFeat4": "150 साझा वॉयस मिनट",
+    "cFeat5": "2 केयरगिवर लॉगिन",
     "guaranteeTitle": "30-दिनों की मनी-बैक गारंटी",
     "guaranteeDesc": "30 दिनों तक जोखिम-मुक्त ICanCall आज़माएं। यदि यह आपके परिवार के लिए सही नहीं है, तो हम आपको पूरा रिफंड कर देंगे — बिना किसी सवाल के, कोई रीस्टॉकिंग शुल्क नहीं, कोई हार्डवेयर वापस नहीं करना है।",
     "shortGuarantee": "30-दिनों की मनी-बैक गारंटी"
@@ -2648,6 +2711,7 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "perMonth": "/ माह",
     "justPriceAnnualEssential": "मात्र $12.42/माह, वार्षिक बिलिंग",
     "justPriceAnnualPro": "मात्र $20.75/माह, वार्षिक बिलिंग",
+    "justPriceAnnualCareteam": "मात्र $41.58/माह, वार्षिक बिलिंग",
     "billedMonthlyCancelAnytime": "मासिक बिलिंग · किसी भी समय रद्द करें",
     "voiceMinutes": "कॉल मिनट",
     "worksOnAnyPhoneNoApp": "किसी भी फोन पर काम करता है — ऐप की आवश्यकता नहीं",
@@ -2889,6 +2953,8 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "essentialDesc": "Ideal para configurações simples e encaminhamento sequencial básico.",
     "proTitle": "Plano Pro",
     "proDesc": "Perfeito para grupos ativos que precisam de desvio por escala de horário e menus de áudio.",
+    "careteamTitle": "Plano Care Team",
+    "careteamDesc": "Feito para o cuidado compartilhado de vários entes queridos, com acesso para um segundo cuidador.",
     "mostPopular": "Mais popular",
     "selectPlan": "Selecionar plano",
     "featuresHeader": "Tudo incluído no plano:",
@@ -2903,6 +2969,11 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "pFeat4": "Escala e Programação de Horários",
     "pFeat5": "Transcrição Instantânea de Mensagens de Voz por E-mail",
     "pFeat6": "Mensagens de Saudação Bilingues",
+    "cFeat1": "5 Números de Segurança Virtuais Dedicados",
+    "cFeat2": "Até 15 Contatos na Lista por Número",
+    "cFeat3": "Todos os Modos de Encaminhamento + Horários",
+    "cFeat4": "150 Minutos de Voz Compartilhados",
+    "cFeat5": "2 Logins de Cuidador",
     "guaranteeTitle": "Garantia de Reembolso de 30 Dias",
     "guaranteeDesc": "Experimente o ICanCall sem riscos durante 30 dias. Se não for a escolha certa para a sua família, reembolsaremos o valor total — sem perguntas, sem taxas de devolução e sem hardware para devolver.",
     "shortGuarantee": "Garantia de reembolso de 30 dias"
@@ -2992,6 +3063,7 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "perMonth": "/ mês",
     "justPriceAnnualEssential": "Apenas $12.42/mês, cobrado anualmente",
     "justPriceAnnualPro": "Apenas $20.75/mês, cobrado anualmente",
+    "justPriceAnnualCareteam": "Apenas $41.58/mês, cobrado anualmente",
     "billedMonthlyCancelAnytime": "Cobrança mensal · cancele a qualquer momento",
     "voiceMinutes": "minutos de voz",
     "worksOnAnyPhoneNoApp": "Funciona em qualquer telefone — sem aplicativos",
@@ -3233,6 +3305,8 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "essentialDesc": "Perfekt für kleine Familien und die grundlegende sequentielle Weiterleitung.",
     "proTitle": "Pro-Tarif",
     "proDesc": "Ideal für aktive Betreuungsgruppen, die Zeitpläne und Sprachmenüs benötigen.",
+    "careteamTitle": "Care-Team-Tarif",
+    "careteamDesc": "Für die gemeinsame Betreuung mehrerer Angehöriger, mit Zugang für eine zweite Betreuungsperson.",
     "mostPopular": "Am beliebtesten",
     "selectPlan": "Tarif wählen",
     "featuresHeader": "Alles im Tarif enthalten:",
@@ -3247,6 +3321,11 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "pFeat4": "Zeitgesteuerte Rufweiterleitung",
     "pFeat5": "Sofortige Transkription von Mailbox-Aufnahmen per E-Mail",
     "pFeat6": "Zweisprachige Ansagen möglich",
+    "cFeat1": "5 eigene virtuelle Sicherheitsnummern",
+    "cFeat2": "Bis zu 15 Kontakte im Rufkreis pro Nummer",
+    "cFeat3": "Alle Weiterleitungsmodi + Zeitpläne",
+    "cFeat4": "150 gemeinsame Sprachminuten",
+    "cFeat5": "2 Betreuer-Logins",
     "guaranteeTitle": "30-tägige Geld-zurück-Garantie",
     "guaranteeDesc": "Testen Sie ICanCall 30 Tage lang risikofrei. Wenn es nicht das Richtige für Ihre Familie ist, erstatten wir Ihnen den vollen Betrag zurück – ohne Fragen, ohne Wiedereinlagerungsgebühren und ohne Hardware, die zurückgegeben werden muss.",
     "shortGuarantee": "30 Tage Geld-zurück-Garantie"
@@ -3336,6 +3415,7 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "perMonth": "/ Monat",
     "justPriceAnnualEssential": "Nur $12.42/Monat bei jährlicher Abrechnung",
     "justPriceAnnualPro": "Nur $20.75/Monat bei jährlicher Abrechnung",
+    "justPriceAnnualCareteam": "Nur $41.58/Monat bei jährlicher Abrechnung",
     "billedMonthlyCancelAnytime": "Monatliche Abrechnung · jederzeit kündbar",
     "voiceMinutes": "Sprachminuten",
     "worksOnAnyPhoneNoApp": "Funktioniert auf jedem Telefon — keine App erforderlich",
@@ -3577,6 +3657,8 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "essentialDesc": "Ideale per configurazioni mono-familiari ed inoltro sequenziale di base.",
     "proTitle": "Piano Pro",
     "proDesc": "Perfetto per gruppi di cura attivi che necessitano di inoltro su turni orari e menu a scelta rapida.",
+    "careteamTitle": "Piano Care Team",
+    "careteamDesc": "Pensato per la cura condivisa di più persone care, con accesso per un secondo caregiver.",
     "mostPopular": "Più Popolare",
     "selectPlan": "Seleziona piano",
     "featuresHeader": "Tutto quello che è incluso nel piano:",
@@ -3591,6 +3673,11 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "pFeat4": "Pianificazione oraria avanzata",
     "pFeat5": "Trascrizioni istantanee dei messaggi vocali via e-mail",
     "pFeat6": "Messaggio di benvenuto bilingue a scelta",
+    "cFeat1": "5 Numeri di Sicurezza Dedicati",
+    "cFeat2": "Fino a 15 Contatti in Lista per Numero",
+    "cFeat3": "Tutte le modalità di inoltro + pianificazione",
+    "cFeat4": "150 Minuti Vocali Condivisi",
+    "cFeat5": "2 Accessi Caregiver",
     "guaranteeTitle": "Garanzia di Rimborso di 30 Giorni",
     "guaranteeDesc": "Prova ICanCall senza rischi per 30 giorni. Se non fa al caso vostro, vi rimborseremo l'intero importo: senza domande, senza costi di riassortimento e nessun hardware da restituire.",
     "shortGuarantee": "Garanzia di rimborso di 30 giorni"
@@ -3680,6 +3767,7 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "perMonth": "/ mese",
     "justPriceAnnualEssential": "Solo $12.42/mese, fatturato annualmente",
     "justPriceAnnualPro": "Solo $20.75/mese, fatturato annualmente",
+    "justPriceAnnualCareteam": "Solo $41.58/mese, fatturato annualmente",
     "billedMonthlyCancelAnytime": "Fatturato mensilmente · cancella quando vuoi",
     "voiceMinutes": "minuti di conversazione",
     "worksOnAnyPhoneNoApp": "Funziona su qualsiasi telefono — nessuna app richiesta",
@@ -3921,6 +4009,8 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "essentialDesc": "단일 가족의 기본 순차 전송망 구축 및 가벼운 이용에 적합한 서비스.",
     "proTitle": "프로 요금제",
     "proDesc": "시간대별 스케줄 지정 및 다이얼 메뉴 선택 기능이 필요한 적극적인 보호자 그룹에 추천.",
+    "careteamTitle": "케어 팀 요금제",
+    "careteamDesc": "여러 가족을 함께 돌보는 팀을 위한 요금제로, 두 번째 보호자 로그인을 지원합니다.",
     "mostPopular": "가장 인기 있는 플랜",
     "selectPlan": "요금제 선택하기",
     "featuresHeader": "해당 플랜에 포함된 모든 혜택:",
@@ -3935,6 +4025,11 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "pFeat4": "시간대별 자동 당번 라우팅 설정",
     "pFeat5": "음성 메시지 자동 텍스트 변환 알림 이메일 전송",
     "pFeat6": "다국어 웰컴 안내 멘트 옵션 선택 가능",
+    "cFeat1": "전용 가상 안심 번호 5개 제공",
+    "cFeat2": "번호당 연결 연락처 최대 15명 등록 가능",
+    "cFeat3": "모든 라우팅 모드 + 스케줄 설정",
+    "cFeat4": "공유 음성 통화 150분 제공",
+    "cFeat5": "보호자 로그인 계정 2개",
     "guaranteeTitle": "30일 이내 100% 환불 보장",
     "guaranteeDesc": "ICanCall을 30일 동안 수수료나 위험 부담 없이 체험해 보세요. 귀하의 가족에게 맞지 않는다면 전액 환불해 드립니다 — 묻지도 따지지도 않고, 어떠한 반품 수수료나 하드웨어 반납 절차도 없습니다.",
     "shortGuarantee": "30일 이내 환불 보장"
@@ -4024,6 +4119,7 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "perMonth": "/ 월",
     "justPriceAnnualEssential": "연간 결제 시 실질 월 $12.42",
     "justPriceAnnualPro": "연간 결제 시 실질 월 $20.75",
+    "justPriceAnnualCareteam": "연간 결제 시 실질 월 $41.58",
     "billedMonthlyCancelAnytime": "월간 결제 · 약정 없이 언제든 해지 가능",
     "voiceMinutes": "제공 통화 분 수",
     "worksOnAnyPhoneNoApp": "모든 전화기 지원 — 별도 앱 불필요",

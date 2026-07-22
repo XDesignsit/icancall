@@ -7,7 +7,7 @@ import { translations, type HomepageTranslations } from "@/lib/translations";
 import Turnstile from "@/components/Turnstile";
 
 /* ============ TYPES ============ */
-type Plan = "essential" | "pro";
+type Plan = "essential" | "pro" | "careteam";
 type BillingCycle = "monthly" | "yearly";
 
 interface AccountData {
@@ -64,6 +64,16 @@ const PLANS = [
     monthly: { amt: 24.99, label: "$24.99", per: "/mo", note: "Billed monthly" },
     annual:  { amt: 249,   label: "$249",   per: "/yr", note: "$20.75/mo, billed yearly" },
     feats: ["2 phone numbers", "6 trusted contacts", "All routing modes + scheduling", "60 minutes + alerts"],
+  },
+  {
+    id: "careteam" as Plan,
+    name: "Care Team",
+    tag: null,
+    desc: "Shared caregiving for bigger circles.",
+    numbers: 5,
+    monthly: { amt: 49.99, label: "$49.99", per: "/mo", note: "Billed monthly" },
+    annual:  { amt: 499,   label: "$499",   per: "/yr", note: "$41.58/mo, billed yearly" },
+    feats: ["5 phone numbers", "15 trusted contacts per number", "All routing modes + scheduling", "150 pooled minutes", "2 caregiver logins"],
   },
 ];
 
@@ -551,6 +561,14 @@ function PlanStep({ data, set, onNext, onBack, t }: { data: OnboardingData; set:
     t.pricing.pFeat5,
   ].filter(Boolean);
 
+  const careteamFeats = [
+    t.pricing.cFeat1,
+    t.pricing.cFeat2,
+    t.pricing.cFeat3,
+    t.pricing.cFeat4,
+    t.pricing.cFeat5,
+  ].filter(Boolean);
+
   return (
     <div className="panel">
       <span className="step-eyebrow">{t.onboarding.step2Eyebrow}</span>
@@ -568,12 +586,12 @@ function PlanStep({ data, set, onNext, onBack, t }: { data: OnboardingData; set:
         {PLANS.map((p) => {
           const price = billing === "yearly" ? p.annual : p.monthly;
           const sel = plan === p.id;
-          const planName = p.id === "pro" ? t.pricing.proTitle : t.pricing.essentialTitle;
-          const planDesc = p.id === "pro" ? t.pricing.proDesc : t.pricing.essentialDesc;
+          const planName = p.id === "careteam" ? t.pricing.careteamTitle : p.id === "pro" ? t.pricing.proTitle : t.pricing.essentialTitle;
+          const planDesc = p.id === "careteam" ? t.pricing.careteamDesc : p.id === "pro" ? t.pricing.proDesc : t.pricing.essentialDesc;
           const planTag = p.id === "pro" ? t.pricing.mostPopular : null;
-          const planFeats = p.id === "pro" ? proFeats : essentialFeats;
+          const planFeats = p.id === "careteam" ? careteamFeats : p.id === "pro" ? proFeats : essentialFeats;
           const perSuffix = billing === "yearly" ? t.ui.perYear : t.ui.perMonth;
-          const noteText = p.id === "pro" ? t.ui.justPriceAnnualPro : t.ui.justPriceAnnualEssential;
+          const noteText = p.id === "careteam" ? t.ui.justPriceAnnualCareteam : p.id === "pro" ? t.ui.justPriceAnnualPro : t.ui.justPriceAnnualEssential;
 
           return (
             <button key={p.id} className={"plan-card" + (sel ? " sel" : "")} onClick={() => set({ plan: p.id })}>
@@ -1356,7 +1374,7 @@ function PaymentStep({ data, onNext, onBack, t, lang }: { data: OnboardingData; 
 /* ============ STEP 5 — Success ============ */
 function SuccessStep({ data, t, lang }: { data: OnboardingData; t: HomepageTranslations; lang: string }) {
   const plan = planById(data.plan);
-  const contactCap = plan.id === "pro" ? 6 : 3;
+  const contactCap = plan.id === "careteam" ? 15 : plan.id === "pro" ? 6 : 3;
   const shown = Math.min(contactCap, 4);
   const ownerFirst = (data.account.name || "You").trim().split(/\s+/)[0];
 

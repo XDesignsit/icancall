@@ -3,18 +3,23 @@ import { cookies } from "next/headers";
 import { verifySession } from "@/lib/session";
 import { supabase } from "@/lib/supabase";
 import { invalidateCachedAccount } from "@/lib/db";
+import { resolveAccount } from "@/lib/account";
 
-async function getAuthenticatedUserId() {
+// Resolve the account whose lines this request acts on. A Care Team member
+// resolves to the owner's account so both caregivers manage the same lines.
+async function getAccountId() {
   const cookieStore = await cookies();
   const sessionToken = cookieStore.get("session")?.value;
   if (!sessionToken) return null;
   const payload = await verifySession(sessionToken);
-  return payload?.userId || null;
+  if (!payload?.userId) return null;
+  const resolved = await resolveAccount(payload.userId);
+  return resolved.accountId;
 }
 
 export async function GET() {
   try {
-    const userId = await getAuthenticatedUserId();
+    const userId = await getAccountId();
     if (!userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -70,7 +75,7 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    const userId = await getAuthenticatedUserId();
+    const userId = await getAccountId();
     if (!userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }

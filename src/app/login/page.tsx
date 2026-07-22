@@ -298,6 +298,15 @@ export default function LoginPage() {
 
   const t = LOGIN_DICTS[lang] || LOGIN_DICTS.en;
 
+  // Honor a post-login destination (e.g. accepting a Care Team invite), but
+  // only same-origin relative paths to avoid open-redirect abuse.
+  const postLoginDest = (fallback: string) => {
+    if (typeof window === "undefined") return fallback;
+    const next = new URLSearchParams(window.location.search).get("next");
+    if (next && next.startsWith("/") && !next.startsWith("//")) return next;
+    return fallback;
+  };
+
   const handleSendOtp = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -348,11 +357,11 @@ export default function LoginPage() {
 
       if (data.role === "admin") {
         localStorage.setItem("isAdminLoggedIn", "true");
-        window.location.href = "/super-admin";
+        window.location.href = postLoginDest("/super-admin");
       } else {
         localStorage.setItem("isLoggedIn", "true");
         localStorage.setItem("userEmail", email);
-        window.location.href = "/dashboard";
+        window.location.href = postLoginDest("/dashboard");
       }
     } catch {
       setError(t.errorUnexpected);

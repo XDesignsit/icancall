@@ -229,6 +229,8 @@ export interface HomepageTranslations {
     essentialDesc: string;
     proTitle: string;
     proDesc: string;
+    careteamTitle: string;
+    careteamDesc: string;
     mostPopular: string;
     selectPlan: string;
     featuresHeader: string;
@@ -243,6 +245,11 @@ export interface HomepageTranslations {
     pFeat4: string;
     pFeat5: string;
     pFeat6: string;
+    cFeat1: string;
+    cFeat2: string;
+    cFeat3: string;
+    cFeat4: string;
+    cFeat5: string;
     guaranteeTitle: string;
     guaranteeDesc: string;
     shortGuarantee: string;
@@ -332,6 +339,7 @@ export interface HomepageTranslations {
     perMonth: string;
     justPriceAnnualEssential: string;
     justPriceAnnualPro: string;
+    justPriceAnnualCareteam: string;
     billedMonthlyCancelAnytime: string;
     voiceMinutes: string;
     worksOnAnyPhoneNoApp: string;

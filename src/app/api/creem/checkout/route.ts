@@ -34,6 +34,10 @@ const PLAN_PRODUCT_IDS: Record<string, Record<string, string>> = {
     monthly: process.env.CREEM_PRODUCT_ID_PRO_MONTHLY!,
     yearly:  process.env.CREEM_PRODUCT_ID_PRO_YEARLY!,
   },
+  careteam: {
+    monthly: process.env.CREEM_PRODUCT_ID_CARETEAM_MONTHLY!,
+    yearly:  process.env.CREEM_PRODUCT_ID_CARETEAM_YEARLY!,
+  },
 };
 
 const ADDON_PRODUCT_IDS: Record<string, string> = {
@@ -64,6 +68,13 @@ export async function POST(req: NextRequest) {
       }
       productId = PLAN_PRODUCT_IDS[plan][billing];
       successUrl = `${appUrl}/signup/creem-checkout?status=success`;
+
+      // A configured environment with a missing product id must never fall
+      // through to the simulated (free) checkout — fail loudly instead.
+      if (process.env.CREEM_API_KEY && !productId) {
+        console.error(`Creem product id missing for plan=${plan}/${billing} — set CREEM_PRODUCT_ID_${String(plan).toUpperCase()}_${String(billing).toUpperCase()}`);
+        return NextResponse.json({ error: "This plan is not yet available for purchase" }, { status: 503 });
+      }
     }
 
     if (await isSimulatedCheckout(productId)) {

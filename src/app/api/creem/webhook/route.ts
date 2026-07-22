@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
 import { supabase } from "@/lib/supabase";
+import { planConfig } from "@/lib/planConfig";
 
 export async function POST(req: NextRequest) {
   const secret = process.env.CREEM_WEBHOOK_SECRET;
@@ -74,8 +75,7 @@ export async function POST(req: NextRequest) {
 
       if (profile) {
         const addons = profile.settings?.addons || {};
-        const plan: "essential" | "pro" = profile.settings?.plan || "essential";
-        const planBaseMinutes = plan === "pro" ? 60 : 30;
+        const planBaseMinutes = planConfig(profile.settings?.plan || "essential").voiceMinutes;
 
         const addonMinutes = (addons.minuteBlocks || 0) * 30;
         const totalPool = planBaseMinutes + addonMinutes + (addons.rolloverMin || 0);

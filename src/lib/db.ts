@@ -1,4 +1,5 @@
 import { supabase } from './supabase';
+import { planConfig } from './planConfig';
 
 export interface LineContact {
   name?: string;
@@ -110,7 +111,8 @@ export async function findAccountByTwilioNumber(phoneNumber: string): Promise<Ac
     const settings = profile.settings || {};
     const addons = settings.addons || {};
     const plan = settings.plan || 'pro';
-    const allotted = (plan === 'essential' ? 60 : 120) + (Number(addons.minuteBlocks || 0) * 60);
+    // Telephony allotment is 2x the marketed minutes (both call legs count).
+    const allotted = planConfig(plan).voiceMinutes * 2 + (Number(addons.minuteBlocks || 0) * 60);
     const used = Number(addons.usedMin || 0);
 
     const lineSettings = line.settings || {};

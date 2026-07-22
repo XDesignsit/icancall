@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { verifySession } from "@/lib/session";
 import { supabase } from "@/lib/supabase";
+import { resolveAccount } from "@/lib/account";
 
 async function getAuthenticatedUserId() {
   const cookieStore = await cookies();
@@ -16,6 +17,21 @@ export async function GET() {
     const userId = await getAuthenticatedUserId();
     if (!userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // Care Team members act on the owner's account, so they load the owner's
+    // profile (plan, add-ons, billing context) rather than their own.
+    const resolved = await resolveAccount(userId);
+    if (resolved.role === "member") {
+      const { data: ownerProfile, error: ownerErr } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", resolved.accountId)
+        .maybeSingle();
+      if (ownerErr || !ownerProfile) {
+        return NextResponse.json({ error: "Failed to fetch account data" }, { status: 500 });
+      }
+      return NextResponse.json({ success: true, profile: ownerProfile, role: "member" });
     }
 
     // 1. Fetch profile from Supabase
@@ -69,7 +85,7 @@ export async function GET() {
       profile = inserted;
     }
 
-    return NextResponse.json({ success: true, profile });
+    return NextResponse.json({ success: true, profile, role: "owner" });
   } catch (err) {
     console.error("Caregiver Profile GET Error:", err);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
@@ -81,6 +97,17 @@ export async function POST(request: Request) {
     const userId = await getAuthenticatedUserId();
     if (!userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // Care Team members have full control over lines/contacts/routing (handled
+    // by the lines route) but cannot alter account-level profile, billing, or
+    // plan settings — those stay with the owner.
+    const resolved = await resolveAccount(userId);
+    if (resolved.role === "member") {
+      return NextResponse.json(
+        { error: "Caregivers can't change account or billing settings. Ask the account owner." },
+        { status: 403 }
+      );
     }
 
     const { name, preferred_name, settings: newSettings } = await request.json();

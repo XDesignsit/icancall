@@ -164,6 +164,38 @@ export async function sendVoicemailAlertEmail(
 
 
 /**
+ * Sends a Care Team seat invitation email with an accept link.
+ */
+export async function sendSeatInviteEmail(
+  to: string,
+  inviterName: string,
+  acceptLink: string
+) {
+  const subject = `${inviterName} invited you to help manage their iCanCall account`;
+  const text = `Hi,\n\n${inviterName} has invited you as a caregiver on their iCanCall Care Team account. As a caregiver you can help manage phone lines, trusted contacts, routing, and greetings.\n\nAccept the invitation and sign in here:\n\n${acceptLink}\n\nIf you weren't expecting this, you can safely ignore this email.\n\nBest,\nThe iCanCall Team`;
+
+  const html = `
+    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 580px; margin: 0 auto; padding: 32px 24px; background: #ffffff; border: 1px solid #f1f5f9; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
+      <div style="margin-bottom: 24px;">
+        <span style="font-size: 1.25rem; font-weight: 700; color: #1e3a8a; letter-spacing: -0.025em;">iCanCall</span>
+      </div>
+      <h2 style="color: #0f172a; font-size: 1.45rem; font-weight: 700; margin: 0 0 12px 0; letter-spacing: -0.025em;">You've been invited to a Care Team</h2>
+      <p style="color: #475569; font-size: 1rem; line-height: 1.6; margin: 0 0 24px 0;"><strong>${inviterName}</strong> invited you to help manage their iCanCall account. As a caregiver you can manage phone lines, trusted contacts, routing, and greetings — everything except billing and plan changes.</p>
+      <div style="margin-bottom: 28px; text-align: center;">
+        <a href="${acceptLink}" style="display: inline-block; padding: 12px 28px; background-color: #2563eb; color: #ffffff; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 0.95rem; box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);">Accept Invitation</a>
+      </div>
+      <p style="color: #64748b; font-size: 0.875rem; line-height: 1.6; margin: 0 0 24px 0;">You'll sign in with your email and a one-time code, then land directly on the shared account.</p>
+      <hr style="border: 0; border-top: 1px solid #f1f5f9; margin: 32px 0 20px 0;" />
+      <p style="color: #94a3b8; font-size: 0.775rem; line-height: 1.5; margin: 0;">If you're having trouble clicking the button, copy and paste this URL into your browser:<br />
+        <a href="${acceptLink}" style="color: #3b82f6; text-decoration: underline; word-break: break-all;">${acceptLink}</a>
+      </p>
+    </div>
+  `;
+
+  return sendEmail({ to, subject, text, html });
+}
+
+/**
  * Sends a high-fidelity Welcome & Signup Confirmation email with billing details
  */
 export async function sendWelcomeBillingEmail(

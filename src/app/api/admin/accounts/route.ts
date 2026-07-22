@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { verifySession } from "@/lib/session";
 import { supabase } from "@/lib/supabase";
+import { planConfig } from "@/lib/planConfig";
 
 async function verifyAdmin() {
   const cookieStore = await cookies();
@@ -82,8 +83,10 @@ export async function GET() {
         connect: 95.0,
         vmRate: 5.0,
         minutesUsed: totalMinutesUsed || 0,
-        minutesCap: (settings.plan === "essential" ? 60 : 120) * userLines.length,
-        mrr: settings.plan === "essential" ? (settings.billingCycle === "yearly" ? 9.99 : 14.99) : (settings.billingCycle === "yearly" ? 19.99 : 24.99),
+        minutesCap: planConfig(settings.plan).voiceMinutes * 2 * userLines.length,
+        mrr: settings.billingCycle === "yearly"
+          ? Math.round((planConfig(settings.plan).annualAmount / 12) * 100) / 100
+          : planConfig(settings.plan).monthlyAmount,
         ltv: 150,
         next: "N/A",
         lines: mappedLines,

@@ -4,6 +4,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { dashboardTranslations, type DashboardTranslations } from "@/lib/dashboardTranslations";
 import { dashboardExtraTranslations } from "@/lib/dashboardExtraTranslations";
 import { stateForAreaCode } from "@/lib/areaCodeStates";
+import { planConfig, type PlanId } from "@/lib/planConfig";
 
 /* ============ DEMO DATA & HELPERS ============ */
 const AVATAR_COLORS = [
@@ -974,7 +975,7 @@ interface Account {
   twoFactor: boolean;
   card: { brand: string; last4: string; exp: string };
   billingAddr: string;
-  plan: "essential" | "pro";
+  plan: PlanId;
   billingCycle: "monthly" | "yearly";
   addons: {
     extraNumbers: number;
@@ -986,7 +987,7 @@ interface Account {
 }
 
 const getLineDefaultLabel = (totalIndex: number, plan: string, lang: string): string => {
-  const baseLinesCount = plan === "pro" ? 2 : 1;
+  const baseLinesCount = planConfig(plan).includedLines;
   if (totalIndex < baseLinesCount) {
     if (totalIndex === 0) {
       return lang === "es" ? "Línea principal" : lang === "fr" ? "Ligne principale" : "Primary line";
@@ -1775,11 +1776,11 @@ function ContactsView({
   showToast: (msg: string) => void;
   d: DashboardTranslations;
   lang: string;
-  plan: "essential" | "pro";
+  plan: PlanId;
 }) {
   const [modal, setModal] = useState<{ edit?: Contact } | null>(null);
   const contacts = line.contacts;
-  const limit = plan === "pro" ? 6 : 3;
+  const limit = planConfig(plan).contactsPerLine;
   const full = contacts.length >= limit;
 
   const move = (idx: number, dir: number) => {
@@ -2372,7 +2373,7 @@ function RoutingView({
   showToast: (msg: string) => void;
   d: DashboardTranslations;
   lang: string;
-  plan: "essential" | "pro";
+  plan: PlanId;
   setView: (v: string) => void;
   setAcctTab: (t: string) => void;
   setAutoOpenPlanModal: (open: boolean) => void;
@@ -3552,6 +3553,128 @@ function SettingsView({
   );
 }
 
+/* Care Team caregiver seats (owner-managed) */
+interface SeatMemberView { email: string; status: "invited" | "active"; invitedAt: string; acceptedAt?: string }
+
+function SeatsManager({ showToast, lang }: { showToast: (m: string) => void; lang: string }) {
+  const [loaded, setLoaded] = useState(false);
+  const [supportsSeats, setSupportsSeats] = useState(false);
+  const [seatLimit, setSeatLimit] = useState(2);
+  const [members, setMembers] = useState<SeatMemberView[]>([]);
+  const [inviteEmail, setInviteEmail] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  const tr = (en: string, es: string, fr: string) => (lang === "es" ? es : lang === "fr" ? fr : en);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await fetch("/api/caregiver/seats");
+        if (res.ok) {
+          const data = await res.json();
+          setSupportsSeats(!!data.supportsSeats);
+          setSeatLimit(data.seatLimit || 2);
+          setMembers(Array.isArray(data.members) ? data.members : []);
+        }
+      } catch { /* fail closed: section stays hidden */ }
+      setLoaded(true);
+    })();
+  }, []);
+
+  if (!loaded || !supportsSeats) return null;
+
+  // Owner occupies one seat; the rest are for invited caregivers.
+  const inviteeSeatsUsed = members.length;
+  const seatsAvailable = seatLimit - 1 - inviteeSeatsUsed;
+
+  const invite = async () => {
+    const email = inviteEmail.trim();
+    if (!email) return;
+    setBusy(true);
+    try {
+      const res = await fetch("/api/caregiver/seats", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "invite", email }),
+      });
+      const data = await res.json();
+      if (!res.ok) { showToast(data.error || tr("Couldn't send invite", "No se pudo invitar", "Envoi impossible")); }
+      else { setMembers(data.members || []); setInviteEmail(""); showToast(tr("Invitation sent", "Invitación enviada", "Invitation envoyée")); }
+    } catch { showToast(tr("Couldn't send invite", "No se pudo invitar", "Envoi impossible")); }
+    setBusy(false);
+  };
+
+  const revoke = async (email: string) => {
+    setBusy(true);
+    try {
+      const res = await fetch("/api/caregiver/seats", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "revoke", email }),
+      });
+      const data = await res.json();
+      if (!res.ok) { showToast(data.error || tr("Couldn't remove caregiver", "No se pudo quitar", "Suppression impossible")); }
+      else { setMembers(data.members || []); showToast(tr("Caregiver removed", "Cuidador eliminado", "Aidant supprimé")); }
+    } catch { showToast(tr("Couldn't remove caregiver", "No se pudo quitar", "Suppression impossible")); }
+    setBusy(false);
+  };
+
+  return (
+    <div className="card section-gap">
+      <div className="card-head">
+        <div>
+          <h2>{tr("Caregiver seats", "Accesos de cuidador", "Accès aidants")}</h2>
+          <p>{tr(
+            `Invite a second caregiver to help manage this account. ${seatsAvailable > 0 ? `${seatsAvailable} seat available.` : "All seats in use."}`,
+            `Invite a otro cuidador para ayudar a gestionar esta cuenta. ${seatsAvailable > 0 ? `${seatsAvailable} acceso disponible.` : "Todos los accesos en uso."}`,
+            `Invitez un second aidant à gérer ce compte. ${seatsAvailable > 0 ? `${seatsAvailable} accès disponible.` : "Tous les accès sont utilisés."}`
+          )}</p>
+        </div>
+      </div>
+      <div className="card-pad" style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+        {members.length > 0 && (
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            {members.map((m) => (
+              <div key={m.email} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, padding: "10px 14px", border: "1px solid var(--line)", borderRadius: "var(--r-md)", background: "var(--surface)" }}>
+                <div style={{ display: "flex", flexDirection: "column", gap: 2, minWidth: 0 }}>
+                  <span style={{ fontWeight: 600, fontSize: "0.9rem", color: "var(--ink)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{m.email}</span>
+                  <span style={{ fontSize: "0.76rem", fontWeight: 600, color: m.status === "active" ? "oklch(0.55 0.14 150)" : "var(--ink-faint)" }}>
+                    {m.status === "active" ? tr("Active caregiver", "Cuidador activo", "Aidant actif") : tr("Invitation pending", "Invitación pendiente", "Invitation en attente")}
+                  </span>
+                </div>
+                <button className="btn btn-ghost" disabled={busy} onClick={() => revoke(m.email)} style={{ padding: "6px 12px", fontSize: "0.82rem" }}>
+                  {m.status === "active" ? tr("Remove", "Quitar", "Retirer") : tr("Cancel", "Cancelar", "Annuler")}
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {seatsAvailable > 0 ? (
+          <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+            <input
+              type="email"
+              value={inviteEmail}
+              onChange={(e) => setInviteEmail(e.target.value)}
+              onKeyDown={(e) => { if (e.key === "Enter") invite(); }}
+              placeholder={tr("caregiver@email.com", "cuidador@email.com", "aidant@email.com")}
+              disabled={busy}
+              style={{ flex: 1, minWidth: 200, padding: "9px 12px", border: "1px solid var(--line)", borderRadius: "var(--r-md)", background: "var(--surface)", fontSize: "0.9rem", color: "var(--ink)" }}
+            />
+            <button className="btn btn-primary" disabled={busy || !inviteEmail.trim()} onClick={invite} style={{ padding: "9px 18px", fontSize: "0.9rem" }}>
+              {tr("Send invite", "Enviar invitación", "Inviter")}
+            </button>
+          </div>
+        ) : (
+          <p style={{ fontSize: "0.85rem", color: "var(--ink-faint)", margin: 0 }}>
+            {tr("Remove a caregiver to free up a seat.", "Quite un cuidador para liberar un acceso.", "Retirez un aidant pour libérer un accès.")}
+          </p>
+        )}
+      </div>
+    </div>
+  );
+}
+
 /* Account & billing */
 export function AccountView({
   account,
@@ -3565,6 +3688,7 @@ export function AccountView({
   setLines,
   autoOpenPlanModal,
   setAutoOpenPlanModal,
+  viewerRole,
 }: {
   account: Account;
   setAccount: React.Dispatch<React.SetStateAction<Account>>;
@@ -3577,10 +3701,11 @@ export function AccountView({
   setLines: React.Dispatch<React.SetStateAction<Line[]>>;
   autoOpenPlanModal: boolean;
   setAutoOpenPlanModal: (open: boolean) => void;
+  viewerRole: "owner" | "member";
 }) {
   const ext = dashboardExtraTranslations[lang as keyof typeof dashboardExtraTranslations] || dashboardExtraTranslations.en;
   const a = account;
-  const baseLinesCount = a.plan === "pro" ? 2 : 1;
+  const baseLinesCount = planConfig(a.plan).includedLines;
   const currentExtraLines = Math.max(0, lines.length - baseLinesCount);
   const set = (patch: Partial<Account>) => {
     setAccount((prev) => {
@@ -3590,7 +3715,7 @@ export function AccountView({
     });
   };
   const [planModalOpen, setPlanModalOpen] = useState(false);
-  const [tempPlan, setTempPlan] = useState<"essential" | "pro">(account.plan || "pro");
+  const [tempPlan, setTempPlan] = useState<PlanId>(account.plan || "pro");
   const [tempCycle, setTempCycle] = useState<"monthly" | "yearly">(account.billingCycle || "monthly");
   const [selectedLineToKeep, setSelectedLineToKeep] = useState<string>("");
 
@@ -3618,7 +3743,7 @@ export function AccountView({
   const [tempExtraNumbers, setTempExtraNumbers] = useState(0);
   const [tempMinuteBlocks, setTempMinuteBlocks] = useState(0);
 
-  const planMaxIncluded = a.plan === "pro" ? 2 : 1;
+  const planMaxIncluded = planConfig(a.plan).includedLines;
   const unusedPlanLines = Math.max(0, planMaxIncluded - lines.length);
   const chargeableNewNumbers = tempExtraNumbers > 0 ? Math.max(0, tempExtraNumbers - unusedPlanLines) : 0;
 
@@ -3814,30 +3939,39 @@ export function AccountView({
            : "Update Billing Cycle";
     }
     
-    if (tempPlan === "pro" && account.plan === "essential") {
-      return lang === "es" ? "Actualizar a Pro"
-           : lang === "fr" ? "Passer à Pro"
-           : lang === "ja" ? "Proにアップグレード"
-           : lang === "zh" ? "升级到专业版"
-           : lang === "ar" ? "الترقية إلى برو"
-           : lang === "hi" ? "प्रो पर अपग्रेड करें"
-           : lang === "pt" ? "Upgrade para Pro"
-           : lang === "de" ? "Auf Pro upgraden"
-           : lang === "it" ? "Passa a Pro"
-           : lang === "ko" ? "Pro로 업그레이드"
-           : "Upgrade to Pro";
+    // Tier order: essential < pro < careteam. Compare ranks to label the
+    // action as an upgrade or downgrade, and name the destination plan.
+    const rank: Record<PlanId, number> = { essential: 0, pro: 1, careteam: 2 };
+    const targetName = tempPlan === "careteam"
+      ? (lang === "ja" ? "ケアチーム" : lang === "zh" ? "护理团队" : lang === "ar" ? "فريق الرعاية" : lang === "hi" ? "केयर टीम" : lang === "ko" ? "케어 팀" : "Care Team")
+      : tempPlan === "pro"
+      ? (lang === "ja" ? "Pro" : lang === "zh" ? "专业版" : lang === "ar" ? "برو" : lang === "hi" ? "प्रो" : "Pro")
+      : (lang === "es" ? "Esencial" : lang === "fr" ? "Essentiel" : lang === "ja" ? "エッセンシャル" : lang === "zh" ? "基础版" : lang === "ar" ? "أساسي" : lang === "hi" ? "एसेनशियल" : lang === "pt" ? "Essencial" : lang === "de" ? "Essential" : lang === "it" ? "Essenziale" : lang === "ko" ? "에센셜" : "Essential");
+
+    if (rank[tempPlan] > rank[account.plan]) {
+      return lang === "es" ? `Actualizar a ${targetName}`
+           : lang === "fr" ? `Passer à ${targetName}`
+           : lang === "ja" ? `${targetName}にアップグレード`
+           : lang === "zh" ? `升级到${targetName}`
+           : lang === "ar" ? `الترقية إلى ${targetName}`
+           : lang === "hi" ? `${targetName} पर अपग्रेड करें`
+           : lang === "pt" ? `Upgrade para ${targetName}`
+           : lang === "de" ? `Auf ${targetName} upgraden`
+           : lang === "it" ? `Passa a ${targetName}`
+           : lang === "ko" ? `${targetName}로 업그레이드`
+           : `Upgrade to ${targetName}`;
     } else {
-      return lang === "es" ? "Degradar a Esencial"
-           : lang === "fr" ? "Passer à Essentiel"
-           : lang === "ja" ? "エッセンシャルにダウング레ード"
-           : lang === "zh" ? "降级到基础版"
-           : lang === "ar" ? "تخفيض الباقة إلى أساسي"
-           : lang === "hi" ? "एसेनशियल पर डाउनग्रेड करें"
-           : lang === "pt" ? "Downgrade para Essencial"
-           : lang === "de" ? "Auf Essential downgraden"
-           : lang === "it" ? "Passa a Essenziale"
-           : lang === "ko" ? "에센셜로 다운그레이드"
-           : "Downgrade to Essential";
+      return lang === "es" ? `Degradar a ${targetName}`
+           : lang === "fr" ? `Passer à ${targetName}`
+           : lang === "ja" ? `${targetName}にダウングレード`
+           : lang === "zh" ? `降级到${targetName}`
+           : lang === "ar" ? `تخفيض الباقة إلى ${targetName}`
+           : lang === "hi" ? `${targetName} पर डाउनग्रेड करें`
+           : lang === "pt" ? `Downgrade para ${targetName}`
+           : lang === "de" ? `Auf ${targetName} downgraden`
+           : lang === "it" ? `Passa a ${targetName}`
+           : lang === "ko" ? `${targetName}로 다운그레이드`
+           : `Downgrade to ${targetName}`;
     }
   };
 
@@ -4171,6 +4305,15 @@ export function AccountView({
 
       {tab === "billing" && (
         <>
+          {viewerRole === "member" && (
+            <div className="card section-gap" style={{ borderColor: "var(--line)" }}>
+              <div className="card-pad" style={{ fontSize: "0.9rem", color: "var(--ink-soft)", lineHeight: 1.5 }}>
+                {lang === "es" ? "Eres cuidador en esta cuenta. La facturación y el plan los gestiona el propietario de la cuenta; puedes gestionar líneas, contactos y enrutamiento."
+                 : lang === "fr" ? "Vous êtes aidant sur ce compte. La facturation et le forfait sont gérés par le propriétaire du compte ; vous pouvez gérer les lignes, contacts et le routage."
+                 : "You're a caregiver on this account. Billing and plan are managed by the account owner — you can manage lines, contacts, and routing."}
+              </div>
+            </div>
+          )}
           {/* Plan Change Modal */}
           {planModalOpen && (
             <Modal
@@ -4456,6 +4599,72 @@ export function AccountView({
                         : lang === "it" ? "Per gruppi di assistenza attivi. Include 2 numeri, fino a 6 contatti, menu e programmazione."
                         : lang === "ko" ? "활동적인 케어 그룹용. 2개의 번호, 최대 6개의 연락처, 메뉴 및 일정 관리 기능을 포함합니다."
                         : "For active care groups. Includes 2 numbers, up to 6 contacts, menus, and scheduling."}
+                    </p>
+                  </div>
+
+                  {/* Care Team Plan Option */}
+                  <div
+                    className={`card ${tempPlan === "careteam" ? "featured" : ""}`}
+                    onClick={() => setTempPlan("careteam")}
+                    style={{
+                      padding: 18,
+                      cursor: "pointer",
+                      border: tempPlan === "careteam" ? "2px solid var(--blue)" : "1px solid var(--line)",
+                      background: tempPlan === "careteam" ? "var(--tint)" : "var(--surface)",
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: 6,
+                      borderRadius: "var(--r-md)",
+                      transition: "all 0.2s"
+                    }}
+                  >
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                        <b style={{ fontSize: "1.1rem" }}>
+                          {lang === "es" ? "Plan Care Team"
+                           : lang === "fr" ? "Forfait Care Team"
+                           : lang === "ja" ? "ケアチームプラン"
+                           : lang === "zh" ? "护理团队方案"
+                           : lang === "ar" ? "باقة فريق الرعاية"
+                           : lang === "hi" ? "केयर टीम प्लान"
+                           : lang === "pt" ? "Plano Care Team"
+                           : lang === "de" ? "Care-Team-Tarif"
+                           : lang === "it" ? "Piano Care Team"
+                           : lang === "ko" ? "케어 팀 플랜"
+                           : "Care Team Plan"}
+                        </b>
+                        {account.plan === "careteam" && (
+                          <span className="badge badge-green" style={{ fontSize: "0.72rem", padding: "2px 8px" }}>
+                            {lang === "es" ? "Plan actual"
+                             : lang === "fr" ? "Forfait actuel"
+                             : lang === "ja" ? "現在のプラン"
+                             : lang === "zh" ? "当前方案"
+                             : lang === "ar" ? "الباقة الحالية"
+                             : lang === "hi" ? "वर्तमान प्लान"
+                             : lang === "pt" ? "Plano atual"
+                             : lang === "de" ? "Aktueller Tarif"
+                             : lang === "it" ? "Piano attuale"
+                             : lang === "ko" ? "현재 플랜"
+                             : "Current Plan"}
+                          </span>
+                        )}
+                      </div>
+                      <span style={{ fontWeight: 700, color: "var(--blue-deep)" }}>
+                        {tempCycle === "yearly" ? "$41.58/mo" : "$49.99/mo"}
+                      </span>
+                    </div>
+                    <p style={{ fontSize: "0.85rem", color: "var(--ink-faint)" }}>
+                      {lang === "es" ? "Para el cuidado compartido de varios seres queridos. Incluye 5 números, hasta 15 contactos, 150 minutos combinados y 2 accesos de cuidador."
+                        : lang === "fr" ? "Pour l'aide partagée auprès de plusieurs proches. 5 numéros, 15 contacts max, 150 minutes mutualisées et 2 accès aidants."
+                        : lang === "ja" ? "複数のご家族の見守りを分担するチーム向け。5つの番号、最大15の連絡先、共有150分、介護者ログイン2名分を含みます。"
+                        : lang === "zh" ? "适合多位亲人共同看护。包含 5 个号码、最多 15 个联系人、150 分钟共享通话和 2 个看护人登录。"
+                        : lang === "ar" ? "للرعاية المشتركة لعدة أحباء. يشمل 5 أرقام، وحتى 15 جهة اتصال، و150 دقيقة مشتركة، وحسابَي دخول."
+                        : lang === "hi" ? "कई प्रियजनों की साझा देखभाल के लिए। इसमें 5 नंबर, 15 संपर्कों तक, 150 साझा मिनट और 2 केयरगिवर लॉगिन शामिल हैं।"
+                        : lang === "pt" ? "Para o cuidado compartilhado de vários entes queridos. Inclui 5 números, até 15 contatos, 150 minutos combinados e 2 logins de cuidador."
+                        : lang === "de" ? "Für die gemeinsame Betreuung mehrerer Angehöriger. Enthält 5 Rufnummern, bis zu 15 Kontakte, 150 gemeinsame Minuten und 2 Betreuer-Logins."
+                        : lang === "it" ? "Per la cura condivisa di più persone care. Include 5 numeri, fino a 15 contatti, 150 minuti condivisi e 2 accessi caregiver."
+                        : lang === "ko" ? "여러 가족을 함께 돌보는 팀용. 5개의 번호, 최대 15개의 연락처, 공유 150분, 보호자 로그인 2개를 포함합니다."
+                        : "For shared caregiving across several loved ones. Includes 5 numbers, up to 15 contacts, 150 pooled minutes, and 2 caregiver logins."}
                     </p>
                   </div>
                 </div>
@@ -5122,7 +5331,7 @@ export function AccountView({
                 </p>
 
                 <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                  {lines.slice(a.plan === "pro" ? 2 : 1).map((l) => {
+                  {lines.slice(planConfig(a.plan).includedLines).map((l) => {
                     const isSelected = selectedLinesToRemove.includes(l.id);
                     return (
                       <label
@@ -5269,27 +5478,32 @@ export function AccountView({
                   padding: "10px 14px",
                   fontWeight: 600
                 }}>
-                  {lang === "es"
-                    ? `Monto de facturación anual: ${account.plan === "pro" ? "$249.00" : "$149.00"}/año`
+                  {(() => {
+                    const annual = planConfig(account.plan).annualAmount.toFixed(2);
+                    const usd = `$${annual}`;
+                    const fr = `${annual.replace(".", ",")} $`;
+                    return lang === "es"
+                    ? `Monto de facturación anual: ${usd}/año`
                     : lang === "fr"
-                    ? `Montant de la facturation annuelle : ${account.plan === "pro" ? "249,00 $" : "149,00 $"}/an`
+                    ? `Montant de la facturation annuelle : ${fr}/an`
                     : lang === "ja"
-                    ? `年間請求額: ${account.plan === "pro" ? "$249.00" : "$149.00"}/年`
+                    ? `年間請求額: ${usd}/年`
                     : lang === "zh"
-                    ? `年度计费金额：${account.plan === "pro" ? "$249.00" : "$149.00"}/年`
+                    ? `年度计费金额：${usd}/年`
                     : lang === "ar"
-                    ? `مبلغ الفوترة السنوية: ${account.plan === "pro" ? "$249.00" : "$149.00"} سنوياً`
+                    ? `مبلغ الفوترة السنوية: ${usd} سنوياً`
                     : lang === "hi"
-                    ? `वार्षिक बिलिंग राशि: ${account.plan === "pro" ? "$249.00" : "$149.00"}/वर्ष`
+                    ? `वार्षिक बिलिंग राशि: ${usd}/वर्ष`
                     : lang === "pt"
-                    ? `Valor da cobrança anual: ${account.plan === "pro" ? "$249.00" : "$149.00"}/ano`
+                    ? `Valor da cobrança anual: ${usd}/ano`
                     : lang === "de"
-                    ? `Jährlicher Abrechnungsbetrag: ${account.plan === "pro" ? "$249.00" : "$149.00"}/Jahr`
+                    ? `Jährlicher Abrechnungsbetrag: ${usd}/Jahr`
                     : lang === "it"
-                    ? `Importo della fatturazione annuale: ${account.plan === "pro" ? "$249.00" : "$149.00"}/anno`
+                    ? `Importo della fatturazione annuale: ${usd}/anno`
                     : lang === "ko"
-                    ? `연간 결제 금액: ${account.plan === "pro" ? "$249.00" : "$149.00"}/년`
-                    : `Annual billing amount: ${account.plan === "pro" ? "$249.00" : "$149.00"}/yr`}
+                    ? `연간 결제 금액: ${usd}/년`
+                    : `Annual billing amount: ${usd}/yr`;
+                  })()}
                 </div>
               </div>
             </Modal>
@@ -5315,8 +5529,15 @@ export function AccountView({
                     : d.account.renewDateSub}
                 </p>
               </div>
-              <Badge kind={account.plan === "pro" ? "blue" : "amber"}>
-                {account.plan === "pro"
+              <Badge kind={account.plan === "essential" ? "amber" : "blue"}>
+                {account.plan === "careteam"
+                  ? (lang === "ja" ? "ケアチーム"
+                   : lang === "ko" ? "케어 팀"
+                   : lang === "zh" ? "护理团队"
+                   : lang === "ar" ? "فريق الرعاية"
+                   : lang === "hi" ? "केयर टीम"
+                   : "Care Team")
+                  : account.plan === "pro"
                   ? (lang === "ja" ? "プロ"
                    : lang === "ko" ? "프로"
                    : lang === "zh" ? "专业版"
@@ -5338,38 +5559,29 @@ export function AccountView({
             <div className="card-pad">
               <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 4 }}>
                 <span style={{ fontSize: "2.4rem", fontWeight: 700, letterSpacing: "-0.03em" }}>
-                  {account.plan === "pro"
-                    ? (account.billingCycle === "yearly" ? "$20.75" : "$24.99")
-                    : (account.billingCycle === "yearly" ? "$12.42" : "$14.99")}
+                  {account.billingCycle === "yearly"
+                    ? `$${(planConfig(account.plan).annualAmount / 12).toFixed(2)}`
+                    : planConfig(account.plan).monthlyLabel}
                 </span>
                 <span style={{ color: "var(--ink-faint)" }}>
                   {lang === "es" ? "/ mes" : lang === "fr" ? "/ mois" : lang === "ja" ? "/ 月" : lang === "zh" ? "/ 月" : lang === "ar" ? "/ شهر" : lang === "hi" ? "/ महीना" : lang === "pt" ? "/ mês" : lang === "de" ? "/ Monat" : lang === "it" ? "/ mese" : lang === "ko" ? "/ 월" : "/ month"}
                 </span>
                 {account.billingCycle === "yearly" && (
                   <span style={{ fontSize: "0.95rem", color: "var(--ink-faint)", marginLeft: 6 }}>
-                    {account.plan === "pro"
-                      ? (lang === "es" ? "(facturado anualmente a $249/año)"
-                       : lang === "fr" ? "(facturé annuellement à 249 $/an)"
-                       : lang === "ja" ? "(年額 $249 で請求)"
-                       : lang === "zh" ? "(按年计费，每年 $249)"
-                       : lang === "ar" ? "(تُخصم سنوياً بقيمة 249$/السنة)"
-                       : lang === "hi" ? "(सालाना $249 शुल्क)"
-                       : lang === "pt" ? "(cobrado anualmente a $249/ano)"
-                       : lang === "de" ? "(jährliche Abrechnung von 249 $/Jahr)"
-                       : lang === "it" ? "(fatturato annualmente a 249 $/anno)"
-                       : lang === "ko" ? "(연간 $249 청구)"
-                       : "(billed annually at $249/yr)")
-                      : (lang === "es" ? "(facturado anualmente a $149/año)"
-                       : lang === "fr" ? "(facturé annuellement à 149 $/an)"
-                       : lang === "ja" ? "(年額 $149 で請求)"
-                       : lang === "zh" ? "(按年计费，每年 $149)"
-                       : lang === "ar" ? "(تُخصم سنوياً بقيمة 149$/السنة)"
-                       : lang === "hi" ? "(सालाना $149 शुल्क)"
-                       : lang === "pt" ? "(cobrado anualmente a $149/ano)"
-                       : lang === "de" ? "(jährliche Abrechnung von 149 $/Jahr)"
-                       : lang === "it" ? "(fatturato annualmente a 149 $/anno)"
-                       : lang === "ko" ? "(연간 $149 청구)"
-                       : "(billed annually at $149/yr)")}
+                    {(() => {
+                      const yr = planConfig(account.plan).annualAmount;
+                      return lang === "es" ? `(facturado anualmente a $${yr}/año)`
+                       : lang === "fr" ? `(facturé annuellement à ${yr} $/an)`
+                       : lang === "ja" ? `(年額 $${yr} で請求)`
+                       : lang === "zh" ? `(按年计费，每年 $${yr})`
+                       : lang === "ar" ? `(تُخصم سنوياً بقيمة ${yr}$/السنة)`
+                       : lang === "hi" ? `(सालाना $${yr} शुल्क)`
+                       : lang === "pt" ? `(cobrado anualmente a $${yr}/ano)`
+                       : lang === "de" ? `(jährliche Abrechnung von ${yr} $/Jahr)`
+                       : lang === "it" ? `(fatturato annualmente a ${yr} $/anno)`
+                       : lang === "ko" ? `(연간 $${yr} 청구)`
+                       : `(billed annually at $${yr}/yr)`;
+                    })()}
                   </span>
                 )}
                 {account.billingCycle !== "yearly" && (
@@ -5388,29 +5600,35 @@ export function AccountView({
                 className="feat-grid"
               >
                 {((account.plan === "pro" ? d.account.billingFeatures : undefined) || [
-                  lang === "es" ? "1 número de teléfono dedicado"
-                  : lang === "fr" ? "1 numéro de sécurité dédié"
-                  : lang === "ja" ? "1つの専用電話番号"
-                  : lang === "zh" ? "1 个专用电话号码"
-                  : lang === "ar" ? "رقم هاتف واحد مخصص"
-                  : lang === "hi" ? "1 समर्पित फ़ोन नंबर"
-                  : lang === "pt" ? "1 número de telefone dedicado"
-                  : lang === "de" ? "1 dedizierte Telefonnummer"
-                  : lang === "it" ? "1 numero di tempo dedicato"
-                  : lang === "ko" ? "1개의 전용 전화번호"
-                  : "1 dedicated phone number",
+                  (() => {
+                    const n = planConfig(account.plan).includedLines;
+                    return lang === "es" ? `${n} número(s) de teléfono dedicado(s)`
+                    : lang === "fr" ? `${n} numéro(s) de sécurité dédié(s)`
+                    : lang === "ja" ? `専用電話番号 ${n} 個`
+                    : lang === "zh" ? `${n} 个专用电话号码`
+                    : lang === "ar" ? `${n} رقم هاتف مخصص`
+                    : lang === "hi" ? `${n} समर्पित फ़ोन नंबर`
+                    : lang === "pt" ? `${n} número(s) de telefone dedicado(s)`
+                    : lang === "de" ? `${n} dedizierte Telefonnummer(n)`
+                    : lang === "it" ? `${n} numero(i) di telefono dedicato(i)`
+                    : lang === "ko" ? `전용 전화번호 ${n}개`
+                    : `${n} dedicated phone number${n === 1 ? "" : "s"}`;
+                  })(),
 
-                  lang === "es" ? "Hasta 3 contactos por número"
-                  : lang === "fr" ? "Jusqu'à 3 contacts par numéro"
-                  : lang === "ja" ? "1番号あたり最大3つの連絡先"
-                  : lang === "zh" ? "每个号码最多 3 个可路由联系人"
-                  : lang === "ar" ? "حتى 3 جهات اتصال لكل رقم"
-                  : lang === "hi" ? "प्रति नंबर 3 रूट करने योग्य संपर्क"
-                  : lang === "pt" ? "Até 3 contatos por número"
-                  : lang === "de" ? "Bis zu 3 Kontakte pro Nummer"
-                  : lang === "it" ? "Fino a 3 contatti per numero"
-                  : lang === "ko" ? "번호당 최대 3개의 연결 연락처"
-                  : "3 routable contacts per number",
+                  (() => {
+                    const c = planConfig(account.plan).contactsPerLine;
+                    return lang === "es" ? `Hasta ${c} contactos por número`
+                    : lang === "fr" ? `Jusqu'à ${c} contacts par numéro`
+                    : lang === "ja" ? `1番号あたり最大${c}つの連絡先`
+                    : lang === "zh" ? `每个号码最多 ${c} 个可路由联系人`
+                    : lang === "ar" ? `حتى ${c} جهات اتصال لكل رقم`
+                    : lang === "hi" ? `प्रति नंबर ${c} रूट करने योग्य संपर्क`
+                    : lang === "pt" ? `Até ${c} contatos por número`
+                    : lang === "de" ? `Bis zu ${c} Kontakte pro Nummer`
+                    : lang === "it" ? `Fino a ${c} contatti per numero`
+                    : lang === "ko" ? `번호당 최대 ${c}개의 연결 연락처`
+                    : `${c} routable contacts per number`;
+                  })(),
 
                   lang === "es" ? "Enrutamiento en cascada (Secuencial)"
                   : lang === "fr" ? "Appel en cascade (séquentiel)"
@@ -5502,19 +5720,20 @@ export function AccountView({
                     onClick={() => {
                       const proceedWithYearlySwitch = () => {
                         set({ billingCycle: "yearly" });
-                        showToast(account.plan === "pro" 
-                          ? ext.annualToast 
-                          : (lang === "es" ? "Cambiado a facturación anual — $149/año"
-                           : lang === "fr" ? "Facturation annuelle activée — 149 $/an"
-                           : lang === "ja" ? "年額プランに切り替えました — $149/年"
-                           : lang === "zh" ? "已切换为按年计费 — $149/年"
-                           : lang === "ar" ? "تم التحويل إلى الدفع السنوي — 149$/السنة"
-                           : lang === "hi" ? "वार्षिक बिलिंग पर स्विच किया गया — $149/वर्ष"
-                           : lang === "pt" ? "Alterado para cobrança anual — $149/ano"
-                           : lang === "de" ? "Auf jährliche Abrechnung umgestellt — 149 $/Jahr"
-                           : lang === "it" ? "Passato alla fatturazione annuale — 149 $/anno"
-                           : lang === "ko" ? "연간 결제로 전환되었습니다 — $149/년"
-                           : "Switched to annual billing — $149/yr"));
+                        const yr = planConfig(account.plan).annualAmount;
+                        showToast(account.plan === "pro"
+                          ? ext.annualToast
+                          : (lang === "es" ? `Cambiado a facturación anual — $${yr}/año`
+                           : lang === "fr" ? `Facturation annuelle activée — ${yr} $/an`
+                           : lang === "ja" ? `年額プランに切り替えました — $${yr}/年`
+                           : lang === "zh" ? `已切换为按年计费 — $${yr}/年`
+                           : lang === "ar" ? `تم التحويل إلى الدفع السنوي — ${yr}$/السنة`
+                           : lang === "hi" ? `वार्षिक बिलिंग पर स्विच किया गया — $${yr}/वर्ष`
+                           : lang === "pt" ? `Alterado para cobrança anual — $${yr}/ano`
+                           : lang === "de" ? `Auf jährliche Abrechnung umgestellt — ${yr} $/Jahr`
+                           : lang === "it" ? `Passato alla fatturazione annuale — ${yr} $/anno`
+                           : lang === "ko" ? `연간 결제로 전환되었습니다 — $${yr}/년`
+                           : `Switched to annual billing — $${yr}/yr`));
                       };
 
                       if (account.billingCycle === "monthly") {
@@ -5563,7 +5782,7 @@ export function AccountView({
           </div>
 
           {(() => {
-            const planMaxIncluded = a.plan === "pro" ? 2 : 1;
+            const planMaxIncluded = planConfig(a.plan).includedLines;
             const unusedPlanLines = Math.max(0, planMaxIncluded - lines.length);
             const chargeableNewNumbers = tempExtraNumbers > 0 ? Math.max(0, tempExtraNumbers - unusedPlanLines) : tempExtraNumbers;
             
@@ -5717,7 +5936,7 @@ export function AccountView({
 
           {(() => {
             const ad = a.addons || {};
-            const planBaseMinutes = a.plan === "pro" ? 60 : 30;
+            const planBaseMinutes = planConfig(a.plan).voiceMinutes;
             const addonMinutes = (ad.minuteBlocks || 0) * 30;
             const purchased = planBaseMinutes + addonMinutes;
             const rollover = ad.rolloverMin || 0;
@@ -5844,24 +6063,27 @@ export function AccountView({
                           ))}
                         </div>
                         {(() => {
-                          const planMaxIncluded = a.plan === "pro" ? 2 : 1;
+                          const planMaxIncluded = planConfig(a.plan).includedLines;
                           const planActive = Math.min(planMaxIncluded, lines.length);
                           const addonActive = Math.max(0, lines.length - planMaxIncluded);
-                          
+                          // Localized short plan name (Care Team keeps its brand name across locales).
+                          const nm = (proName: string, essName: string) =>
+                            a.plan === "careteam" ? "Care Team" : a.plan === "pro" ? proName : essName;
+
                           return (
                             <div style={{ display: "flex", flexDirection: "column", gap: 6, marginTop: 12 }}>
                               <div style={{ fontSize: "0.82rem", color: "var(--ink-soft)", fontWeight: 500 }}>
-                                {lang === "es" ? `Plan ${a.plan === "pro" ? "Pro" : "Esencial"}: ${planActive} de ${planMaxIncluded} números de teléfono incluidos activados`
-                               : lang === "fr" ? `Forfait ${a.plan === "pro" ? "Pro" : "Essentiel"}: ${planActive} sur ${planMaxIncluded} numéros de téléphone inclus actifs`
-                               : lang === "ja" ? `${a.plan === "pro" ? "Pro" : "エッセンシャル"}プラン：含まれている電話番号 ${planActive} / ${planMaxIncluded} 個が有効`
-                               : lang === "zh" ? `${a.plan === "pro" ? "专业版" : "基础版"}方案：包含的 ${planMaxIncluded} 个电话号码中已启用 ${planActive} 个`
-                               : lang === "ar" ? `باقة ${a.plan === "pro" ? "برو" : "أساسي"}: ${planActive} من أصل ${planMaxIncluded} أرقام هواتف مشمولة نشطة`
-                               : lang === "hi" ? `${a.plan === "pro" ? "प्रो" : "एसेनशियल"} प्लान: शामिल ${planMaxIncluded} फ़ोन नंबरों में से ${planActive} सक्रिय हैं`
-                               : lang === "pt" ? `Plano ${a.plan === "pro" ? "Pro" : "Essencial"}: ${planActive} de ${planMaxIncluded} número(s) de telefone incluído(s) ativo(s)`
-                               : lang === "de" ? `${a.plan === "pro" ? "Pro" : "Essential"}-Tarif: ${planActive} von ${planMaxIncluded} enthaltenen Telefonnummern aktiv`
-                               : lang === "it" ? `Piano ${a.plan === "pro" ? "Pro" : "Essenziale"}: ${planActive} di ${planMaxIncluded} numeri di telefono inclusi attivi`
-                               : lang === "ko" ? `${a.plan === "pro" ? "Pro" : "에센셜"} 플랜: 포함된 ${planMaxIncluded}개의 전화번호 중 ${planActive}개 활성화됨`
-                               : `${a.plan === "pro" ? "Pro" : "Essential"} plan: ${planActive} of ${planMaxIncluded} included phone numbers active`}
+                                {lang === "es" ? `Plan ${nm("Pro", "Esencial")}: ${planActive} de ${planMaxIncluded} números de teléfono incluidos activados`
+                               : lang === "fr" ? `Forfait ${nm("Pro", "Essentiel")}: ${planActive} sur ${planMaxIncluded} numéros de téléphone inclus actifs`
+                               : lang === "ja" ? `${nm("Pro", "エッセンシャル")}プラン：含まれている電話番号 ${planActive} / ${planMaxIncluded} 個が有効`
+                               : lang === "zh" ? `${nm("专业版", "基础版")}方案：包含的 ${planMaxIncluded} 个电话号码中已启用 ${planActive} 个`
+                               : lang === "ar" ? `باقة ${nm("برو", "أساسي")}: ${planActive} من أصل ${planMaxIncluded} أرقام هواتف مشمولة نشطة`
+                               : lang === "hi" ? `${nm("प्रो", "एसेनशियल")} प्लान: शामिल ${planMaxIncluded} फ़ोन नंबरों में से ${planActive} सक्रिय हैं`
+                               : lang === "pt" ? `Plano ${nm("Pro", "Essencial")}: ${planActive} de ${planMaxIncluded} número(s) de telefone incluído(s) ativo(s)`
+                               : lang === "de" ? `${nm("Pro", "Essential")}-Tarif: ${planActive} von ${planMaxIncluded} enthaltenen Telefonnummern aktiv`
+                               : lang === "it" ? `Piano ${nm("Pro", "Essenziale")}: ${planActive} di ${planMaxIncluded} numeri di telefono inclusi attivi`
+                               : lang === "ko" ? `${nm("Pro", "에센셜")} 플랜: 포함된 ${planMaxIncluded}개의 전화번호 중 ${planActive}개 활성화됨`
+                               : `${nm("Pro", "Essential")} plan: ${planActive} of ${planMaxIncluded} included phone numbers active`}
                               </div>
                               {addonActive > 0 ? (
                                 <div style={{ fontSize: "0.82rem", color: "var(--blue)", fontWeight: 500 }}>
@@ -6040,6 +6262,9 @@ export function AccountView({
               </button>
             </div>
           </div>
+
+          {/* Care Team caregiver seats — self-hides unless the plan includes seats */}
+          {viewerRole === "owner" && <SeatsManager showToast={showToast} lang={lang} />}
         </>
       )}
     </div>
@@ -6422,6 +6647,10 @@ export default function DashboardApp() {
 
   const [lang, setLang] = useState<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi" | "pt" | "de" | "it" | "ko">("en");
 
+  // Whether the signed-in user owns this account or is an invited Care Team
+  // caregiver ("member"). Members manage lines/contacts/routing but not billing.
+  const [viewerRole, setViewerRole] = useState<"owner" | "member">("owner");
+
   // 1. Loading and Syncing States
   const [loading, setLoading] = useState(true);
   const [initialLoadComplete, setInitialLoadComplete] = useState(false);
@@ -6523,6 +6752,7 @@ export default function DashboardApp() {
         }
         if (!profileRes.ok) throw new Error("profile_fetch_failed");
         const profileData = await profileRes.json();
+        setViewerRole(profileData.role === "member" ? "member" : "owner");
 
         const linesRes = await fetch("/api/caregiver/lines");
         if (linesRes.status === 401) {
@@ -6550,7 +6780,7 @@ export default function DashboardApp() {
 
           // Auto-heal extraNumbers out-of-sync states on load
           if (currentAccount) {
-            const baseLinesLimit = currentAccount.plan === "pro" ? 2 : 1;
+            const baseLinesLimit = planConfig(currentAccount.plan).includedLines;
             const correctExtraNumbers = Math.max(0, mappedLines.length - baseLinesLimit);
             if (currentAccount.addons && currentAccount.addons.extraNumbers !== correctExtraNumbers) {
               console.log(`[Auto-heal] Correcting extraNumbers from ${currentAccount.addons.extraNumbers} to ${correctExtraNumbers}`);
@@ -6905,7 +7135,14 @@ export default function DashboardApp() {
           <div className="plan-card">
             <div className="row">
               <span className="pill">
-                {account.plan === "pro"
+                {account.plan === "careteam"
+                  ? (lang === "ja" ? "ケアチームプラン"
+                   : lang === "zh" ? "护理团队方案"
+                   : lang === "ar" ? "باقة فريق الرعاية"
+                   : lang === "hi" ? "केयर टीम प्लान"
+                   : lang === "ko" ? "케어 팀 플랜"
+                   : "CARE TEAM PLAN")
+                  : account.plan === "pro"
                   ? (lang === "es" ? "PLAN PRO"
                    : lang === "fr" ? "FORFAIT PRO"
                    : lang === "ja" ? "プロプラン"
@@ -6930,7 +7167,7 @@ export default function DashboardApp() {
                    : "ESSENTIAL PLAN")}
               </span>
               <span style={{ fontSize: "0.78rem", color: "oklch(0.82 0.02 225)" }}>
-                {lines.length}/{account.plan === "pro" ? 2 + (account.addons?.extraNumbers || 0) : 1 + (account.addons?.extraNumbers || 0)} {d.common.numbers}
+                {lines.length}/{planConfig(account.plan).includedLines + (account.addons?.extraNumbers || 0)} {d.common.numbers}
               </span>
             </div>
             <button
@@ -7041,7 +7278,7 @@ export default function DashboardApp() {
                           <Icon name="check" style={{ width: 17, height: 17 }} />
                         </span>
                       )}
-                      {index >= (account.plan === "pro" ? 2 : 1) && (
+                      {index >= (planConfig(account.plan).includedLines) && (
                         <button
                           className="btn-trash"
                           style={{ background: "transparent", border: "none", cursor: "pointer", color: "oklch(0.6 0.18 22)", padding: 4, display: "flex", alignItems: "center" }}
@@ -7061,7 +7298,7 @@ export default function DashboardApp() {
                   className="add-num"
                   onClick={() => {
                     setSwitchOpen(false);
-                    if (account.plan === "pro") {
+                    if (account.plan !== "essential") {
                       loadHeaderNumbers(headerAreaCode);
                       setHeaderSelectedNumber(null);
                       setHeaderAddonModalOpen(true);
@@ -7178,6 +7415,7 @@ export default function DashboardApp() {
               setLines={setLines}
               autoOpenPlanModal={autoOpenPlanModal}
               setAutoOpenPlanModal={setAutoOpenPlanModal}
+              viewerRole={viewerRole}
             />
           )}
         </div>
@@ -7198,7 +7436,7 @@ export default function DashboardApp() {
                 onClick={() => {
                   let updatedAccount = account;
                   setAccount((prev) => {
-                    const baseLinesCount = prev.plan === "pro" ? 2 : 1;
+                    const baseLinesCount = planConfig(prev.plan).includedLines;
                     const needsAddon = lines.length >= baseLinesCount;
                     if (!needsAddon) return prev;
 
@@ -7259,8 +7497,8 @@ export default function DashboardApp() {
               </p>
 
               {(() => {
-                const baseLinesLimit = account.plan === "pro" ? 2 : 1;
-                const isPro = account.plan === "pro";
+                const baseLinesLimit = planConfig(account.plan).includedLines;
+                const planName = account.plan === "careteam" ? "Care Team" : account.plan === "pro" ? "Pro" : "Essential";
                 return lines.length >= baseLinesLimit ? (
                   <div style={{ background: "oklch(0.96 0.03 220 / 0.4)", border: "1px solid var(--border)", borderRadius: "var(--r-md)", padding: "10px 14px", marginBottom: 16, fontSize: "0.85rem", color: "var(--ink-soft)", lineHeight: 1.4 }}>
                     {lang === "es"
@@ -7272,10 +7510,10 @@ export default function DashboardApp() {
                 ) : (
                   <div style={{ background: "oklch(0.96 0.03 140 / 0.1)", border: "1px solid oklch(0.8 0.1 140 / 0.3)", borderRadius: "var(--r-md)", padding: "10px 14px", marginBottom: 16, fontSize: "0.85rem", color: "var(--ink-soft)", lineHeight: 1.4 }}>
                     {lang === "es"
-                      ? `Nota: Esta línea está incluida en su plan ${isPro ? "Pro" : "Essential"} sin costo adicional.`
+                      ? `Nota: Esta línea está incluida en su plan ${planName} sin costo adicional.`
                       : lang === "fr"
-                      ? `Remarque : Cette ligne est incluse dans votre forfait ${isPro ? "Pro" : "Essential"} sans frais supplémentaires.`
-                      : `Note: This line is included in your ${isPro ? "Pro" : "Essential"} plan at no additional cost.`}
+                      ? `Remarque : Cette ligne est incluse dans votre forfait ${planName} sans frais supplémentaires.`
+                      : `Note: This line is included in your ${planName} plan at no additional cost.`}
                   </div>
                 );
               })()}
