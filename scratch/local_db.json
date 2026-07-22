@@ -30,7 +30,7 @@
         },
         "avatarUrl": ""
       },
-      "updated_at": "2026-07-09T21:55:53.358Z"
+      "updated_at": "2026-07-22T18:03:17.319Z"
     }
   ],
   "phone_lines": [
@@ -48,13 +48,15 @@
           "available": true
         }
       ],
-      "id": "mock-row-fpr851mxk",
+      "id": "mock-row-3kdkglegx",
       "settings": {
         "color": "oklch(0.58 0.115 232)",
         "mode": "simultaneous",
         "minutesUsed": 0,
         "schedule": [],
-        "extraSettings": {}
+        "extraSettings": {
+          "bilingual": false
+        }
       }
     },
     {
@@ -86,7 +88,7 @@
           "notifWeekly": false
         }
       },
-      "id": "mock-row-ql5g9rvdp"
+      "id": "mock-row-asvoz7jxq"
     },
     {
       "user_id": "mock-user-support-icancall-co",
@@ -117,7 +119,30 @@
           "notifWeekly": false
         }
       },
-      "id": "mock-row-zezbb320s"
+      "id": "mock-row-ivco6yszt"
+    },
+    {
+      "user_id": "mock-user-helper-example-com",
+      "number": "+15005550006",
+      "name": "Priority cascaded line",
+      "type": "seniors",
+      "contacts": [
+        {
+          "id": 1,
+          "name": "Maria Delgado",
+          "phone": "+14155550192",
+          "rel": "Primary Caregiver",
+          "available": true
+        }
+      ],
+      "id": "mock-row-3pc05ewfo",
+      "settings": {
+        "color": "oklch(0.58 0.115 232)",
+        "mode": "menu",
+        "minutesUsed": 0,
+        "schedule": [],
+        "extraSettings": {}
+      }
     }
   ]
 }

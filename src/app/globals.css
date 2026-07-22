@@ -652,8 +652,8 @@ h3 { font-size: clamp(1.25rem, 2vw, 1.6rem); }
 }
 .plan-card.sel .radio { border-color: var(--accent); }
 .plan-card.sel .radio::after { content: ""; width: 11px; height: 11px; border-radius: 50%; background: var(--accent); }
-.plan-card .pname { font-size: 1.18rem; font-weight: 700; letter-spacing: -0.02em; display: flex; align-items: center; gap: 10px; }
-.plan-card .ptag { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: #fff; background: linear-gradient(120deg, var(--blue), var(--teal-deep)); padding: 3px 9px; border-radius: 999px; }
+.plan-card .pname { font-size: 1.18rem; font-weight: 700; letter-spacing: -0.02em; display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.plan-card .ptag { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: #fff; background: linear-gradient(120deg, var(--blue), var(--teal-deep)); padding: 3px 9px; border-radius: 999px; white-space: nowrap; text-align: center; line-height: 1.4; }
 .plan-card .pdesc { color: var(--ink-soft); font-size: 0.95rem; margin-top: 3px; grid-column: 2; }
 .plan-card .pprice { text-align: right; grid-row: span 2; align-self: center; }
 .plan-card .pprice b { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.02em; }
