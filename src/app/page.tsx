@@ -1400,7 +1400,7 @@ export default function Home() {
                 <li><a href="#">{t.footer.about}</a></li>
                 <li><a href="#">{t.footer.careers}</a></li>
 
-                <li><a href="#">{t.footer.contact}</a></li>
+                <li><a href="/contact">{t.footer.contact}</a></li>
               </ul>
             </div>
             <div>
