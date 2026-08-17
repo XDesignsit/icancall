@@ -930,26 +930,6 @@ export const localizeCaller = (caller: string, lang: string): string => {
   return mobile[lang] ? caller.replace("(mobile)", mobile[lang]) : caller;
 };
 
-/* ---------- Care-team role labels ----------
-   The role stored on a profile is a self-description shown to the rest of the
-   care team; it grants nothing. What a user can actually do is decided by their
-   seat (owner vs invited caregiver) in src/lib/account.ts. The old "Account
-   administrator" option was removed because it implied authority it never had —
-   profiles still holding it fall back to the default label. */
-
-export const CARE_ROLE_OPTIONS: { id: string; extKey: string }[] = [
-  { id: "Caregiver", extKey: "caregiver" },
-  { id: "Primary caregiver", extKey: "primaryCaregiver" },
-  { id: "Family member", extKey: "familyMember" },
-  { id: "Care coordinator", extKey: "careCoordinator" },
-];
-
-export const DEFAULT_CARE_ROLE = "Primary caregiver";
-
-/** Map a stored role onto the current options; unknown/legacy values reset. */
-export const normalizeCareRole = (role: string | undefined | null): string =>
-  CARE_ROLE_OPTIONS.some((r) => r.id === role) ? (role as string) : DEFAULT_CARE_ROLE;
-
 export const STATUS_META = {
   connected: { badge: "badge-green", label: "Connected", dirCls: "dir-in" },
   missed: { badge: "badge-rose", label: "Missed → alerted", dirCls: "dir-miss" },

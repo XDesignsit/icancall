@@ -8,10 +8,8 @@ import { planConfig, type PlanId } from "@/lib/planConfig";
 
 import {
   AVATAR_COLORS,
-  CARE_ROLE_OPTIONS,
   getLineDefaultLabel,
   getLocalizedLineLabel,
-  normalizeCareRole,
 } from "../_data";
 import { Icon } from "../_icons";
 import { AREA_SUGGESTIONS, AreaFlag, fetchNumbersLive } from "../_numbers";
@@ -170,13 +168,14 @@ export function AccountView({
   const ext = dashboardExtraTranslations[lang as keyof typeof dashboardExtraTranslations] || dashboardExtraTranslations.en;
   const a = account;
   const baseLinesCount = planConfig(a.plan).includedLines;
-  // Seats only exist on plans that allow a second caregiver, so the access row
-  // stays hidden on single-seat plans where "owner" is the only possibility.
-  const showAccessRow = planConfig(a.plan).seats > 1 || viewerRole === "member";
   // The profile row belongs to the account owner, and /api/caregiver/profile
   // rejects writes from seat members — so show it read-only rather than
   // offering edits that silently fail.
   const canEditProfile = viewerRole === "owner";
+  // There are exactly two roles on an account and neither is chosen: you either
+  // hold the subscription or you occupy a caregiver seat on someone else's.
+  const roleLabel = viewerRole === "owner" ? ext.accessOwner : ext.careCoordinator;
+  const roleDesc = viewerRole === "owner" ? ext.accessOwnerDesc : ext.accessMemberDesc;
   const currentExtraLines = Math.max(0, lines.length - baseLinesCount);
   const set = (patch: Partial<Account>) => {
     setAccount((prev) => {
@@ -499,7 +498,7 @@ export function AccountView({
               </span>
               <div className="pmeta">
                 <b>{a.name}</b>
-                <span>{ext[CARE_ROLE_OPTIONS.find((r) => r.id === normalizeCareRole(a.role))!.extKey]}</span>
+                <span>{roleLabel}</span>
                 <div className="pacts">
                   <input
                     type="file"
@@ -530,46 +529,29 @@ export function AccountView({
                 </div>
               </div>
             </div>
-            <div className="field" style={{ marginBottom: showAccessRow ? 18 : 0 }}>
+            <div className="field" style={{ marginBottom: 0 }}>
               <label>{d.account.role}</label>
-              <select value={normalizeCareRole(a.role)} onChange={(e) => set({ role: e.target.value })} disabled={!canEditProfile} style={{ maxWidth: 320 }}>
-                {CARE_ROLE_OPTIONS.map((r) => (
-                  <option key={r.id} value={r.id}>{ext[r.extKey]}</option>
-                ))}
-              </select>
-              <p style={{ fontSize: "0.82rem", color: "var(--ink-faint)", margin: "7px 0 0", maxWidth: 520 }}>
-                {ext.roleHint}
-              </p>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "flex-start",
+                  gap: 12,
+                  padding: "12px 14px",
+                  border: "1px solid var(--line)",
+                  borderRadius: "var(--r-md)",
+                  background: "var(--surface-2)",
+                  maxWidth: 520,
+                }}
+              >
+                <span style={{ flex: "none", whiteSpace: "nowrap" }}>
+                  <Badge kind={viewerRole === "owner" ? "green" : "blue"}>{roleLabel}</Badge>
+                </span>
+                <p style={{ fontSize: "0.84rem", color: "var(--ink-soft)", margin: 0, lineHeight: 1.45 }}>
+                  {roleDesc}
+                </p>
+              </div>
             </div>
 
-            {/* What the account actually grants, as opposed to the label above.
-                Only meaningful once an account can hold more than one caregiver. */}
-            {showAccessRow && (
-              <div className="field" style={{ marginBottom: 0 }}>
-                <label>{ext.accessLabel}</label>
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "flex-start",
-                    gap: 12,
-                    padding: "12px 14px",
-                    border: "1px solid var(--line)",
-                    borderRadius: "var(--r-md)",
-                    background: "var(--surface-2)",
-                    maxWidth: 520,
-                  }}
-                >
-                  <span style={{ flex: "none", whiteSpace: "nowrap" }}>
-                    <Badge kind={viewerRole === "owner" ? "green" : "blue"}>
-                      {viewerRole === "owner" ? ext.accessOwner : ext.accessMember}
-                    </Badge>
-                  </span>
-                  <p style={{ fontSize: "0.84rem", color: "var(--ink-soft)", margin: 0, lineHeight: 1.45 }}>
-                    {viewerRole === "owner" ? ext.accessOwnerDesc : ext.accessMemberDesc}
-                  </p>
-                </div>
-              </div>
-            )}
             {canEditProfile && (
               <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 22 }}>
                 <button className="btn btn-primary" onClick={() => showToast(d.common.savedToast)}>

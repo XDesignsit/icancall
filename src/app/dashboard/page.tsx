@@ -12,7 +12,6 @@ import {
   getLineDefaultLabel,
   getLocalizedLineLabel,
   getLocalizedPersonName,
-  normalizeCareRole,
 } from "./_data";
 import { ICONS, Icon } from "./_icons";
 import { AreaFlag, fetchNumbersLive } from "./_numbers";
@@ -406,7 +405,6 @@ export default function DashboardApp() {
   const [account, setAccount] = useState<Account>({
     name: "Maria Delgado",
     preferred: "Maria",
-    role: "Primary caregiver",
     email: "maria.delgado@email.com",
     notifyEmail: "maria.delgado@email.com",
     phone: "(415) 555-0192",
@@ -442,9 +440,6 @@ export default function DashboardApp() {
     return {
       name: profile.name || "",
       preferred: profile.preferred_name || "",
-      // Profiles saved before the role list was trimmed can hold a value that
-      // is no longer offered (e.g. "Account administrator"); reset those.
-      role: normalizeCareRole(settings.role),
       email: profile.email || "",
       notifyEmail: settings.notifyEmail || profile.email || "",
       phone: settings.phone || settings.smsPhone || "",
@@ -466,7 +461,6 @@ export default function DashboardApp() {
       name: account.name,
       preferred_name: account.preferred,
       settings: {
-        role: account.role,
         notifyEmail: account.notifyEmail,
         phone: account.phone,
         smsPhone: account.phone,

@@ -57,7 +57,6 @@ export interface CallLogEntry {
 export interface Account {
   name: string;
   preferred: string;
-  role: string;
   email: string;
   notifyEmail: string;
   phone: string;
