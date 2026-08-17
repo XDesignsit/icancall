@@ -12,6 +12,7 @@ import {
   getLineDefaultLabel,
   getLocalizedLineLabel,
   getLocalizedPersonName,
+  normalizeCareRole,
 } from "./_data";
 import { ICONS, Icon } from "./_icons";
 import { AreaFlag, fetchNumbersLive } from "./_numbers";
@@ -441,7 +442,9 @@ export default function DashboardApp() {
     return {
       name: profile.name || "",
       preferred: profile.preferred_name || "",
-      role: settings.role || "Primary caregiver",
+      // Profiles saved before the role list was trimmed can hold a value that
+      // is no longer offered (e.g. "Account administrator"); reset those.
+      role: normalizeCareRole(settings.role),
       email: profile.email || "",
       notifyEmail: settings.notifyEmail || profile.email || "",
       phone: settings.phone || settings.smsPhone || "",

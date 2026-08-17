@@ -8,8 +8,10 @@ import { planConfig, type PlanId } from "@/lib/planConfig";
 
 import {
   AVATAR_COLORS,
+  CARE_ROLE_OPTIONS,
   getLineDefaultLabel,
   getLocalizedLineLabel,
+  normalizeCareRole,
 } from "../_data";
 import { Icon } from "../_icons";
 import { AREA_SUGGESTIONS, AreaFlag, fetchNumbersLive } from "../_numbers";
@@ -168,6 +170,13 @@ export function AccountView({
   const ext = dashboardExtraTranslations[lang as keyof typeof dashboardExtraTranslations] || dashboardExtraTranslations.en;
   const a = account;
   const baseLinesCount = planConfig(a.plan).includedLines;
+  // Seats only exist on plans that allow a second caregiver, so the access row
+  // stays hidden on single-seat plans where "owner" is the only possibility.
+  const showAccessRow = planConfig(a.plan).seats > 1 || viewerRole === "member";
+  // The profile row belongs to the account owner, and /api/caregiver/profile
+  // rejects writes from seat members — so show it read-only rather than
+  // offering edits that silently fail.
+  const canEditProfile = viewerRole === "owner";
   const currentExtraLines = Math.max(0, lines.length - baseLinesCount);
   const set = (patch: Partial<Account>) => {
     setAccount((prev) => {
@@ -490,14 +499,7 @@ export function AccountView({
               </span>
               <div className="pmeta">
                 <b>{a.name}</b>
-                <span>
-                  {a.role === "Primary caregiver" ? ext.primaryCaregiver :
-                   a.role === "Family member" ? ext.familyMember :
-                   a.role === "Account administrator" ? ext.accountAdmin :
-                   a.role === "Care coordinator" ? ext.careCoordinator :
-                   a.role === "Caregiver" ? ext.caregiver :
-                   a.role}
-                </span>
+                <span>{ext[CARE_ROLE_OPTIONS.find((r) => r.id === normalizeCareRole(a.role))!.extKey]}</span>
                 <div className="pacts">
                   <input
                     type="file"
@@ -509,7 +511,7 @@ export function AccountView({
                   <button
                     className="btn btn-ghost btn-sm"
                     onClick={() => fileInputRef.current?.click()}
-                    disabled={uploadingPhoto}
+                    disabled={uploadingPhoto || !canEditProfile}
                   >
                     <Icon name="camera" /> {uploadingPhoto ? (lang === "es" ? "Subiendo..." : lang === "fr" ? "Téléchargement..." : "Uploading...") : ext.changePhoto}
                   </button>
@@ -520,33 +522,61 @@ export function AccountView({
               <div className="row2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
                 <div>
                   <label>{d.contacts.fullName}</label>
-                  <input value={a.name} onChange={(e) => set({ name: e.target.value })} />
+                  <input value={a.name} onChange={(e) => set({ name: e.target.value })} disabled={!canEditProfile} />
                 </div>
                 <div>
                   <label>{d.account.prefName}</label>
-                  <input value={a.preferred} onChange={(e) => set({ preferred: e.target.value })} />
+                  <input value={a.preferred} onChange={(e) => set({ preferred: e.target.value })} disabled={!canEditProfile} />
                 </div>
               </div>
             </div>
-            <div className="field" style={{ marginBottom: 0 }}>
+            <div className="field" style={{ marginBottom: showAccessRow ? 18 : 0 }}>
               <label>{d.account.role}</label>
-              <select value={a.role} onChange={(e) => set({ role: e.target.value })} style={{ maxWidth: 320 }}>
-                {[
-                  { id: "Caregiver", label: ext.caregiver },
-                  { id: "Primary caregiver", label: ext.primaryCaregiver },
-                  { id: "Family member", label: ext.familyMember },
-                  { id: "Account administrator", label: ext.accountAdmin },
-                  { id: "Care coordinator", label: ext.careCoordinator },
-                ].map((r) => (
-                  <option key={r.id} value={r.id}>{r.label}</option>
+              <select value={normalizeCareRole(a.role)} onChange={(e) => set({ role: e.target.value })} disabled={!canEditProfile} style={{ maxWidth: 320 }}>
+                {CARE_ROLE_OPTIONS.map((r) => (
+                  <option key={r.id} value={r.id}>{ext[r.extKey]}</option>
                 ))}
               </select>
+              <p style={{ fontSize: "0.82rem", color: "var(--ink-faint)", margin: "7px 0 0", maxWidth: 520 }}>
+                {ext.roleHint}
+              </p>
             </div>
-            <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 22 }}>
-              <button className="btn btn-primary" onClick={() => showToast(d.common.savedToast)}>
-                <Icon name="check" /> {d.contacts.saveChanges}
-              </button>
-            </div>
+
+            {/* What the account actually grants, as opposed to the label above.
+                Only meaningful once an account can hold more than one caregiver. */}
+            {showAccessRow && (
+              <div className="field" style={{ marginBottom: 0 }}>
+                <label>{ext.accessLabel}</label>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "flex-start",
+                    gap: 12,
+                    padding: "12px 14px",
+                    border: "1px solid var(--line)",
+                    borderRadius: "var(--r-md)",
+                    background: "var(--surface-2)",
+                    maxWidth: 520,
+                  }}
+                >
+                  <span style={{ flex: "none", whiteSpace: "nowrap" }}>
+                    <Badge kind={viewerRole === "owner" ? "green" : "blue"}>
+                      {viewerRole === "owner" ? ext.accessOwner : ext.accessMember}
+                    </Badge>
+                  </span>
+                  <p style={{ fontSize: "0.84rem", color: "var(--ink-soft)", margin: 0, lineHeight: 1.45 }}>
+                    {viewerRole === "owner" ? ext.accessOwnerDesc : ext.accessMemberDesc}
+                  </p>
+                </div>
+              </div>
+            )}
+            {canEditProfile && (
+              <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 22 }}>
+                <button className="btn btn-primary" onClick={() => showToast(d.common.savedToast)}>
+                  <Icon name="check" /> {d.contacts.saveChanges}
+                </button>
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -756,11 +786,13 @@ export function AccountView({
                 </div>
               </div>
             </div>
-            <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 22 }}>
-              <button className="btn btn-primary" onClick={() => showToast(d.common.savedToast)}>
-                <Icon name="check" /> {d.contacts.saveChanges}
-              </button>
-            </div>
+            {canEditProfile && (
+              <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 22 }}>
+                <button className="btn btn-primary" onClick={() => showToast(d.common.savedToast)}>
+                  <Icon name="check" /> {d.contacts.saveChanges}
+                </button>
+              </div>
+            )}
           </div>
         </div>
       )}
