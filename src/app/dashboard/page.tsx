@@ -924,7 +924,7 @@ export default function DashboardApp() {
                    : lang === "ko" ? "에센셜 플랜"
                    : "ESSENTIAL PLAN")}
               </span>
-              <span style={{ fontSize: "0.78rem", color: "oklch(0.82 0.02 225)" }}>
+              <span className="count">
                 {lines.length}/{planConfig(account.plan).includedLines + (account.addons?.extraNumbers || 0)} {d.common.numbers}
               </span>
             </div>
