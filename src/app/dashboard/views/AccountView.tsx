@@ -10,6 +10,7 @@ import {
   AVATAR_COLORS,
   getLineDefaultLabel,
   getLocalizedLineLabel,
+  planDisplayName,
 } from "../_data";
 import { Icon } from "../_icons";
 import { AREA_SUGGESTIONS, AreaFlag, fetchNumbersLive } from "../_numbers";
@@ -174,6 +175,10 @@ export function AccountView({
   const canEditProfile = viewerRole === "owner";
   // There are exactly two roles on an account and neither is chosen: you either
   // hold the subscription or you occupy a caregiver seat on someone else's.
+  // Billing copy always names the plan this account is actually on.
+  const planName = planDisplayName(a.plan, lang);
+  const planInvoiceDesc = `${planName} · ${a.billingCycle === "yearly" ? ext.cycleAnnual : ext.cycleMonthly}`;
+  const planInvoiceAmount = a.billingCycle === "yearly" ? planConfig(a.plan).annualLabel : planConfig(a.plan).monthlyLabel;
   const roleLabel = viewerRole === "owner" ? ext.accessOwner : ext.careCoordinator;
   const roleDesc = viewerRole === "owner" ? ext.accessOwnerDesc : ext.accessMemberDesc;
   const currentExtraLines = Math.max(0, lines.length - baseLinesCount);
@@ -412,11 +417,7 @@ export function AccountView({
     // Tier order: essential < pro < careteam. Compare ranks to label the
     // action as an upgrade or downgrade, and name the destination plan.
     const rank: Record<PlanId, number> = { essential: 0, pro: 1, careteam: 2 };
-    const targetName = tempPlan === "careteam"
-      ? (lang === "ja" ? "ケアチーム" : lang === "zh" ? "护理团队" : lang === "ar" ? "فريق الرعاية" : lang === "hi" ? "केयर टीम" : lang === "ko" ? "케어 팀" : "Care Team")
-      : tempPlan === "pro"
-      ? (lang === "ja" ? "Pro" : lang === "zh" ? "专业版" : lang === "ar" ? "برو" : lang === "hi" ? "प्रो" : "Pro")
-      : (lang === "es" ? "Esencial" : lang === "fr" ? "Essentiel" : lang === "ja" ? "エッセンシャル" : lang === "zh" ? "基础版" : lang === "ar" ? "أساسي" : lang === "hi" ? "एसेनशियल" : lang === "pt" ? "Essencial" : lang === "de" ? "Essential" : lang === "it" ? "Essenziale" : lang === "ko" ? "에센셜" : "Essential");
+    const targetName = planDisplayName(tempPlan, lang);
 
     if (rank[tempPlan] > rank[account.plan]) {
       return lang === "es" ? `Actualizar a ${targetName}`
@@ -668,6 +669,8 @@ export function AccountView({
               </div>
             </div>
             <div className="card-pad" style={{ paddingTop: 6, paddingBottom: 10 }}>
+              {/* Sample invoices, but they must at least bill the plan this
+                  account is on rather than a hardcoded Pro subscription. */}
               {[
                 { dev: "Chrome · MacBook Pro", loc: "Oakland, CA", last: d.common.activeNow, cur: true },
                 { dev: "iCanCall app · iPhone 15", loc: "Oakland, CA", last: lang === "es" ? "Hace 2 horas" : lang === "fr" ? "Il y a 2 heures" : lang === "ja" ? "2時間前" : lang === "zh" ? "2小时前" : lang === "ar" ? "قبل ساعتين" : lang === "hi" ? "2 घंटे पहले" : lang === "pt" ? "Há 2 horas" : lang === "de" ? "Vor 2 Stunden" : lang === "it" ? "2 ore fa" : lang === "ko" ? "2시간 전" : "2 hours ago", cur: false },
@@ -2198,7 +2201,7 @@ export function AccountView({
                         set({ billingCycle: "yearly" });
                         const yr = planConfig(account.plan).annualAmount;
                         showToast(account.plan === "pro"
-                          ? ext.annualToast
+                          ? ext.annualToast.replace("{price}", planConfig(a.plan).annualLabel)
                           : (lang === "es" ? `Cambiado a facturación anual — $${yr}/año`
                            : lang === "fr" ? `Facturation annuelle activée — ${yr} $/an`
                            : lang === "ja" ? `年額プランに切り替えました — $${yr}/年`
@@ -2692,23 +2695,24 @@ export function AccountView({
               </div>
             </div>
             <div className="card-pad" style={{ paddingTop: 6, paddingBottom: 10 }}>
+              {/* Sample invoices, but they must at least bill the plan this
+                  account is on rather than a hardcoded Pro subscription. */}
               {[
-                [lang === "es" ? "1 de mayo de 2026" : lang === "fr" ? "1 mai 2026" : lang === "ja" ? "2026年5月1日" : lang === "zh" ? "2026年5月1日" : lang === "ar" ? "1 مايو 2026" : lang === "hi" ? "1 मई, 2026" : lang === "pt" ? "1 de maio de 2026" : lang === "de" ? "1. Mai 2026" : lang === "it" ? "1 maggio 2026" : lang === "ko" ? "2026년 5월 1일" : "May 1, 2026", "Pro · monthly", "$24.99"],
-                [lang === "es" ? "1 de abr de 2026" : lang === "fr" ? "1 avr. 2026" : lang === "ja" ? "2026年4月1日" : lang === "zh" ? "2026年4月1日" : lang === "ar" ? "1 أبريل 2026" : lang === "hi" ? "1 अप्रैल, 2026" : lang === "pt" ? "1 de abr de 2026" : lang === "de" ? "1. Apr. 2026" : lang === "it" ? "1 aprile 2026" : lang === "ko" ? "2026년 4월 1일" : "Apr 1, 2026", "Pro · monthly", "$24.99"],
-                [lang === "es" ? "1 de mar de 2026" : lang === "fr" ? "1 mars 2026" : lang === "ja" ? "2026年3月1日" : lang === "zh" ? "2026年3月1日" : lang === "ar" ? "1 مارس 2026" : lang === "hi" ? "1 मार्च, 2026" : lang === "pt" ? "1 de mar de 2026" : lang === "de" ? "1. März 2026" : lang === "it" ? "1 marzo 2026" : lang === "ko" ? "2026년 3월 1일" : "Mar 1, 2026", "Pro · monthly", "$24.99"],
+                [lang === "es" ? "1 de mayo de 2026" : lang === "fr" ? "1 mai 2026" : lang === "ja" ? "2026年5月1日" : lang === "zh" ? "2026年5月1日" : lang === "ar" ? "1 مايو 2026" : lang === "hi" ? "1 मई, 2026" : lang === "pt" ? "1 de maio de 2026" : lang === "de" ? "1. Mai 2026" : lang === "it" ? "1 maggio 2026" : lang === "ko" ? "2026년 5월 1일" : "May 1, 2026", planInvoiceDesc, planInvoiceAmount],
+                [lang === "es" ? "1 de abr de 2026" : lang === "fr" ? "1 avr. 2026" : lang === "ja" ? "2026年4月1日" : lang === "zh" ? "2026年4月1日" : lang === "ar" ? "1 أبريل 2026" : lang === "hi" ? "1 अप्रैल, 2026" : lang === "pt" ? "1 de abr de 2026" : lang === "de" ? "1. Apr. 2026" : lang === "it" ? "1 aprile 2026" : lang === "ko" ? "2026년 4월 1일" : "Apr 1, 2026", planInvoiceDesc, planInvoiceAmount],
+                [lang === "es" ? "1 de mar de 2026" : lang === "fr" ? "1 mars 2026" : lang === "ja" ? "2026年3月1日" : lang === "zh" ? "2026年3月1日" : lang === "ar" ? "1 مارس 2026" : lang === "hi" ? "1 मार्च, 2026" : lang === "pt" ? "1 de mar de 2026" : lang === "de" ? "1. März 2026" : lang === "it" ? "1 marzo 2026" : lang === "ko" ? "2026년 3월 1일" : "Mar 1, 2026", planInvoiceDesc, planInvoiceAmount],
               ].map(([dVal, desc, amt]) => {
-                const localizedDesc = desc === "Pro · monthly" ? (lang === "es" ? "Pro · mensual" : lang === "fr" ? "Pro · mensuel" : lang === "ja" ? "プロ · 月額" : lang === "zh" ? "专业版 · 按月" : lang === "ar" ? "برو · شهرياً" : lang === "hi" ? "प्रो · मासिक" : lang === "pt" ? "Pro · mensal" : lang === "de" ? "Pro · monatlich" : lang === "it" ? "Pro · mensile" : lang === "ko" ? "프로 · 월간" : "Pro · monthly") : desc;
                 return (
                   <div className="invoice" key={dVal}>
                     <div className="l">
                       <b>{dVal}</b>
-                      <span>{localizedDesc}</span>
+                      <span>{desc}</span>
                     </div>
                     <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
                       <span className="amt">{amt}</span>
                       <a
                         className="btn btn-soft btn-sm"
-                        href={`/api/caregiver/receipt?date=${encodeURIComponent(dVal)}&desc=${encodeURIComponent(localizedDesc)}&amount=${encodeURIComponent(amt)}&last4=${encodeURIComponent(a.card.last4)}`}
+                        href={`/api/caregiver/receipt?date=${encodeURIComponent(dVal)}&desc=${encodeURIComponent(desc)}&amount=${encodeURIComponent(amt)}&last4=${encodeURIComponent(a.card.last4)}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         style={{ display: "inline-flex", alignItems: "center", gap: 6, textDecoration: "none" }}
@@ -2734,7 +2738,7 @@ export function AccountView({
                 className="btn btn-danger-ghost"
                 onClick={() => showToast(ext.cancelToast)}
               >
-                {ext.cancelPro}
+                {ext.cancelPlan.replace("{plan}", planName)}
               </button>
             </div>
           </div>

@@ -930,6 +930,23 @@ export const localizeCaller = (caller: string, lang: string): string => {
   return mobile[lang] ? caller.replace("(mobile)", mobile[lang]) : caller;
 };
 
+/* ---------- Plan names ----------
+   One table for the localized plan names, so billing copy, the plan picker and
+   the usage summaries can't drift from each other (or from planConfig). */
+
+const PLAN_NAMES: Record<string, Record<string, string>> = {
+  essential: { es: "Esencial", fr: "Essentiel", ja: "エッセンシャル", zh: "基础版", ar: "أساسي", hi: "एसेनशियल", pt: "Essencial", de: "Essential", it: "Essenziale", ko: "에센셜" },
+  pro: { zh: "专业版", ar: "برو", hi: "प्रो", ko: "프로" },
+  careteam: { ja: "ケアチーム", zh: "护理团队", ar: "فريق الرعاية", hi: "केयर टीम", ko: "케어 팀" },
+};
+
+const PLAN_NAME_EN: Record<string, string> = { essential: "Essential", pro: "Pro", careteam: "Care Team" };
+
+export const planDisplayName = (plan: string | undefined | null, lang: string): string => {
+  const id = plan && PLAN_NAME_EN[plan] ? plan : "pro";
+  return PLAN_NAMES[id][lang] || PLAN_NAME_EN[id];
+};
+
 export const STATUS_META = {
   connected: { badge: "badge-green", label: "Connected", dirCls: "dir-in" },
   missed: { badge: "badge-rose", label: "Missed → alerted", dirCls: "dir-miss" },
