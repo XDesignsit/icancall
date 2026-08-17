@@ -1,4 +1,5 @@
 import { supabase } from "./supabase";
+import { DEMO_EMAILS, isDemoEmail } from "./demoEmails";
 
 // Seeded demo logins used by the login page's "Demo accounts" panel. Each one
 // self-heals: if the auth user or its profile row is missing (fresh Supabase
@@ -121,14 +122,10 @@ export const DEMO_ACCOUNTS: Record<string, DemoAccount> = {
   },
 };
 
-export const DEMO_EMAILS = Object.keys(DEMO_ACCOUNTS);
+export { DEMO_EMAILS, isDemoEmail };
 
 export function demoAccount(email: string): DemoAccount | null {
   return DEMO_ACCOUNTS[email.trim().toLowerCase()] || null;
-}
-
-export function isDemoEmail(email: string): boolean {
-  return demoAccount(email) !== null;
 }
 
 /** Session role for an email — demo admins are the only elevated accounts. */

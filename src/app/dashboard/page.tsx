@@ -2,7 +2,9 @@
 
 import React, { useState, useRef, useEffect } from "react";
 
+import { dashboardExtraTranslations } from "@/lib/dashboardExtraTranslations";
 import { dashboardTranslations } from "@/lib/dashboardTranslations";
+import { isDemoEmail } from "@/lib/demoEmails";
 import { planConfig } from "@/lib/planConfig";
 
 import {
@@ -28,6 +30,7 @@ import { ContactsView } from "./views/ContactsView";
 import { OverviewView } from "./views/OverviewView";
 import { RoutingView } from "./views/RoutingView";
 import { SettingsView } from "./views/SettingsView";
+import { TeamAdminView } from "./views/TeamAdminView";
 
 /* ============ MAIN APPLICATION SHELL ============ */
 // NAV and TITLES are built inside the component from translated strings; the
@@ -35,6 +38,7 @@ import { SettingsView } from "./views/SettingsView";
 
 const LINE_SCOPED = {
   overview: false,
+  team: false,
   contacts: true,
   routing: true,
   log: true,
@@ -153,13 +157,27 @@ function generateDynamicLogs(linesList: Line[]): Record<string, CallLogEntry[]> 
   const statusOptions: Array<"connected" | "missed" | "voicemail"> = ["connected", "connected", "voicemail", "missed"];
   const callerNames = ["Grandkid Leo", "Sunrise Pharmacy", "Utility Dept", "Dr. Anita Patel", "Mom (Eleanor)"];
 
-  linesList.forEach((ln) => {
+  // Stagger each line's timestamps so an account with several numbers doesn't
+  // show the same clock time on every one of them.
+  const stamp = (day: string, hour: number, minute: number, offset: number) => {
+    const total = (hour * 60 + minute - offset + 1440) % 1440;
+    const h24 = Math.floor(total / 60);
+    const h12 = h24 % 12 === 0 ? 12 : h24 % 12;
+    return `${day} · ${h12}:${String(total % 60).padStart(2, "0")} ${h24 < 12 ? "AM" : "PM"}`;
+  };
+
+  linesList.forEach((ln, lineIdx) => {
     const contacts = ln.contacts;
+    const shift = lineIdx * 23;
     const logs: CallLogEntry[] = Array.from({ length: 5 }).map((_, lIdx) => {
       const status = statusOptions[lIdx % statusOptions.length];
       const contact = contacts[lIdx % contacts.length];
       const caller = contact ? `${contact.name} (mobile)` : callerNames[lIdx % callerNames.length];
-      const when = lIdx === 0 ? "Today · 2:48 PM" : lIdx === 1 ? "Today · 11:02 AM" : lIdx === 2 ? "Yesterday · 7:14 PM" : lIdx === 3 ? "Yesterday · 9:30 AM" : "Mon · 3:20 PM";
+      const when = lIdx === 0 ? stamp("Today", 14, 48, shift)
+        : lIdx === 1 ? stamp("Today", 11, 2, shift)
+        : lIdx === 2 ? stamp("Yesterday", 19, 14, shift)
+        : lIdx === 3 ? stamp("Yesterday", 9, 30, shift)
+        : stamp("Mon", 15, 20, shift);
       return {
         id: lIdx + 1,
         status,
@@ -373,7 +391,7 @@ export default function DashboardApp() {
     ],
   });
 
-  const [view, setView] = useState("overview");
+  const [requestedView, setView] = useState("overview");
   const [activeVoicemail, setActiveVoicemail] = useState<{
     recordingUrl: string;
     transcription: string;
@@ -536,6 +554,13 @@ export default function DashboardApp() {
             setActiveLineId(mappedLines[0].id);
           }
 
+          // Demo logins get sample call history keyed to their own numbers so
+          // the call log and the team admin analytics have something to show.
+          // Real accounts only ever see calls their own numbers received.
+          if (currentAccount && isDemoEmail(currentAccount.email)) {
+            setLog(generateDynamicLogs(mappedLines));
+          }
+
           // Auto-heal extraNumbers out-of-sync states on load
           if (currentAccount) {
             const baseLinesLimit = planConfig(currentAccount.plan).includedLines;
@@ -647,6 +672,7 @@ export default function DashboardApp() {
   };
 
   const d = dashboardTranslations[lang];
+  const ext = dashboardExtraTranslations[lang] || dashboardExtraTranslations.en;
 
   const NAV = [
     {
@@ -659,7 +685,14 @@ export default function DashboardApp() {
     },
     {
       group: d.nav.activity,
-      items: [{ id: "log", label: d.nav.log, icon: "log" as keyof typeof ICONS, badge: true }],
+      items: [
+        { id: "log", label: d.nav.log, icon: "log" as keyof typeof ICONS, badge: true },
+        // Account-wide admin view: only plans with more than one caregiver seat
+        // (Care Team) manage numbers on behalf of a whole team.
+        ...(planConfig(account.plan).seats > 1
+          ? [{ id: "team", label: ext.adminNav, icon: "shield" as keyof typeof ICONS }]
+          : []),
+      ],
     },
     {
       group: d.nav.configure,
@@ -675,6 +708,7 @@ export default function DashboardApp() {
     contacts: [d.titles.contacts, d.titles.contactsSub],
     routing: [d.titles.routing, d.titles.routingSub],
     log: [d.titles.log, d.titles.logSub],
+    team: [ext.adminTitle, ext.adminSub],
     settings: [d.titles.settings, d.titles.settingsSub],
     account: [d.titles.account, d.titles.accountSub],
   };
@@ -801,6 +835,11 @@ export default function DashboardApp() {
       });
     }, 750);
   };
+
+  // The team admin view is Care Team only; a stale ?view=team link (or a
+  // downgrade) falls back to the overview instead of an empty page.
+  const supportsTeamAdmin = planConfig(account.plan).seats > 1;
+  const view = requestedView === "team" && !supportsTeamAdmin ? "overview" : requestedView;
 
   const [t1, t2] = TITLES[view as keyof typeof TITLES] || ["Dashboard", "iCanCall Routing Panel"];
 
@@ -1150,6 +1189,22 @@ export default function DashboardApp() {
             />
           )}
           {view === "log" && <CallLogView line={line} log={log} d={d} lang={lang} />}
+          {view === "team" && (
+            <TeamAdminView
+              lines={lines}
+              log={log}
+              account={account}
+              viewerRole={viewerRole}
+              setView={go}
+              setActiveLineId={setActiveLineId}
+              onManageSeats={() => {
+                setAcctTab("billing");
+                go("account");
+              }}
+              d={d}
+              lang={lang}
+            />
+          )}
           {view === "settings" && (
             <SettingsView
               line={line}

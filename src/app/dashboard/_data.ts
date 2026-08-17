@@ -896,6 +896,40 @@ export const getLocalizedPersonName = (person: string, lang: string) => {
   return "Trusted contact line";
 };
 
+/* ---------- Call-log string localization ----------
+   The seeded call records store English day/caller labels; these turn them
+   into the viewer's language. Shared by the call log and the team admin feed. */
+
+const WHEN_TOKENS: Record<string, Record<string, string>> = {
+  Today:     { es: "Hoy", fr: "Aujourd'hui", ja: "今日", zh: "今天", ar: "اليوم", hi: "आज", pt: "Hoje", de: "Heute", it: "Oggi", ko: "오늘" },
+  Yesterday: { es: "Ayer", fr: "Hier", ja: "昨日", zh: "昨天", ar: "أمس", hi: "कल", pt: "Ontem", de: "Gestern", it: "Ieri", ko: "어제" },
+  Mon: { es: "Lun", fr: "Lun", ja: "月", zh: "周一", ar: "الإثنين", hi: "सोम", pt: "Seg", de: "Mo", it: "Lun", ko: "월" },
+  Tue: { es: "Mar", fr: "Mar", ja: "火", zh: "周二", ar: "الثلاثاء", hi: "मंगल", pt: "Ter", de: "Di", it: "Mar", ko: "화" },
+  Wed: { es: "Mié", fr: "Mer", ja: "水", zh: "周三", ar: "الأربعاء", hi: "बुध", pt: "Qua", de: "Mi", it: "Mer", ko: "수" },
+  Thu: { es: "Jue", fr: "Jeu", ja: "木", zh: "周四", ar: "الخميس", hi: "गुरु", pt: "Qui", de: "Do", it: "Gio", ko: "목" },
+  Fri: { es: "Vie", fr: "Ven", ja: "金", zh: "周五", ar: "الجمعة", hi: "शुक्र", pt: "Sex", de: "Fr", it: "Ven", ko: "금" },
+  Sat: { es: "Sáb", fr: "Sam", ja: "土", zh: "周六", ar: "السبت", hi: "शनि", pt: "Sáb", de: "Sa", it: "Sab", ko: "토" },
+  Sun: { es: "Dom", fr: "Dim", ja: "日", zh: "周日", ar: "الأحد", hi: "रवि", pt: "Dom", de: "So", it: "Dom", ko: "일" },
+};
+
+/** "Today · 2:48 PM" -> "Hoy · 2:48 PM" */
+export const localizeWhen = (when: string, lang: string): string => {
+  if (lang === "en") return when;
+  return Object.entries(WHEN_TOKENS).reduce(
+    (out, [token, dict]) => (dict[lang] ? out.replace(token, dict[lang]) : out),
+    when
+  );
+};
+
+/** "Eleanor (mobile)" -> "Eleanor (móvil)", and "Unknown" callers. */
+export const localizeCaller = (caller: string, lang: string): string => {
+  if (lang === "en") return caller;
+  const unknown: Record<string, string> = { es: "Desconocido", fr: "Inconnu", ja: "不明", zh: "未知", ar: "مجهول", hi: "अज्ञात", pt: "Desconhecido", de: "Unbekannt", it: "Sconosciuto", ko: "알 수 없음" };
+  if (caller === "Unknown") return unknown[lang] || caller;
+  const mobile: Record<string, string> = { es: "(móvil)", fr: "(portable)", ja: "(携帯電話)", zh: "(手机)", ar: "(هاتف محمول)", hi: "(मोबाइल)", pt: "(celular)", de: "(Mobiltelefon)", it: "(cellulare)", ko: "(휴대전화)" };
+  return mobile[lang] ? caller.replace("(mobile)", mobile[lang]) : caller;
+};
+
 export const STATUS_META = {
   connected: { badge: "badge-green", label: "Connected", dirCls: "dir-in" },
   missed: { badge: "badge-rose", label: "Missed → alerted", dirCls: "dir-miss" },
