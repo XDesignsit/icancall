@@ -64,13 +64,33 @@ export async function POST(req: NextRequest) {
 
   // Link the accepting caregiver's own profile to the owner's account FIRST, so
   // an interrupted accept never leaves a seat marked active without its link.
+  // An invitee signing in for the first time has no profile row yet, and an
+  // UPDATE would match nothing and silently drop the link — leaving the seat
+  // active on the owner's side while the caregiver lands in an empty account of
+  // their own. Insert the row in that case, and fail loudly either way.
   const selfProfile = await loadProfile(session.userId);
   const selfSettings = selfProfile?.settings || {};
-  if (selfSettings.memberOf !== ownerId) {
-    await supabase
+  if (!selfProfile) {
+    const { error: createError } = await supabase.from("profiles").insert({
+      id: session.userId,
+      email: session.email,
+      name: "New Caregiver",
+      preferred_name: "Caregiver",
+      settings: { notifyEmail: session.email, memberOf: ownerId },
+    });
+    if (createError) {
+      console.error("accept-invite: failed to create caregiver profile:", createError);
+      return NextResponse.json({ error: "We couldn't connect you to the account. Please try again." }, { status: 500 });
+    }
+  } else if (selfSettings.memberOf !== ownerId) {
+    const { error: linkError } = await supabase
       .from("profiles")
       .update({ settings: { ...selfSettings, memberOf: ownerId } })
       .eq("id", session.userId);
+    if (linkError) {
+      console.error("accept-invite: failed to link caregiver to account:", linkError);
+      return NextResponse.json({ error: "We couldn't connect you to the account. Please try again." }, { status: 500 });
+    }
   }
 
   // Mark the seat active and drop the one-time token (no-op if already active).

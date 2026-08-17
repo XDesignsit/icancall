@@ -24,13 +24,11 @@ function AcceptInviteInner() {
       return;
     }
 
-    // Guard against React's development double-mount firing two accepts for the
-    // same token (the second would see it consumed and error).
-    const lockKey = `ic_accept_${owner}_${token}`;
-    if (typeof sessionStorage !== "undefined" && sessionStorage.getItem(lockKey)) {
-      return;
-    }
-    try { sessionStorage.setItem(lockKey, "1"); } catch { /* private mode */ }
+    // A double-mount is already handled by the ref above. Nothing here may
+    // persist a "we tried this token" marker across page loads: accepting an
+    // invitation while signed out bounces through /login and comes straight
+    // back, and that second visit must be allowed to run. (The route itself is
+    // idempotent — a repeat accept by the same user re-asserts the seat.)
 
     (async () => {
       try {
