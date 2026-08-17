@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { signSession } from "@/lib/session";
 import { supabase } from "@/lib/supabase";
 import { verifyTurnstile } from "@/lib/rateLimit";
+import { ensureDemoAccount, isDemoEmail, roleForEmail } from "@/lib/demoAccounts";
 
 export async function POST(request: Request) {
   try {
@@ -11,9 +12,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Email is required" }, { status: 400 });
     }
 
-    const isDemoCaregiver = email === "support@icancall.co";
-    const isDemoAdmin = email === "admin@icancall.co";
-    const isDemo = isDemoCaregiver || isDemoAdmin;
+    const isDemo = isDemoEmail(email);
 
     // ==========================================
     // ACTION: SEND OTP
@@ -71,85 +70,8 @@ export async function POST(request: Request) {
         }
 
         try {
-          // Fetch or self-heal demo account
-          const { data: { users }, error: listError } = await supabase.auth.admin.listUsers();
-          if (listError) throw listError;
-
-          const existingUser = (users || []).find((u) => u.email === email);
-
-          if (existingUser) {
-            userId = existingUser.id;
-          } else {
-            // Dynamic registration & auto-confirmation
-            const { data: created, error: createError } = await supabase.auth.admin.createUser({
-              email,
-              password: isDemoAdmin ? "AdminPassword123!" : "DemoPassword123!",
-              email_confirm: true
-            });
-
-            if (createError || !created.user) {
-              throw createError || new Error("User creation failed");
-            }
-            userId = created.user.id;
-          }
-
-          // Force self-healing profile row check
-          const { data: profile } = await supabase
-            .from("profiles")
-            .select("id")
-            .eq("id", userId)
-            .maybeSingle();
-
-          if (!profile) {
-            if (isDemoCaregiver) {
-              await supabase.from("profiles").insert({
-                id: userId,
-                email,
-                name: "Support Demo",
-                preferred_name: "Support",
-                settings: {
-                  notifyEmail: email,
-                  smsConsent: true,
-                  smsPhone: "",
-                  twoFactor: false,
-                  card: { brand: "Visa", last4: "4242", exp: "12 / 28" },
-                  billingAddr: "123 Main St, Oakland, CA 94607",
-                  plan: "pro",
-                  billingCycle: "monthly",
-                  addons: { extraNumbers: 0, minuteBlocks: 0, usedMin: 0, rolloverMin: 0 },
-                }
-              });
-
-              await supabase.from("phone_lines").insert({
-                user_id: userId,
-                number: "+15005550006",
-                name: "Priority cascaded line",
-                type: "seniors",
-                contacts: [
-                  {
-                    id: 1,
-                    name: "Support Demo",
-                    phone: "+14155550192",
-                    rel: "Primary Caregiver",
-                    available: true,
-                  }
-                ]
-              });
-            } else {
-              // admin@icancall.co
-              await supabase.from("profiles").insert({
-                id: userId,
-                email,
-                name: "Alex Delgado",
-                preferred_name: "Alex",
-                settings: {
-                  role: "admin",
-                  notifyEmail: email,
-                  plan: "pro",
-                }
-              });
-            }
-          }
+          // Fetch or self-heal demo account (auth user, profile and seeded lines)
+          userId = await ensureDemoAccount(email);
         } catch (adminErr) {
           console.error("Demo admin setup error:", adminErr);
           return NextResponse.json({ error: "Failed setting up demo session." }, { status: 500 });
@@ -170,7 +92,7 @@ export async function POST(request: Request) {
         userId = verifyData.user.id;
       }
 
-      const role = email === "admin@icancall.co" ? "admin" : "user";
+      const role = roleForEmail(email);
       const expiresAt = Date.now() + 7 * 24 * 60 * 60 * 1000; // 7 days
 
       const sessionToken = await signSession({ email, role, expiresAt, userId: userId || undefined });

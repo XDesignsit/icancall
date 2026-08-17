@@ -259,6 +259,13 @@ const LOGIN_DICTS = {
   }
 };
 
+// Seeded demo logins (see src/lib/demoAccounts.ts). PIN 123456 for all of them.
+const DEMO_LOGINS = [
+  { email: "support@icancall.co", label: "Customer (Pro)" },
+  { email: "careteam@icancall.co", label: "Customer (Care Team)" },
+  { email: "admin@icancall.co", label: "Super Admin" },
+];
+
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
@@ -269,7 +276,7 @@ export default function LoginPage() {
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const [lang, setLang] = useState<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi" | "pt" | "de" | "it" | "ko">("en");
 
-  const isDemo = email === "support@icancall.co" || email === "admin@icancall.co";
+  const isDemo = DEMO_LOGINS.some((d) => d.email === email);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -630,22 +637,17 @@ export default function LoginPage() {
         }}>
           <strong>{t.demoTitle}</strong>
           <div style={{ marginTop: 8, display: "flex", flexDirection: "column", gap: 6 }}>
-            <div 
-              style={{ cursor: "pointer", display: "inline-block", color: "oklch(0.4 0.01 220)" }} 
-              onClick={() => { setEmail("support@icancall.co"); setOtp("123456"); setStep("otp"); }}
-              onMouseEnter={(e) => e.currentTarget.style.color = "oklch(0.58 0.115 232)"}
-              onMouseLeave={(e) => e.currentTarget.style.color = "oklch(0.4 0.01 220)"}
-            >
-              • Customer: <code>support@icancall.co</code> (PIN: 123456)
-            </div>
-            <div 
-              style={{ cursor: "pointer", display: "inline-block", color: "oklch(0.4 0.01 220)" }} 
-              onClick={() => { setEmail("admin@icancall.co"); setOtp("123456"); setStep("otp"); }}
-              onMouseEnter={(e) => e.currentTarget.style.color = "oklch(0.58 0.115 232)"}
-              onMouseLeave={(e) => e.currentTarget.style.color = "oklch(0.4 0.01 220)"}
-            >
-              • Super Admin: <code>admin@icancall.co</code> (PIN: 123456)
-            </div>
+            {DEMO_LOGINS.map((demo) => (
+              <div
+                key={demo.email}
+                style={{ cursor: "pointer", display: "inline-block", color: "oklch(0.4 0.01 220)" }}
+                onClick={() => { setEmail(demo.email); setOtp("123456"); setStep("otp"); }}
+                onMouseEnter={(e) => e.currentTarget.style.color = "oklch(0.58 0.115 232)"}
+                onMouseLeave={(e) => e.currentTarget.style.color = "oklch(0.4 0.01 220)"}
+              >
+                • {demo.label}: <code>{demo.email}</code> (PIN: 123456)
+              </div>
+            ))}
           </div>
         </div>
 

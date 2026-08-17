@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { signSession } from "@/lib/session";
 import { supabase } from "@/lib/supabase";
+import { demoAccount, ensureDemoAccount, roleForEmail } from "@/lib/demoAccounts";
 
 const loginSchema = z.object({
   email: z.string().email(),
@@ -18,88 +19,16 @@ export async function POST(request: Request) {
     const { email, password } = parsed.data;
 
     let userId: string | null = null;
-    const isDemoCaregiver = email === "support@icancall.co" && (password === "google_oauth_bypass" || password === "••••••••");
-    const isDemoAdmin = email === "admin@icancall.co" && password === "••••••••";
+    // Demo logins bypass Supabase password auth: the login page submits a
+    // placeholder password, so match on the sentinel values it sends. The
+    // Google-flow sentinel is not accepted for the admin demo.
+    const demo = demoAccount(email);
+    const isDemo = !!demo && (password === "••••••••" || (demo.role !== "admin" && password === "google_oauth_bypass"));
 
     // 1. Bulletproof Auth bypass for Demo accounts using Service Role Admin API
-    if (isDemoCaregiver || isDemoAdmin) {
+    if (isDemo) {
       try {
-        const { data: { users }, error: listError } = await supabase.auth.admin.listUsers();
-        if (listError) throw listError;
-        const existingUser = (users || []).find((u) => u.email === email);
-        if (existingUser) {
-          userId = existingUser.id;
-        } else {
-          // Dynamic registration & auto-confirmation
-          const { data: created, error: createError } = await supabase.auth.admin.createUser({
-            email,
-            password: isDemoAdmin ? "AdminPassword123!" : "DemoPassword123!",
-            email_confirm: true
-          });
-
-          if (createError || !created.user) {
-            throw createError || new Error("User creation failed");
-          }
-          userId = created.user.id;
-        }
-
-        // Force self-healing profile row check
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("id")
-          .eq("id", userId)
-          .maybeSingle();
-
-        if (!profile) {
-          if (email === "support@icancall.co") {
-            await supabase.from("profiles").insert({
-              id: userId,
-              email,
-              name: "Support Demo",
-              preferred_name: "Support",
-              settings: {
-                notifyEmail: email,
-                smsConsent: true,
-                smsPhone: "",
-                twoFactor: false,
-                card: { brand: "Visa", last4: "4242", exp: "12 / 28" },
-                billingAddr: "123 Main St, Oakland, CA 94607",
-                plan: "pro",
-                billingCycle: "monthly",
-                addons: { extraNumbers: 0, minuteBlocks: 0, usedMin: 0, rolloverMin: 0 },
-              }
-            });
-
-            await supabase.from("phone_lines").insert({
-              user_id: userId,
-              number: "+15005550006",
-              name: "Priority cascaded line",
-              type: "seniors",
-              contacts: [
-                {
-                  id: 1,
-                  name: "Support Demo",
-                  phone: "+14155550192",
-                  rel: "Primary Caregiver",
-                  available: true,
-                }
-              ]
-            });
-          } else {
-            // admin@icancall.co
-            await supabase.from("profiles").insert({
-              id: userId,
-              email,
-              name: "Alex Delgado",
-              preferred_name: "Alex",
-              settings: {
-                role: "admin",
-                notifyEmail: email,
-                plan: "pro",
-              }
-            });
-          }
-        }
+        userId = await ensureDemoAccount(email);
       } catch (adminErr) {
         console.error("Admin bypass processing error:", adminErr);
         // Fallback to normal flow if admin API fails (e.g. key mismatch or network issues)
@@ -119,7 +48,7 @@ export async function POST(request: Request) {
       userId = authData.user.id;
     }
 
-    const role = email === "admin@icancall.co" ? "admin" : "user";
+    const role = roleForEmail(email);
     const expiresAt = Date.now() + 7 * 24 * 60 * 60 * 1000; // 7 days
 
     const token = await signSession({ email, role, expiresAt, userId: userId || undefined });

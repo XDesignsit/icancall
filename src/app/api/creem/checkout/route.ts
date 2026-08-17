@@ -1,12 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { verifySession } from "@/lib/session";
+import { isDemoEmail } from "@/lib/demoAccounts";
 
 const CREEM_API = process.env.CREEM_API_KEY?.startsWith("creem_test_")
   ? "https://test-api.creem.io/v1"
   : "https://api.creem.io/v1";
-
-const DEMO_EMAILS = ["support@icancall.co", "admin@icancall.co"];
 
 // Demo accounts must never reach a real payment gateway, and local/preview
 // environments have no Creem credentials at all — both get a simulated
@@ -19,7 +18,7 @@ async function isSimulatedCheckout(productId: string): Promise<boolean> {
     const sessionToken = cookieStore.get("session")?.value;
     if (!sessionToken) return false;
     const payload = await verifySession(sessionToken);
-    return !!payload && DEMO_EMAILS.includes(payload.email);
+    return !!payload && isDemoEmail(payload.email);
   } catch {
     return false;
   }

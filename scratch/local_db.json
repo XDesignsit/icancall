@@ -31,6 +31,53 @@
         "avatarUrl": ""
       },
       "updated_at": "2026-07-22T18:03:17.319Z"
+    },
+    {
+      "id": "mock-user-careteam-icancall-co",
+      "email": "careteam@icancall.co",
+      "name": "Jordan Reyes",
+      "preferred_name": "Jordan",
+      "settings": {
+        "notifyEmail": "careteam@icancall.co",
+        "smsConsent": true,
+        "smsPhone": "",
+        "twoFactor": false,
+        "card": {
+          "brand": "Visa",
+          "last4": "4242",
+          "exp": "12 / 28"
+        },
+        "billingAddr": "1420 Ocean Ave, Santa Monica, CA 90401",
+        "plan": "careteam",
+        "billingCycle": "monthly",
+        "addons": {
+          "extraNumbers": 0,
+          "minuteBlocks": 0,
+          "usedMin": 38,
+          "rolloverMin": 0
+        },
+        "seats": {
+          "members": []
+        },
+        "role": "Primary caregiver",
+        "phone": "",
+        "address": "1420 Ocean Ave, Santa Monica, CA 90401",
+        "timezone": "Pacific (PT)",
+        "language": "English",
+        "avatarUrl": ""
+      },
+      "updated_at": "2026-08-17T20:57:30.298Z"
+    },
+    {
+      "id": "mock-user-admin-icancall-co",
+      "email": "admin@icancall.co",
+      "name": "Alex Delgado",
+      "preferred_name": "Alex",
+      "settings": {
+        "notifyEmail": "admin@icancall.co",
+        "role": "admin",
+        "plan": "pro"
+      }
     }
   ],
   "phone_lines": [
@@ -136,6 +183,103 @@
         }
       ],
       "id": "mock-row-3pc05ewfo",
+      "settings": {
+        "color": "oklch(0.58 0.115 232)",
+        "mode": "menu",
+        "minutesUsed": 0,
+        "schedule": [],
+        "extraSettings": {}
+      }
+    },
+    {
+      "user_id": "mock-user-careteam-icancall-co",
+      "number": "+15005550006",
+      "name": "Mom — Eleanor",
+      "type": "seniors",
+      "contacts": [
+        {
+          "id": 1,
+          "name": "Jordan Reyes",
+          "phone": "+14155550192",
+          "rel": "Primary Caregiver",
+          "available": true
+        },
+        {
+          "id": 2,
+          "name": "Priya Reyes",
+          "phone": "+14155550143",
+          "rel": "Daughter",
+          "available": true
+        },
+        {
+          "id": 3,
+          "name": "Dr. Amelia Okafor",
+          "phone": "+14155550178",
+          "rel": "Primary Physician",
+          "available": false
+        }
+      ],
+      "id": "mock-row-r1lilrz5z",
+      "settings": {
+        "color": "oklch(0.58 0.115 232)",
+        "mode": "menu",
+        "minutesUsed": 0,
+        "schedule": [],
+        "extraSettings": {}
+      }
+    },
+    {
+      "user_id": "mock-user-careteam-icancall-co",
+      "number": "+14155550188",
+      "name": "Dad — Robert",
+      "type": "seniors",
+      "contacts": [
+        {
+          "id": 1,
+          "name": "Jordan Reyes",
+          "phone": "+14155550192",
+          "rel": "Primary Caregiver",
+          "available": true
+        },
+        {
+          "id": 2,
+          "name": "Marcus Reyes",
+          "phone": "+14155550167",
+          "rel": "Son",
+          "available": true
+        }
+      ],
+      "id": "mock-row-2hm4qp47m",
+      "settings": {
+        "color": "oklch(0.58 0.115 232)",
+        "mode": "menu",
+        "minutesUsed": 0,
+        "schedule": [],
+        "extraSettings": {}
+      }
+    },
+    {
+      "user_id": "mock-user-careteam-icancall-co",
+      "number": "+14155550151",
+      "name": "Aunt Rosa",
+      "type": "seniors",
+      "contacts": [
+        {
+          "id": 1,
+          "name": "Priya Reyes",
+          "phone": "+14155550143",
+          "rel": "Niece",
+          "available": true
+        },
+        {
+          "id": 2,
+          "name": "Hillside Care Center",
+          "phone": "+14155550109",
+          "rel": "Care Facility",
+          "available": true
+        }
+      ],
+      "id": "mock-row-2nvdov7p1",
       "settings": {
         "color": "oklch(0.58 0.115 232)",
         "mode": "menu",
