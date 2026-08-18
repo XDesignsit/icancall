@@ -147,7 +147,7 @@ export function OverviewView({
                                            .replace("Sun", lang === "es" ? "Dom" : lang === "fr" ? "Dim" : lang === "ja" ? "日" : lang === "zh" ? "周日" : lang === "ar" ? "الأحد" : lang === "hi" ? "रवि" : lang === "pt" ? "Dom" : lang === "de" ? "So" : lang === "it" ? "Dom" : lang === "ko" ? "일" : "Sun")}
                     </span>
                   </div>
-                  <Badge kind={m.badge.replace("badge-", "")}>{c.status === "voicemail" ? d.sim.voicemail : c.status === "missed" ? d.sim.noAnswer : d.sim.connected}</Badge>
+                  <Badge kind={m.badge.replace("badge-", "")}>{(c.status === "voicemail" ? d.sim.voicemail : c.status === "missed" ? d.sim.noAnswer : d.sim.connected).replace(/^[✓✔]\s*/, "")}</Badge>
                 </div>
               );
             })}

@@ -77,7 +77,7 @@ export function CallLogView({ line, log, d, lang }: { line: Line; log: Record<st
                   <div className="dur">{c.dur}</div>
                   <div style={{ textAlign: "right" }}>
                     <Badge kind={m.badge.replace("badge-", "")}>
-                      {c.status === "voicemail" ? d.sim.voicemail : c.status === "missed" ? d.sim.noAnswer : d.sim.connected}
+                      {(c.status === "voicemail" ? d.sim.voicemail : c.status === "missed" ? d.sim.noAnswer : d.sim.connected).replace(/^[✓✔]\s*/, "")}
                     </Badge>
                     <div className="when" style={{ marginTop: 5 }}>
                       {localizeWhen(c.when, lang)}
