@@ -962,7 +962,7 @@ h3 { font-size: clamp(1.25rem, 2vw, 1.6rem); }
 .section-gap { margin-bottom: 22px; }
 
 /* ---------- Badges ---------- */
-.badge { display: inline-flex; align-items: center; gap: 5px; font-size: 0.75rem; font-weight: 600; padding: 3px 9px; border-radius: 99px; }
+.badge { display: inline-flex; align-items: center; gap: 5px; font-size: 0.75rem; font-weight: 600; padding: 3px 9px; border-radius: 99px; white-space: nowrap; }
 .badge .d { width: 6px; height: 6px; border-radius: 50%; }
 .badge-green { background: oklch(0.95 0.05 158); color: oklch(0.42 0.13 158); }
 .badge-green .d { background: var(--green); }
@@ -1108,7 +1108,7 @@ h3 { font-size: clamp(1.25rem, 2vw, 1.6rem); }
 .fpill:hover { border-color: var(--blue); color: var(--blue-deep); }
 .fpill.active { background: var(--blue); color: #fff; border-color: var(--blue); }
 .log { display: flex; flex-direction: column; }
-.logrow { display: grid; grid-template-columns: 40px 1fr 150px 110px 120px; align-items: center; gap: 14px; padding: 14px 8px; border-bottom: 1px solid var(--line-soft); }
+.logrow { display: grid; grid-template-columns: 40px 1fr 150px 110px minmax(120px, max-content); align-items: center; gap: 14px; padding: 14px 8px; border-bottom: 1px solid var(--line-soft); }
 .logrow:last-child { border-bottom: none; }
 .logrow .dir { width: 36px; height: 36px; border-radius: 10px; display: grid; place-items: center; }
 .logrow .dir svg { width: 17px; height: 17px; }
