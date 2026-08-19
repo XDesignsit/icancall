@@ -305,7 +305,7 @@ export function TeamAdminView({
                   </div>
                   <div style={{ textAlign: "right" }}>
                     <Badge kind={m.badge.replace("badge-", "")}>
-                      {call.status === "voicemail" ? d.sim.voicemail : call.status === "missed" ? d.sim.noAnswer : d.sim.connected}
+                      {(call.status === "voicemail" ? d.sim.voicemail : call.status === "missed" ? d.sim.noAnswer : d.sim.connected).replace(/^[✓✔]\s*/, "")}
                     </Badge>
                     <div className="when" style={{ marginTop: 5, fontSize: "0.76rem", color: "var(--ink-faint)" }}>{localizeWhen(call.when, lang)}</div>
                   </div>
