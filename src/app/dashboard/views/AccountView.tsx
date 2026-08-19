@@ -500,22 +500,22 @@ export function AccountView({
               <div className="pmeta">
                 <b>{a.name}</b>
                 <span>{roleLabel}</span>
-                <div className="pacts">
-                  <input
-                    type="file"
-                    ref={fileInputRef}
-                    style={{ display: "none" }}
-                    accept="image/*"
-                    onChange={handlePhotoChange}
-                  />
-                  <button
-                    className="btn btn-ghost btn-sm"
-                    onClick={() => fileInputRef.current?.click()}
-                    disabled={uploadingPhoto || !canEditProfile}
-                  >
-                    <Icon name="camera" /> {uploadingPhoto ? (lang === "es" ? "Subiendo..." : lang === "fr" ? "Téléchargement..." : "Uploading...") : ext.changePhoto}
-                  </button>
-                </div>
+              </div>
+              <div className="pacts">
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  style={{ display: "none" }}
+                  accept="image/*"
+                  onChange={handlePhotoChange}
+                />
+                <button
+                  className="btn btn-ghost btn-sm"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploadingPhoto || !canEditProfile}
+                >
+                  <Icon name="camera" /> {uploadingPhoto ? (lang === "es" ? "Subiendo..." : lang === "fr" ? "Téléchargement..." : "Uploading...") : ext.changePhoto}
+                </button>
               </div>
             </div>
             <div className="field">

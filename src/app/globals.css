@@ -1163,7 +1163,7 @@ h3 { font-size: clamp(1.25rem, 2vw, 1.6rem); }
 .acct-photo .big-ava { width: 76px; height: 76px; border-radius: 50%; display: grid; place-items: center; color: #fff; font-weight: 700; font-size: 1.7rem; background: linear-gradient(150deg, var(--violet), var(--blue)); flex: none; }
 .acct-photo .pmeta b { font-size: 1.05rem; font-weight: 700; display: block; }
 .acct-photo .pmeta span { font-size: 0.85rem; color: var(--ink-faint); }
-.acct-photo .pacts { display: flex; gap: 8px; margin-top: 10px; }
+.acct-photo .pacts { display: flex; gap: 8px; margin-left: auto; }
 
 .session { display: flex; align-items: center; gap: 14px; padding: 14px 0; border-bottom: 1px solid var(--line-soft); }
 .session:last-child { border-bottom: none; }
