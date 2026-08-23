@@ -3,6 +3,8 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 
+import { PLAN_CONFIG, type PlanId } from "@/lib/planConfig";
+
 /* ============ MOCK DATA ============ */
 const fmtUSD = (n: number, dp: number = 0) =>
   "$" + Number(n).toLocaleString("en-US", { minimumFractionDigits: dp, maximumFractionDigits: dp });
@@ -10,11 +12,63 @@ const fmtNum = (n: number) => Number(n).toLocaleString("en-US");
 
 const MONTHS = ["Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec", "Jan", "Feb", "Mar", "Apr", "May"];
 
+// Subscriber mix by tier and billing cycle. Everything money-shaped on this
+// page is derived from it at the real plan prices in planConfig, so the split,
+// the MRR headline and the tier bars can never disagree with each other.
+const PLAN_MIX: { id: PlanId; monthly: number; annual: number; tint: string; monthlyColor: string; annualColor: string; note?: string }[] = [
+  {
+    id: "essential",
+    monthly: 186,
+    annual: 82,
+    tint: "var(--teal-deep)",
+    monthlyColor: "var(--teal-deep)",
+    annualColor: "oklch(0.79 0.07 196)",
+  },
+  {
+    id: "pro",
+    monthly: 121,
+    annual: 74,
+    tint: "var(--blue)",
+    monthlyColor: "var(--blue)",
+    annualColor: "oklch(0.72 0.08 232)",
+  },
+  {
+    id: "careteam",
+    monthly: 17,
+    annual: 7,
+    tint: "var(--violet)",
+    monthlyColor: "var(--violet)",
+    annualColor: "oklch(0.78 0.09 300)",
+    note: "Launched Jul 2026",
+  },
+];
+
+const PLAN_SPLIT = PLAN_MIX.map((mix) => {
+  const cfg = PLAN_CONFIG[mix.id];
+  // Annual subscriptions are recognised as their monthly-equivalent run rate.
+  const monthlyMrr = mix.monthly * cfg.monthlyAmount;
+  const annualMrr = mix.annual * (cfg.annualAmount / 12);
+  return {
+    ...mix,
+    name: cfg.name,
+    priceLabel: `${cfg.monthlyLabel}/mo · ${cfg.annualLabel}/yr`,
+    count: mix.monthly + mix.annual,
+    mrr: monthlyMrr + annualMrr,
+    billing: [
+      { id: "monthly", label: "Monthly", count: mix.monthly, mrr: monthlyMrr, color: mix.monthlyColor },
+      { id: "annual", label: "Annual", count: mix.annual, mrr: annualMrr, color: mix.annualColor },
+    ],
+  };
+});
+
+const TOTAL_ACCOUNTS = PLAN_SPLIT.reduce((sum, p) => sum + p.count, 0);
+const TOTAL_MRR = Math.round(PLAN_SPLIT.reduce((sum, p) => sum + p.mrr, 0));
+
 const KPI = {
-  mrr: 9847,
+  mrr: TOTAL_MRR,
   mrrPrev: 9082,
-  arr: 118164,
-  accounts: 487,
+  arr: TOTAL_MRR * 12,
+  accounts: TOTAL_ACCOUNTS,
   accountsNew: 44,
   accountsPrev: 455,
   activeNumbers: 712,
@@ -24,31 +78,8 @@ const KPI = {
   ltv: 412,
 };
 
-const MRR_SERIES = [4180, 4620, 5050, 5380, 5910, 6340, 6880, 7390, 7920, 8510, 9180, 9847];
-const PLAN_SPLIT = [
-  {
-    id: "pro",
-    name: "Pro",
-    count: 201,
-    mrr: 5667,
-    color: "var(--blue)",
-    billing: [
-      { id: "monthly", label: "Monthly", count: 118, mrr: 3540, color: "var(--blue)" },
-      { id: "annual", label: "Annual", count: 83, mrr: 2127, color: "oklch(0.72 0.08 232)" },
-    ],
-  },
-  {
-    id: "essential",
-    name: "Essential",
-    count: 286,
-    mrr: 4180,
-    color: "var(--teal-deep)",
-    billing: [
-      { id: "monthly", label: "Monthly", count: 191, mrr: 2890, color: "var(--teal-deep)" },
-      { id: "annual", label: "Annual", count: 95, mrr: 1290, color: "oklch(0.79 0.07 196)" },
-    ],
-  },
-];
+// Trailing 12 months; the final point is this month's derived MRR.
+const MRR_SERIES = [4180, 4620, 5050, 5380, 5910, 6340, 6880, 7390, 7920, 8510, 9180, TOTAL_MRR];
 
 const MRR_MOVEMENT = [
   { label: "New business", amt: 1024, kind: "pos" },
@@ -748,7 +779,7 @@ export default function SuperAdminApp() {
                     <div className="lbl" style={{ fontSize: "0.82rem", color: "var(--ink-faint)" }}>Monthly Recurring Revenue (MRR)</div>
                     <div className="val" style={{ fontSize: "1.9rem", fontWeight: 700, color: "var(--ink)", marginTop: 6 }}>{fmtUSD(KPI.mrr)}</div>
                     <div className="trend trend-up" style={{ fontSize: "0.76rem", fontWeight: 600, color: "oklch(0.5 0.13 158)", marginTop: 6 }}>
-                      +8.4% this month
+                      +{(((KPI.mrr - KPI.mrrPrev) / KPI.mrrPrev) * 100).toFixed(1)}% this month
                     </div>
                   </div>
                   <div className="stat" style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-lg)", padding: "18px 20px" }}>
@@ -804,20 +835,65 @@ export default function SuperAdminApp() {
                   <div className="card">
                     <div className="card-head">
                       <h2>Product Pricing Split</h2>
-                      <p>Distribution of active subscriber plans base</p>
+                      <p>Active subscribers by tier and billing cycle</p>
                     </div>
-                    <div className="card-pad" style={{ display: "flex", flexDirection: "column", gap: 18 }}>
-                      {PLAN_SPLIT.map((plan) => (
-                        <div key={plan.id}>
-                          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
-                            <b>{plan.name} Tier</b>
-                            <span>{plan.count} users ({fmtUSD(plan.mrr)} MRR)</span>
+                    <div className="card-pad" style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+                      {PLAN_SPLIT.map((plan) => {
+                        const shareOfBase = (plan.count / TOTAL_ACCOUNTS) * 100;
+                        const shareOfMrr = (plan.mrr / TOTAL_MRR) * 100;
+                        return (
+                          <div key={plan.id}>
+                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 12, marginBottom: 3 }}>
+                              <div style={{ display: "flex", alignItems: "baseline", gap: 8, minWidth: 0 }}>
+                                <b>{plan.name}</b>
+                                {plan.note && (
+                                  <span style={{ fontSize: "0.68rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.04em", color: "var(--violet)", background: "oklch(0.96 0.04 285)", padding: "2px 7px", borderRadius: 99, whiteSpace: "nowrap" }}>
+                                    {plan.note}
+                                  </span>
+                                )}
+                              </div>
+                              <span style={{ fontWeight: 600, whiteSpace: "nowrap" }}>
+                                {fmtUSD(plan.mrr)} MRR
+                              </span>
+                            </div>
+                            <div style={{ display: "flex", justifyContent: "space-between", gap: 12, fontSize: "0.78rem", color: "var(--ink-faint)", marginBottom: 7 }}>
+                              <span>{plan.priceLabel}</span>
+                              <span style={{ whiteSpace: "nowrap" }}>
+                                {fmtNum(plan.count)} accounts · {shareOfBase.toFixed(1)}% of base · {shareOfMrr.toFixed(1)}% of MRR
+                              </span>
+                            </div>
+
+                            {/* Tier bar, scaled to its share of the base and split by billing cycle */}
+                            <div style={{ height: 12, background: "var(--tint)", borderRadius: 99, overflow: "hidden" }}>
+                              <div style={{ display: "flex", height: "100%", width: `${shareOfBase}%` }}>
+                                {plan.billing.map((cycle) => (
+                                  <div
+                                    key={cycle.id}
+                                    title={`${cycle.label}: ${cycle.count} accounts`}
+                                    style={{ width: `${(cycle.count / plan.count) * 100}%`, background: cycle.color }}
+                                  ></div>
+                                ))}
+                              </div>
+                            </div>
+
+                            <div style={{ display: "flex", flexWrap: "wrap", gap: "4px 18px", marginTop: 8 }}>
+                              {plan.billing.map((cycle) => (
+                                <div key={cycle.id} style={{ display: "flex", alignItems: "center", gap: 7, fontSize: "0.78rem", color: "var(--ink-soft)" }}>
+                                  <span style={{ width: 8, height: 8, borderRadius: 3, background: cycle.color, flex: "none" }}></span>
+                                  <span>
+                                    {cycle.label} · {fmtNum(cycle.count)} · <b style={{ fontWeight: 600, color: "var(--ink)" }}>{fmtUSD(cycle.mrr)}</b>
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
                           </div>
-                          <div className="usage-bar bigbar" style={{ height: 12, background: "var(--tint)", borderRadius: 99, overflow: "hidden" }}>
-                            <i style={{ display: "block", height: "100%", width: `${(plan.count / KPI.accounts) * 100}%`, background: plan.color }}></i>
-                          </div>
-                        </div>
-                      ))}
+                        );
+                      })}
+
+                      <div style={{ display: "flex", justifyContent: "space-between", gap: 12, paddingTop: 14, borderTop: "1px solid var(--line)", fontSize: "0.85rem" }}>
+                        <span style={{ color: "var(--ink-soft)" }}>{fmtNum(TOTAL_ACCOUNTS)} paying accounts</span>
+                        <b>{fmtUSD(TOTAL_MRR)} MRR · {fmtUSD(TOTAL_MRR * 12)} ARR</b>
+                      </div>
                     </div>
                   </div>
                 </div>
