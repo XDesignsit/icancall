@@ -9,7 +9,20 @@
  */
 export function toE164(raw: string | null | undefined): string {
   if (!raw) return "";
-  const trimmed = String(raw).trim();
+  let trimmed = String(raw).trim();
+
+  // Defensive: a serialised picker option can reach us instead of the number it
+  // wraps -- production holds a row whose number column is the literal string
+  // {"number":"+14705550100","id":"t1",...}. Digit-stripping that yields a
+  // plausible-looking but wrong number, so unwrap it before doing anything else.
+  if (trimmed.startsWith("{")) {
+    try {
+      const parsed = JSON.parse(trimmed);
+      if (parsed && typeof parsed.number === "string") trimmed = parsed.number.trim();
+    } catch {
+      /* not JSON after all -- fall through and treat it as a plain string */
+    }
+  }
 
   // Already E.164, or an international number typed with a leading +.
   if (trimmed.startsWith("+")) return `+${trimmed.slice(1).replace(/\D/g, "")}`;

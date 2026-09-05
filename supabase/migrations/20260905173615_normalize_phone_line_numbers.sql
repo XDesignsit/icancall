@@ -19,6 +19,23 @@ BEGIN
     RETURN raw;
   END IF;
 
+  -- Unwrap a serialised picker option before anything else. Production holds a
+  -- row whose number is the literal string {"number":"+14705550100","id":"t1",
+  -- "area":"470",...}; stripping non-digits from that yields +147055501001470,
+  -- a wrong number that still looks valid. Pull the real one out instead.
+  IF btrim(raw) LIKE '{%' THEN
+    BEGIN
+      IF (raw::jsonb ? 'number') THEN
+        raw := raw::jsonb ->> 'number';
+        IF raw IS NULL OR btrim(raw) = '' THEN
+          RETURN NULL;
+        END IF;
+      END IF;
+    EXCEPTION WHEN others THEN
+      NULL; -- not valid json; fall through and treat it as a plain string
+    END;
+  END IF;
+
   IF btrim(raw) LIKE '+%' THEN
     RETURN '+' || regexp_replace(substring(btrim(raw) FROM 2), '\D', '', 'g');
   END IF;
