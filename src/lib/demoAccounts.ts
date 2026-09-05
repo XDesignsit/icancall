@@ -1,5 +1,5 @@
 import { supabase } from "./supabase";
-import { DEMO_EMAILS, isDemoEmail } from "./demoEmails";
+import { DEMO_EMAILS, DEMO_LOGINS_ENABLED, isDemoEmail } from "./demoEmails";
 
 // Seeded demo logins used by the login page's "Demo accounts" panel. Each one
 // self-heals: if the auth user or its profile row is missing (fresh Supabase
@@ -122,9 +122,13 @@ export const DEMO_ACCOUNTS: Record<string, DemoAccount> = {
   },
 };
 
-export { DEMO_EMAILS, isDemoEmail };
+export { DEMO_EMAILS, DEMO_LOGINS_ENABLED, isDemoEmail };
 
 export function demoAccount(email: string): DemoAccount | null {
+  // Gated by NEXT_PUBLIC_DEMO_LOGINS: with demo logins off, these addresses are
+  // ordinary emails and fall through to real Supabase auth. Every downstream
+  // bypass (PIN, admin role, free checkout, sample call logs) hangs off this.
+  if (!DEMO_LOGINS_ENABLED) return null;
   return DEMO_ACCOUNTS[email.trim().toLowerCase()] || null;
 }
 

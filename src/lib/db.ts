@@ -1,5 +1,6 @@
 import { supabase } from './supabase';
 import { planConfig } from './planConfig';
+import { toE164 } from './phone';
 
 export interface LineContact {
   name?: string;
@@ -68,13 +69,14 @@ function setCachedAccount(phoneNumber: string, account: Account | undefined) {
 }
 
 export function invalidateCachedAccount(phoneNumber: string) {
-  const normalized = phoneNumber.replace(/\s+/g, '');
-  accountCache.delete(normalized);
+  accountCache.delete(toE164(phoneNumber));
 }
 
 // Find an account (caregiver profile) and line details by the dialed Twilio phone number
 export async function findAccountByTwilioNumber(phoneNumber: string): Promise<Account | undefined> {
-  const normalizedSearch = phoneNumber.replace(/\s+/g, '');
+  // Gateways always dial in E.164; rows may predate normalisation, so match on
+  // the canonical form rather than a bare whitespace strip.
+  const normalizedSearch = toE164(phoneNumber);
 
   const cached = getCachedAccount(normalizedSearch);
   if (cached !== null) {
@@ -146,7 +148,7 @@ export async function findAccountByTwilioNumber(phoneNumber: string): Promise<Ac
 
 // Deduct minutes consumed by a call
 export async function deductMinutes(twilioPhoneNumber: string, minutes: number): Promise<Account | null> {
-  const normalizedSearch = twilioPhoneNumber.replace(/\s+/g, '');
+  const normalizedSearch = toE164(twilioPhoneNumber);
   // Invalidate any existing cache entry before performing database updates to prevent stale reads
   invalidateCachedAccount(normalizedSearch);
 

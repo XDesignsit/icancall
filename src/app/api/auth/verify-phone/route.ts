@@ -1,18 +1,12 @@
 import { NextResponse } from "next/server";
 import { randomInt } from "crypto";
+import { toE164 } from "@/lib/phone";
 
 // In-memory store: normalizedPhone -> { code, expiresAt, attempts }
 const otpStore = new Map<string, { code: string; expiresAt: number; attempts: number }>();
 
 const OTP_TTL_MS = 10 * 60 * 1000; // 10 minutes
 const MAX_ATTEMPTS = 5;
-
-function normalizePhone(raw: string): string {
-  const digits = raw.replace(/\D/g, "");
-  if (digits.length === 10) return `+1${digits}`;
-  if (digits.length === 11 && digits.startsWith("1")) return `+${digits}`;
-  return `+${digits}`;
-}
 
 export async function POST(request: Request) {
   try {
@@ -23,7 +17,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Phone number is required." }, { status: 400 });
     }
 
-    const normalized = normalizePhone(phone);
+    const normalized = toE164(phone);
 
     // ── SEND ──────────────────────────────────────────────────────────────────
     if (action === "send") {

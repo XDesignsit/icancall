@@ -9,7 +9,10 @@ async function verifyAdmin() {
   const sessionToken = cookieStore.get("session")?.value;
   if (!sessionToken) return false;
   const payload = await verifySession(sessionToken);
-  return payload?.role === "admin" || payload?.email === "admin@icancall.co";
+  // Role only. The email escape hatch that used to sit here granted super-admin
+  // to any session for admin@icancall.co regardless of how it was obtained; the
+  // demo seed already signs that role into the session when demo logins are on.
+  return payload?.role === "admin";
 }
 
 export async function GET() {

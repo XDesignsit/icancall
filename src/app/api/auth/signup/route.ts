@@ -4,6 +4,7 @@ import { z } from "zod";
 import { supabase } from "@/lib/supabase";
 import { verifySession } from "@/lib/session";
 import { verifyTurnstile } from "@/lib/rateLimit";
+import { toE164 } from "@/lib/phone";
 
 const signupSchema = z.object({
   email: z.string().email(),
@@ -143,7 +144,7 @@ export async function POST(request: Request) {
 
       const phoneLinesRows = numbers.map((num) => ({
         user_id: userId,
-        number: typeof num === "string" ? num : num.number,
+        number: toE164(typeof num === "string" ? num : num.number),
         name: "My Priority Line",
         type: "seniors",
         contacts: [

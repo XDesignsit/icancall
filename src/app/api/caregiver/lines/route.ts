@@ -4,6 +4,7 @@ import { verifySession } from "@/lib/session";
 import { supabase } from "@/lib/supabase";
 import { invalidateCachedAccount } from "@/lib/db";
 import { resolveAccount } from "@/lib/account";
+import { toE164 } from "@/lib/phone";
 
 // Resolve the account whose lines this request acts on. A Care Team member
 // resolves to the owner's account so both caregivers manage the same lines.
@@ -93,7 +94,7 @@ export async function POST(request: Request) {
     const rows = lines.map((l) => {
       return {
         user_id: userId,
-        number: l.number,
+        number: toE164(l.number),
         name: l.label, // label on frontend
         type: l.person, // person/role on frontend
         contacts: l.contacts || [],

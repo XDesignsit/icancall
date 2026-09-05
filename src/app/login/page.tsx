@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Turnstile from "@/components/Turnstile";
+import { DEMO_LOGINS_ENABLED, isDemoEmail } from "@/lib/demoEmails";
 
 const LOGIN_DICTS = {
   en: {
@@ -260,6 +261,8 @@ const LOGIN_DICTS = {
 };
 
 // Seeded demo logins (see src/lib/demoAccounts.ts). PIN 123456 for all of them.
+// Only rendered when NEXT_PUBLIC_DEMO_LOGINS=1 — the server enforces the same
+// flag, so with it off these are ordinary addresses with no bypass.
 const DEMO_LOGINS = [
   { email: "support@icancall.co", label: "Customer (Pro)" },
   { email: "careteam@icancall.co", label: "Customer (Care Team)" },
@@ -276,7 +279,7 @@ export default function LoginPage() {
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const [lang, setLang] = useState<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi" | "pt" | "de" | "it" | "ko">("en");
 
-  const isDemo = DEMO_LOGINS.some((d) => d.email === email);
+  const isDemo = isDemoEmail(email);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -624,8 +627,8 @@ export default function LoginPage() {
           {isLoading ? t.connecting : t.continueWithGoogle}
         </button>
 
-        {/* Demo Accounts Panel */}
-        <div style={{
+        {/* Demo Accounts Panel — hidden unless demo logins are switched on */}
+        {DEMO_LOGINS_ENABLED && <div style={{
           marginTop: 24,
           padding: "12px 14px",
           borderRadius: 10,
@@ -649,7 +652,7 @@ export default function LoginPage() {
               </div>
             ))}
           </div>
-        </div>
+        </div>}
 
         <div style={{ textAlign: "center", marginTop: 24, fontSize: "0.84rem", color: "oklch(0.46 0.022 245)" }}>
           {t.noAccount}{" "}
