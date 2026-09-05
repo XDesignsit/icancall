@@ -30,12 +30,22 @@ token=$(security find-generic-password -s "Supabase CLI" -w 2>/dev/null || echo 
 api() { curl -sS --max-time 60 -H "Authorization: Bearer $token" "$@"; }
 
 echo "==> 1. checking project $REF"
-status=$(api "https://api.supabase.com/v1/projects" \
-  | python3 -c 'import json,sys; r=sys.argv[1]; print(next((p["status"] for p in json.load(sys.stdin)["projects"] if p["ref"]==r), "NOT_FOUND"))' "$REF")
+status=$(api "https://api.supabase.com/v1/projects" | python3 -c '
+import json, sys
+ref = sys.argv[1]
+try:
+    d = json.load(sys.stdin)
+except Exception:
+    print("BAD_RESPONSE"); raise SystemExit
+# the REST API returns a bare list; the CLI wraps it in {"projects": [...]}
+projects = d.get("projects", []) if isinstance(d, dict) else d
+print(next((p["status"] for p in projects if p.get("ref") == ref), "NOT_FOUND"))
+' "$REF")
 echo "    status: $status"
 case "$status" in
   ACTIVE_HEALTHY) ;;
   NOT_FOUND) echo "    Project not found on this account." >&2; exit 1 ;;
+  BAD_RESPONSE) echo "    Could not read the projects list (token expired? run 'supabase login')." >&2; exit 1 ;;
   *) echo "    Still provisioning. Wait until ACTIVE_HEALTHY and re-run." >&2; exit 1 ;;
 esac
 
