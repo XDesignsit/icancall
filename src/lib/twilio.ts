@@ -6,6 +6,31 @@ const authToken = process.env.TWILIO_AUTH_TOKEN;
 // Initialize Twilio client dynamically
 const client = accountSid && authToken ? twilio(accountSid, authToken) : null;
 
+/**
+ * The only number registered for A2P 10DLC. Every customer-facing SMS -- signup
+ * confirmations, phone verification codes, voicemail alerts -- has to originate
+ * here, or US carriers filter or drop it and the traffic breaches registration.
+ *
+ * TWILIO_PHONE_NUMBER stays the knob, but a value that is not registered is a
+ * misconfiguration rather than an intent to send from somewhere else, so we say
+ * so loudly and send from the approved number anyway.
+ */
+export const A2P_APPROVED_SENDERS = ['+18542262250'] as const;
+
+/** Resolve the sending number, refusing to send from an unregistered one. */
+export function a2pSender(): string {
+  const configured = process.env.TWILIO_PHONE_NUMBER?.trim();
+  const fallback = A2P_APPROVED_SENDERS[0];
+  if (!configured) return fallback;
+  if ((A2P_APPROVED_SENDERS as readonly string[]).includes(configured)) return configured;
+
+  console.error(
+    `TWILIO_PHONE_NUMBER is ${configured}, which is not A2P 10DLC registered. ` +
+    `Sending from ${fallback} instead -- fix the environment variable.`
+  );
+  return fallback;
+}
+
 /** Whether real Twilio credentials are present in this environment. */
 export function isTwilioConfigured() {
   return !!client;
@@ -106,7 +131,7 @@ export async function sendSms(to: string, body: string) {
     return null;
   }
 
-  const fromNumber = process.env.TWILIO_PHONE_NUMBER || '+18542262250';
+  const fromNumber = a2pSender();
   
   try {
     const message = await client.messages.create({

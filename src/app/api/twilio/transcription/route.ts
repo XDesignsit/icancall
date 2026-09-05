@@ -94,7 +94,7 @@ export async function POST(request: Request) {
             const cleanTranscript = transcript.length > 100
               ? `${transcript.substring(0, 97)}...`
               : transcript;
-            const host = request.headers.get('x-forwarded-host') || request.headers.get('host') || 'icancall.com';
+            const host = request.headers.get('x-forwarded-host') || request.headers.get('host') || 'app.icancall.co';
             const protocol = host.startsWith('localhost') ? 'http' : 'https';
             const dashboardUrl = `${protocol}://${host}/dashboard?view=log`;
             const smsBody = `iCanCall Voicemail Alert: New message from ${callerLabel} (${recordingDuration}s). Transcript: "${cleanTranscript}" View call log: ${dashboardUrl}`;
