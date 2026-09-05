@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
 import { signSession } from "@/lib/session";
-import { roleForEmail } from "@/lib/demoAccounts";
+import { resolveSessionRole } from "@/lib/roles";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -50,7 +50,7 @@ export async function GET(request: Request) {
       });
     }
 
-    const role = roleForEmail(email || "");
+    const role = await resolveSessionRole(userId, email || "");
     const expiresAt = Date.now() + 7 * 24 * 60 * 60 * 1000; // 7 days
 
     const sessionToken = await signSession({ email: email || "", role, expiresAt, userId });

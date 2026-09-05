@@ -132,11 +132,6 @@ export function demoAccount(email: string): DemoAccount | null {
   return DEMO_ACCOUNTS[email.trim().toLowerCase()] || null;
 }
 
-/** Session role for an email — demo admins are the only elevated accounts. */
-export function roleForEmail(email: string): DemoRole {
-  return demoAccount(email)?.role === "admin" ? "admin" : "user";
-}
-
 /**
  * Resolve a demo email to its auth user id, creating the auth user, profile row
  * and seeded phone lines if any of them are missing. Throws if the Supabase

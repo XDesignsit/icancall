@@ -2,7 +2,8 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { signSession } from "@/lib/session";
 import { supabase } from "@/lib/supabase";
-import { demoAccount, ensureDemoAccount, roleForEmail } from "@/lib/demoAccounts";
+import { demoAccount, ensureDemoAccount } from "@/lib/demoAccounts";
+import { resolveSessionRole } from "@/lib/roles";
 
 const loginSchema = z.object({
   email: z.string().email(),
@@ -48,7 +49,7 @@ export async function POST(request: Request) {
       userId = authData.user.id;
     }
 
-    const role = roleForEmail(email);
+    const role = await resolveSessionRole(userId, email);
     const expiresAt = Date.now() + 7 * 24 * 60 * 60 * 1000; // 7 days
 
     const token = await signSession({ email, role, expiresAt, userId: userId || undefined });
