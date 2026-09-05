@@ -53,7 +53,13 @@ echo "==> 2. applying schema and migrations"
 for f in supabase/schema.sql supabase/migrations/*.sql; do
   [ -f "$f" ] || continue
   printf '    %-62s' "$(basename "$f")"
-  if PROJECT_REF="$REF" ./scripts/supabase-sql.sh < "$f" >/dev/null 2>&1; then echo "ok"; else echo "FAILED"; exit 1; fi
+  # An empty migration is a stub, not a failure -- skip rather than abort.
+  if [ ! -s "$f" ] || [ -z "$(tr -d '[:space:]' < "$f")" ]; then echo "skipped (empty)"; continue; fi
+  if err=$(PROJECT_REF="$REF" ./scripts/supabase-sql.sh < "$f" 2>&1 >/dev/null); then
+    echo "ok"
+  else
+    echo "FAILED"; echo "$err" | sed 's/^/      /' >&2; exit 1
+  fi
 done
 
 echo "==> 3. fetching API keys"
