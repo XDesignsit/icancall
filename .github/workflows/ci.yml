@@ -2,9 +2,18 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
+      - 'claude/**'
   pull_request:
     branches: [main]
+
+# A push to a claude/** branch that already has a PR open fires both `push` and
+# `pull_request` against the same commit. Superseding the older run keeps a
+# branch from burning two sets of minutes on one commit.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
   ci:
