@@ -1,0 +1,70 @@
+name: Post-deploy smoke
+
+# Vercel reports every deployment to GitHub, which fires deployment_status.
+# The build going green only says the bundle compiled; it says nothing about
+# whether the deployed site actually serves. This probes the public domains
+# from outside Vercel, so a deploy that builds clean and then 500s is caught
+# here rather than by a customer.
+on:
+  deployment_status:
+
+# Only a successful production deployment is worth probing. Vercel marks those
+# with production_environment, or an environment named "Production"; preview
+# deployments can sit behind deployment protection and would fail on auth
+# rather than on anything real.
+jobs:
+  smoke:
+    if: >-
+      github.event.deployment_status.state == 'success' &&
+      (github.event.deployment.production_environment ||
+       contains(github.event.deployment_status.environment, 'roduction'))
+    runs-on: ubuntu-latest
+    steps:
+      - name: Probe public surfaces
+        env:
+          DEPLOY_URL: ${{ github.event.deployment_status.environment_url }}
+          DEPLOY_SHA: ${{ github.event.deployment.sha }}
+        run: |
+          set -uo pipefail
+          echo "deployment ${DEPLOY_SHA} -> ${DEPLOY_URL:-(no environment_url)}"
+
+          # A 200 alone is not proof: an error page, a parked domain, or a CDN
+          # placeholder all return 200. Each probe also has to find the brand
+          # string in the body before it counts as a pass.
+          probe() {
+            url="$1"
+            expect="$2"
+            attempt=1
+            code=000
+            while [ "$attempt" -le 5 ]; do
+              # Clear the body first: a failed curl can leave the previous
+              # probe's page in place, and a stale body must never be read as
+              # this host's response.
+              rm -f body.html
+              code=$(curl -sS -L -o body.html -w '%{http_code}' --max-time 20 "$url") || true
+              [ -n "$code" ] || code=000
+              if [ "$code" = "200" ] && grep -qi "$expect" body.html; then
+                echo "ok    $url -> $code, body contains '$expect'"
+                return 0
+              fi
+              # DNS and CDN propagation can trail the deployment event by a few
+              # seconds, so a first miss is not yet a failure.
+              echo "retry $url -> $code (attempt $attempt/5)"
+              attempt=$((attempt + 1))
+              [ "$attempt" -le 5 ] && sleep 10
+            done
+            echo "FAIL  $url -> last status $code, wanted 200 containing '$expect'"
+            return 1
+          }
+
+          failed=0
+          probe https://www.icancall.co iCanCall || failed=1
+          probe https://app.icancall.co iCanCall || failed=1
+
+          # Both domains are reported before exiting, so one bad host does not
+          # hide the state of the other.
+          if [ "$failed" -ne 0 ]; then
+            echo "production smoke test failed"
+            exit 1
+          fi
+          echo "production smoke test passed"
