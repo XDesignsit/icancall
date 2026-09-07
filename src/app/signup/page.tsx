@@ -1509,17 +1509,23 @@ function OnboardingContent() {
         const result = await res.json();
         if (!result.email) return;
         const rawName: string = result.name || "";
-        const name = rawName && rawName !== "New Caregiver" ? rawName : result.email.split("@")[0];
+        // A profile seeded by the old flow carries the "New Caregiver"
+        // placeholder rather than a real name. Never invent one from the
+        // email: the name ends up in the welcome email and the dashboard.
+        const hasName = !!rawName && rawName !== "New Caregiver";
         setData((d) => ({
           ...d,
           account: {
             ...d.account,
-            name,
+            name: hasName ? rawName : "",
             email: result.email,
+            emailVerified: true, // the session proves the address
             password: "google_oauth_bypass", // No password on a session-backed signup
           },
         }));
-        setStep(1);
+        // With a name on file the account step has nothing left to ask;
+        // without one, stay on it so the customer can type their name.
+        if (hasName) setStep(1);
       } catch (err) {
         console.error("Failed to load profile while resuming signup:", err);
       }

@@ -210,7 +210,9 @@ export async function POST(request: Request) {
         await addAcumbamailSubscriber({
           listId: process.env.ACUMBAMAIL_SUBSCRIBERS_LIST_ID,
           email,
-          mergeFields: { name: name || firstName },
+          // The list needs matching merge fields ("name", "first_name") for
+          // the welcome autoresponder to greet by name; unknown keys are dropped.
+          mergeFields: { name: name || firstName, first_name: firstName },
           welcomeEmail: true,
         });
       } catch (acumbaErr) {
