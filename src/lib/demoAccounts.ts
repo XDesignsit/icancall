@@ -48,7 +48,11 @@ export const DEMO_ACCOUNTS: Record<string, DemoAccount> = {
     },
     lines: [
       {
-        number: "+15005550006",
+        // Must differ from every other demo seed: phone_lines.number is UNIQUE,
+        // so a shared number means whichever demo account self-heals second
+        // fails its line insert and lands on an empty dashboard. The Care Team
+        // demo holds Twilio's magic test number for end-to-end call flows.
+        number: "+14155550123",
         name: "Priority cascaded line",
         type: "seniors",
         contacts: [

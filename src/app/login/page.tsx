@@ -286,6 +286,14 @@ export default function LoginPage() {
       localStorage.removeItem("isLoggedIn");
       localStorage.removeItem("isAdminLoggedIn");
       localStorage.removeItem("userEmail");
+      // Reaching the login page ends whoever was signed in before, so drop every
+      // per-account key here too. The logout button clears these, but signing in
+      // as someone else never goes through it -- the demo panel and an expired
+      // session both land here directly -- and a surviving impersonatingUser
+      // then rewrites the next user's dashboard with the impersonated account.
+      localStorage.removeItem("impersonatingUser");
+      localStorage.removeItem("ic_account_data");
+      localStorage.removeItem("ic_lines_data");
       
       const validLangs = ["en", "es", "fr", "ja", "zh", "ar", "hi", "pt", "de", "it", "ko"];
       const searchParams = new URLSearchParams(window.location.search);

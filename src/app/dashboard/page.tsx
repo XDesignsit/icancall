@@ -713,7 +713,12 @@ export default function DashboardApp() {
   useEffect(() => {
     if (typeof window !== "undefined") {
       // Check if session is impersonated
-      const imp = localStorage.getItem("impersonatingUser");
+      // Impersonation is a super-admin tool, so honour the key only for an admin
+      // session. Without this check any stale value drives an ordinary user's
+      // dashboard, showing them another account's name, email and plan.
+      const imp = localStorage.getItem("isAdminLoggedIn") === "true"
+        ? localStorage.getItem("impersonatingUser")
+        : null;
       if (imp) {
         try {
           const userObj = JSON.parse(imp);
