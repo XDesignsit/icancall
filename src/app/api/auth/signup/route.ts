@@ -3,7 +3,6 @@ import { cookies } from "next/headers";
 import { z } from "zod";
 import { supabase } from "@/lib/supabase";
 import { verifySession } from "@/lib/session";
-import { verifyTurnstile } from "@/lib/rateLimit";
 import { toE164 } from "@/lib/phone";
 
 const signupSchema = z.object({
@@ -89,8 +88,9 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: "Password must be at least 6 characters." }, { status: 400 });
       }
 
-      // CAPTCHA verification is bypassed on signup since the flow requires a successful paid Creem checkout, preventing automated spam registration.
-      const ip = request.headers.get("x-forwarded-for")?.split(",")[0] || "127.0.0.1";
+      // CAPTCHA is deliberately not required here: signup completes only after a
+      // paid Creem checkout, which is already bot-proof, so a challenge would add
+      // friction without adding protection.
 
       // Sign up the user in Supabase Auth. Pass emailRedirectTo explicitly so the
       // confirmation link points at the deployment's real host instead of falling

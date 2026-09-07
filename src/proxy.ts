@@ -3,7 +3,7 @@ import type { NextRequest } from "next/server";
 import { verifySession } from "@/lib/session";
 import { PRELAUNCH } from "@/lib/prelaunch";
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const url = request.nextUrl.clone();
   const host = request.headers.get("host") || "";
   const baseHost = host.split(":")[0]; // remove port if any

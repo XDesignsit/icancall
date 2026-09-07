@@ -64,8 +64,10 @@ export async function GET() {
           smsConsent: false,
           smsPhone: "",
           twoFactor: false,
-          card: { brand: "Visa", last4: "4242", exp: "12 / 28" },
-          billingAddr: "123 Main St, Oakland, CA 94607",
+          // No card or billing address: this profile is being created for an
+          // account that reached the dashboard without completing checkout, and
+          // inventing payment details would put fake card data in a live
+          // billing table. The billing UI treats these as "not on file".
           plan: "pro",
           billingCycle: "monthly",
           addons: { extraNumbers: 0, minuteBlocks: 0, usedMin: 0, rolloverMin: 0 },

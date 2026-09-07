@@ -29,6 +29,11 @@ export default withSentryConfig(nextConfig, {
   silent: !process.env.CI,
   widenClientFileUpload: true,
   sourcemaps: { deleteSourcemapsAfterUpload: true },
-  disableLogger: true,
-  automaticVercelMonitors: true,
+  // disableLogger / automaticVercelMonitors moved under `webpack` in Sentry 10.
+  // Both are webpack-only and inert under Turbopack, which is what `next dev`
+  // uses -- kept so webpack builds behave as before, without the deprecation.
+  webpack: {
+    treeshake: { removeDebugLogging: true },
+    automaticVercelMonitors: true,
+  },
 });
