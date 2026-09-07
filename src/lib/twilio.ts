@@ -113,13 +113,42 @@ export async function searchAvailableNumbers(areaCode: string = '415') {
 }
 
 /**
- * Programmatically purchases a Twilio phone number
+ * Buys a Twilio phone number and points its voice webhook at this deployment
+ * so inbound calls reach the routing logic. Returns the number's SID, which
+ * the caller stores so the number can be released later.
  */
-export async function purchaseNumber(phoneNumber: string) {
+export async function purchaseNumber(
+  phoneNumber: string,
+  opts: { voiceUrl: string; friendlyName?: string }
+): Promise<{ sid: string }> {
   if (!client) {
     throw new Error('Twilio client not configured');
   }
-  return client.incomingPhoneNumbers.create({ phoneNumber });
+  const purchased = await client.incomingPhoneNumbers.create({
+    phoneNumber,
+    voiceUrl: opts.voiceUrl,
+    voiceMethod: 'POST',
+    friendlyName: opts.friendlyName,
+  });
+  return { sid: purchased.sid };
+}
+
+/**
+ * Releases a Twilio number so it stops billing. Looks the SID up by number
+ * when the caller does not have it. Resolves quietly if the account no longer
+ * owns the number.
+ */
+export async function releaseNumber(phoneNumber: string, sid?: string): Promise<void> {
+  if (!client) {
+    throw new Error('Twilio client not configured');
+  }
+  let target = sid;
+  if (!target) {
+    const owned = await client.incomingPhoneNumbers.list({ phoneNumber, limit: 1 });
+    target = owned[0]?.sid;
+  }
+  if (!target) return;
+  await client.incomingPhoneNumbers(target).remove();
 }
 
 /**

@@ -5,6 +5,7 @@ import { supabase } from "@/lib/supabase";
 import { invalidateCachedAccount } from "@/lib/db";
 import { resolveAccount } from "@/lib/account";
 import { toE164 } from "@/lib/phone";
+import { provisionNumber, releaseProvisionedNumber, type TelephonyRecord } from "@/lib/numbers";
 
 // Resolve the account whose lines this request acts on. A Care Team member
 // resolves to the owner's account so both caregivers manage the same lines.
@@ -62,14 +63,55 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Lines must be an array" }, { status: 400 });
     }
 
-    // 1. Map to database rows. No `id` column: PostgREST bulk upserts require
+    // 0. What the account holds today, so we can tell new numbers (to buy)
+    //    from removed ones (to release) and keep each line's carrier record.
+    const { data: existingRows } = await supabase
+      .from("phone_lines")
+      .select("number, settings")
+      .eq("user_id", userId);
+    const existingByNumber = new Map<string, TelephonyRecord | undefined>(
+      (existingRows || []).map((r) => [r.number as string, (r.settings || {}).telephony as TelephonyRecord | undefined])
+    );
+
+    // Session email, for the carrier-side friendly name and the demo check.
+    const cookieStore = await cookies();
+    const payload = await verifySession(cookieStore.get("session")?.value || "");
+    const ownerEmail = payload?.email || "";
+
+    // 1. Buy any number the account did not hold before. A failed purchase
+    //    refuses the whole save so the client can drop that line, rather than
+    //    saving a number the carrier never assigned to us.
+    const failedNumbers: string[] = [];
+    const telephonyByNumber = new Map<string, TelephonyRecord | undefined>();
+    for (const l of lines) {
+      const e164 = toE164(l.number);
+      if (existingByNumber.has(e164)) {
+        telephonyByNumber.set(e164, existingByNumber.get(e164));
+        continue;
+      }
+      const outcome = await provisionNumber(e164, ownerEmail);
+      if (outcome.ok) {
+        telephonyByNumber.set(e164, outcome.record);
+      } else {
+        failedNumbers.push(e164);
+      }
+    }
+    if (failedNumbers.length > 0) {
+      return NextResponse.json(
+        { error: "We couldn't reserve that number with the carrier. Please pick another.", failedNumbers },
+        { status: 502 }
+      );
+    }
+
+    // 2. Map to database rows. No `id` column: PostgREST bulk upserts require
     //    identical keys on every row, and new lines from the UI carry
     //    client-generated non-UUID ids anyway — the unique `number` column is
     //    the conflict target, so existing rows keep their ids.
     const rows = lines.map((l) => {
+      const e164 = toE164(l.number);
       return {
         user_id: userId,
-        number: toE164(l.number),
+        number: e164,
         name: l.label, // label on frontend
         type: l.person, // person/role on frontend
         contacts: l.contacts || [],
@@ -79,11 +121,12 @@ export async function POST(request: Request) {
           minutesUsed: l.minutesUsed,
           schedule: l.schedule || [],
           extraSettings: l.settings || {},
+          telephony: telephonyByNumber.get(e164),
         }
       };
     });
 
-    // 2. Upsert the lines
+    // 3. Upsert the lines
     const { data: updatedLines, error: upsertError } = await supabase
       .from("phone_lines")
       .upsert(rows, { onConflict: "number" })
@@ -101,8 +144,16 @@ export async function POST(request: Request) {
       }
     });
 
-    // 3. Delete any lines that were removed from the UI
+    // 4. Delete any lines that were removed from the UI, and give their
+    //    numbers back to the carrier so they stop billing.
     // (PostgREST `in` lists take bare/double-quoted values; single quotes fail on uuid columns)
+    const keptNumbers = new Set(rows.map((r) => r.number));
+    for (const [number, record] of existingByNumber) {
+      if (!keptNumbers.has(number)) {
+        await releaseProvisionedNumber(number, record);
+        invalidateCachedAccount(number);
+      }
+    }
     const activeIds = (updatedLines || []).map((l) => l.id);
     if (activeIds.length > 0) {
       await supabase

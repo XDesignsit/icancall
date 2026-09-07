@@ -94,24 +94,53 @@ export async function searchAvailableNumbers(countryCode: string) {
 }
 
 /**
- * Programmatically orders a Telnyx phone number. Defined for parity with
- * `twilio.ts`; not called today — carrier provisioning and TeXML Application /
- * voice-webhook assignment are handled manually in the Telnyx portal for the
- * Caribbean rollout.
+ * Orders a Telnyx phone number. When TELNYX_CONNECTION_ID names the TeXML
+ * Application that serves `/api/twilio/voice`, the number is attached to it
+ * in the same order; without it the number must be attached in the Telnyx
+ * portal before calls route. Returns the order id.
  */
-export async function purchaseNumber(phoneNumber: string) {
+export async function purchaseNumber(phoneNumber: string): Promise<{ sid: string }> {
   if (!apiKey) {
     throw new Error('Telnyx client not configured');
   }
+  const body: Record<string, unknown> = { phone_numbers: [{ phone_number: phoneNumber }] };
+  const connectionId = process.env.TELNYX_CONNECTION_ID;
+  if (connectionId) body.connection_id = connectionId;
+
   const res = await fetch(`${TELNYX_API}/number_orders`, {
     method: 'POST',
     headers: authHeaders(),
-    body: JSON.stringify({ phone_numbers: [{ phone_number: phoneNumber }] }),
+    body: JSON.stringify(body),
   });
   if (!res.ok) {
     throw new Error(`Telnyx number order failed: ${res.status} ${await res.text()}`);
   }
-  return res.json();
+  const json = (await res.json()) as { data?: { id?: string } };
+  if (!connectionId) {
+    console.warn(`Telnyx number ${phoneNumber} ordered without TELNYX_CONNECTION_ID; attach it to the TeXML app in the portal.`);
+  }
+  return { sid: json.data?.id || '' };
+}
+
+/** Releases a Telnyx number so it stops billing. Quiet if it is not owned. */
+export async function releaseNumber(phoneNumber: string): Promise<void> {
+  if (!apiKey) {
+    throw new Error('Telnyx client not configured');
+  }
+  const lookup = await fetch(
+    `${TELNYX_API}/phone_numbers?filter[phone_number]=${encodeURIComponent(phoneNumber)}`,
+    { headers: authHeaders(), cache: 'no-store' }
+  );
+  if (!lookup.ok) {
+    throw new Error(`Telnyx number lookup failed: ${lookup.status} ${await lookup.text()}`);
+  }
+  const json = (await lookup.json()) as { data?: { id: string }[] };
+  const id = json.data?.[0]?.id;
+  if (!id) return;
+  const del = await fetch(`${TELNYX_API}/phone_numbers/${id}`, { method: 'DELETE', headers: authHeaders() });
+  if (!del.ok) {
+    throw new Error(`Telnyx number release failed: ${del.status} ${await del.text()}`);
+  }
 }
 
 /**

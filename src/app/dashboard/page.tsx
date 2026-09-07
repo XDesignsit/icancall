@@ -445,6 +445,9 @@ export default function DashboardApp() {
     syncProfile();
   }, [account, initialLoadComplete]);
 
+  // Declared ahead of the line sync below, which reports carrier failures through it.
+  const [toast, setToast] = useState<string | null>(null);
+
   // 5. Synchronize lines updates to Supabase
   useEffect(() => {
     if (!initialLoadComplete || !serverDataLoadedRef.current) return;
@@ -453,11 +456,23 @@ export default function DashboardApp() {
 
     async function syncLines() {
       try {
-        await fetch("/api/caregiver/lines", {
+        const res = await fetch("/api/caregiver/lines", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ lines }),
         });
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          const failed: string[] = Array.isArray(data.failedNumbers) ? data.failedNumbers : [];
+          if (failed.length > 0) {
+            // The carrier would not sell that number: take the line back out
+            // of local state so it is not re-sent on every sync.
+            const last10 = (n: string) => n.replace(/\D/g, "").slice(-10);
+            const failedDigits = new Set(failed.map(last10));
+            setLines((prev) => prev.filter((l) => !failedDigits.has(last10(l.number))));
+            setToast(data.error || "That number is no longer available. Please pick another.");
+          }
+        }
       } catch (err) {
         console.error("Error syncing phone lines to backend:", err);
       }
@@ -613,7 +628,6 @@ export default function DashboardApp() {
     }
   };
 
-  const [toast, setToast] = useState<string | null>(null);
   const [switchOpen, setSwitchOpen] = useState(false);
   const switchRef = useRef<HTMLDivElement | null>(null);
 

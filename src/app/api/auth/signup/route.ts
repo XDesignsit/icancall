@@ -6,6 +6,7 @@ import { issueSession, sessionCookieOptions, verifySession } from "@/lib/session
 import { toE164 } from "@/lib/phone";
 import { resolveSessionRole } from "@/lib/roles";
 import { isOnboarded } from "@/lib/onboarding";
+import { provisionNumber } from "@/lib/numbers";
 
 const signupSchema = z.object({
   email: z.string().email(),
@@ -151,33 +152,48 @@ export async function POST(request: Request) {
       }
     }
 
-    // 2. Seed selected phone lines for the user
+    // 2. Buy the selected numbers from the carrier and attach them as lines.
+    //    A number whose purchase fails is left out rather than saved dead:
+    //    the dashboard's empty state lets the customer pick another one,
+    //    which is free within the plan's quota.
     if (userId && Array.isArray(numbers) && numbers.length > 0) {
       // First clear any existing seeded phone lines to avoid duplicates
       await supabase.from("phone_lines").delete().eq("user_id", userId);
 
-      const phoneLinesRows = numbers.map((num) => ({
-        user_id: userId,
-        number: toE164(typeof num === "string" ? num : num.number),
-        name: "My Priority Line",
-        type: "seniors",
-        contacts: [
-          {
-            id: 1,
-            name,
-            phone: "+14155550192", // Seed owner as primary
-            rel: "Primary Caregiver",
-            available: true,
-          }
-        ]
-      }));
+      const phoneLinesRows = [];
+      for (const num of numbers) {
+        const e164 = toE164(typeof num === "string" ? num : num.number);
+        const outcome = await provisionNumber(e164, email);
+        if (!outcome.ok) {
+          console.error(`Signup for ${email}: number ${e164} not attached, purchase failed: ${outcome.error}`);
+          continue;
+        }
+        phoneLinesRows.push({
+          user_id: userId,
+          number: e164,
+          name: "My Priority Line",
+          type: "seniors",
+          contacts: [
+            {
+              id: 1,
+              name,
+              phone: rawNormalized, // the caregiver's own phone, regardless of SMS consent
+              rel: "Primary Caregiver",
+              available: true,
+            }
+          ],
+          settings: { telephony: outcome.record },
+        });
+      }
 
-      const { error: linesError } = await supabase
-        .from("phone_lines")
-        .insert(phoneLinesRows);
+      if (phoneLinesRows.length > 0) {
+        const { error: linesError } = await supabase
+          .from("phone_lines")
+          .insert(phoneLinesRows);
 
-      if (linesError) {
-        console.error("Failed to seed phone lines:", linesError);
+        if (linesError) {
+          console.error("Failed to seed phone lines:", linesError);
+        }
       }
     }
 
