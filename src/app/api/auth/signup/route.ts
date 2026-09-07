@@ -174,7 +174,7 @@ export async function POST(request: Request) {
           user_id: userId,
           number: e164,
           name: "My Priority Line",
-          type: "seniors",
+          type: "Trusted Contact",
           contacts: [
             {
               id: 1,

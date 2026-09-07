@@ -1147,7 +1147,7 @@ export default function DashboardApp() {
                   const newLine: Line = {
                     id: "line_" + Date.now() + "_" + index,
                     label: getLineDefaultLabel(index, updatedAccount.plan, lang),
-                    person: lang === "es" ? "Línea del círculo de confianza" : lang === "fr" ? "Ligne du cercle de confiance" : "Trusted contact line",
+                    person: "Trusted Contact",
                     number: headerSelectedNumber!.number,
                     color: AVATAR_COLORS[index % AVATAR_COLORS.length],
                     mode: "cascade",

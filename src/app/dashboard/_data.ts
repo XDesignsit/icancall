@@ -877,23 +877,34 @@ export const getLocalizedLineLabel = (label: string, lang: string): string => {
   return label;
 };
 
-export const getLocalizedPersonName = (person: string, lang: string) => {
-  const isDefault = person === "Trusted contact line" || 
-                    person === "Línea del círculo de confianza" || 
-                    person === "Ligne du cercle de confiance";
-  if (!isDefault) return person;
+/**
+ * The "Assigned To (Person)" default for a line is "Trusted Contact", shown in
+ * the viewer's language. Older rows carry the earlier defaults — the line type
+ * "seniors" that signup used to stamp, or "Trusted contact line" — and are
+ * treated the same so they read correctly without a data migration.
+ */
+const DEFAULT_PERSON_VALUES = new Set([
+  "Trusted Contact",
+  "seniors",
+  "Trusted contact line",
+  "Línea del círculo de confianza",
+  "Ligne du cercle de confiance",
+]);
 
-  if (lang === "es") return "Línea del círculo de confianza";
-  if (lang === "fr") return "Ligne du cercle de confiance";
+export const getLocalizedPersonName = (person: string, lang: string) => {
+  if (!DEFAULT_PERSON_VALUES.has((person || "").trim())) return person;
+
+  if (lang === "es") return "Contacto de confianza";
+  if (lang === "fr") return "Contact de confiance";
   if (lang === "ja") return "信頼できる連絡先";
   if (lang === "zh") return "信任的联系人";
-  if (lang === "ar") return "خط الاتصال الموثوق";
-  if (lang === "hi") return "विश्वसनीय संपर्क लाइन";
-  if (lang === "pt") return "Linha de contato confiável";
-  if (lang === "de") return "Vertrauenswürdige Kontaktlinie";
-  if (lang === "it") return "Linea di contatto fidata";
-  if (lang === "ko") return "신뢰할 수 있는 연락처 라인";
-  return "Trusted contact line";
+  if (lang === "ar") return "جهة اتصال موثوقة";
+  if (lang === "hi") return "विश्वसनीय संपर्क";
+  if (lang === "pt") return "Contato de confiança";
+  if (lang === "de") return "Vertrauenskontakt";
+  if (lang === "it") return "Contatto fidato";
+  if (lang === "ko") return "신뢰할 수 있는 연락처";
+  return "Trusted Contact";
 };
 
 /* ---------- Call-log string localization ----------
