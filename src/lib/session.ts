@@ -30,6 +30,13 @@ export interface SessionPayload {
    * /api/auth/signup completes and re-issues the cookie without the flag.
    */
   onboarding?: boolean;
+  /**
+   * Id of this cookie's row in public.user_sessions (src/lib/userSessions.ts).
+   * Lets the account page list signed-in devices and revoke one of them.
+   * Absent on cookies issued before that table existed, or when recording
+   * the row failed at sign-in.
+   */
+  sid?: string;
 }
 
 export const SESSION_MAX_AGE_SECONDS = 7 * 24 * 60 * 60; // 7 days
@@ -58,6 +65,7 @@ export async function issueSession(input: {
   role: "admin" | "user";
   userId?: string | null;
   onboarding?: boolean;
+  sid?: string;
 }): Promise<string> {
   return signSession({
     email: input.email,
@@ -65,6 +73,7 @@ export async function issueSession(input: {
     expiresAt: Date.now() + SESSION_MAX_AGE_SECONDS * 1000,
     userId: input.userId || undefined,
     ...(input.onboarding ? { onboarding: true } : {}),
+    ...(input.sid ? { sid: input.sid } : {}),
   });
 }
 

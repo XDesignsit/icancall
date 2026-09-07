@@ -5,6 +5,7 @@ import { verifyTurnstile } from "@/lib/rateLimit";
 import { ensureDemoAccount, isDemoEmail } from "@/lib/demoAccounts";
 import { resolveSessionRole } from "@/lib/roles";
 import { isOnboarded } from "@/lib/onboarding";
+import { startSession } from "@/lib/userSessions";
 
 export async function POST(request: Request) {
   try {
@@ -108,7 +109,8 @@ export async function POST(request: Request) {
       // Someone who authenticated (say, via Google) but never finished the
       // wizard gets an onboarding-only session and is sent back to it.
       const onboarded = await isOnboarded(userId, email);
-      const sessionToken = await issueSession({ email, role, userId, onboarding: !onboarded });
+      const sid = await startSession(userId, request.headers);
+      const sessionToken = await issueSession({ email, role, userId, onboarding: !onboarded, sid });
 
       const response = NextResponse.json({ success: true, role, onboarding: !onboarded });
       response.cookies.set("session", sessionToken, sessionCookieOptions());

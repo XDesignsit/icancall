@@ -49,11 +49,13 @@ export async function POST(request: Request) {
     const sessionToken = cookieStore.get("session")?.value;
     let userId: string | null = null;
     let sessionEmail: string | null = null;
+    let sessionId: string | undefined;
 
     if (sessionToken) {
       const payload = await verifySession(sessionToken);
       userId = payload?.userId || null;
       sessionEmail = payload?.email || null;
+      sessionId = payload?.sid;
     }
 
     if (userId) {
@@ -240,7 +242,9 @@ export async function POST(request: Request) {
     if (userId && sessionToken) {
       const role = await resolveSessionRole(userId, email);
       const onboarded = await isOnboarded(userId, email);
-      const fresh = await issueSession({ email, role, userId, onboarding: !onboarded });
+      // Same device, same session row: keep the sid so the account page
+      // still recognises this browser as "This device".
+      const fresh = await issueSession({ email, role, userId, onboarding: !onboarded, sid: sessionId });
       response.cookies.set("session", fresh, sessionCookieOptions());
     }
 

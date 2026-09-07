@@ -4,6 +4,7 @@ import { issueSession, sessionCookieOptions } from "@/lib/session";
 import { resolveSessionRole } from "@/lib/roles";
 import { isOnboarded, RESUME_SIGNUP_PATH } from "@/lib/onboarding";
 import { exchangeGoogleCode, OAUTH_VERIFIER_COOKIE } from "@/lib/oauth";
+import { startSession } from "@/lib/userSessions";
 
 // Only same-origin relative paths may be used as a post-login destination.
 function safeNext(raw: string | null): string {
@@ -79,7 +80,8 @@ export async function GET(request: Request) {
 
     const role = await resolveSessionRole(userId, email || "");
     const onboarded = await isOnboarded(userId, email || "");
-    const sessionToken = await issueSession({ email: email || "", role, userId, onboarding: !onboarded });
+    const sid = await startSession(userId, request.headers);
+    const sessionToken = await issueSession({ email: email || "", role, userId, onboarding: !onboarded, sid });
 
     // An unfinished account goes to the wizard to pick a plan and a number,
     // whatever `next` asked for; a finished one goes where it was headed.

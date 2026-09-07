@@ -41,3 +41,20 @@ CREATE POLICY "Allow users to insert their own profile" ON public.profiles
 DROP POLICY IF EXISTS "Allow users to manage their own phone lines" ON public.phone_lines;
 CREATE POLICY "Allow users to manage their own phone lines" ON public.phone_lines
     FOR ALL USING (auth.uid() = user_id);
+
+-- Signed-in devices; see supabase/migrations/20260907120000_user_sessions.sql.
+CREATE TABLE IF NOT EXISTS public.user_sessions (
+  id           UUID PRIMARY KEY,
+  user_id      UUID NOT NULL REFERENCES auth.users (id) ON DELETE CASCADE,
+  device       TEXT NOT NULL DEFAULT '',
+  user_agent   TEXT NOT NULL DEFAULT '',
+  ip           TEXT NOT NULL DEFAULT '',
+  city         TEXT NOT NULL DEFAULT '',
+  region       TEXT NOT NULL DEFAULT '',
+  country      TEXT NOT NULL DEFAULT '',
+  created_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
+  last_seen_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  expires_at   TIMESTAMPTZ NOT NULL
+);
+CREATE INDEX IF NOT EXISTS user_sessions_user_id_idx ON public.user_sessions (user_id);
+ALTER TABLE public.user_sessions ENABLE ROW LEVEL SECURITY;

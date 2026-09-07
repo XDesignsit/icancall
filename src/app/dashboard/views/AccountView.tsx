@@ -2,6 +2,33 @@
 
 import React, { useEffect, useRef, useState } from "react";
 
+interface ActiveSession {
+  id: string;
+  device: string;
+  location: string;
+  createdAt: string;
+  lastSeenAt: string;
+  current: boolean;
+}
+
+/** "2 hours ago" / "yesterday" in the dashboard language; "Active now" inside two minutes. */
+function relativeTime(iso: string, lang: string, activeNow: string): string {
+  const diffMs = new Date(iso).getTime() - Date.now();
+  if (!Number.isFinite(diffMs) || diffMs > -2 * 60 * 1000) return activeNow;
+  const abs = Math.abs(diffMs);
+  const units: [Intl.RelativeTimeFormatUnit, number][] = [
+    ["day", 24 * 60 * 60 * 1000],
+    ["hour", 60 * 60 * 1000],
+    ["minute", 60 * 1000],
+  ];
+  const [unit, size] = units.find(([, ms]) => abs >= ms) || ["minute", 60 * 1000];
+  try {
+    return new Intl.RelativeTimeFormat(lang, { numeric: "auto" }).format(-Math.round(abs / size), unit);
+  } catch {
+    return new Intl.RelativeTimeFormat("en", { numeric: "auto" }).format(-Math.round(abs / size), unit);
+  }
+}
+
 import { dashboardExtraTranslations } from "@/lib/dashboardExtraTranslations";
 import { type DashboardTranslations } from "@/lib/dashboardTranslations";
 import { planConfig, type PlanId } from "@/lib/planConfig";
@@ -189,6 +216,46 @@ export function AccountView({
       return updated;
     });
   };
+  // Devices signed in to this account, from /api/auth/sessions. The panel
+  // used to show three invented devices; this is what is really signed in.
+  const [sessions, setSessions] = useState<ActiveSession[]>([]);
+  const [sessionsError, setSessionsError] = useState(false);
+  const [sessionBusy, setSessionBusy] = useState(false);
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch("/api/auth/sessions");
+        if (!res.ok) throw new Error("sessions_fetch_failed");
+        const data = await res.json();
+        if (!cancelled) setSessions(Array.isArray(data.sessions) ? data.sessions : []);
+      } catch {
+        if (!cancelled) setSessionsError(true);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+  const endSessions = async (body: { id?: string; others?: boolean }, toast: string) => {
+    setSessionBusy(true);
+    try {
+      const res = await fetch("/api/auth/sessions", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      if (!res.ok) throw new Error("session_end_failed");
+      const data = await res.json();
+      setSessions(Array.isArray(data.sessions) ? data.sessions : []);
+      showToast(toast);
+    } catch {
+      showToast(ext.sessionsLoadFailed);
+    } finally {
+      setSessionBusy(false);
+    }
+  };
+
   const [planModalOpen, setPlanModalOpen] = useState(false);
   const [tempPlan, setTempPlan] = useState<PlanId>(account.plan || "pro");
   const [tempCycle, setTempCycle] = useState<"monthly" | "yearly">(account.billingCycle || "monthly");
@@ -669,35 +736,48 @@ export function AccountView({
               </div>
             </div>
             <div className="card-pad" style={{ paddingTop: 6, paddingBottom: 10 }}>
-              {/* Sample invoices, but they must at least bill the plan this
-                  account is on rather than a hardcoded Pro subscription. */}
-              {[
-                { dev: "Chrome · MacBook Pro", loc: "Oakland, CA", last: d.common.activeNow, cur: true },
-                { dev: "iCanCall app · iPhone 15", loc: "Oakland, CA", last: lang === "es" ? "Hace 2 horas" : lang === "fr" ? "Il y a 2 heures" : lang === "ja" ? "2時間前" : lang === "zh" ? "2小时前" : lang === "ar" ? "قبل ساعتين" : lang === "hi" ? "2 घंटे पहले" : lang === "pt" ? "Há 2 horas" : lang === "de" ? "Vor 2 Stunden" : lang === "it" ? "2 ore fa" : lang === "ko" ? "2시간 전" : "2 hours ago", cur: false },
-                { dev: "Safari · iPad", loc: "Sacramento, CA", last: lang === "es" ? "Ayer" : lang === "fr" ? "Hier" : lang === "ja" ? "昨日" : lang === "zh" ? "昨天" : lang === "ar" ? "أمس" : lang === "hi" ? "कल" : lang === "pt" ? "Ontem" : lang === "de" ? "Gestern" : lang === "it" ? "Ieri" : lang === "ko" ? "어제" : "Yesterday", cur: false },
-              ].map((s, i) => (
-                <div className="session" key={i}>
+              {sessionsError && (
+                <div className="session">
+                  <div className="sinfo">
+                    <span>{ext.sessionsLoadFailed}</span>
+                  </div>
+                </div>
+              )}
+              {sessions.map((s) => (
+                <div className="session" key={s.id}>
                   <span className="sic">
                     <Icon name="device" />
                   </span>
                   <div className="sinfo">
-                    <b>{s.dev}</b>
+                    <b>{s.device || ext.unknownDevice}</b>
                     <span>
-                      {s.loc} · {s.last}
+                      {s.location || ext.unknownLocation} · {s.current ? d.common.activeNow : relativeTime(s.lastSeenAt, lang, d.common.activeNow)}
                     </span>
                   </div>
-                  {s.cur ? (
+                  {s.current ? (
                     <Badge kind="green">{ext.thisDevice}</Badge>
                   ) : (
                     <button
                       className="btn btn-danger-ghost btn-sm"
-                      onClick={() => showToast(ext.deviceSignoutToast + s.dev)}
+                      disabled={sessionBusy}
+                      onClick={() => endSessions({ id: s.id }, ext.sessionSignedOutToast.replace("{device}", s.device || ext.unknownDevice))}
                     >
                       <Icon name="logout" /> {ext.signOut}
                     </button>
                   )}
                 </div>
               ))}
+              {sessions.some((s) => !s.current) && (
+                <div style={{ paddingTop: 12 }}>
+                  <button
+                    className="btn btn-danger-ghost btn-sm"
+                    disabled={sessionBusy}
+                    onClick={() => endSessions({ others: true }, ext.otherSessionsSignedOutToast)}
+                  >
+                    <Icon name="logout" /> {ext.signOutOtherDevices}
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </>

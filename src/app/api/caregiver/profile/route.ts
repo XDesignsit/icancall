@@ -4,13 +4,18 @@ import { verifySession } from "@/lib/session";
 import { supabase } from "@/lib/supabase";
 import { resolveAccount } from "@/lib/account";
 import { isOnboarded } from "@/lib/onboarding";
+import { isSessionLive } from "@/lib/userSessions";
 
 async function getAuthenticatedUserId() {
   const cookieStore = await cookies();
   const sessionToken = cookieStore.get("session")?.value;
   if (!sessionToken) return null;
   const payload = await verifySession(sessionToken);
-  return payload?.userId || null;
+  if (!payload?.userId) return null;
+  // A device signed out from the account page has its session row deleted;
+  // its cookie is still a valid JWT, so this is where the revocation bites.
+  if (payload.sid && !(await isSessionLive(payload.sid))) return null;
+  return payload.userId;
 }
 
 export async function GET() {

@@ -5,6 +5,7 @@ import { supabase } from "@/lib/supabase";
 import { demoAccount, ensureDemoAccount } from "@/lib/demoAccounts";
 import { resolveSessionRole } from "@/lib/roles";
 import { isOnboarded } from "@/lib/onboarding";
+import { startSession } from "@/lib/userSessions";
 
 const loginSchema = z.object({
   email: z.string().email(),
@@ -52,7 +53,8 @@ export async function POST(request: Request) {
 
     const role = await resolveSessionRole(userId, email);
     const onboarded = await isOnboarded(userId, email);
-    const token = await issueSession({ email, role, userId, onboarding: !onboarded });
+    const sid = await startSession(userId, request.headers);
+    const token = await issueSession({ email, role, userId, onboarding: !onboarded, sid });
 
     const response = NextResponse.json({ success: true, role, onboarding: !onboarded });
     response.cookies.set("session", token, sessionCookieOptions());
