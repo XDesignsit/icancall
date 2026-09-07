@@ -3,217 +3,8 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 
-import { PLAN_CONFIG, type PlanId } from "@/lib/planConfig";
-
-/* ============ MOCK DATA ============ */
 const fmtUSD = (n: number, dp: number = 0) =>
   "$" + Number(n).toLocaleString("en-US", { minimumFractionDigits: dp, maximumFractionDigits: dp });
-const fmtNum = (n: number) => Number(n).toLocaleString("en-US");
-
-const MONTHS = ["Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec", "Jan", "Feb", "Mar", "Apr", "May"];
-
-// Subscriber mix by tier and billing cycle. Everything money-shaped on this
-// page is derived from it at the real plan prices in planConfig, so the split,
-// the MRR headline and the tier bars can never disagree with each other.
-const PLAN_MIX: { id: PlanId; monthly: number; annual: number; tint: string; monthlyColor: string; annualColor: string; note?: string }[] = [
-  {
-    id: "essential",
-    monthly: 186,
-    annual: 82,
-    tint: "var(--teal-deep)",
-    monthlyColor: "var(--teal-deep)",
-    annualColor: "oklch(0.79 0.07 196)",
-  },
-  {
-    id: "pro",
-    monthly: 121,
-    annual: 74,
-    tint: "var(--blue)",
-    monthlyColor: "var(--blue)",
-    annualColor: "oklch(0.72 0.08 232)",
-  },
-  {
-    id: "careteam",
-    monthly: 17,
-    annual: 7,
-    tint: "var(--violet)",
-    monthlyColor: "var(--violet)",
-    annualColor: "oklch(0.78 0.09 300)",
-    note: "Launched Jul 2026",
-  },
-];
-
-const PLAN_SPLIT = PLAN_MIX.map((mix) => {
-  const cfg = PLAN_CONFIG[mix.id];
-  // Annual subscriptions are recognised as their monthly-equivalent run rate.
-  const monthlyMrr = mix.monthly * cfg.monthlyAmount;
-  const annualMrr = mix.annual * (cfg.annualAmount / 12);
-  return {
-    ...mix,
-    name: cfg.name,
-    priceLabel: `${cfg.monthlyLabel}/mo · ${cfg.annualLabel}/yr`,
-    count: mix.monthly + mix.annual,
-    mrr: monthlyMrr + annualMrr,
-    billing: [
-      { id: "monthly", label: "Monthly", count: mix.monthly, mrr: monthlyMrr, color: mix.monthlyColor },
-      { id: "annual", label: "Annual", count: mix.annual, mrr: annualMrr, color: mix.annualColor },
-    ],
-  };
-});
-
-const TOTAL_ACCOUNTS = PLAN_SPLIT.reduce((sum, p) => sum + p.count, 0);
-const TOTAL_MRR = Math.round(PLAN_SPLIT.reduce((sum, p) => sum + p.mrr, 0));
-
-const KPI = {
-  mrr: TOTAL_MRR,
-  mrrPrev: 9082,
-  arr: TOTAL_MRR * 12,
-  accounts: TOTAL_ACCOUNTS,
-  accountsNew: 44,
-  accountsPrev: 455,
-  activeNumbers: 712,
-  churnLogo: 2.1,
-  nrr: 104,
-  arpa: 22.85,
-  ltv: 412,
-};
-
-// Trailing 12 months; the final point is this month's derived MRR.
-const MRR_SERIES = [4180, 4620, 5050, 5380, 5910, 6340, 6880, 7390, 7920, 8510, 9180, TOTAL_MRR];
-
-const MRR_MOVEMENT = [
-  { label: "New business", amt: 1024, kind: "pos" },
-  { label: "Expansion", amt: 388, kind: "pos" },
-  { label: "Reactivation", amt: 96, kind: "pos" },
-  { label: "Contraction", amt: -214, kind: "neg" },
-  { label: "Churn", amt: -529, kind: "neg" },
-];
-
-const MAILEROO = {
-  totalSent: 2845,
-  deliverySuccess: 99.42,
-  bounceRate: 0.18,
-  spamRate: 0.04,
-  avgLatency: "1.4s",
-  smtpQueueStatus: "Optimal",
-  categories: [
-    { name: "Voicemail Alerts", count: 1565, pct: 55, color: "var(--violet)" },
-    { name: "Welcome & Billing", count: 995, pct: 35, color: "var(--blue)" },
-    { name: "System Security Alerts", count: 285, pct: 10, color: "var(--teal)" },
-  ],
-  logs: [
-    { id: "mr-9943", email: "maria.delgado@gmail.com", category: "Voicemail Alert", timestamp: "Today · 2:48 PM", msgId: "msg_vm_78a1c9df", status: "delivered" },
-    { id: "mr-9942", email: "james.d@delgadofamily.org", category: "Voicemail Alert", timestamp: "Today · 11:02 AM", msgId: "msg_vm_43f82b12", status: "delivered" },
-    { id: "mr-9941", email: "alex.d@icancall.co", category: "System Security Alert", timestamp: "Today · 9:14 AM", msgId: "msg_sec_10bc93ef", status: "delivered" },
-    { id: "mr-9940", email: "support@icancall.co", category: "Welcome & Billing", timestamp: "Yesterday · 4:32 PM", msgId: "msg_bill_88da1230", status: "delivered" },
-    { id: "mr-9939", email: "robert.hale@yahoo.com", category: "Voicemail Alert", timestamp: "Yesterday · 2:10 PM", msgId: "msg_vm_c982a174", status: "delivered" },
-    { id: "mr-9938", email: "bad-email-address-test@domain.com", category: "System Security Alert", timestamp: "May 30 · 11:45 AM", msgId: "msg_sec_d88f9c10", status: "bounced" },
-    { id: "mr-9937", email: "mom-eleanor@delgadofamily.org", category: "Welcome & Billing", timestamp: "May 29 · 3:00 PM", msgId: "msg_bill_f043e911", status: "delivered" },
-  ]
-};
-
-const HEALTH = {
-  uptime: 99.98,
-  connectRate: 94.2,
-  voicemailRate: 5.8,
-  missedAlertRate: 99.1,
-  avgRingMs: 2.4,
-  callsLast30: 18420,
-  callVolume: [520, 548, 612, 590, 634, 470, 410, 560, 598, 640, 612, 668, 590, 512],
-  connectTrend: [93.1, 93.6, 94.0, 92.8, 94.4, 95.1, 94.2],
-  incidents: [
-    {
-      id: 1,
-      sev: "resolved",
-      title: "Carrier latency — (305) Miami pool",
-      detail: "Elevated ring times on 41 numbers",
-      when: "May 22 · 14m",
-      kind: "amber",
-    },
-    {
-      id: 2,
-      sev: "resolved",
-      title: "Voicemail transcription delay",
-      detail: "Backlog cleared, no calls dropped",
-      when: "May 14 · 38m",
-      kind: "amber",
-    },
-    {
-      id: 3,
-      sev: "resolved",
-      title: "SMS alert provider failover",
-      detail: "Auto-failover to secondary route",
-      when: "Apr 30 · 6m",
-      kind: "green",
-    },
-  ],
-  regions: [
-    { code: "415", city: "San Francisco", numbers: 168, connect: 95.1 },
-    { code: "212", city: "New York", numbers: 142, connect: 94.6 },
-    { code: "312", city: "Chicago", numbers: 96, connect: 93.8 },
-    { code: "305", city: "Miami", numbers: 88, connect: 92.4 },
-    { code: "206", city: "Seattle", numbers: 74, connect: 95.3 },
-    { code: "617", city: "Boston", numbers: 61, connect: 94.9 },
-  ],
-};
-
-const TRANSACTIONS = [
-  { id: "in_8841", acct: "Aisha Bello", amt: 24.99, kind: "paid", when: "Today · 11:04 AM", plan: "Pro · Monthly" },
-  { id: "in_8840", acct: "Daniel Okonkwo", amt: 24.99, kind: "paid", when: "Today · 9:30 AM", plan: "Pro · Monthly" },
-  { id: "in_8838", acct: "James Patel", amt: 24.99, kind: "failed", when: "Today · 6:12 AM", plan: "Pro · Monthly" },
-  { id: "in_8835", acct: "Tomás Rivera", amt: 14.99, kind: "paid", when: "Yesterday · 8:41 PM", plan: "Essential · Monthly" },
-  { id: "in_8832", acct: "Maria Delgado", amt: 249.0, kind: "paid", when: "Yesterday · 2:02 PM", plan: "Pro · Annual" },
-  { id: "in_8829", acct: "Kevin O’Brien", amt: 14.99, kind: "paid", when: "Yesterday · 10:15 AM", plan: "Essential · Monthly" },
-  { id: "in_8826", acct: "Sofia Martinez", amt: 8.5, kind: "refund", when: "Mon · 4:48 PM", plan: "Goodwill credit" },
-];
-
-const TWILIO = {
-  spend: 2840,
-  spendPrev: 2614,
-  projected: 3010,
-  balance: 4210,
-  autoRecharge: 2000,
-  costPerCall: 0.154,
-  costPerMin: 0.026,
-  costPerNumber: 3.99,
-  spendSeries: [1180, 1290, 1380, 1510, 1660, 1820, 1990, 2160, 2320, 2510, 2680, 2840],
-  breakdown: [
-    { id: "voice", label: "Programmable Voice", amt: 1180, color: "var(--blue)" },
-    { id: "numbers", label: "Phone numbers", amt: 819, color: "var(--teal-deep)" },
-    { id: "sms", label: "Messaging · alerts", amt: 410, color: "var(--violet)" },
-    { id: "transcribe", label: "Recording & transcription", amt: 250, color: "var(--amber)" },
-    { id: "lookup", label: "Lookup & Verify", amt: 181, color: "oklch(0.62 0.16 22)" },
-  ],
-  usage: {
-    voiceMin: 46200,
-    voiceIn: 41000,
-    voiceOut: 5200,
-    sms: 6240,
-    smsAlerts: 5180,
-    sms2fa: 1060,
-    numbers: 712,
-    numbersAdded: 52,
-    numbersReleased: 9,
-    transcriptions: 1068,
-    recordings: 1342,
-    lookups: 3140,
-  },
-  regions: [
-    { code: "415", city: "San Francisco", numbers: 168, spend: 712 },
-    { code: "212", city: "New York", numbers: 142, spend: 604 },
-    { code: "312", city: "Chicago", numbers: 96, spend: 402 },
-    { code: "305", city: "Miami", numbers: 88, spend: 388 },
-    { code: "206", city: "Seattle", numbers: 74, spend: 318 },
-    { code: "617", city: "Boston", numbers: 61, spend: 266 },
-  ],
-  reliability: { callErrorRate: 0.8, smsUndelivered: 1.2, apiSuccess: 99.94, avgLatencyMs: 410 },
-  charges: [
-    { id: "TW-44021", desc: "Programmable Voice — daily usage", amt: 41.2, when: "Today · 12:00 AM", kind: "usage" },
-    { id: 'TW-44018', desc: 'Auto-recharge — balance top-up', amt: 2000, when: 'Yesterday · 3:14 PM', kind: 'recharge' },
-    { id: "TW-44012", desc: "Phone number renewals (×214)", amt: 246.1, when: "May 28 · 2:00 AM", kind: "numbers" },
-    { id: "TW-43998", desc: "Voice recording & transcription", amt: 9.3, when: "May 26 · 12:00 AM", kind: "usage" },
-  ],
-};
 
 /* ============ ICONS ============ */
 const ICONS = {
@@ -446,7 +237,25 @@ interface AdminAccount {
 }
 
 export default function SuperAdminApp() {
-  const [view, setView] = useState("overview");
+  const [view, setView] = useState("accounts");
+
+  interface TwilioNumber { phoneNumber: string; friendlyName: string }
+  interface TwilioState {
+    configured: boolean;
+    reason?: string;
+    sender?: string;
+    balance?: number;
+    currency?: string;
+    balanceError?: string;
+    spendThisMonth?: number;
+    spendCurrency?: string;
+    spendError?: string;
+    numbers?: TwilioNumber[];
+    numberCount?: number;
+    numbersError?: string;
+  }
+  const [twilio, setTwilio] = useState<TwilioState | null>(null);
+  const [twilioLoading, setTwilioLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [, setToast] = useState<string | null>(null);
   const [accounts, setAccounts] = useState<AdminAccount[]>([]);
@@ -478,6 +287,16 @@ export default function SuperAdminApp() {
       }
     }
   }, []);
+
+  useEffect(() => {
+    if (view !== "twilio" || twilio || twilioLoading) return;
+    setTwilioLoading(true);
+    fetch("/api/admin/twilio")
+      .then((r) => r.json())
+      .then((d) => setTwilio(d))
+      .catch(() => setTwilio({ configured: false, reason: "Could not reach the Twilio status endpoint." }))
+      .finally(() => setTwilioLoading(false));
+  }, [view, twilio, twilioLoading]);
 
   useEffect(() => {
     async function loadAccounts() {
@@ -598,12 +417,8 @@ export default function SuperAdminApp() {
 
         <nav className="nav" style={{ display: "flex", flexDirection: "column", gap: 4 }}>
           {[
-            { id: "overview", label: "SaaS Overview", icon: "overview" },
             { id: "accounts", label: "Subscriber Base", icon: "users" },
-            { id: "revenue", label: "Revenue & Ledger", icon: "revenue" },
-            { id: "twilio", label: "Twilio Telemetry", icon: "cloud" },
-            { id: "maileroo", label: "Maileroo Delivery", icon: "mail" },
-            { id: "health", label: "System Health", icon: "health" },
+            { id: "twilio", label: "Twilio Account", icon: "cloud" },
           ].map((item) => (
             <button
               key={item.id}
@@ -724,20 +539,12 @@ export default function SuperAdminApp() {
         <header className="topbar" style={{ display: "flex", alignItems: "center", gap: 18, padding: "16px 30px", borderBottom: "1px solid var(--line-soft)", background: "rgba(255, 255, 255, 0.75)", backdropFilter: "blur(12px)", boxShadow: "0 1px 2px rgba(0, 0, 0, 0.01)" }}>
           <div className="page-title">
             <h1 style={{ fontSize: "1.35rem", fontWeight: 700, color: "var(--ink)" }}>
-              {view === "overview" && "SaaS Dashboard"}
               {view === "accounts" && "Subscriber Directory"}
-              {view === "revenue" && "Financial Metrics"}
-              {view === "twilio" && "Twilio Carrier Cost Engine"}
-              {view === "maileroo" && "Maileroo Delivery Hub"}
-              {view === "health" && "Core Reliability Control"}
+              {view === "twilio" && "Twilio Account"}
             </h1>
             <p style={{ fontSize: "0.85rem", color: "var(--ink-soft)" }}>
-              {view === "overview" && "Early-stage metrics (487 paying base accounts)"}
               {view === "accounts" && "Active family numbers configuration registers"}
-              {view === "revenue" && "Subscription transactions & monthly recurring revenue movement"}
-              {view === "twilio" && "Telephony metered billing and prepaid balance control"}
-              {view === "maileroo" && "SMTP queue logs, bounce analytics, and template statistics"}
-              {view === "health" && "Uptime statistics, latency, and incident reports"}
+              {view === "twilio" && "Live balance, month-to-date spend and provisioned numbers"}
             </p>
           </div>
 
@@ -769,137 +576,6 @@ export default function SuperAdminApp() {
         {/* Content Section */}
         <div className="content" style={{ flex: 1, overflowY: "auto", padding: "28px 30px" }}>
           <div className="content-inner wide" style={{ maxWidth: 1200, margin: "0 auto" }}>
-            
-            {/* VIEW: OVERVIEW */}
-            {view === "overview" && (
-              <>
-                {/* KPI Metrics */}
-                <div className="stat-grid" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16, marginBottom: 24 }}>
-                  <div className="stat" style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-lg)", padding: "18px 20px" }}>
-                    <div className="lbl" style={{ fontSize: "0.82rem", color: "var(--ink-faint)" }}>Monthly Recurring Revenue (MRR)</div>
-                    <div className="val" style={{ fontSize: "1.9rem", fontWeight: 700, color: "var(--ink)", marginTop: 6 }}>{fmtUSD(KPI.mrr)}</div>
-                    <div className="trend trend-up" style={{ fontSize: "0.76rem", fontWeight: 600, color: "oklch(0.5 0.13 158)", marginTop: 6 }}>
-                      +{(((KPI.mrr - KPI.mrrPrev) / KPI.mrrPrev) * 100).toFixed(1)}% this month
-                    </div>
-                  </div>
-                  <div className="stat" style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-lg)", padding: "18px 20px" }}>
-                    <div className="lbl" style={{ fontSize: "0.82rem", color: "var(--ink-faint)" }}>ARR Run Rate</div>
-                    <div className="val" style={{ fontSize: "1.9rem", fontWeight: 700, color: "var(--ink)", marginTop: 6 }}>{fmtUSD(KPI.arr)}</div>
-                    <div className="trend" style={{ fontSize: "0.76rem", color: "var(--ink-faint)", marginTop: 6 }}>
-                      Active projection
-                    </div>
-                  </div>
-                  <div className="stat" style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-lg)", padding: "18px 20px" }}>
-                    <div className="lbl" style={{ fontSize: "0.82rem", color: "var(--ink-faint)" }}>Active Accounts Base</div>
-                    <div className="val" style={{ fontSize: "1.9rem", fontWeight: 700, color: "var(--ink)", marginTop: 6 }}>{fmtNum(KPI.accounts)}</div>
-                    <div className="trend trend-up" style={{ fontSize: "0.76rem", fontWeight: 600, color: "oklch(0.5 0.13 158)", marginTop: 6 }}>
-                      +{KPI.accountsNew} new signups
-                    </div>
-                  </div>
-                  <div className="stat" style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-lg)", padding: "18px 20px" }}>
-                    <div className="lbl" style={{ fontSize: "0.82rem", color: "var(--ink-faint)" }}>Global Phone Lines</div>
-                    <div className="val" style={{ fontSize: "1.9rem", fontWeight: 700, color: "var(--ink)", marginTop: 6 }}>{fmtNum(KPI.activeNumbers)}</div>
-                    <div className="trend" style={{ fontSize: "0.76rem", color: "oklch(0.5 0.13 158)", marginTop: 6 }}>
-                      99.98% carrier uptime
-                    </div>
-                  </div>
-                </div>
-
-                <div className="grid-2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18, marginBottom: 24 }}>
-                  {/* Growth History list chart simulation */}
-                  <div className="card">
-                    <div className="card-head">
-                      <h2>Monthly Revenue Curve</h2>
-                      <p>Trailing 12-month MRR growth trajectory</p>
-                    </div>
-                    <div className="card-pad">
-                      <div style={{ display: "flex", alignItems: "flex-end", height: 160, gap: 10, paddingBottom: 10, borderBottom: "1px solid var(--line)" }}>
-                        {MRR_SERIES.map((val, idx) => (
-                          <div key={idx} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center" }}>
-                            <div
-                              style={{
-                                width: "100%",
-                                height: (val / 10000) * 140,
-                                background: "linear-gradient(180deg, var(--blue) 0%, var(--teal) 100%)",
-                                borderRadius: "3px 3px 0 0",
-                              }}
-                            ></div>
-                            <span style={{ fontSize: "0.68rem", color: "var(--ink-faint)", marginTop: 4 }}>{MONTHS[idx]}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Plan Segment Distribution */}
-                  <div className="card">
-                    <div className="card-head">
-                      <h2>Product Pricing Split</h2>
-                      <p>Active subscribers by tier and billing cycle</p>
-                    </div>
-                    <div className="card-pad" style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-                      {PLAN_SPLIT.map((plan) => {
-                        const shareOfBase = (plan.count / TOTAL_ACCOUNTS) * 100;
-                        const shareOfMrr = (plan.mrr / TOTAL_MRR) * 100;
-                        return (
-                          <div key={plan.id}>
-                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 12, marginBottom: 3 }}>
-                              <div style={{ display: "flex", alignItems: "baseline", gap: 8, minWidth: 0 }}>
-                                <b>{plan.name}</b>
-                                {plan.note && (
-                                  <span style={{ fontSize: "0.68rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.04em", color: "var(--violet)", background: "oklch(0.96 0.04 285)", padding: "2px 7px", borderRadius: 99, whiteSpace: "nowrap" }}>
-                                    {plan.note}
-                                  </span>
-                                )}
-                              </div>
-                              <span style={{ fontWeight: 600, whiteSpace: "nowrap" }}>
-                                {fmtUSD(plan.mrr)} MRR
-                              </span>
-                            </div>
-                            <div style={{ display: "flex", justifyContent: "space-between", gap: 12, fontSize: "0.78rem", color: "var(--ink-faint)", marginBottom: 7 }}>
-                              <span>{plan.priceLabel}</span>
-                              <span style={{ whiteSpace: "nowrap" }}>
-                                {fmtNum(plan.count)} accounts · {shareOfBase.toFixed(1)}% of base · {shareOfMrr.toFixed(1)}% of MRR
-                              </span>
-                            </div>
-
-                            {/* Tier bar, scaled to its share of the base and split by billing cycle */}
-                            <div style={{ height: 12, background: "var(--tint)", borderRadius: 99, overflow: "hidden" }}>
-                              <div style={{ display: "flex", height: "100%", width: `${shareOfBase}%` }}>
-                                {plan.billing.map((cycle) => (
-                                  <div
-                                    key={cycle.id}
-                                    title={`${cycle.label}: ${cycle.count} accounts`}
-                                    style={{ width: `${(cycle.count / plan.count) * 100}%`, background: cycle.color }}
-                                  ></div>
-                                ))}
-                              </div>
-                            </div>
-
-                            <div style={{ display: "flex", flexWrap: "wrap", gap: "4px 18px", marginTop: 8 }}>
-                              {plan.billing.map((cycle) => (
-                                <div key={cycle.id} style={{ display: "flex", alignItems: "center", gap: 7, fontSize: "0.78rem", color: "var(--ink-soft)" }}>
-                                  <span style={{ width: 8, height: 8, borderRadius: 3, background: cycle.color, flex: "none" }}></span>
-                                  <span>
-                                    {cycle.label} · {fmtNum(cycle.count)} · <b style={{ fontWeight: 600, color: "var(--ink)" }}>{fmtUSD(cycle.mrr)}</b>
-                                  </span>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        );
-                      })}
-
-                      <div style={{ display: "flex", justifyContent: "space-between", gap: 12, paddingTop: 14, borderTop: "1px solid var(--line)", fontSize: "0.85rem" }}>
-                        <span style={{ color: "var(--ink-soft)" }}>{fmtNum(TOTAL_ACCOUNTS)} paying accounts</span>
-                        <b>{fmtUSD(TOTAL_MRR)} MRR · {fmtUSD(TOTAL_MRR * 12)} ARR</b>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </>
-            )}
-
             {/* VIEW: ACCOUNTS */}
             {view === "accounts" && (
               <div className="card">
@@ -981,355 +657,72 @@ export default function SuperAdminApp() {
               </div>
             )}
 
-            {/* VIEW: REVENUE */}
-            {view === "revenue" && (
-              <>
-                {/* Movement grid */}
-                <div className="card section-gap" style={{ marginBottom: 24 }}>
-                  <div className="card-head">
-                    <h2>Monthly Revenue Movements</h2>
-                    <p>MRR additions and churn components this cycle</p>
-                  </div>
-                  <div className="card-pad" style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 14 }}>
-                    {MRR_MOVEMENT.map((mov, i) => (
-                      <div key={i} style={{ background: "var(--surface-2)", border: "1px solid var(--line)", padding: 16, borderRadius: "var(--r-md)" }}>
-                        <span style={{ fontSize: "0.8rem", color: "var(--ink-faint)" }}>{mov.label}</span>
-                        <div style={{ fontSize: "1.45rem", fontWeight: 700, marginTop: 4, color: mov.kind === "pos" ? "oklch(0.45 0.13 158)" : "oklch(0.55 0.18 22)" }}>
-                          {mov.amt > 0 ? "+" : ""}{fmtUSD(mov.amt)}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Ledger Transactions */}
-                <div className="card">
-                  <div className="card-head">
-                    <h2>Recent Ledger Transactions</h2>
-                    <p>Credit card processing logs via Stripe/Creem Gateway</p>
-                  </div>
-                  <div className="card-pad" style={{ padding: 0 }}>
-                    {TRANSACTIONS.map((tx) => (
-                      <div key={tx.id} style={{ display: "flex", justifyItems: "center", justifyContent: "space-between", padding: "14px 20px", borderBottom: "1px solid var(--line-soft)" }}>
-                        <div>
-                          <b style={{ color: "var(--ink)", display: "block" }}>{tx.acct}</b>
-                          <span style={{ fontSize: "0.78rem", color: "var(--ink-faint)" }}>{tx.plan} &bull; ID: {tx.id}</span>
-                        </div>
-                        <div style={{ textAlign: "right" }}>
-                          <span style={{ fontWeight: 700, color: tx.kind === "paid" ? "oklch(0.42 0.13 158)" : "oklch(0.55 0.18 22)" }}>
-                            {tx.kind === "paid" ? "" : "-"}{fmtUSD(tx.amt, 2)}
-                          </span>
-                          <span style={{ fontSize: "0.78rem", color: "var(--ink-faint)", display: "block", marginTop: 4 }}>{tx.when}</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </>
-            )}
-
             {/* VIEW: TWILIO */}
             {view === "twilio" && (
               <>
-                {/* Twilio KPI row */}
-                <div className="stat-grid" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16, marginBottom: 24 }}>
-                  <div className="stat" style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-lg)", padding: "18px 20px" }}>
-                    <div className="lbl" style={{ fontSize: "0.82rem", color: "var(--ink-faint)" }}>MTD Telephony Spend</div>
-                    <div className="val" style={{ fontSize: "1.9rem", fontWeight: 700, color: "var(--ink)", marginTop: 6 }}>{fmtUSD(TWILIO.spend)}</div>
-                    <div className="trend trend-up" style={{ fontSize: "0.76rem", fontWeight: 600, color: "oklch(0.55 0.18 22)", marginTop: 6 }}>
-                      +8.6% MTD projected: {fmtUSD(TWILIO.projected)}
-                    </div>
-                  </div>
-                  <div className="stat" style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-lg)", padding: "18px 20px" }}>
-                    <div className="lbl" style={{ fontSize: "0.82rem", color: "var(--ink-faint)" }}>Gross Operating Margin</div>
-                    <div className="val" style={{ fontSize: "1.9rem", fontWeight: 700, color: "var(--ink)", marginTop: 6 }}>
-                      {((1 - TWILIO.spend / KPI.mrr) * 100).toFixed(1)}%
-                    </div>
-                    <div className="trend" style={{ fontSize: "0.76rem", color: "oklch(0.5 0.13 158)", marginTop: 6 }}>
-                      {fmtUSD(KPI.mrr - TWILIO.spend)} retained / mo
-                    </div>
-                  </div>
-                  <div className="stat" style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-lg)", padding: "18px 20px" }}>
-                    <div className="lbl" style={{ fontSize: "0.82rem", color: "var(--ink-faint)" }}>Prepaid Account Balance</div>
-                    <div className="val" style={{ fontSize: "1.9rem", fontWeight: 700, color: "var(--ink)", marginTop: 6 }}>{fmtUSD(TWILIO.balance)}</div>
-                    <div className="trend" style={{ fontSize: "0.76rem", color: "var(--ink-faint)", marginTop: 6 }}>
-                      Recharges at {fmtUSD(TWILIO.autoRecharge)} threshold
-                    </div>
-                  </div>
-                  <div className="stat" style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-lg)", padding: "18px 20px" }}>
-                    <div className="lbl" style={{ fontSize: "0.82rem", color: "var(--ink-faint)" }}>Cost Per Inbound Call</div>
-                    <div className="val" style={{ fontSize: "1.9rem", fontWeight: 700, color: "var(--ink)", marginTop: 6 }}>{fmtUSD(TWILIO.costPerCall, 3)}</div>
-                    <div className="trend" style={{ fontSize: "0.76rem", color: "var(--ink-faint)", marginTop: 6 }}>
-                      {fmtUSD(TWILIO.costPerNumber, 2)}/number renewal fee
-                    </div>
-                  </div>
-                </div>
+                {twilioLoading && (
+                  <div className="card" style={{ padding: 20, color: "var(--ink-soft)" }}>Loading Twilio account data…</div>
+                )}
 
-                {/* Twilio breakdown & spend trend */}
-                <div className="grid-7-5" style={{ display: "grid", gridTemplateColumns: "1.45fr 1fr", gap: 18, marginBottom: 24 }}>
-                  <div className="card">
-                    <div className="card-head">
-                      <h2>Twilio Cost Breakdown</h2>
-                      <p>Telemetry spend categories for active billing cycle</p>
+                {!twilioLoading && twilio && twilio.configured === false && (
+                  <div className="card" style={{ padding: 20 }}>
+                    <div style={{ fontWeight: 700, color: "var(--ink)", marginBottom: 6 }}>Twilio is not configured in this environment</div>
+                    <div style={{ fontSize: "0.88rem", color: "var(--ink-soft)" }}>{twilio.reason}</div>
+                  </div>
+                )}
+
+                {!twilioLoading && twilio && twilio.configured && (
+                  <>
+                    <div className="stat-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16, marginBottom: 24 }}>
+                      <div className="stat" style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-lg)", padding: "18px 20px" }}>
+                        <div className="lbl" style={{ fontSize: "0.82rem", color: "var(--ink-faint)" }}>Account Balance</div>
+                        <div className="val" style={{ fontSize: "1.9rem", fontWeight: 700, color: "var(--ink)", marginTop: 6 }}>
+                          {typeof twilio.balance === "number" ? `${twilio.currency ?? "USD"} ${twilio.balance.toFixed(2)}` : "—"}
+                        </div>
+                        <div className="trend" style={{ fontSize: "0.76rem", color: "var(--ink-faint)", marginTop: 6 }}>
+                          {twilio.balanceError ? `Unavailable: ${twilio.balanceError}` : "Live from the Twilio API"}
+                        </div>
+                      </div>
+                      <div className="stat" style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-lg)", padding: "18px 20px" }}>
+                        <div className="lbl" style={{ fontSize: "0.82rem", color: "var(--ink-faint)" }}>Spend This Month</div>
+                        <div className="val" style={{ fontSize: "1.9rem", fontWeight: 700, color: "var(--ink)", marginTop: 6 }}>
+                          {typeof twilio.spendThisMonth === "number" ? `${twilio.spendCurrency ?? "USD"} ${twilio.spendThisMonth.toFixed(2)}` : "—"}
+                        </div>
+                        <div className="trend" style={{ fontSize: "0.76rem", color: "var(--ink-faint)", marginTop: 6 }}>
+                          {twilio.spendError ? `Unavailable: ${twilio.spendError}` : "Month-to-date, all categories"}
+                        </div>
+                      </div>
+                      <div className="stat" style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-lg)", padding: "18px 20px" }}>
+                        <div className="lbl" style={{ fontSize: "0.82rem", color: "var(--ink-faint)" }}>Provisioned Numbers</div>
+                        <div className="val" style={{ fontSize: "1.9rem", fontWeight: 700, color: "var(--ink)", marginTop: 6 }}>
+                          {typeof twilio.numberCount === "number" ? twilio.numberCount : "—"}
+                        </div>
+                        <div className="trend" style={{ fontSize: "0.76rem", color: "var(--ink-faint)", marginTop: 6 }}>
+                          {twilio.numbersError ? `Unavailable: ${twilio.numbersError}` : `A2P sender ${twilio.sender ?? "—"}`}
+                        </div>
+                      </div>
                     </div>
-                    <div className="card-pad" style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-                      {TWILIO.breakdown.map((b) => (
-                        <div key={b.id}>
-                          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
-                            <b>{b.label}</b>
-                            <span>{fmtUSD(b.amt)} ({Math.round((b.amt / TWILIO.spend) * 100)}%)</span>
+
+                    <div className="card">
+                      <div className="card-head" style={{ padding: "16px 20px", borderBottom: "1px solid var(--line-soft)" }}>
+                        <h2>Numbers on the Twilio Account</h2>
+                      </div>
+                      <div style={{ padding: "8px 20px 18px" }}>
+                        {(twilio.numbers ?? []).length === 0 && (
+                          <div style={{ fontSize: "0.88rem", color: "var(--ink-soft)", padding: "12px 0" }}>
+                            No numbers are provisioned on this Twilio account yet.
                           </div>
-                          <div className="usage-bar" style={{ height: 10, background: "var(--tint)", borderRadius: 99, overflow: "hidden" }}>
-                            <i style={{ display: "block", height: "100%", width: `${(b.amt / TWILIO.spend) * 100}%`, background: b.color }}></i>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="card">
-                    <div className="card-head">
-                      <h2>Carrier Reliability</h2>
-                      <p>Twilio delivery health &amp; API setup stats</p>
-                    </div>
-                    <div className="card-pad" style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-                      <div style={{ display: "flex", justifyContent: "space-between", borderBottom: "1px solid var(--line-soft)", paddingBottom: 8 }}>
-                        <span>Twilio API Success Rate</span>
-                        <b style={{ color: "oklch(0.42 0.13 158)" }}>{TWILIO.reliability.apiSuccess}%</b>
-                      </div>
-                      <div style={{ display: "flex", justifyContent: "space-between", borderBottom: "1px solid var(--line-soft)", paddingBottom: 8 }}>
-                        <span>Call Setup Latency</span>
-                        <b>{TWILIO.reliability.avgLatencyMs}ms</b>
-                      </div>
-                      <div style={{ display: "flex", justifyContent: "space-between", borderBottom: "1px solid var(--line-soft)", paddingBottom: 8 }}>
-                        <span>SMS Undelivered</span>
-                        <b style={{ color: "oklch(0.55 0.18 22)" }}>{TWILIO.reliability.smsUndelivered}%</b>
-                      </div>
-                      <div style={{ display: "flex", justifyContent: "space-between" }}>
-                        <span>Voice Call Fail Rate</span>
-                        <b style={{ color: "oklch(0.42 0.13 158)" }}>{TWILIO.reliability.callErrorRate}%</b>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Metered usage quantities */}
-                <div className="card">
-                  <div className="card-head">
-                    <h2>Consumption Analytics</h2>
-                    <p>Total metered traffic counts across the global Twilio pool</p>
-                  </div>
-                  <div className="card-pad">
-                    <div className="stat-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 }}>
-                      <div style={{ border: "1px solid var(--line)", borderRadius: "var(--r-md)", padding: 16, background: "var(--surface-2)" }}>
-                        <div style={{ fontSize: "1.6rem", fontWeight: 700 }}>{fmtNum(TWILIO.usage.voiceMin)}</div>
-                        <div style={{ fontSize: "0.8rem", color: "var(--ink-faint)", marginTop: 6 }}>Voice Minutes Used</div>
-                        <span style={{ fontSize: "0.74rem", color: "var(--ink-faint)", display: "block", marginTop: 2 }}>{fmtNum(TWILIO.usage.voiceIn)} in &bull; {fmtNum(TWILIO.usage.voiceOut)} out</span>
-                      </div>
-                      <div style={{ border: "1px solid var(--line)", borderRadius: "var(--r-md)", padding: 16, background: "var(--surface-2)" }}>
-                        <div style={{ fontSize: "1.6rem", fontWeight: 700 }}>{fmtNum(TWILIO.usage.sms)}</div>
-                        <div style={{ fontSize: "0.8rem", color: "var(--ink-faint)", marginTop: 6 }}>SMS Dispatched</div>
-                        <span style={{ fontSize: "0.74rem", color: "var(--ink-faint)", display: "block", marginTop: 2 }}>{fmtNum(TWILIO.usage.smsAlerts)} alerts &bull; {fmtNum(TWILIO.usage.sms2fa)} security</span>
-                      </div>
-                      <div style={{ border: "1px solid var(--line)", borderRadius: "var(--r-md)", padding: 16, background: "var(--surface-2)" }}>
-                        <div style={{ fontSize: "1.6rem", fontWeight: 700 }}>{fmtNum(TWILIO.usage.transcriptions)}</div>
-                        <div style={{ fontSize: "0.8rem", color: "var(--ink-faint)", marginTop: 6 }}>Voice Transcriptions</div>
-                        <span style={{ fontSize: "0.74rem", color: "var(--ink-faint)", display: "block", marginTop: 2 }}>{fmtNum(TWILIO.usage.recordings)} recordings stored</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </>
-            )}
-
-            {/* VIEW: HEALTH */}
-            {view === "health" && (
-              <>
-                {/* Incidents logs */}
-                <div className="card section-gap" style={{ marginBottom: 24 }}>
-                  <div className="card-head">
-                    <div>
-                      <h2>Operational Incident History</h2>
-                      <p>Trailing incidents and carriers auto-failover reports</p>
-                    </div>
-                  </div>
-                  <div className="card-pad" style={{ padding: 0 }}>
-                    {HEALTH.incidents.map((inc) => (
-                      <div key={inc.id} style={{ display: "flex", justifyItems: "center", justifyContent: "space-between", padding: "14px 20px", borderBottom: "1px solid var(--line-soft)" }}>
-                        <div>
-                          <b style={{ color: "var(--ink)", display: "block" }}>{inc.title}</b>
-                          <span style={{ fontSize: "0.78rem", color: "var(--ink-faint)" }}>{inc.detail} &bull; {inc.when}</span>
-                        </div>
-                        <div style={{ display: "flex", alignItems: "center" }}>
-                          <span
-                            style={{
-                              display: "inline-block",
-                              padding: "4px 10px",
-                              borderRadius: 99,
-                              fontSize: "0.74rem",
-                              fontWeight: 700,
-                              background: inc.sev === "resolved" ? "oklch(0.95 0.05 158)" : "oklch(0.96 0.05 75)",
-                              color: inc.sev === "resolved" ? "oklch(0.42 0.13 158)" : "oklch(0.5 0.13 60)",
-                            }}
-                          >
-                            {inc.sev}
-                          </span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Regional health connects */}
-                <div className="card">
-                  <div className="card-head">
-                    <h2>Active Inbound Connect Rates by Region</h2>
-                    <p>Live stats of Twilio line connectors per city pool</p>
-                  </div>
-                  <div className="card-pad" style={{ padding: 0 }}>
-                    <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left", fontSize: "0.92rem" }}>
-                      <thead>
-                        <tr style={{ background: "var(--surface-2)", borderBottom: "1px solid var(--line)" }}>
-                          <th style={{ padding: "14px 20px" }}>City Pool</th>
-                          <th style={{ padding: "14px 20px" }}>Area Code</th>
-                          <th style={{ padding: "14px 20px" }}>Configured Lines</th>
-                          <th style={{ padding: "14px 20px" }}>Call Connect Success</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {HEALTH.regions.map((reg) => (
-                          <tr key={reg.code} style={{ borderBottom: "1px solid var(--line-soft)" }}>
-                            <td style={{ padding: "14px 20px", fontWeight: 600 }}>{reg.city}</td>
-                            <td style={{ padding: "14px 20px", fontFamily: "var(--mono)" }}>{reg.code}</td>
-                            <td style={{ padding: "14px 20px" }}>{reg.numbers} active lines</td>
-                            <td style={{ padding: "14px 20px", fontWeight: 700, color: reg.connect > 94 ? "oklch(0.42 0.13 158)" : "oklch(0.5 0.13 60)" }}>
-                              {reg.connect}%
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              </>
-            )}
-
-            {/* VIEW: MAILEROO */}
-            {view === "maileroo" && (
-              <>
-                {/* KPI metrics row */}
-                <div className="stat-grid section-gap" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16, marginBottom: 22 }}>
-                  <div className="stat" style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-lg)", padding: "18px 20px" }}>
-                    <div className="ic" style={{ background: "var(--tint)", color: "var(--blue-deep)", width: 38, height: 38, borderRadius: 11, display: "grid", placeItems: "center", marginBottom: 14 }}>
-                      <Icon name="mail" style={{ width: 19, height: 19 }} />
-                    </div>
-                    <div className="val" style={{ fontSize: "1.9rem", fontWeight: 700 }}>{MAILEROO.totalSent}</div>
-                    <div className="lbl" style={{ fontSize: "0.82rem", color: "var(--ink-faint)", marginTop: 5 }}>Total Sent (30d)</div>
-                  </div>
-
-                  <div className="stat" style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-lg)", padding: "18px 20px" }}>
-                    <div className="ic" style={{ background: "oklch(0.95 0.05 158)", color: "oklch(0.45 0.13 158)", width: 38, height: 38, borderRadius: 11, display: "grid", placeItems: "center", marginBottom: 14 }}>
-                      <Icon name="check" style={{ width: 19, height: 19 }} />
-                    </div>
-                    <div className="val" style={{ fontSize: "1.9rem", fontWeight: 700 }}>{MAILEROO.deliverySuccess}%</div>
-                    <div className="lbl" style={{ fontSize: "0.82rem", color: "var(--ink-faint)", marginTop: 5 }}>Delivery Success</div>
-                  </div>
-
-                  <div className="stat" style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-lg)", padding: "18px 20px" }}>
-                    <div className="ic" style={{ background: "oklch(0.96 0.05 22)", color: "var(--rose)", width: 38, height: 38, borderRadius: 11, display: "grid", placeItems: "center", marginBottom: 14 }}>
-                      <Icon name="alert" style={{ width: 19, height: 19 }} />
-                    </div>
-                    <div className="val" style={{ fontSize: "1.9rem", fontWeight: 700 }}>{MAILEROO.bounceRate}%</div>
-                    <div className="lbl" style={{ fontSize: "0.82rem", color: "var(--ink-faint)", marginTop: 5 }}>Bounce Rate</div>
-                  </div>
-
-                  <div className="stat" style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-lg)", padding: "18px 20px" }}>
-                    <div className="ic" style={{ background: "oklch(0.96 0.04 285)", color: "var(--violet)", width: 38, height: 38, borderRadius: 11, display: "grid", placeItems: "center", marginBottom: 14 }}>
-                      <Icon name="health" style={{ width: 19, height: 19 }} />
-                    </div>
-                    <div className="val" style={{ fontSize: "1.9rem", fontWeight: 700 }}>{MAILEROO.avgLatency}</div>
-                    <div className="lbl" style={{ fontSize: "0.82rem", color: "var(--ink-faint)", marginTop: 5 }}>Avg. Dispatch Latency</div>
-                  </div>
-                </div>
-
-                <div style={{ display: "grid", gridTemplateColumns: "1.6fr 1fr", gap: 22 }}>
-                  {/* Left: Queue Table */}
-                  <div className="card">
-                    <div className="card-head">
-                      <div>
-                        <h2>SMTP Delivery Queue Logs</h2>
-                        <p>Real-time Maileroo API message statuses</p>
-                      </div>
-                      <span className="badge badge-green">SMTP: {MAILEROO.smtpQueueStatus}</span>
-                    </div>
-                    <div className="card-pad" style={{ padding: 0 }}>
-                      <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left", fontSize: "0.9rem" }}>
-                        <thead>
-                          <tr style={{ background: "var(--surface-2)", borderBottom: "1px solid var(--line)" }}>
-                            <th style={{ padding: "12px 16px" }}>Recipient</th>
-                            <th style={{ padding: "12px 16px" }}>Category</th>
-                            <th style={{ padding: "12px 16px" }}>Message ID</th>
-                            <th style={{ padding: "12px 16px", textAlign: "right" }}>Status</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {MAILEROO.logs.map((log) => (
-                            <tr key={log.id} style={{ borderBottom: "1px solid var(--line-soft)" }}>
-                              <td style={{ padding: "12px 16px" }}>
-                                <b style={{ display: "block", color: "var(--ink)", fontSize: "0.88rem" }}>{log.email}</b>
-                                <span style={{ fontSize: "0.76rem", color: "var(--ink-faint)" }}>{log.timestamp}</span>
-                              </td>
-                              <td style={{ padding: "12px 16px", fontSize: "0.84rem", color: "var(--ink-soft)" }}>{log.category}</td>
-                              <td style={{ padding: "12px 16px", fontFamily: "var(--mono)", fontSize: "0.78rem", color: "var(--ink-faint)" }}>{log.msgId}</td>
-                              <td style={{ padding: "12px 16px", textAlign: "right" }}>
-                                <span
-                                  className={`badge ${log.status === "delivered" ? "badge-green" : "badge-rose"}`}
-                                  style={{ textTransform: "capitalize" }}
-                                >
-                                  {log.status}
-                                </span>
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-
-                  {/* Right: Templates/Categories Breakdown */}
-                  <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-                    <div className="card card-pad" style={{ display: "flex", flexDirection: "column", gap: 18 }}>
-                      <div>
-                        <h2 style={{ fontSize: "1.08rem", fontWeight: 700 }}>Dispatch Distribution</h2>
-                        <p style={{ fontSize: "0.84rem", color: "var(--ink-faint)", marginTop: 2 }}>Outbound volume segmented by transactional template</p>
-                      </div>
-
-                      <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-                        {MAILEROO.categories.map((cat) => (
-                          <div key={cat.name} style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: "0.86rem" }}>
-                              <b style={{ color: "var(--ink-soft)" }}>{cat.name}</b>
-                              <span style={{ fontWeight: 600 }}>{cat.count} ({cat.pct}%)</span>
-                            </div>
-                            <div style={{ height: 8, background: "var(--tint)", borderRadius: 99, overflow: "hidden" }}>
-                              <div style={{ width: `${cat.pct}%`, height: "100%", background: cat.color, borderRadius: 99 }} />
-                            </div>
+                        )}
+                        {(twilio.numbers ?? []).map((n) => (
+                          <div key={n.phoneNumber} style={{ display: "flex", justifyContent: "space-between", padding: "10px 0", borderBottom: "1px solid var(--line-soft)", fontSize: "0.9rem" }}>
+                            <span style={{ fontWeight: 600, color: "var(--ink)" }}>{n.phoneNumber}</span>
+                            <span style={{ color: "var(--ink-soft)" }}>{n.friendlyName}</span>
                           </div>
                         ))}
                       </div>
                     </div>
-
-                    <div className="card card-pad" style={{ display: "flex", gap: 14, alignItems: "center", background: "var(--surface-2)" }}>
-                      <div style={{ width: 44, height: 44, borderRadius: 12, background: "var(--tint)", color: "var(--blue-deep)", display: "grid", placeItems: "center", flex: "none" }}>
-                        <Icon name="shield" style={{ width: 22, height: 22 }} />
-                      </div>
-                      <div>
-                        <b style={{ display: "block", fontSize: "0.92rem" }}>SPF & DKIM Verified</b>
-                        <span style={{ fontSize: "0.8rem", color: "var(--ink-faint)" }}>Maileroo DNS alignment check: 100% compliant</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                  </>
+                )}
               </>
             )}
 
