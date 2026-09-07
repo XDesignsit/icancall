@@ -9,7 +9,11 @@ import twilioClient, { isTwilioConfigured, a2pSender } from "@/lib/twilio";
  * The panel this feeds used to render hardcoded figures -- a $4,210 balance and
  * a $2,000 auto-recharge that were never connected to the account. During live
  * testing that is worse than showing nothing: numbers stop working when the
- * real balance runs out, and an invented one reads healthy the whole way down.
+ * credit runs out, and an invented figure reads healthy the whole way down.
+ *
+ * Twilio's `balance` is prepaid CREDIT REMAINING, not money owed. It counts
+ * down as usage and number renewals are billed against it, so the dashboard
+ * presents it as a countdown -- a small number is a warning, not a small bill.
  *
  * Everything here comes from the Twilio API or is reported as unavailable.
  */
@@ -43,7 +47,7 @@ export async function GET() {
         result.balance = Number(balance.balance);
         result.currency = balance.currency;
       } catch (err) {
-        result.balanceError = err instanceof Error ? err.message : "balance unavailable";
+        result.balanceError = err instanceof Error ? err.message : "credit balance unavailable";
       }
     })(),
     (async () => {

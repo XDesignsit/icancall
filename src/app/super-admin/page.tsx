@@ -6,6 +6,32 @@ import Link from "next/link";
 const fmtUSD = (n: number, dp: number = 0) =>
   "$" + Number(n).toLocaleString("en-US", { minimumFractionDigits: dp, maximumFractionDigits: dp });
 
+// Twilio's `balance` is prepaid credit remaining, not money owed -- it counts
+// down as calls, messages and number renewals are billed against it, and when
+// it reaches zero the numbers stop working. Shown as a countdown so a small
+// figure reads as a warning rather than as a small bill.
+const LOW_CREDIT = 20;
+const CRITICAL_CREDIT = 5;
+
+function creditTone(balance: number | undefined): { color: string; note: string } {
+  if (typeof balance !== "number") {
+    return { color: "var(--ink-faint)", note: "Prepaid credit remaining" };
+  }
+  if (balance <= CRITICAL_CREDIT) {
+    return {
+      color: "oklch(0.55 0.18 22)",
+      note: "Critically low — numbers stop working at zero. Top up before testing.",
+    };
+  }
+  if (balance <= LOW_CREDIT) {
+    return {
+      color: "oklch(0.62 0.15 65)",
+      note: "Running low — top up before a long test session.",
+    };
+  }
+  return { color: "var(--ink)", note: "Prepaid credit remaining, live from Twilio" };
+}
+
 /* ============ ICONS ============ */
 const ICONS = {
   shield: <path d="M12 3 5 6v5c0 4.5 3 7.5 7 9 4-1.5 7-4.5 7-9V6l-7-3Z" />,
@@ -675,12 +701,14 @@ export default function SuperAdminApp() {
                   <>
                     <div className="stat-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16, marginBottom: 24 }}>
                       <div className="stat" style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-lg)", padding: "18px 20px" }}>
-                        <div className="lbl" style={{ fontSize: "0.82rem", color: "var(--ink-faint)" }}>Account Balance</div>
-                        <div className="val" style={{ fontSize: "1.9rem", fontWeight: 700, color: "var(--ink)", marginTop: 6 }}>
+                        <div className="lbl" style={{ fontSize: "0.82rem", color: "var(--ink-faint)" }}>Credit Remaining</div>
+                        <div className="val" style={{ fontSize: "1.9rem", fontWeight: 700, marginTop: 6, color: creditTone(twilio.balance).color }}>
                           {typeof twilio.balance === "number" ? `${twilio.currency ?? "USD"} ${twilio.balance.toFixed(2)}` : "—"}
                         </div>
-                        <div className="trend" style={{ fontSize: "0.76rem", color: "var(--ink-faint)", marginTop: 6 }}>
-                          {twilio.balanceError ? `Unavailable: ${twilio.balanceError}` : "Live from the Twilio API"}
+                        <div className="trend" style={{ fontSize: "0.76rem", marginTop: 6, color: creditTone(twilio.balance).color }}>
+                          {twilio.balanceError
+                            ? `Unavailable: ${twilio.balanceError}`
+                            : creditTone(twilio.balance).note}
                         </div>
                       </div>
                       <div className="stat" style={{ background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "var(--r-lg)", padding: "18px 20px" }}>
