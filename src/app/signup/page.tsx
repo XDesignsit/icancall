@@ -78,6 +78,9 @@ const PLANS = [
 ];
 
 const planById = (id: Plan) => PLANS.find((p) => p.id === id) || PLANS[0];
+// Sentence templates read "Your {planName} plan ..." so they take the bare name;
+// the pricing titles ("Pro Plan") would double the word.
+const planShortName = (id: Plan) => (id === "careteam" ? "Care Team" : id === "pro" ? "Pro" : "Essential");
 
 const AREA_SUGGESTIONS = [
   { code: "470", city: "Atlanta" },
@@ -1091,12 +1094,11 @@ function NumberStep({ data, set, onNext, onBack, t, lang }: { data: OnboardingDa
     return dict[memo] || memo;
   };
 
-  const planNameTrans = data.plan === "pro" ? t.pricing.proTitle : t.pricing.essentialTitle;
   const statusTemplate = need > 1 ? t.onboarding.statusText : t.onboarding.statusTextSingle;
   const statusTextStr = statusTemplate
-    .replace("{planName}", planNameTrans)
-    .replace("{need}", String(need))
-    .replace("{selected}", String(selected.length));
+    .replaceAll("{planName}", planShortName(data.plan))
+    .replaceAll("{need}", String(need))
+    .replaceAll("{selected}", String(selected.length));
 
   return (
     <div className="panel wide">
@@ -1302,7 +1304,7 @@ function PaymentStep({ data, onNext, onBack, t, lang }: { data: OnboardingData; 
     return () => window.removeEventListener("message", handleMsg);
   }, [onNext, data]);
 
-  const translatedPlanName = data.plan === "pro" ? t.pricing.proTitle : t.pricing.essentialTitle;
+  const translatedPlanName = planShortName(data.plan);
   const billingName = data.billing === "yearly" ? t.onboarding.annual : t.onboarding.monthly;
   const orderPlanStr = t.onboarding.orderPlan
     .replace("{planName}", translatedPlanName)
@@ -1378,7 +1380,7 @@ function SuccessStep({ data, t, lang }: { data: OnboardingData; t: HomepageTrans
   const shown = Math.min(contactCap, 4);
   const ownerFirst = (data.account.name || "You").trim().split(/\s+/)[0];
 
-  const translatedPlanName = data.plan === "pro" ? t.pricing.proTitle : t.pricing.essentialTitle;
+  const translatedPlanName = planShortName(data.plan);
 
   const successTitleStr = t.onboarding.successTitle.replace("{name}", ownerFirst);
   const successSubStr = (plan.numbers > 1 ? t.onboarding.successSubtitlePlural : t.onboarding.successSubtitle)
