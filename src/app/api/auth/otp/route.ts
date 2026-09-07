@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
-import { signSession } from "@/lib/session";
+import { issueSession, sessionCookieOptions } from "@/lib/session";
 import { supabase } from "@/lib/supabase";
 import { verifyTurnstile } from "@/lib/rateLimit";
 import { ensureDemoAccount, isDemoEmail } from "@/lib/demoAccounts";
 import { resolveSessionRole } from "@/lib/roles";
+import { isOnboarded } from "@/lib/onboarding";
 
 export async function POST(request: Request) {
   try {
@@ -41,12 +42,22 @@ export async function POST(request: Request) {
       const { error: otpError } = await supabase.auth.signInWithOtp({
         email,
         options: {
-          shouldCreateUser: true, // Auto-create user if they don't exist yet
+          // The login page signs people in; it must not mint accounts. A PIN
+          // for an unknown address used to create a bare auth user that then
+          // reached the dashboard with no plan, no number and seeded sample
+          // data. New customers go through the signup wizard instead.
+          shouldCreateUser: false,
           captchaToken: captchaToken || undefined,
         },
       });
 
       if (otpError) {
+        if (/signups? not allowed/i.test(otpError.message) || otpError.code === "otp_disabled") {
+          return NextResponse.json(
+            { error: "We couldn't find an account for that email. Please sign up first.", code: "no_account" },
+            { status: 404 }
+          );
+        }
         console.error("Supabase OTP Send Error:", otpError);
         return NextResponse.json({ error: otpError.message }, { status: 400 });
       }
@@ -94,22 +105,13 @@ export async function POST(request: Request) {
       }
 
       const role = await resolveSessionRole(userId, email);
-      const expiresAt = Date.now() + 7 * 24 * 60 * 60 * 1000; // 7 days
+      // Someone who authenticated (say, via Google) but never finished the
+      // wizard gets an onboarding-only session and is sent back to it.
+      const onboarded = await isOnboarded(userId, email);
+      const sessionToken = await issueSession({ email, role, userId, onboarding: !onboarded });
 
-      const sessionToken = await signSession({ email, role, expiresAt, userId: userId || undefined });
-
-      const response = NextResponse.json({ success: true, role });
-
-      // Set secure HTTP-only cookie (SameSite=None is required for iframe preview sandboxes in prod)
-      const isProd = process.env.NODE_ENV === "production";
-      response.cookies.set("session", sessionToken, {
-        httpOnly: true,
-        secure: isProd,
-        sameSite: isProd ? "none" : "lax",
-        maxAge: 7 * 24 * 60 * 60, // 7 days in seconds
-        path: "/",
-      });
-
+      const response = NextResponse.json({ success: true, role, onboarding: !onboarded });
+      response.cookies.set("session", sessionToken, sessionCookieOptions());
       return response;
     }
 

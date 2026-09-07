@@ -195,201 +195,13 @@ function generateDynamicLogs(linesList: Line[]): Record<string, CallLogEntry[]> 
 }
 
 export default function DashboardApp() {
-  const [lines, setLines] = useState<Line[]>([
-    {
-      id: "mom",
-      label: "Eleanor's line",
-      person: "Eleanor Delgado · Mom",
-      number: "(415) 555-0142",
-      color: "oklch(0.6 0.14 350)",
-      mode: "menu",
-      minutesUsed: 38,
-      contacts: [
-        {
-          id: "c1",
-          name: "Maria Delgado",
-          rel: "Daughter",
-          phone: "(415) 555-0192",
-          color: AVATAR_COLORS[0],
-          available: true,
-        },
-        {
-          id: "c2",
-          name: "James Delgado",
-          rel: "Son",
-          phone: "(510) 555-0177",
-          color: AVATAR_COLORS[1],
-          available: true,
-        },
-        {
-          id: "c3",
-          name: "Dr. Anita Patel",
-          rel: "Primary physician",
-          phone: "(415) 555-0240",
-          color: AVATAR_COLORS[2],
-          available: false,
-        },
-        {
-          id: "c4",
-          name: "Sunrise Home Care",
-          rel: "Daytime caregiver",
-          phone: "(415) 555-0311",
-          color: AVATAR_COLORS[3],
-          available: true,
-        },
-        {
-          id: "c5",
-          name: "Lena Novak",
-          rel: "Neighbor",
-          phone: "(415) 555-0156",
-          color: AVATAR_COLORS[4],
-          available: true,
-        },
-      ],
-    },
-    {
-      id: "dad",
-      label: "Robert's line",
-      person: "Robert Hale · Dad",
-      number: "(415) 555-0188",
-      color: "oklch(0.58 0.115 232)",
-      mode: "cascade",
-      minutesUsed: 11,
-      contacts: [
-        {
-          id: "d1",
-          name: "Maria Delgado",
-          rel: "Daughter",
-          phone: "(415) 555-0192",
-          color: AVATAR_COLORS[0],
-          available: true,
-        },
-        {
-          id: "d2",
-          name: "Carla Hale",
-          rel: "Sister",
-          phone: "(206) 555-0133",
-          color: AVATAR_COLORS[5],
-          available: true,
-        },
-        {
-          id: "d3",
-          name: "Dr. Sam Okafor",
-          rel: "Cardiologist",
-          phone: "(415) 555-0299",
-          color: AVATAR_COLORS[2],
-          available: true,
-        },
-      ],
-    },
-  ]);
-
-  const [activeLineId, setActiveLineId] = useState("mom");
-  const [log, setLog] = useState<Record<string, CallLogEntry[]>>({
-    mom: [
-      {
-        id: 1,
-        status: "connected",
-        caller: "Eleanor (mobile)",
-        routed: "Maria Delgado",
-        rel: "Daughter",
-        dur: "4:12",
-        when: "Today · 2:48 PM",
-      },
-      {
-        id: 2,
-        status: "connected",
-        caller: "Eleanor (mobile)",
-        routed: "Sunrise Home Care",
-        rel: "Daytime caregiver",
-        dur: "1:05",
-        when: "Today · 9:30 AM",
-      },
-      {
-        id: 3,
-        status: "voicemail",
-        caller: "Unknown",
-        routed: "No one available",
-        rel: "Voicemail left",
-        dur: "0:38",
-        when: "Yesterday · 7:14 PM",
-      },
-      {
-        id: 4,
-        status: "connected",
-        caller: "Eleanor (mobile)",
-        routed: "James Delgado",
-        rel: "Son",
-        dur: "6:51",
-        when: "Yesterday · 11:02 AM",
-      },
-      {
-        id: 5,
-        status: "missed",
-        caller: "Eleanor (mobile)",
-        routed: "Dr. Anita Patel",
-        rel: "Primary physician",
-        dur: "—",
-        when: "Mon · 3:20 PM",
-      },
-      {
-        id: 6,
-        status: "connected",
-        caller: "Eleanor (mobile)",
-        routed: "Maria Delgado",
-        rel: "Daughter",
-        dur: "2:44",
-        when: "Mon · 8:55 AM",
-      },
-      {
-        id: 7,
-        status: "connected",
-        caller: "Lena Novak",
-        routed: "Maria Delgado",
-        rel: "Daughter",
-        dur: "3:30",
-        when: "Sun · 5:41 PM",
-      },
-    ],
-    dad: [
-      {
-        id: 1,
-        status: "connected",
-        caller: "Robert (mobile)",
-        routed: "Maria Delgado",
-        rel: "Daughter",
-        dur: "5:20",
-        when: "Today · 1:12 PM",
-      },
-      {
-        id: 2,
-        status: "connected",
-        caller: "Robert (mobile)",
-        routed: "Dr. Sam Okafor",
-        rel: "Cardiologist",
-        dur: "2:08",
-        when: "Yesterday · 10:30 AM",
-      },
-      {
-        id: 3,
-        status: "missed",
-        caller: "Robert (mobile)",
-        routed: "Carla Hale",
-        rel: "Sister",
-        dur: "—",
-        when: "Wed · 6:02 PM",
-      },
-      {
-        id: 4,
-        status: "connected",
-        caller: "Robert (mobile)",
-        routed: "Maria Delgado",
-        rel: "Daughter",
-        dur: "1:47",
-        when: "Tue · 9:18 AM",
-      },
-    ],
-  });
+  // Everything starts empty and is filled from the API. There are no
+  // placeholder lines, contacts or call logs: a failed load shows an error
+  // screen rather than someone else's sample data.
+  const [lines, setLines] = useState<Line[]>([]);
+  const [activeLineId, setActiveLineId] = useState("");
+  const [log, setLog] = useState<Record<string, CallLogEntry[]>>({});
+  const [loadError, setLoadError] = useState(false);
 
   const [requestedView, setView] = useState("overview");
   const [activeVoicemail, setActiveVoicemail] = useState<{
@@ -403,20 +215,20 @@ export default function DashboardApp() {
   const [acctTab, setAcctTab] = useState("profile");
   const [autoOpenPlanModal, setAutoOpenPlanModal] = useState(false);
   const [account, setAccount] = useState<Account>({
-    name: "Maria Delgado",
-    preferred: "Maria",
-    email: "maria.delgado@email.com",
-    notifyEmail: "maria.delgado@email.com",
-    phone: "(415) 555-0192",
-    address: "482 Linden Ave, Oakland, CA 94607",
+    name: "",
+    preferred: "",
+    email: "",
+    notifyEmail: "",
+    phone: "",
+    address: "",
     timezone: "Pacific (PT)",
     language: "English",
-    twoFactor: true,
-    card: { brand: "Visa", last4: "4242", exp: "08 / 27" },
-    billingAddr: "482 Linden Ave, Oakland, CA 94607",
-    plan: "pro",
+    twoFactor: false,
+    card: { brand: "", last4: "", exp: "" },
+    billingAddr: "",
+    plan: "essential",
     billingCycle: "monthly",
-    addons: { extraNumbers: 0, minuteBlocks: 0, usedMin: 41, rolloverMin: 18 },
+    addons: { extraNumbers: 0, minuteBlocks: 0, usedMin: 0, rolloverMin: 0 },
     avatarUrl: "",
   });
 
@@ -449,7 +261,7 @@ export default function DashboardApp() {
       twoFactor: !!settings.twoFactor,
       card: settings.card || { brand: "Visa", last4: "4242", exp: "08 / 27" },
       billingAddr: settings.billingAddr || "",
-      plan: settings.plan || "pro",
+      plan: settings.plan || "essential",
       billingCycle: settings.billingCycle || "monthly",
       addons: settings.addons || { extraNumbers: 0, minuteBlocks: 0, usedMin: 0, rolloverMin: 0 },
       avatarUrl: settings.avatarUrl || "",
@@ -515,21 +327,33 @@ export default function DashboardApp() {
 
   // 3. Load profile and phone lines from Supabase
   useEffect(() => {
+    // While a redirect is in flight the loading screen must stay up: rendering
+    // the dashboard with no lines would crash before the navigation lands.
+    let redirecting = false;
     async function loadData() {
       try {
         const profileRes = await fetch("/api/caregiver/profile");
         if (profileRes.status === 401) {
           localStorage.removeItem("isLoggedIn");
+          redirecting = true;
           window.location.href = "/login?unauthorized=true";
           return;
         }
         if (!profileRes.ok) throw new Error("profile_fetch_failed");
         const profileData = await profileRes.json();
+        if (profileData.onboarding) {
+          // Signed in, but signup was never completed: no plan, number or
+          // checkout. The wizard picks up where it left off.
+          redirecting = true;
+          window.location.href = "/signup?resume=1";
+          return;
+        }
         setViewerRole(profileData.role === "member" ? "member" : "owner");
 
         const linesRes = await fetch("/api/caregiver/lines");
         if (linesRes.status === 401) {
           localStorage.removeItem("isLoggedIn");
+          redirecting = true;
           window.location.href = "/login?unauthorized=true";
           return;
         }
@@ -576,6 +400,7 @@ export default function DashboardApp() {
         console.error("Error loading dashboard data, falling back to localStorage:", err);
         const cachedAcc = localStorage.getItem("ic_account_data");
         const cachedLines = localStorage.getItem("ic_lines_data");
+        if (!cachedAcc || !cachedLines) setLoadError(true);
         if (cachedAcc) {
           try {
             setAccount(JSON.parse(cachedAcc));
@@ -591,8 +416,10 @@ export default function DashboardApp() {
           } catch {}
         }
       } finally {
-        setLoading(false);
-        setInitialLoadComplete(true);
+        if (!redirecting) {
+          setLoading(false);
+          setInitialLoadComplete(true);
+        }
       }
     }
     loadData();
@@ -862,6 +689,23 @@ export default function DashboardApp() {
     );
   }
 
+  if (loadError) {
+    return (
+      <div style={{ display: "grid", placeItems: "center", minHeight: "100vh", background: "oklch(0.975 0.008 220)", padding: 24 }}>
+        <div style={{ textAlign: "center", maxWidth: 420 }}>
+          <div style={{ color: "oklch(0.25 0.03 240)", fontSize: "1.15rem", fontWeight: 700, marginBottom: 8 }}>We couldn&apos;t load your account</div>
+          <div style={{ color: "oklch(0.45 0.02 240)", fontSize: "0.95rem", lineHeight: 1.5, marginBottom: 20 }}>
+            Your lines and settings didn&apos;t come back from the server. Try again in a moment, or sign in again.
+          </div>
+          <div style={{ display: "flex", gap: 10, justifyContent: "center" }}>
+            <button className="btn btn-primary" onClick={() => window.location.reload()}>Try again</button>
+            <a className="btn" href="/login">Sign in again</a>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
       {impersonatingUser && (
@@ -998,7 +842,7 @@ export default function DashboardApp() {
           </button>
           <div className="page-title">
             <h1>{t1}</h1>
-            <p>{LINE_SCOPED[view as keyof typeof LINE_SCOPED] ? getLocalizedLineLabel(line.label, lang) + " · " + getLocalizedPersonName(line.person, lang) : t2}</p>
+            <p>{LINE_SCOPED[view as keyof typeof LINE_SCOPED] && line ? getLocalizedLineLabel(line.label, lang) + " · " + getLocalizedPersonName(line.person, lang) : t2}</p>
           </div>
           <div className="topbar-spacer"></div>
 
@@ -1036,12 +880,12 @@ export default function DashboardApp() {
           {/* number switcher */}
           <div ref={switchRef} className={`numswitch ${switchOpen ? "open" : ""}`}>
             <button className="numswitch-btn" onClick={() => setSwitchOpen((o) => !o)}>
-              <span className="ava" style={{ background: line.color }}>
-                {initials(getLocalizedPersonName(line.person, lang))}
+              <span className="ava" style={{ background: line?.color || "oklch(0.58 0.115 232)" }}>
+                {line ? initials(getLocalizedPersonName(line.person, lang)) : "—"}
               </span>
               <span className="meta">
-                <b>{getLocalizedLineLabel(line.label, lang)}</b>
-                <span>{line.number}</span>
+                <b>{line ? getLocalizedLineLabel(line.label, lang) : d.common.numbers}</b>
+                <span>{line?.number || ""}</span>
               </span>
               <span className="chev">
                 <Icon name="chev" style={{ width: 16, height: 16 }} />
@@ -1163,7 +1007,25 @@ export default function DashboardApp() {
               </div>
             </div>
           )}
-          {view === "overview" && (
+          {!line && ["overview", "contacts", "routing", "log", "settings"].includes(view) && (
+            <div className="panel" style={{ padding: "40px 24px", textAlign: "center" }}>
+              <h2 style={{ fontSize: "1.2rem", fontWeight: 700, marginBottom: 8 }}>No phone numbers yet</h2>
+              <p style={{ color: "oklch(0.45 0.02 240)", marginBottom: 20 }}>Add a number to start routing calls to your family.</p>
+              {viewerRole === "owner" && (
+                <button
+                  className="btn btn-primary"
+                  onClick={() => {
+                    loadHeaderNumbers(headerAreaCode);
+                    setHeaderSelectedNumber(null);
+                    setHeaderAddonModalOpen(true);
+                  }}
+                >
+                  {d.common.addAnotherNumber}
+                </button>
+              )}
+            </div>
+          )}
+          {view === "overview" && line && (
             <OverviewView
               lines={lines}
               log={log}
@@ -1174,10 +1036,10 @@ export default function DashboardApp() {
               lang={lang}
             />
           )}
-          {view === "contacts" && (
+          {view === "contacts" && line && (
             <ContactsView line={line} setLine={setLines} showToast={showToast} d={d} lang={lang} plan={account.plan} />
           )}
-          {view === "routing" && (
+          {view === "routing" && line && (
             <RoutingView
               line={line}
               setLine={setLines}
@@ -1190,7 +1052,7 @@ export default function DashboardApp() {
               setAutoOpenPlanModal={setAutoOpenPlanModal}
             />
           )}
-          {view === "log" && <CallLogView line={line} log={log} d={d} lang={lang} />}
+          {view === "log" && line && <CallLogView line={line} log={log} d={d} lang={lang} />}
           {view === "team" && (
             <TeamAdminView
               lines={lines}
@@ -1207,7 +1069,7 @@ export default function DashboardApp() {
               lang={lang}
             />
           )}
-          {view === "settings" && (
+          {view === "settings" && line && (
             <SettingsView
               line={line}
               setLine={setLines}

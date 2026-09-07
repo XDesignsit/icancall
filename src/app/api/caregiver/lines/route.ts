@@ -30,42 +30,17 @@ export async function GET() {
       .from("phone_lines")
       .select("*")
       .eq("user_id", userId);
-    let lines = fetchedLines;
+    const lines = fetchedLines || [];
 
     if (error) {
       console.error("Failed to fetch phone lines:", error);
       return NextResponse.json({ error: "Failed to fetch lines" }, { status: 500 });
     }
 
-    // 2. If no lines exist, seed a default one
-    if (!lines || lines.length === 0) {
-      const defaultLine = {
-        user_id: userId,
-        number: "+15005550006", // Magic Twilio test number
-        name: "Priority cascaded line",
-        type: "seniors",
-        contacts: [
-          {
-            id: 1,
-            name: "Maria Delgado",
-            phone: "+14155550192",
-            rel: "Primary Caregiver",
-            available: true,
-          }
-        ]
-      };
-
-      const { data: inserted, error: insertError } = await supabase
-        .from("phone_lines")
-        .insert(defaultLine)
-        .select();
-
-      if (insertError) {
-        console.error("Failed to seed default line:", insertError);
-        return NextResponse.json({ error: "Failed to initialize phone line data" }, { status: 500 });
-      }
-      lines = inserted;
-    }
+    // An account with no lines gets an empty list. This used to seed a
+    // "Priority cascaded line" for Maria Delgado on Twilio's magic test number,
+    // which showed every new customer someone else's sample data -- and, since
+    // phone_lines.number is unique, failed outright for the second account.
 
     return NextResponse.json({ success: true, lines });
   } catch (err) {

@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { verifySession } from "@/lib/session";
 import { supabase } from "@/lib/supabase";
 import { resolveAccount } from "@/lib/account";
+import { isOnboarded } from "@/lib/onboarding";
 
 async function getAuthenticatedUserId() {
   const cookieStore = await cookies();
@@ -17,6 +18,17 @@ export async function GET() {
     const userId = await getAuthenticatedUserId();
     if (!userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // The dashboard bounces unfinished accounts back to the wizard. The proxy
+    // does the same from the session flag on production hosts; this covers
+    // local and preview, where the proxy stays out of the way.
+    const cookieStore = await cookies();
+    const sessionToken = cookieStore.get("session")?.value;
+    const payload = sessionToken ? await verifySession(sessionToken) : null;
+    const sessionEmail = payload?.email || "";
+    if (!(await isOnboarded(userId, sessionEmail))) {
+      return NextResponse.json({ success: false, onboarding: true, profile: null }, { status: 200 });
     }
 
     // Care Team members act on the owner's account, so they load the owner's
@@ -49,10 +61,7 @@ export async function GET() {
 
     // 2. If no profile exists, create a default one
     if (!profile) {
-      const cookieStore = await cookies();
-      const sessionToken = cookieStore.get("session")?.value;
-      const payload = sessionToken ? await verifySession(sessionToken) : null;
-      const email = payload?.email || "user@example.com";
+      const email = sessionEmail || "user@example.com";
 
       const defaultProfile = {
         id: userId,
@@ -64,11 +73,10 @@ export async function GET() {
           smsConsent: false,
           smsPhone: "",
           twoFactor: false,
-          // No card or billing address: this profile is being created for an
-          // account that reached the dashboard without completing checkout, and
-          // inventing payment details would put fake card data in a live
-          // billing table. The billing UI treats these as "not on file".
-          plan: "pro",
+          // No card, billing address or plan: this profile is being created for
+          // an account that reached the dashboard without going through the
+          // wizard, and inventing payment details would put fake card data in a
+          // live billing table. The billing UI treats these as "not on file".
           billingCycle: "monthly",
           addons: { extraNumbers: 0, minuteBlocks: 0, usedMin: 0, rolloverMin: 0 },
         }

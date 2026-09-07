@@ -1494,33 +1494,35 @@ function OnboardingContent() {
     });
   }, [searchParams]);
 
-  // If redirected back from Google OAuth, fetch caregiver profile details and auto-advance
+  // Resuming with an existing session -- back from Google consent, or a PIN
+  // login on an account that never finished signup. The user is already
+  // authenticated, so skip the account step and go straight to plan selection.
   useEffect(() => {
-    const isGoogle = searchParams.get("google") === "true";
-    if (isGoogle) {
-      async function loadGoogleProfile() {
-        try {
-          const res = await fetch("/api/caregiver/profile");
-          if (res.ok) {
-            const result = await res.json();
-            if (result.profile) {
-              setData((d) => ({
-                ...d,
-                account: {
-                  name: result.profile.name || "Google User",
-                  email: result.profile.email || "",
-                  password: "google_oauth_bypass", // Bypass password constraint in step-1 validation
-                },
-              }));
-              setStep(1); // Auto-advance to step 2 (Plan selection)
-            }
-          }
-        } catch (err) {
-          console.error("Failed to load Google profile in onboarding:", err);
-        }
+    const isResume = searchParams.get("google") === "true" || searchParams.get("resume") === "1";
+    if (!isResume) return;
+    async function loadAuthenticatedProfile() {
+      try {
+        const res = await fetch("/api/auth/me");
+        if (!res.ok) return;
+        const result = await res.json();
+        if (!result.email) return;
+        const rawName: string = result.name || "";
+        const name = rawName && rawName !== "New Caregiver" ? rawName : result.email.split("@")[0];
+        setData((d) => ({
+          ...d,
+          account: {
+            ...d.account,
+            name,
+            email: result.email,
+            password: "google_oauth_bypass", // No password on a session-backed signup
+          },
+        }));
+        setStep(1);
+      } catch (err) {
+        console.error("Failed to load profile while resuming signup:", err);
       }
-      loadGoogleProfile();
     }
+    loadAuthenticatedProfile();
   }, [searchParams]);
 
   // Adjust selected numbers cap when plan shifts

@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { signSession } from "@/lib/session";
+import { issueSession, sessionCookieOptions } from "@/lib/session";
 import { supabase } from "@/lib/supabase";
 import { demoAccount, ensureDemoAccount } from "@/lib/demoAccounts";
 import { resolveSessionRole } from "@/lib/roles";
+import { isOnboarded } from "@/lib/onboarding";
 
 const loginSchema = z.object({
   email: z.string().email(),
@@ -50,22 +51,11 @@ export async function POST(request: Request) {
     }
 
     const role = await resolveSessionRole(userId, email);
-    const expiresAt = Date.now() + 7 * 24 * 60 * 60 * 1000; // 7 days
+    const onboarded = await isOnboarded(userId, email);
+    const token = await issueSession({ email, role, userId, onboarding: !onboarded });
 
-    const token = await signSession({ email, role, expiresAt, userId: userId || undefined });
-
-    const response = NextResponse.json({ success: true, role });
-
-    // Set secure HTTP-only cookie (SameSite=None is required for iframe preview sandboxes in prod)
-    const isProd = process.env.NODE_ENV === "production";
-    response.cookies.set("session", token, {
-      httpOnly: true,
-      secure: isProd,
-      sameSite: isProd ? "none" : "lax",
-      maxAge: 7 * 24 * 60 * 60, // 7 days in seconds
-      path: "/",
-    });
-
+    const response = NextResponse.json({ success: true, role, onboarding: !onboarded });
+    response.cookies.set("session", token, sessionCookieOptions());
     return response;
   } catch (err) {
     console.error("Login API Error:", err);

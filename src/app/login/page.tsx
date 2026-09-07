@@ -373,7 +373,11 @@ export default function LoginPage() {
         return;
       }
 
-      if (data.role === "admin") {
+      if (data.onboarding) {
+        // Authenticated, but signup was never finished (no plan, number or
+        // checkout). Resume the wizard instead of opening an empty dashboard.
+        window.location.href = `/signup?resume=1&lang=${lang}`;
+      } else if (data.role === "admin") {
         localStorage.setItem("isAdminLoggedIn", "true");
         window.location.href = postLoginDest("/super-admin");
       } else {

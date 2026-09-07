@@ -23,7 +23,16 @@ export interface SessionPayload {
   role: "admin" | "user";
   expiresAt: number;
   userId?: string;
+  /**
+   * Set when the user is authenticated but has not finished signup (no plan
+   * chosen, no number picked, no checkout). Such a session may only reach the
+   * signup wizard; the proxy and the dashboard send it back there until
+   * /api/auth/signup completes and re-issues the cookie without the flag.
+   */
+  onboarding?: boolean;
 }
+
+export const SESSION_MAX_AGE_SECONDS = 7 * 24 * 60 * 60; // 7 days
 
 export async function signSession(payload: SessionPayload): Promise<string> {
   const secret = getSecret();
@@ -41,4 +50,35 @@ export async function verifySession(token: string): Promise<SessionPayload | nul
   } catch {
     return null;
   }
+}
+
+/** Sign a fresh 7-day session token for a user. */
+export async function issueSession(input: {
+  email: string;
+  role: "admin" | "user";
+  userId?: string | null;
+  onboarding?: boolean;
+}): Promise<string> {
+  return signSession({
+    email: input.email,
+    role: input.role,
+    expiresAt: Date.now() + SESSION_MAX_AGE_SECONDS * 1000,
+    userId: input.userId || undefined,
+    ...(input.onboarding ? { onboarding: true } : {}),
+  });
+}
+
+/**
+ * Cookie attributes for the session cookie. SameSite=None is required for
+ * iframe preview sandboxes in production; Secure must accompany it.
+ */
+export function sessionCookieOptions() {
+  const isProd = process.env.NODE_ENV === "production";
+  return {
+    httpOnly: true,
+    secure: isProd,
+    sameSite: isProd ? ("none" as const) : ("lax" as const),
+    maxAge: SESSION_MAX_AGE_SECONDS,
+    path: "/",
+  };
 }

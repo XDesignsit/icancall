@@ -2,8 +2,10 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { z } from "zod";
 import { supabase } from "@/lib/supabase";
-import { verifySession } from "@/lib/session";
+import { issueSession, sessionCookieOptions, verifySession } from "@/lib/session";
 import { toE164 } from "@/lib/phone";
+import { resolveSessionRole } from "@/lib/roles";
+import { isOnboarded } from "@/lib/onboarding";
 
 const signupSchema = z.object({
   email: z.string().email(),
@@ -14,7 +16,7 @@ const signupSchema = z.object({
   numbers: z.array(z.union([z.string(), z.looseObject({ number: z.string() })])).optional(),
   captchaToken: z.string().optional(),
   smsConsent: z.boolean().optional(),
-  plan: z.enum(["essential", "pro"]).optional(),
+  plan: z.enum(["essential", "pro", "careteam"]).optional(),
   billing: z.enum(["monthly", "yearly"]).optional(),
 });
 
@@ -22,6 +24,7 @@ const signupSchema = z.object({
 const PLAN_DETAILS = {
   essential: { name: "Essential Plan", lines: "1 Virtual Line", monthly: "$14.99", yearly: "$149" },
   pro: { name: "Pro Plan", lines: "2 Virtual Lines", monthly: "$24.99", yearly: "$249" },
+  careteam: { name: "Care Team Plan", lines: "5 Virtual Lines", monthly: "$49.99", yearly: "$499" },
 } as const;
 
 export async function POST(request: Request) {
@@ -44,32 +47,45 @@ export async function POST(request: Request) {
     const cookieStore = await cookies();
     const sessionToken = cookieStore.get("session")?.value;
     let userId: string | null = null;
+    let sessionEmail: string | null = null;
 
     if (sessionToken) {
       const payload = await verifySession(sessionToken);
       userId = payload?.userId || null;
+      sessionEmail = payload?.email || null;
     }
 
     if (userId) {
-      // User is already logged in (Google OAuth path). Update profile with onboarding details.
+      // Already authenticated (Google, or a PIN login that landed on an
+      // unfinished account) and now completing the wizard. Merge onto the
+      // existing settings: the Creem webhook may already have written the
+      // customer/subscription ids for this checkout, and a plain replace
+      // would wipe them.
+      const { data: existing } = await supabase
+        .from("profiles")
+        .select("settings")
+        .eq("id", userId)
+        .maybeSingle();
+      const existingSettings = (existing?.settings || {}) as Record<string, unknown>;
+
       const { error: profileError } = await supabase
         .from("profiles")
-        .update({
+        .upsert({
+          id: userId,
+          email: sessionEmail || email,
           name,
           preferred_name: preferredName || (name ?? "").split(" ")[0],
           settings: {
+            ...existingSettings,
             notifyEmail: email,
             smsConsent,
             smsPhone: normalizedSmsPhone,
             twoFactor: false,
-            card: { brand: "Visa", last4: "4242", exp: "12 / 28" },
-            billingAddr: "123 Main St, Oakland, CA 94607",
             plan,
             billingCycle,
-            addons: { extraNumbers: 0, minuteBlocks: 0, usedMin: 0, rolloverMin: 0 },
+            addons: existingSettings.addons || { extraNumbers: 0, minuteBlocks: 0, usedMin: 0, rolloverMin: 0 },
           }
-        })
-        .eq("id", userId);
+        });
 
       if (profileError) {
         console.error("Failed to update profile for logged-in user:", profileError);
@@ -124,8 +140,6 @@ export async function POST(request: Request) {
             smsConsent,
             smsPhone: normalizedSmsPhone,
             twoFactor: false,
-            card: { brand: "Visa", last4: "4242", exp: "12 / 28" },
-            billingAddr: "123 Main St, Oakland, CA 94607",
             plan,
             billingCycle,
             addons: { extraNumbers: 0, minuteBlocks: 0, usedMin: 0, rolloverMin: 0 },
@@ -200,7 +214,19 @@ export async function POST(request: Request) {
       }
     }
 
-    return NextResponse.json({ success: true, userId });
+    const response = NextResponse.json({ success: true, userId });
+
+    // A session that started as onboarding-only (Google callback / PIN login on
+    // an unfinished account) is re-issued without the flag once the account
+    // is complete, so the wizard's "Go to dashboard" link is let through.
+    if (userId && sessionToken) {
+      const role = await resolveSessionRole(userId, email);
+      const onboarded = await isOnboarded(userId, email);
+      const fresh = await issueSession({ email, role, userId, onboarding: !onboarded });
+      response.cookies.set("session", fresh, sessionCookieOptions());
+    }
+
+    return response;
   } catch (err) {
     console.error("Signup API Error:", err);
     return NextResponse.json({ error: "Invalid request payload" }, { status: 400 });

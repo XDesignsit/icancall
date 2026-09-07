@@ -105,10 +105,21 @@ export async function proxy(request: NextRequest) {
       url.pathname = "/dashboard";
       return NextResponse.redirect(url);
     }
+
+    // Authenticated but never finished signup (no plan, number or checkout):
+    // the only place this session may go is back into the wizard.
+    if (session.onboarding) {
+      url.pathname = "/signup";
+      url.search = "";
+      url.searchParams.set("resume", "1");
+      return NextResponse.redirect(url);
+    }
   }
 
-  // Only redirect away from signup if already logged in (never redirect away from /login)
-  if (isSignup && session) {
+  // Only redirect away from signup if already logged in with a finished
+  // account (never redirect away from /login). An onboarding-only session
+  // is exactly where the wizard is meant to be resumed.
+  if (isSignup && session && !session.onboarding) {
     url.pathname = session.role === "admin" ? "/super-admin" : "/dashboard";
     return NextResponse.redirect(url);
   }
