@@ -48,6 +48,10 @@ export async function proxy(request: NextRequest) {
       path: "/",
       sameSite: "lax",
       secure: process.env.NODE_ENV === "production",
+      // One cookie for app., www. and the apex. Host-only, it was missing on
+      // www after the app -> marketing redirect (e.g. on sign-out), which
+      // dropped previewers onto /coming-soon as if the bypass had expired.
+      ...(baseHost.endsWith("icancall.co") ? { domain: ".icancall.co" } : {}),
     });
     return response;
   }
@@ -148,6 +152,7 @@ export async function proxy(request: NextRequest) {
   if ((baseHost === marketingDomain || baseHost === "www.icancall.co") && isAppRoute) {
     url.host = appDomain;
     url.protocol = "https:";
+    if (PRELAUNCH && hasPreviewCookie) url.searchParams.set("preview", "hellionz");
     return NextResponse.redirect(url);
   }
 
@@ -155,6 +160,9 @@ export async function proxy(request: NextRequest) {
   if (baseHost === appDomain && !isAppRoute) {
     url.host = marketingDomain;
     url.protocol = "https:";
+    // Carry the preview bypass across hosts: a cookie issued before it became
+    // domain-wide exists on this host only, so let the marketing host set it.
+    if (PRELAUNCH && hasPreviewCookie) url.searchParams.set("preview", "hellionz");
     return NextResponse.redirect(url);
   }
 
