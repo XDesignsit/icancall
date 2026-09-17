@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { z } from "zod";
-import { supabase } from "@/lib/supabase";
+import { createAuthClient, supabase } from "@/lib/supabase";
 import { issueSession, sessionCookieOptions, verifySession } from "@/lib/session";
 import { toE164 } from "@/lib/phone";
 import { resolveSessionRole } from "@/lib/roles";
@@ -115,7 +115,7 @@ export async function POST(request: Request) {
       // confirmation link points at the deployment's real host instead of falling
       // back to the Supabase project's Site URL (which was set to localhost).
       const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
-      const { data: authData, error: authError } = await supabase.auth.signUp({
+      const { data: authData, error: authError } = await createAuthClient().auth.signUp({
         email,
         password,
         options: {

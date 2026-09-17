@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { issueSession, sessionCookieOptions } from "@/lib/session";
-import { supabase } from "@/lib/supabase";
+import { createAuthClient, supabase } from "@/lib/supabase";
 import { verifyTurnstile } from "@/lib/rateLimit";
 import { ensureDemoAccount, isDemoEmail } from "@/lib/demoAccounts";
 import { resolveSessionRole } from "@/lib/roles";
@@ -40,7 +40,7 @@ export async function POST(request: Request) {
         }
       }
 
-      const { error: otpError } = await supabase.auth.signInWithOtp({
+      const { error: otpError } = await createAuthClient().auth.signInWithOtp({
         email,
         options: {
           // The login page signs people in; it must not mint accounts. A PIN
@@ -91,7 +91,7 @@ export async function POST(request: Request) {
         }
       } else {
         // Normal Supabase Auth OTP verification path
-        const { data: verifyData, error: verifyError } = await supabase.auth.verifyOtp({
+        const { data: verifyData, error: verifyError } = await createAuthClient().auth.verifyOtp({
           email,
           token,
           type: "email",

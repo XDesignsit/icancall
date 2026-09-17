@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { issueSession, sessionCookieOptions } from "@/lib/session";
-import { supabase } from "@/lib/supabase";
+import { createAuthClient, supabase } from "@/lib/supabase";
 import { demoAccount, ensureDemoAccount } from "@/lib/demoAccounts";
 import { resolveSessionRole } from "@/lib/roles";
 import { isOnboarded } from "@/lib/onboarding";
@@ -40,7 +40,7 @@ export async function POST(request: Request) {
 
     // 2. Normal path for non-demo users or as fallback
     if (!userId) {
-      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+      const { data: authData, error: authError } = await createAuthClient().auth.signInWithPassword({
         email,
         password,
       });

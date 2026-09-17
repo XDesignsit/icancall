@@ -244,6 +244,36 @@ export const supabase = isMock
       {
         auth: {
           persistSession: false,
+          autoRefreshToken: false,
+          detectSessionInUrl: false,
         },
       }
     );
+
+/**
+ * A throwaway client for signing a USER in (PIN send/verify, password login,
+ * signUp). Never run those on the shared `supabase` client above: a successful
+ * sign-in leaves the user's session in the client's memory, and supabase-js
+ * then sends that user's JWT -- not the service key -- on every later database
+ * call made by the same warm server instance. Row-level security silently
+ * applies to "service" queries, so the next request (say, a Google callback
+ * for a different account) cannot see its own profile or lines and the
+ * customer is bounced into the signup wizard.
+ *
+ * Use `supabase.auth.admin.*` on the shared client freely; admin calls do not
+ * create a session.
+ */
+export function createAuthClient(): SupabaseClient {
+  if (isMock) return supabase;
+  return createClient(
+    supabaseUrl,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || supabaseServiceKey,
+    {
+      auth: {
+        persistSession: false,
+        autoRefreshToken: false,
+        detectSessionInUrl: false,
+      },
+    }
+  );
+}
