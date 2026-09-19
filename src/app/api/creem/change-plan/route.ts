@@ -200,6 +200,16 @@ export async function POST(req: NextRequest) {
 
     if (!res.ok) {
       console.error(`Creem plan change error (${res.status}) for subscription ${subscriptionId}:`, await res.text());
+      // 401/403 is our own misconfiguration (bad key, or a scoped key without
+      // subscription write access) — don't send the customer off to check a
+      // payment method that was never tried.
+      if (res.status === 401 || res.status === 403) {
+        console.error("CREEM_API_KEY cannot modify subscriptions — it needs the subscriptions write scope.");
+        return NextResponse.json(
+          { error: "Plan changes are temporarily unavailable, so your plan was not changed. Please try again later or contact support." },
+          { status: 503 }
+        );
+      }
       return NextResponse.json(
         { error: "We couldn't update your subscription, so your plan was not changed. Please check your payment method and try again." },
         { status: 502 }
