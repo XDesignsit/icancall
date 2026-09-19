@@ -7,6 +7,8 @@ import { toE164 } from "@/lib/phone";
 import { resolveSessionRole } from "@/lib/roles";
 import { isOnboarded } from "@/lib/onboarding";
 import { provisionNumber } from "@/lib/numbers";
+import { planConfig } from "@/lib/planConfig";
+import { activePlanForSubscription, isSimulatedBilling, verifyPlanCheckout, type VerifiedPlanPurchase } from "@/lib/creem";
 
 const signupSchema = z.object({
   email: z.string().email(),
@@ -19,6 +21,8 @@ const signupSchema = z.object({
   smsConsent: z.boolean().optional(),
   plan: z.enum(["essential", "pro", "careteam"]).optional(),
   billing: z.enum(["monthly", "yearly"]).optional(),
+  // The Creem checkout this signup paid for (from /api/creem/checkout).
+  checkoutId: z.string().max(200).optional(),
 });
 
 // Mirrors the wizard's PLANS config for the confirmation email summary
@@ -41,8 +45,8 @@ export async function POST(request: Request) {
     // Only retain the phone number when the user actually opted in to SMS
     const rawNormalized = smsPhone.length === 10 ? `+1${smsPhone}` : smsPhone.length === 11 ? `+${smsPhone}` : "";
     const normalizedSmsPhone = smsConsent ? rawNormalized : "";
-    const plan = parsed.data.plan || (numbers && numbers.length > 0 ? "pro" : "essential");
-    const billingCycle = billing || "monthly";
+    let plan = parsed.data.plan || (numbers && numbers.length > 0 ? "pro" : "essential");
+    let billingCycle = billing || "monthly";
 
     // 1. Check if user already has an active session cookie (e.g. logged in via Google)
     const cookieStore = await cookies();
@@ -57,6 +61,58 @@ export async function POST(request: Request) {
       sessionEmail = payload?.email || null;
       sessionId = payload?.sid;
     }
+
+    // 1b. Proof of payment. An account, its plan and its phone numbers (which
+    // cost real money to buy) are only created for a checkout Creem confirms
+    // was paid by this person. The wizard's "payment succeeded" message comes
+    // from the browser and proves nothing. What was paid for — not what the
+    // wizard says was chosen — decides the plan. Demo accounts and
+    // environments without Creem credentials keep the simulated checkout.
+    let purchase: VerifiedPlanPurchase | null = null;
+    const ownerEmail = sessionEmail || email;
+    if (!isSimulatedBilling(ownerEmail)) {
+      if (parsed.data.checkoutId) {
+        const check = await verifyPlanCheckout(parsed.data.checkoutId, { userId, email: ownerEmail });
+        if (!check.ok) {
+          console.error(`Signup for ${ownerEmail} refused: checkout ${parsed.data.checkoutId} ${check.reason}`);
+          return check.reason === "lookup_failed"
+            ? NextResponse.json({ error: "We couldn't verify your payment just now. Please try again in a moment — you won't be charged twice." }, { status: 502 })
+            : NextResponse.json({ error: "We couldn't find a completed payment for this signup. Please complete checkout to continue." }, { status: 402 });
+        }
+        purchase = check.purchase;
+      } else if (userId) {
+        // Resuming an account whose checkout the Creem webhook already recorded.
+        const { data: paidProfile } = await supabase.from("profiles").select("settings").eq("id", userId).maybeSingle();
+        const knownSub = paidProfile?.settings?.creem_subscription_id;
+        purchase = typeof knownSub === "string" && knownSub ? await activePlanForSubscription(knownSub) : null;
+      }
+      if (!purchase) {
+        return NextResponse.json({ error: "We couldn't find a completed payment for this signup. Please complete checkout to continue." }, { status: 402 });
+      }
+
+      // One paid subscription opens one account.
+      if (purchase.subscriptionId) {
+        const { data: holders } = await supabase
+          .from("profiles")
+          .select("id, email")
+          .eq("settings->>creem_subscription_id", purchase.subscriptionId);
+        const taken = (holders || []).some((h: { id: string; email: string | null }) =>
+          userId ? h.id !== userId : (h.email || "").toLowerCase() !== email.toLowerCase());
+        if (taken) {
+          console.error(`Signup for ${ownerEmail} refused: subscription ${purchase.subscriptionId} already belongs to another account`);
+          return NextResponse.json({ error: "This payment has already been used to open an account." }, { status: 409 });
+        }
+      }
+
+      plan = purchase.plan;
+      billingCycle = purchase.billingCycle;
+    }
+    const creemIds = purchase
+      ? {
+          ...(purchase.customerId ? { creem_customer_id: purchase.customerId } : {}),
+          ...(purchase.subscriptionId ? { creem_subscription_id: purchase.subscriptionId } : {}),
+        }
+      : {};
 
     if (userId) {
       // Already authenticated (Google, or a PIN login that landed on an
@@ -86,6 +142,7 @@ export async function POST(request: Request) {
             twoFactor: false,
             plan,
             billingCycle,
+            ...creemIds,
             addons: existingSettings.addons || { extraNumbers: 0, minuteBlocks: 0, usedMin: 0, rolloverMin: 0 },
           }
         });
@@ -145,6 +202,7 @@ export async function POST(request: Request) {
             twoFactor: false,
             plan,
             billingCycle,
+            ...creemIds,
             addons: { extraNumbers: 0, minuteBlocks: 0, usedMin: 0, rolloverMin: 0 },
           }
         });
@@ -163,7 +221,8 @@ export async function POST(request: Request) {
       await supabase.from("phone_lines").delete().eq("user_id", userId);
 
       const phoneLinesRows = [];
-      for (const num of numbers) {
+      // Never buy more numbers than the paid plan includes, whatever was posted.
+      for (const num of numbers.slice(0, planConfig(plan).includedLines)) {
         const e164 = toE164(typeof num === "string" ? num : num.number);
         const outcome = await provisionNumber(e164, email);
         if (!outcome.ok) {

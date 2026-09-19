@@ -8,7 +8,7 @@ const ADDON_PRODUCT_IDS: Record<string, string> = {
 
 export async function POST(req: NextRequest) {
   try {
-    const { plan, billing, addon, quantity } = await req.json();
+    const { plan, billing, addon, quantity, email } = await req.json();
 
     const host = req.headers.get("host") || "localhost:3000";
     const proto = host.startsWith("localhost") ? "http" : "https";
@@ -59,8 +59,15 @@ export async function POST(req: NextRequest) {
     if (quantity && quantity > 1) body.units = quantity;
     // Tie the purchase to the signed-in account so the webhook can match it
     // even if the customer pays with a different email address.
-    if (identity?.email) body.customer = { email: identity.email };
-    if (identity?.userId) body.metadata = { user_id: identity.userId };
+    // An email/password signup has no session yet, so the wizard sends the
+    // address the account will be created under. Signup later checks the paid
+    // checkout against these before it creates anything.
+    const buyerEmail = identity?.email || (typeof email === "string" && /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email.trim()) ? email.trim().toLowerCase() : "");
+    if (buyerEmail) body.customer = { email: buyerEmail };
+    const metadata: Record<string, string> = {};
+    if (identity?.userId) metadata.user_id = identity.userId;
+    if (buyerEmail) metadata.signup_email = buyerEmail;
+    if (Object.keys(metadata).length > 0) body.metadata = metadata;
 
     const res = await fetch(`${CREEM_API}/checkouts`, {
       method: "POST",

@@ -11,11 +11,13 @@ function CreemCheckoutContent() {
     if (status === "success") {
       // Notify the opener (signup page) and close this popup
       if (window.opener) {
-        window.opener.postMessage({ type: "CREEM_PAYMENT_SUCCESS" }, window.location.origin);
+        // Creem appends the checkout it just completed; the signup API verifies it server-side.
+        const checkoutId = searchParams.get("checkout_id") || undefined;
+        window.opener.postMessage({ type: "CREEM_PAYMENT_SUCCESS", checkoutId }, window.location.origin);
         setTimeout(() => window.close(), 800);
       }
     }
-  }, [status]);
+  }, [status, searchParams]);
 
   if (status === "success") {
     return (
