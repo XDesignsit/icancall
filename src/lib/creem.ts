@@ -84,3 +84,81 @@ export async function sessionIdentity(): Promise<{ email: string; userId?: strin
     return null;
   }
 }
+
+export interface VerifiedPlanPurchase {
+  plan: PlanId;
+  billingCycle: BillingCycle;
+  customerId?: string;
+  subscriptionId?: string;
+}
+
+export type PurchaseCheck =
+  | { ok: true; purchase: VerifiedPlanPurchase }
+  | { ok: false; reason: "lookup_failed" | "not_paid" | "not_a_plan" | "not_yours" };
+
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+/**
+ * Asks Creem whether a checkout was really paid, what it bought, and whether it
+ * belongs to this person — the only proof of payment the server accepts. The
+ * browser's "payment succeeded" signal is never trusted on its own.
+ *
+ * Ownership: the checkout carries metadata.user_id / metadata.signup_email set
+ * when it was created, and Creem records the email the customer paid with.
+ */
+export async function verifyPlanCheckout(
+  checkoutId: string,
+  owner: { userId?: string | null; email: string },
+): Promise<PurchaseCheck> {
+  let checkout: Record<string, any> | null = null; // eslint-disable-line @typescript-eslint/no-explicit-any
+  // The customer is redirected back the moment payment succeeds; give Creem a
+  // few seconds to mark the checkout completed before calling it unpaid.
+  for (let attempt = 0; attempt < 4; attempt++) {
+    if (attempt > 0) await sleep(1500);
+    const res = await fetch(`${CREEM_API}/checkouts?checkout_id=${encodeURIComponent(checkoutId)}`, {
+      headers: creemHeaders(),
+    });
+    if (!res.ok) {
+      console.error(`Creem checkout lookup error (${res.status}):`, await res.text());
+      return { ok: false, reason: "lookup_failed" };
+    }
+    checkout = await res.json();
+    if (checkout?.status === "completed") break;
+  }
+  if (checkout?.status !== "completed") return { ok: false, reason: "not_paid" };
+
+  const bought = planForProductId(creemEntityId(checkout.product));
+  if (!bought) return { ok: false, reason: "not_a_plan" };
+
+  const email = owner.email.trim().toLowerCase();
+  const same = (v: unknown) => typeof v === "string" && v.trim().toLowerCase() === email;
+  const owns =
+    (!!owner.userId && checkout.metadata?.user_id === owner.userId) ||
+    same(checkout.metadata?.signup_email) ||
+    same(checkout.customer?.email);
+  if (!owns) return { ok: false, reason: "not_yours" };
+
+  return {
+    ok: true,
+    purchase: {
+      ...bought,
+      customerId: creemEntityId(checkout.customer),
+      subscriptionId: creemEntityId(checkout.subscription),
+    },
+  };
+}
+
+/** The plan an existing subscription is paying for, or null unless it is active. */
+export async function activePlanForSubscription(subscriptionId: string): Promise<VerifiedPlanPurchase | null> {
+  const res = await fetch(`${CREEM_API}/subscriptions?subscription_id=${encodeURIComponent(subscriptionId)}`, {
+    headers: creemHeaders(),
+  });
+  if (!res.ok) {
+    console.error(`Creem subscription lookup error (${res.status}):`, await res.text());
+    return null;
+  }
+  const sub = await res.json();
+  if (sub?.status !== "active" && sub?.status !== "trialing") return null;
+  const plan = planForProductId(creemEntityId(sub.product));
+  return plan ? { ...plan, subscriptionId, customerId: creemEntityId(sub.customer) } : null;
+}

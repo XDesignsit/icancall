@@ -434,6 +434,21 @@ const PAYMENT_BANNER_SUB: Record<string, string> = {
   ko: "몇 분 만에 설정 완료 · 대시보드에서 언제든지 취소 가능."
 };
 
+// Shown when the server could not confirm the checkout with Creem, so no account was created.
+const PAYMENT_UNVERIFIED: Record<string, string> = {
+  en: "We couldn't confirm your payment, so your account has not been created yet. Please complete checkout to continue. If you were charged, contact support@icancall.co and we'll sort it out.",
+  es: "No pudimos confirmar su pago, por lo que su cuenta aún no se ha creado. Complete el pago para continuar. Si se le cobró, escriba a support@icancall.co y lo resolveremos.",
+  fr: "Nous n'avons pas pu confirmer votre paiement ; votre compte n'a donc pas encore été créé. Veuillez finaliser le paiement pour continuer. Si vous avez été débité, écrivez à support@icancall.co.",
+  ja: "お支払いを確認できなかったため、アカウントはまだ作成されていません。続行するには決済を完了してください。請求が発生している場合は support@icancall.co までご連絡ください。",
+  zh: "我们无法确认您的付款，因此尚未创建您的账户。请完成结账以继续。如果您已被扣款，请联系 support@icancall.co。",
+  ar: "تعذر علينا تأكيد الدفع، لذلك لم يتم إنشاء حسابك بعد. يرجى إكمال الدفع للمتابعة. إذا تم خصم المبلغ، تواصل مع support@icancall.co.",
+  hi: "हम आपके भुगतान की पुष्टि नहीं कर सके, इसलिए आपका खाता अभी नहीं बना है। जारी रखने के लिए कृपया चेकआउट पूरा करें। यदि शुल्क लिया गया है, तो support@icancall.co से संपर्क करें।",
+  pt: "Não foi possível confirmar seu pagamento, então sua conta ainda não foi criada. Conclua o checkout para continuar. Se você foi cobrado, escreva para support@icancall.co.",
+  de: "Wir konnten Ihre Zahlung nicht bestätigen, daher wurde Ihr Konto noch nicht erstellt. Bitte schließen Sie den Checkout ab. Falls Sie belastet wurden, schreiben Sie an support@icancall.co.",
+  it: "Non siamo riusciti a confermare il pagamento, quindi il tuo account non è stato ancora creato. Completa il checkout per continuare. Se ti è stato addebitato un importo, scrivi a support@icancall.co.",
+  ko: "결제를 확인하지 못해 계정이 아직 생성되지 않았습니다. 계속하려면 결제를 완료해 주세요. 요금이 청구되었다면 support@icancall.co로 문의해 주세요.",
+};
+
 /* ============ INTERNAL COMPONENTS ============ */
 function BrandMark({ dark, lang }: { dark?: boolean; lang: string }) {
   return (
@@ -1271,7 +1286,11 @@ function PaymentStep({ data, onNext, onBack, t, lang }: { data: OnboardingData; 
   const [checkoutUrl, setCheckoutUrl] = useState("");
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [popupBlocked, setPopupBlocked] = useState(false);
+  const [signupError, setSignupError] = useState("");
   const checkoutPopupRef = useRef<Window | null>(null);
+  // The checkout this attempt is paying for; the server verifies it with Creem.
+  const checkoutIdRef = useRef<string>("");
+  const signupInFlight = useRef(false);
 
   const handleStartPayment = async () => {
     // Open popup immediately — must be synchronous within the user gesture
@@ -1279,6 +1298,7 @@ function PaymentStep({ data, onNext, onBack, t, lang }: { data: OnboardingData; 
 
     checkoutPopupRef.current = popup;
     setPopupBlocked(false);
+    setSignupError("");
     setCheckoutLoading(true);
     try {
       const res = await fetch("/api/creem/checkout", {
@@ -1287,7 +1307,8 @@ function PaymentStep({ data, onNext, onBack, t, lang }: { data: OnboardingData; 
         body: JSON.stringify({ plan: data.plan, billing: data.billing, email: data.account.email }),
       });
       if (!res.ok) throw new Error("checkout_failed");
-      const { checkoutUrl: url } = await res.json();
+      const { checkoutUrl: url, checkoutId } = await res.json();
+      checkoutIdRef.current = checkoutId || "";
       setCheckoutUrl(url);
       if (popup && !popup.closed) {
         popup.location.href = url;
@@ -1313,45 +1334,62 @@ function PaymentStep({ data, onNext, onBack, t, lang }: { data: OnboardingData; 
   // Listen to iframe success messages
   useEffect(() => {
     const handleMsg = async (e: MessageEvent) => {
-      if (e.data && e.data.type === "CREEM_PAYMENT_SUCCESS") {
-        if (checkoutPopupRef.current) {
-          try { checkoutPopupRef.current.close(); } catch {}
-          checkoutPopupRef.current = null;
-        }
-        try {
-          // Register the caregiver and seed selected phone numbers in Supabase
-          const res = await fetch("/api/auth/signup", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              email: data.account.email,
-              password: data.account.password,
-              name: data.account.name,
-              numbers: data.numbers,
-              captchaToken: data.account.captchaToken,
-              smsConsent: !!data.account.smsConsent,
-              smsPhone: data.account.smsPhone,
-              plan: data.plan,
-              billing: data.billing,
-            }),
-          });
-          if (!res.ok) {
-            const errData = await res.json();
-            console.error("Failed to register caregiver:", errData.error);
-          }
-        } catch (err) {
-          console.error("Error during Supabase signup registration:", err);
-        }
+      if (e.origin !== window.location.origin) return;
+      if (!e.data || e.data.type !== "CREEM_PAYMENT_SUCCESS" || signupInFlight.current) return;
+      signupInFlight.current = true;
 
-        setTimeout(() => {
-          setModalOpen(false);
-          onNext(); // Advance to Success step
-        }, 800);
+      if (checkoutPopupRef.current) {
+        try { checkoutPopupRef.current.close(); } catch {}
+        checkoutPopupRef.current = null;
       }
+
+      // This message only says the checkout window came back. The server asks
+      // Creem whether the checkout was really paid before it creates the
+      // account, so the wizard moves on only when signup itself succeeds.
+      let failure = "";
+      try {
+        const res = await fetch("/api/auth/signup", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email: data.account.email,
+            password: data.account.password,
+            name: data.account.name,
+            numbers: data.numbers,
+            captchaToken: data.account.captchaToken,
+            smsConsent: !!data.account.smsConsent,
+            smsPhone: data.account.smsPhone,
+            plan: data.plan,
+            billing: data.billing,
+            // Creem appends checkout_id to the return URL; prefer what it reports.
+            checkoutId: (typeof e.data.checkoutId === "string" && e.data.checkoutId) || checkoutIdRef.current || undefined,
+          }),
+        });
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
+          console.error("Failed to register caregiver:", errData.error);
+          const unpaid = res.status === 402 || res.status === 409 || res.status === 502;
+          failure = unpaid && lang !== "en" ? (PAYMENT_UNVERIFIED[lang] || PAYMENT_UNVERIFIED.en) : (errData.error || PAYMENT_UNVERIFIED.en);
+        }
+      } catch (err) {
+        console.error("Error during Supabase signup registration:", err);
+        failure = PAYMENT_UNVERIFIED[lang] || PAYMENT_UNVERIFIED.en;
+      }
+      signupInFlight.current = false;
+
+      if (failure) {
+        setModalOpen(false);
+        setSignupError(failure);
+        return;
+      }
+      setTimeout(() => {
+        setModalOpen(false);
+        onNext(); // Advance to Success step
+      }, 800);
     };
     window.addEventListener("message", handleMsg);
     return () => window.removeEventListener("message", handleMsg);
-  }, [onNext, data]);
+  }, [onNext, data, lang]);
 
   const translatedPlanName = planShortName(data.plan);
   const billingName = data.billing === "yearly" ? t.onboarding.annual : t.onboarding.monthly;
@@ -1400,6 +1438,12 @@ function PaymentStep({ data, onNext, onBack, t, lang }: { data: OnboardingData; 
         <Ico.lock className="w-[17px] h-[17px] text-teal-600" />
         {t.onboarding.orderSecured}
       </div>
+
+      {signupError && (
+        <div role="alert" className="mt-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium leading-relaxed text-red-800">
+          {signupError}
+        </div>
+      )}
 
       <div className="step-nav mt-8">
         <button className="btn btn-ghost" onClick={onBack}>{t.onboarding.btnBack}</button>

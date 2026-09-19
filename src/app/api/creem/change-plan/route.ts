@@ -13,7 +13,7 @@ import {
   isBillingCycle,
   isPlanId,
   isSimulatedBilling,
-  planForProductId,
+  verifyPlanCheckout,
   type BillingCycle,
 } from "@/lib/creem";
 
@@ -112,27 +112,18 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ success: true, plan: settings.plan, billingCycle: settings.billingCycle, charged: true });
       }
 
-      const res = await fetch(`${CREEM_API}/checkouts?checkout_id=${encodeURIComponent(String(body.checkoutId))}`, {
-        headers: creemHeaders(),
-      });
-      if (!res.ok) {
-        console.error("Creem checkout lookup error:", await res.text());
-        return NextResponse.json({ error: "We couldn't verify your payment. If you were charged, your plan will update shortly." }, { status: 502 });
+      const check = await verifyPlanCheckout(String(body.checkoutId), { userId, email: owner.email });
+      if (!check.ok) {
+        return check.reason === "lookup_failed"
+          ? NextResponse.json({ error: "We couldn't verify your payment. If you were charged, your plan will update shortly." }, { status: 502 })
+          : NextResponse.json({ error: "This checkout has not been paid." }, { status: 402 });
       }
-      const checkout = await res.json();
-      const paidFor = planForProductId(creemEntityId(checkout.product));
-      const ownsCheckout =
-        checkout.metadata?.user_id === userId ||
-        (typeof checkout.customer?.email === "string" && checkout.customer.email.toLowerCase() === owner.email.toLowerCase());
-
-      if (checkout.status !== "completed" || !paidFor || !ownsCheckout) {
-        return NextResponse.json({ error: "This checkout has not been paid." }, { status: 402 });
-      }
+      const { customerId, subscriptionId: paidSubscriptionId, ...paidFor } = check.purchase;
 
       const saved = await savePlan(userId, settings, {
         ...paidFor,
-        creem_customer_id: creemEntityId(checkout.customer) ?? settings.creem_customer_id,
-        creem_subscription_id: creemEntityId(checkout.subscription) ?? settings.creem_subscription_id,
+        creem_customer_id: customerId ?? settings.creem_customer_id,
+        creem_subscription_id: paidSubscriptionId ?? settings.creem_subscription_id,
       });
       if (!saved) return NextResponse.json({ error: "Payment received, but we couldn't update your plan. Please contact support." }, { status: 500 });
       return NextResponse.json({ success: true, ...paidFor, charged: true });
