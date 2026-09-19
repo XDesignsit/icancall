@@ -324,6 +324,8 @@ const t: HomepageTranslations = {
   "prRateNotice": "Dies sind Telefonnummern aus Puerto Rico. Die Anrufkosten können höher sein als bei Nummern auf dem US-Festland.",
   "checkoutSecure": "Sichere Zahlung",
   "checkoutSecuring": "Sichere Verbindung zum Zahlungskanal wird hergestellt...",
+  "checkoutPopupNotice": "Die Zahlung wird in einem separaten Fenster geöffnet. Falls Sie es nicht sehen, hat Ihr Browser es möglicherweise blockiert.",
+  "checkoutOpenBtn": "Sichere Zahlung öffnen",
   "step4Eyebrow": "Schritt 4 von 4 · Bestätigen",
   "step4Title": "Bestätigen Sie Ihr Abonnement",
   "step4Subtitle": "Überprüfen Sie Ihre Tarifdetails, um zur sicheren Kasse zu gelangen.",

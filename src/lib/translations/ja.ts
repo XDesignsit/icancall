@@ -324,6 +324,8 @@ const t: HomepageTranslations = {
   "prRateNotice": "これらはプエルトリコの電話番号です。通話料金が米国本土の番号より高くなる場合があります。",
   "checkoutSecure": "安全なお支払い",
   "checkoutSecuring": "決済用の通信接続を確立しています...",
+  "checkoutPopupNotice": "お支払い画面は別ウィンドウで開きます。表示されない場合は、ブラウザによってブロックされた可能性があります。",
+  "checkoutOpenBtn": "安全なお支払い画面を開く",
   "step4Eyebrow": "ステップ 4 / 4 · 確認",
   "step4Title": "ご購読内容の確認",
   "step4Subtitle": "プランの詳細を確認し、安全な決済画面にお進みください。",

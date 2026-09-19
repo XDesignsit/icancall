@@ -324,6 +324,8 @@ const t: HomepageTranslations = {
   "prRateNotice": "这些是波多黎各电话号码。通话费率可能高于美国本土号码。",
   "checkoutSecure": "安全支付",
   "checkoutSecuring": "正在建立安全支付通道...",
+  "checkoutPopupNotice": "支付页面会在单独的窗口中打开。如果您没有看到，可能已被浏览器拦截。",
+  "checkoutOpenBtn": "打开安全支付页面",
   "step4Eyebrow": "步骤 4 / 4 · 确认",
   "step4Title": "确认您的订阅",
   "step4Subtitle": "确认计划详情以进入安全结算界面。",

@@ -324,6 +324,8 @@ const t: HomepageTranslations = {
   "prRateNotice": "These are Puerto Rico phone numbers. Calling rates may be higher than mainland US numbers.",
   "checkoutSecure": "Secure Payment",
   "checkoutSecuring": "Securing payment channel...",
+  "checkoutPopupNotice": "Checkout opens in a separate window. If you don't see it, your browser may have blocked it.",
+  "checkoutOpenBtn": "Open secure checkout",
   "step4Eyebrow": "Step 4 of 4 · Confirm",
   "step4Title": "Confirm your subscription",
   "step4Subtitle": "Review your plan details to proceed to secure checkout.",
