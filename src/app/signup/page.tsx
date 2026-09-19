@@ -715,6 +715,9 @@ function AccountStep({ data, set, onNext, onBack, t, lang }: { data: OnboardingD
   const [emailCodeTouched, setEmailCodeTouched] = useState(false);
   const [emailLoading, setEmailLoading] = useState(false);
   const [emailApiErr, setEmailApiErr] = useState("");
+  // The address already has an account: said up front, before any verifying, number picking or paying.
+  const [emailRegistered, setEmailRegistered] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [emailSuccessMsg, setEmailSuccessMsg] = useState("");
 
   const strength = passwordStrength(a.password || "");
@@ -770,13 +773,34 @@ function AccountStep({ data, set, onNext, onBack, t, lang }: { data: OnboardingD
     return touched[k] && errs[k];
   };
 
-  const submit = () => {
-    if (valid) onNext();
-    else {
+  /** False (and flags the field) when the address already has an account. Fails open on network errors. */
+  const checkEmailAvailable = async (): Promise<boolean> => {
+    try {
+      const res = await fetch("/api/auth/verify-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "check", email: a.email }),
+      });
+      if (res.status === 409) {
+        setEmailRegistered(true);
+        return false;
+      }
+    } catch {}
+    return true;
+  };
+
+  const submit = async () => {
+    if (!valid) {
       setTouched({ name: true, email: true, password: true, captcha: true });
       setPhoneTouched(true);
       setSmsTouched(true);
+      return;
     }
+    // Covers the SMS path too, where the email itself is never sent a code.
+    setSubmitting(true);
+    const available = await checkEmailAvailable();
+    setSubmitting(false);
+    if (available) onNext();
   };
 
   // ── Phone OTP ──────────────────────────────────────────────────────────────
@@ -787,6 +811,7 @@ function AccountStep({ data, set, onNext, onBack, t, lang }: { data: OnboardingD
     setPhoneApiErr("");
     setPhoneSuccessMsg("");
     try {
+      if (validEmail(a.email) && !(await checkEmailAvailable())) return;
       const res = await fetch("/api/auth/verify-phone", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -842,6 +867,10 @@ function AccountStep({ data, set, onNext, onBack, t, lang }: { data: OnboardingD
         body: JSON.stringify({ action: "send", email: a.email }),
       });
       const json = await res.json();
+      if (res.status === 409 && json.code === "account_exists") {
+        setEmailRegistered(true);
+        return;
+      }
       if (!res.ok) throw new Error(json.error || "Failed to send code.");
       setEmailCodeSent(true);
       setEmailOtp("");
@@ -920,7 +949,7 @@ function AccountStep({ data, set, onNext, onBack, t, lang }: { data: OnboardingD
               <Ico.mail className="ico" />
               <input className={"input" + (show("email") ? " error" : "")} type="email" placeholder={t.onboarding.placeholderEmail}
                 value={a.email}
-                onChange={(e) => { upd("email", e.target.value); setEmailCodeSent(false); set({ account: { ...a, email: e.target.value, emailVerified: false } }); setEmailApiErr(""); setEmailSuccessMsg(""); }}
+                onChange={(e) => { upd("email", e.target.value); setEmailCodeSent(false); set({ account: { ...a, email: e.target.value, emailVerified: false } }); setEmailApiErr(""); setEmailSuccessMsg(""); setEmailRegistered(false); }}
                 onBlur={() => setTouched((prev) => ({ ...prev, email: true }))}
                 disabled={emailLoading} />
             </div>
@@ -935,6 +964,14 @@ function AccountStep({ data, set, onNext, onBack, t, lang }: { data: OnboardingD
             )}
             {emailSuccessMsg && <div style={{ fontSize: "0.82rem", color: "oklch(0.45 0.12 140)", marginTop: 4 }}>{emailSuccessMsg}</div>}
             {emailApiErr && <div style={{ fontSize: "0.82rem", color: "var(--rose)", marginTop: 6 }}>{emailApiErr}</div>}
+            {emailRegistered && (
+              <div role="alert" style={{ fontSize: "0.88rem", color: "var(--rose)", marginTop: 8, lineHeight: 1.5 }}>
+                {ACCOUNT_EXISTS[lang] || ACCOUNT_EXISTS.en}{" "}
+                <Link href={`/login?lang=${lang}`} style={{ fontWeight: 700, textDecoration: "underline" }}>
+                  {(SIGNIN_PROMPTS[lang] || SIGNIN_PROMPTS.en).link}
+                </Link>
+              </div>
+            )}
             {!smsConsent && emailCodeSent && (
               <OtpCodeRow
                 value={emailOtp}
@@ -1071,6 +1108,7 @@ function AccountStep({ data, set, onNext, onBack, t, lang }: { data: OnboardingD
         onBack={onBack}
         onNext={submit}
         nextDisabled={
+          submitting || emailRegistered ||
           (touched.name && !!errs.name) ||
           (touched.email && !!errs.email) ||
           (touched.password && !!errs.password)
