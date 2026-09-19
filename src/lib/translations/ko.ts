@@ -324,6 +324,8 @@ const t: HomepageTranslations = {
   "prRateNotice": "이 번호들은 푸에르토리코 전화번호입니다. 통화 요금이 미국 본토 번호보다 높을 수 있습니다.",
   "checkoutSecure": "안전 결제",
   "checkoutSecuring": "안전한 결제 회선을 구성 중입니다...",
+  "checkoutPopupNotice": "결제 화면은 별도의 창에서 열립니다. 창이 보이지 않으면 브라우저에서 차단했을 수 있습니다.",
+  "checkoutOpenBtn": "안전 결제 창 열기",
   "step4Eyebrow": "4단계 / 4단계 · 확인",
   "step4Title": "구독 정보 확인",
   "step4Subtitle": "선택한 플랜 정보를 최종 확인하고 결제를 진행합니다.",

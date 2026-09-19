@@ -324,6 +324,8 @@ const t: HomepageTranslations = {
   "prRateNotice": "Questi sono numeri di telefono di Porto Rico. Le tariffe delle chiamate potrebbero essere più alte rispetto ai numeri degli Stati Uniti continentali.",
   "checkoutSecure": "Pagamento Sicuro",
   "checkoutSecuring": "Connessione al canale di pagamento sicuro...",
+  "checkoutPopupNotice": "Il pagamento si apre in una finestra separata. Se non la vedi, il browser potrebbe averla bloccata.",
+  "checkoutOpenBtn": "Apri il pagamento sicuro",
   "step4Eyebrow": "Passo 4 di 4 · Conferma",
   "step4Title": "Conferma il tuo abbonamento",
   "step4Subtitle": "Verifica i dettagli del piano prima di procedere al pagamento sicuro.",

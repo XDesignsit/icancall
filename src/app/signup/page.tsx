@@ -1190,15 +1190,47 @@ function NumberStep({ data, set, onNext, onBack, t, lang }: { data: OnboardingDa
 }
 
 /* ============ SECURE CHECKOUT MODAL OVERLAY ============ */
+const CHECKOUT_WINDOW_NAME = "creem_checkout";
+// How long the spinner runs before the manual "Open secure checkout" fallback appears
+const CHECKOUT_FALLBACK_DELAY_MS = 4000;
+
+// Must run synchronously inside a user gesture, otherwise popup blockers reject it.
+// No "noopener": the checkout return page reports success through window.opener.
+function openCheckoutWindow(url: string): Window | null {
+  const w = 520, h = 720;
+  const left = Math.round(window.screenX + (window.outerWidth - w) / 2);
+  const top  = Math.round(window.screenY + (window.outerHeight - h) / 2);
+  const popup = window.open(url, CHECKOUT_WINDOW_NAME, `width=${w},height=${h},left=${left},top=${top},resizable=yes,scrollbars=yes`);
+  return popup && !popup.closed ? popup : null;
+}
+
 interface CheckoutModalProps {
-  isOpen: boolean;
   checkoutUrl: string;
+  popupBlocked: boolean;
+  onPopupOpened: (popup: Window) => void;
   onClose: () => void;
   t: HomepageTranslations;
 }
 
-function CheckoutModal({ isOpen, onClose, t }: CheckoutModalProps) {
-  if (!isOpen) return null;
+// Mounted only while open, so the fallback timer restarts on every checkout attempt
+function CheckoutModal({ checkoutUrl, popupBlocked, onPopupOpened, onClose, t }: CheckoutModalProps) {
+  const [delayElapsed, setDelayElapsed] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setDelayElapsed(true), CHECKOUT_FALLBACK_DELAY_MS);
+    return () => clearTimeout(timer);
+  }, []);
+
+  const showFallback = !!checkoutUrl && (popupBlocked || delayElapsed);
+
+  const handleOpenCheckout = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    const popup = openCheckoutWindow(checkoutUrl);
+    // If even the click-driven window.open is refused, let the anchor navigate natively
+    if (popup) {
+      e.preventDefault();
+      onPopupOpened(popup);
+    }
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -1209,6 +1241,20 @@ function CheckoutModal({ isOpen, onClose, t }: CheckoutModalProps) {
           <p className="font-semibold text-slate-800 text-sm">{t.onboarding.checkoutSecure}</p>
           <p className="text-xs text-slate-500 mt-1">{t.onboarding.checkoutSecuring}</p>
         </div>
+        {showFallback && (
+          <div className="w-full rounded-xl border border-slate-200 bg-slate-50 p-4 flex flex-col items-center gap-3" role="status">
+            <p className="text-xs leading-relaxed text-slate-600">{t.onboarding.checkoutPopupNotice}</p>
+            <a
+              href={checkoutUrl}
+              target={CHECKOUT_WINDOW_NAME}
+              onClick={handleOpenCheckout}
+              className="inline-flex w-full items-center justify-center gap-1.5 rounded-full bg-[#10b981] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#059669]"
+            >
+              <Ico.lock className="w-[15px] h-[15px] shrink-0 text-white" />
+              {t.onboarding.checkoutOpenBtn}
+            </a>
+          </div>
+        )}
         <button onClick={onClose} className="mt-2 text-xs text-slate-400 hover:text-slate-600 underline underline-offset-2 transition">
           Cancel
         </button>
@@ -1224,16 +1270,15 @@ function PaymentStep({ data, onNext, onBack, t, lang }: { data: OnboardingData; 
   const [modalOpen, setModalOpen] = useState(false);
   const [checkoutUrl, setCheckoutUrl] = useState("");
   const [checkoutLoading, setCheckoutLoading] = useState(false);
+  const [popupBlocked, setPopupBlocked] = useState(false);
   const checkoutPopupRef = useRef<Window | null>(null);
 
   const handleStartPayment = async () => {
     // Open popup immediately — must be synchronous within the user gesture
-    const w = 520, h = 720;
-    const left = Math.round(window.screenX + (window.outerWidth - w) / 2);
-    const top  = Math.round(window.screenY + (window.outerHeight - h) / 2);
-    const popup = window.open("about:blank", "creem_checkout", `width=${w},height=${h},left=${left},top=${top},resizable=yes,scrollbars=yes`);
+    const popup = openCheckoutWindow("about:blank");
 
     checkoutPopupRef.current = popup;
+    setPopupBlocked(false);
     setCheckoutLoading(true);
     try {
       const res = await fetch("/api/creem/checkout", {
@@ -1244,10 +1289,14 @@ function PaymentStep({ data, onNext, onBack, t, lang }: { data: OnboardingData; 
       if (!res.ok) throw new Error("checkout_failed");
       const { checkoutUrl: url } = await res.json();
       setCheckoutUrl(url);
-      if (popup) {
+      if (popup && !popup.closed) {
         popup.location.href = url;
       } else {
-        window.open(url, "_blank");
+        // We are past the user gesture here, so this is usually blocked as well —
+        // the modal then offers a click-driven "Open secure checkout" link instead.
+        const retry = openCheckoutWindow(url);
+        checkoutPopupRef.current = retry;
+        setPopupBlocked(!retry);
       }
       setModalOpen(true);
     } catch {
@@ -1363,12 +1412,15 @@ function PaymentStep({ data, onNext, onBack, t, lang }: { data: OnboardingData; 
         </button>
       </div>
 
-      <CheckoutModal 
-        isOpen={modalOpen} 
-        checkoutUrl={checkoutUrl} 
-        onClose={() => setModalOpen(false)} 
-        t={t}
-      />
+      {modalOpen && (
+        <CheckoutModal
+          checkoutUrl={checkoutUrl}
+          popupBlocked={popupBlocked}
+          onPopupOpened={(popup) => { checkoutPopupRef.current = popup; }}
+          onClose={() => setModalOpen(false)}
+          t={t}
+        />
+      )}
     </div>
   );
 }

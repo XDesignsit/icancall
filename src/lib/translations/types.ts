@@ -189,6 +189,8 @@ export interface HomepageTranslations {
     prRateNotice: string;
     checkoutSecure: string;
     checkoutSecuring: string;
+    checkoutPopupNotice: string;
+    checkoutOpenBtn: string;
     step4Eyebrow: string;
     step4Title: string;
     step4Subtitle: string;
