@@ -33,6 +33,7 @@ import { dashboardExtraTranslations } from "@/lib/dashboardExtraTranslations";
 import { type DashboardTranslations } from "@/lib/dashboardTranslations";
 import { isPlanChangeChargedNow, planConfig, type PlanId } from "@/lib/planConfig";
 import { planChangeNotice, planChangeStrings, type PlanChangeMode } from "./planChangeStrings";
+import { cancelStrings, formatEndDate } from "./cancelStrings";
 
 import {
   AVATAR_COLORS,
@@ -281,6 +282,43 @@ export function AccountView({
   const [planChangePending, setPlanChangePending] = useState(false);
   const [planChangeError, setPlanChangeError] = useState("");
   useEffect(() => { setPlanChangeError(""); }, [planModalOpen, tempPlan, tempCycle]);
+
+  // Cancelling (and undoing it) goes through /api/creem/cancel-subscription.
+  // The subscription always runs to the end of the period already paid for.
+  const cs = cancelStrings(lang);
+  const [cancelConfirmOpen, setCancelConfirmOpen] = useState(false);
+  const [cancelPending, setCancelPending] = useState(false);
+  const [cancelError, setCancelError] = useState("");
+  const cancelScheduled = account.subscriptionStatus === "scheduled_cancel";
+  const subscriptionEnded = account.subscriptionStatus === "canceled" || account.subscriptionStatus === "expired";
+
+  const updateSubscription = async (action: "cancel" | "resume") => {
+    // An admin impersonating an account never touches that account's billing.
+    if (localStorage.getItem("impersonatingUser")) {
+      setCancelConfirmOpen(false);
+      return;
+    }
+    setCancelPending(true);
+    setCancelError("");
+    try {
+      const res = await fetch("/api/creem/cancel-subscription", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.success) throw new Error(lang === "en" && data.error ? data.error : cs.failed);
+      set({ subscriptionStatus: data.subscriptionStatus, subscriptionEndsAt: data.subscriptionEndsAt ?? null });
+      setCancelConfirmOpen(false);
+      showToast(action === "cancel" ? cs.cancelledToast : cs.resumedToast);
+    } catch (err) {
+      const msg = err instanceof Error && err.message && err.message !== "Failed to fetch" ? err.message : cs.failed;
+      setCancelError(msg);
+      if (action === "resume") showToast(msg);
+    } finally {
+      setCancelPending(false);
+    }
+  };
 
   useEffect(() => {
     if (viewerRole !== "owner") return;
@@ -2905,15 +2943,61 @@ export function AccountView({
                 <p>{ext.cancelSubscriptionDesc}</p>
               </div>
             </div>
-            <div className="card-pad" style={{ paddingTop: 14 }}>
-              <button
-                className="btn btn-danger-ghost"
-                onClick={() => showToast(ext.cancelToast)}
-              >
-                {ext.cancelPlan.replace("{plan}", planName)}
-              </button>
+            <div className="card-pad" style={{ paddingTop: 14, display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 14 }}>
+              {(cancelScheduled || subscriptionEnded) && (
+                <div role="status" style={{ fontSize: "0.95rem", lineHeight: 1.55, color: "var(--ink)", fontWeight: 600 }}>
+                  {subscriptionEnded
+                    ? cs.ended
+                    : formatEndDate(account.subscriptionEndsAt, lang)
+                      ? cs.endsOn.replace("{date}", formatEndDate(account.subscriptionEndsAt, lang))
+                      : cs.endsSoon}
+                </div>
+              )}
+              {cancelScheduled ? (
+                <button className="btn btn-primary" disabled={cancelPending} onClick={() => updateSubscription("resume")}>
+                  {cancelPending ? cs.working : cs.resume}
+                </button>
+              ) : !subscriptionEnded && (
+                <button
+                  className="btn btn-danger-ghost"
+                  onClick={() => { setCancelError(""); setCancelConfirmOpen(true); }}
+                >
+                  {ext.cancelPlan.replace("{plan}", planName)}
+                </button>
+              )}
             </div>
           </div>
+
+          {cancelConfirmOpen && (
+            <Modal
+              title={cs.confirmTitle}
+              onClose={() => { if (!cancelPending) setCancelConfirmOpen(false); }}
+              footer={
+                <div style={{ display: "flex", flexDirection: "column", gap: 12, width: "100%" }}>
+                  {cancelError && (
+                    <div role="alert" style={{ fontSize: "0.9rem", color: "oklch(0.45 0.16 25)", background: "oklch(0.96 0.03 25)", border: "1px solid oklch(0.85 0.08 25)", borderRadius: "var(--r-md)", padding: "10px 14px", fontWeight: 600 }}>
+                      {cancelError}
+                    </div>
+                  )}
+                  <div style={{ display: "flex", justifyContent: "flex-end", gap: 10, width: "100%", flexWrap: "wrap" }}>
+                    <button className="btn btn-ghost" disabled={cancelPending} onClick={() => setCancelConfirmOpen(false)}>
+                      {cs.keep}
+                    </button>
+                    <button className="btn btn-danger" disabled={cancelPending} onClick={() => updateSubscription("cancel")}>
+                      {cancelPending ? cs.working : cs.confirmCancel}
+                    </button>
+                  </div>
+                </div>
+              }
+            >
+              <div style={{ display: "flex", flexDirection: "column", gap: 14, textAlign: "left" }}>
+                <p style={{ color: "var(--ink-soft)", fontSize: "0.98rem", margin: 0, lineHeight: 1.55 }}>{cs.confirmBody}</p>
+                <div style={{ fontSize: "0.9rem", color: "var(--ink-soft)", background: "var(--tint)", border: "1px solid var(--line)", borderRadius: "var(--r-md)", padding: "10px 14px", lineHeight: 1.5 }}>
+                  {cs.confirmNote}
+                </div>
+              </div>
+            </Modal>
+          )}
 
           {/* Care Team caregiver seats — self-hides unless the plan includes seats */}
           {viewerRole === "owner" && <SeatsManager showToast={showToast} lang={lang} />}

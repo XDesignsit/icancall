@@ -134,6 +134,8 @@ export async function POST(request: Request) {
     if (newSettings && !isSimulatedBilling((await sessionIdentity())?.email)) {
       delete newSettings.plan;
       delete newSettings.billingCycle;
+      delete newSettings.subscriptionStatus;
+      delete newSettings.subscriptionEndsAt;
     }
 
     // Fetch existing settings to prevent overwriting payment metadata keys set by webhooks

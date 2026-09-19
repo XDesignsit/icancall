@@ -13,6 +13,8 @@ interface CreemObject {
   subscription?: { id?: string; metadata?: Record<string, unknown> } | string;
   metadata?: Record<string, unknown>;
   current_period_start_date?: string;
+  current_period_end_date?: string;
+  status?: string;
 }
 
 // Checkouts started by a signed-in user carry metadata.user_id (copied onto the
@@ -104,6 +106,39 @@ export async function POST(req: NextRequest) {
           })
           .eq("id", profile.id);
       }
+    }
+  }
+
+  // Cancellation state, whoever caused it: the dashboard's cancel button
+  // (api/creem/cancel-subscription), the Creem customer portal, a failed
+  // renewal, or the merchant dashboard. scheduled_cancel = still active until
+  // the period ends; canceled / expired = over.
+  if (
+    eventType === "subscription.scheduled_cancel" || eventType === "subscription.canceled" ||
+    eventType === "subscription.expired" || eventType === "subscription.active" || eventType === "subscription.update"
+  ) {
+    const profile = await findProfile(obj);
+    const knownSub = profile?.settings.creem_subscription_id;
+    // Add-on subscriptions have their own lifecycle; only the plan's counts here.
+    const isPlanSub = !!knownSub && knownSub === obj.id;
+    const status =
+      eventType === "subscription.scheduled_cancel" ? "scheduled_cancel"
+      : eventType === "subscription.canceled" ? "canceled"
+      : eventType === "subscription.expired" ? "expired"
+      : obj.status;
+
+    if (profile && isPlanSub && status && profile.settings.subscriptionStatus !== status) {
+      console.log(`Creem ${eventType} — ${profile.id} subscription is now ${status}`);
+      await supabase
+        .from("profiles")
+        .update({
+          settings: {
+            ...profile.settings,
+            subscriptionStatus: status,
+            subscriptionEndsAt: status === "active" || status === "trialing" ? null : (obj.current_period_end_date ?? profile.settings.subscriptionEndsAt ?? null),
+          },
+        })
+        .eq("id", profile.id);
     }
   }
 

@@ -87,6 +87,8 @@ interface ProfileSettings {
   card?: Account["card"];
   plan?: Account["plan"];
   billingCycle?: Account["billingCycle"];
+  subscriptionStatus?: string;
+  subscriptionEndsAt?: string | null;
   addons?: Account["addons"];
   avatarUrl?: string;
 }
@@ -263,6 +265,8 @@ export default function DashboardApp() {
       billingAddr: settings.billingAddr || "",
       plan: settings.plan || "essential",
       billingCycle: settings.billingCycle || "monthly",
+      subscriptionStatus: settings.subscriptionStatus || undefined,
+      subscriptionEndsAt: settings.subscriptionEndsAt || null,
       addons: settings.addons || { extraNumbers: 0, minuteBlocks: 0, usedMin: 0, rolloverMin: 0 },
       avatarUrl: settings.avatarUrl || "",
     };
