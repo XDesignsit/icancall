@@ -6,6 +6,7 @@ import { dashboardExtraTranslations } from "@/lib/dashboardExtraTranslations";
 import { dashboardTranslations } from "@/lib/dashboardTranslations";
 import { isDemoEmail } from "@/lib/demoEmails";
 import { planConfig } from "@/lib/planConfig";
+import { cancelStrings, formatEndDate } from "./views/cancelStrings";
 
 import {
   AVATAR_COLORS,
@@ -89,6 +90,9 @@ interface ProfileSettings {
   billingCycle?: Account["billingCycle"];
   subscriptionStatus?: string;
   subscriptionEndsAt?: string | null;
+  subscriptionEndedAt?: string | null;
+  numbersReleaseAt?: string | null;
+  numbersReleasedAt?: string | null;
   addons?: Account["addons"];
   avatarUrl?: string;
 }
@@ -267,6 +271,9 @@ export default function DashboardApp() {
       billingCycle: settings.billingCycle || "monthly",
       subscriptionStatus: settings.subscriptionStatus || undefined,
       subscriptionEndsAt: settings.subscriptionEndsAt || null,
+      subscriptionEndedAt: settings.subscriptionEndedAt || null,
+      numbersReleaseAt: settings.numbersReleaseAt || null,
+      numbersReleasedAt: settings.numbersReleasedAt || null,
       addons: settings.addons || { extraNumbers: 0, minuteBlocks: 0, usedMin: 0, rolloverMin: 0 },
       avatarUrl: settings.avatarUrl || "",
     };
@@ -1002,6 +1009,36 @@ export default function DashboardApp() {
         </div>
 
         <div className="content">
+          {/* Subscription ended: say plainly when the numbers go, on every view. */}
+          {viewerRole === "owner" && (account.subscriptionStatus === "canceled" || account.subscriptionStatus === "expired") && (() => {
+            const cs = cancelStrings(lang);
+            const released = formatEndDate(account.numbersReleasedAt, lang);
+            const text = released
+              ? cs.endedReleased.replace("{date}", released)
+              : account.numbersReleaseAt
+                ? cs.endedHeld
+                    .replace("{ended}", formatEndDate(account.subscriptionEndedAt, lang))
+                    .replace("{release}", formatEndDate(account.numbersReleaseAt, lang))
+                : cs.ended;
+            return (
+              <div
+                role="alert"
+                style={{
+                  display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, flexWrap: "wrap",
+                  marginBottom: 20, padding: "14px 18px", borderRadius: "var(--r-lg)",
+                  border: "1px solid oklch(0.86 0.07 22)", background: "oklch(0.985 0.02 22)",
+                }}
+              >
+                <span style={{ flex: "1 1 320px", fontSize: "0.95rem", lineHeight: 1.55, fontWeight: 600, color: "oklch(0.4 0.12 22)" }}>{text}</span>
+                <button
+                  className="btn btn-primary btn-sm"
+                  onClick={() => { setAcctTab("billing"); setAutoOpenPlanModal(true); go("account"); }}
+                >
+                  {cs.resubscribe}
+                </button>
+              </div>
+            );
+          })()}
           {activeVoicemail && (
             <div className="card" style={{ border: '2px solid oklch(0.60 0.13 220)', background: 'oklch(0.96 0.03 220 / 0.3)', marginBottom: 24 }}>
               <div className="card-pad" style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>

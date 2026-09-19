@@ -162,3 +162,31 @@ export async function activePlanForSubscription(subscriptionId: string): Promise
   const plan = planForProductId(creemEntityId(sub.product));
   return plan ? { ...plan, subscriptionId, customerId: creemEntityId(sub.customer) } : null;
 }
+
+/**
+ * Whether Creem still considers a subscription to be running. "unknown" means
+ * the lookup itself failed — callers about to do something irreversible (the
+ * number release job) must treat that as a reason to stop, not as "ended".
+ */
+export async function subscriptionLiveness(
+  subscriptionId: string,
+): Promise<{ state: "live"; purchase: VerifiedPlanPurchase | null } | { state: "ended" } | { state: "unknown" }> {
+  try {
+    const res = await fetch(`${CREEM_API}/subscriptions?subscription_id=${encodeURIComponent(subscriptionId)}`, {
+      headers: creemHeaders(),
+    });
+    if (!res.ok) {
+      console.error(`Creem subscription lookup error (${res.status}):`, await res.text());
+      return { state: "unknown" };
+    }
+    const sub = await res.json();
+    if (sub?.status === "canceled" || sub?.status === "expired") return { state: "ended" };
+    if (typeof sub?.status !== "string") return { state: "unknown" };
+    // active, trialing, scheduled_cancel, past_due, unpaid, paused: not over.
+    const plan = planForProductId(creemEntityId(sub.product));
+    return { state: "live", purchase: plan ? { ...plan, subscriptionId, customerId: creemEntityId(sub.customer) } : null };
+  } catch (err) {
+    console.error("Creem subscription lookup failed:", err);
+    return { state: "unknown" };
+  }
+}

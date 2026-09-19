@@ -136,6 +136,11 @@ export async function POST(request: Request) {
       delete newSettings.billingCycle;
       delete newSettings.subscriptionStatus;
       delete newSettings.subscriptionEndsAt;
+      delete newSettings.subscriptionEndedAt;
+      delete newSettings.numbersReleaseAt;
+      delete newSettings.numbersReleasedAt;
+      delete newSettings.releaseReminderSentAt;
+      delete newSettings.archivedLines;
     }
 
     // Fetch existing settings to prevent overwriting payment metadata keys set by webhooks

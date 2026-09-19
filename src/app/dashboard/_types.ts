@@ -71,6 +71,10 @@ export interface Account {
   /** Creem subscription state, written server-side only. "scheduled_cancel" = cancelled but active until subscriptionEndsAt. */
   subscriptionStatus?: string;
   subscriptionEndsAt?: string | null;
+  /** Set once the subscription has really ended: numbers are held until numbersReleaseAt, then released. */
+  subscriptionEndedAt?: string | null;
+  numbersReleaseAt?: string | null;
+  numbersReleasedAt?: string | null;
   addons: {
     extraNumbers: number;
     minuteBlocks: number;
