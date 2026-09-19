@@ -5,6 +5,7 @@ import { supabase } from "@/lib/supabase";
 import { resolveAccount } from "@/lib/account";
 import { isOnboarded } from "@/lib/onboarding";
 import { isSessionLive } from "@/lib/userSessions";
+import { isSimulatedBilling, sessionIdentity } from "@/lib/creem";
 
 async function getAuthenticatedUserId() {
   const cookieStore = await cookies();
@@ -126,6 +127,14 @@ export async function POST(request: Request) {
     }
 
     const { name, preferred_name, settings: newSettings } = await request.json();
+
+    // With live billing the plan is whatever the Creem subscription says: it is
+    // written by api/creem/change-plan and the Creem webhook only. Accepting it
+    // from this sync would let a client grant itself a plan it isn't paying for.
+    if (newSettings && !isSimulatedBilling((await sessionIdentity())?.email)) {
+      delete newSettings.plan;
+      delete newSettings.billingCycle;
+    }
 
     // Fetch existing settings to prevent overwriting payment metadata keys set by webhooks
     const { data: profile } = await supabase

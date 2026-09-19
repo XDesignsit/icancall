@@ -31,7 +31,8 @@ function relativeTime(iso: string, lang: string, activeNow: string): string {
 
 import { dashboardExtraTranslations } from "@/lib/dashboardExtraTranslations";
 import { type DashboardTranslations } from "@/lib/dashboardTranslations";
-import { planConfig, type PlanId } from "@/lib/planConfig";
+import { isPlanChangeChargedNow, planConfig, type PlanId } from "@/lib/planConfig";
+import { planChangeNotice, planChangeStrings, type PlanChangeMode } from "./planChangeStrings";
 
 import {
   AVATAR_COLORS,
@@ -260,6 +261,98 @@ export function AccountView({
   const [tempPlan, setTempPlan] = useState<PlanId>(account.plan || "pro");
   const [tempCycle, setTempCycle] = useState<"monthly" | "yearly">(account.billingCycle || "monthly");
   const [selectedLineToKeep, setSelectedLineToKeep] = useState<string>("");
+
+  // Plan and billing-cycle changes go through /api/creem/change-plan, which
+  // switches the real Creem subscription. The new plan is only adopted locally
+  // once that succeeds.
+  const pcs = planChangeStrings(lang);
+  const planUpdatedMsg = lang === "es" ? "Plan actualizado correctamente"
+    : lang === "fr" ? "Forfait mis à jour avec succès"
+    : lang === "ja" ? "プランが正常に更新されました"
+    : lang === "zh" ? "方案已成功更新"
+    : lang === "ar" ? "تم تحديث الباقة بنجاح"
+    : lang === "hi" ? "प्लान सफलतापूर्वक अपडेट किया गया"
+    : lang === "pt" ? "Plano atualizado com sucesso"
+    : lang === "de" ? "Tarif erfolgreich aktualisiert"
+    : lang === "it" ? "Piano aggiornato con successo"
+    : lang === "ko" ? "플랜이 성공적으로 업데이트되었습니다"
+    : "Plan updated successfully";
+  const [planChangeMode, setPlanChangeMode] = useState<PlanChangeMode | null>(null);
+  const [planChangePending, setPlanChangePending] = useState(false);
+  const [planChangeError, setPlanChangeError] = useState("");
+  useEffect(() => { setPlanChangeError(""); }, [planModalOpen, tempPlan, tempCycle]);
+
+  useEffect(() => {
+    if (viewerRole !== "owner") return;
+    // An admin impersonating an account never touches that account's billing.
+    if (localStorage.getItem("impersonatingUser")) {
+      setPlanChangeMode("simulated");
+      return;
+    }
+    fetch("/api/creem/change-plan")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => { if (data?.mode) setPlanChangeMode(data.mode); })
+      .catch(() => {});
+  }, [viewerRole]);
+
+  /** Resolves true once the subscription has been switched and the new plan may be applied. */
+  const changePlan = async (plan: PlanId, billingCycle: "monthly" | "yearly"): Promise<boolean> => {
+    if (localStorage.getItem("impersonatingUser")) return true;
+    setPlanChangePending(true);
+    setPlanChangeError("");
+    try {
+      const res = await fetch("/api/creem/change-plan", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ plan, billing: billingCycle }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok && data.requiresCheckout && data.checkoutUrl) {
+        window.location.href = data.checkoutUrl;
+        return false;
+      }
+      if (res.ok && data.success) return true;
+      throw new Error(lang === "en" && data.error ? data.error : pcs.failed);
+    } catch (err) {
+      const msg = err instanceof Error && err.message && err.message !== "Failed to fetch" ? err.message : pcs.failed;
+      setPlanChangeError(msg);
+      showToast(msg);
+      return false;
+    } finally {
+      setPlanChangePending(false);
+    }
+  };
+
+  // Back from the checkout that change-plan sends subscription-less accounts
+  // to: have the server verify the payment before adopting the plan.
+  const checkoutReturnHandled = useRef(false);
+  useEffect(() => {
+    if (checkoutReturnHandled.current) return;
+    const params = new URLSearchParams(window.location.search);
+    const checkoutId = params.get("checkout_id");
+    if (params.get("plan_change") !== "success" || !checkoutId) return;
+    checkoutReturnHandled.current = true;
+    window.history.replaceState({}, "", "/dashboard?view=account");
+
+    (async () => {
+      try {
+        const res = await fetch("/api/creem/change-plan", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ checkoutId }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || !data.success) throw new Error(lang === "en" && data.error ? data.error : pcs.failed);
+        set({ plan: data.plan, billingCycle: data.billingCycle });
+        setPlanChangeMode("subscription");
+        showToast(planUpdatedMsg);
+      } catch (err) {
+        showToast(err instanceof Error && err.message ? err.message : pcs.failed);
+      }
+    })();
+    // Runs once on mount; the handlers it calls are stable enough for that.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     if (planModalOpen && lines && lines.length > 0) {
@@ -517,6 +610,16 @@ export function AccountView({
   const isModalButtonDisabled =
     (tempPlan === account.plan && tempCycle === account.billingCycle) ||
     (isUpgradingToPro && !upgradeSelectedNumber);
+
+  const planChangeBillingNotice = planChangeNotice(
+    lang,
+    planChangeMode,
+    isPlanChangeChargedNow({ plan: account.plan, billingCycle: account.billingCycle }, { plan: tempPlan, billingCycle: tempCycle }),
+  );
+
+  // The annual confirmation serves both the plan modal (which may also be
+  // switching tiers) and the billing card's cycle toggle (current tier).
+  const annualTargetPlan = planModalOpen ? tempPlan : account.plan;
 
   const ACCT_TABS = [
     { id: "profile", label: d.account.profile },
@@ -889,6 +992,16 @@ export function AccountView({
                 : "Change Subscription Plan"}
               onClose={() => setPlanModalOpen(false)}
               footer={
+                <div style={{ display: "flex", flexDirection: "column", gap: 12, width: "100%" }}>
+                {planChangeError ? (
+                  <div role="alert" style={{ fontSize: "0.9rem", color: "oklch(0.45 0.16 25)", background: "oklch(0.96 0.03 25)", border: "1px solid oklch(0.85 0.08 25)", borderRadius: "var(--r-md)", padding: "10px 14px", fontWeight: 600 }}>
+                    {planChangeError}
+                  </div>
+                ) : !isModalButtonDisabled && planChangeBillingNotice ? (
+                  <div style={{ fontSize: "0.9rem", color: "var(--ink-soft)", background: "var(--tint)", border: "1px solid var(--line)", borderRadius: "var(--r-md)", padding: "10px 14px" }}>
+                    {planChangeBillingNotice}
+                  </div>
+                ) : null}
                 <div style={{ display: "flex", justifyContent: "flex-end", gap: 10, width: "100%" }}>
                   <button className="btn btn-ghost" onClick={() => setPlanModalOpen(false)}>
                     {lang === "es" ? "Cancelar"
@@ -905,9 +1018,10 @@ export function AccountView({
                   </button>
                   <button
                     className="btn btn-primary"
-                    disabled={isModalButtonDisabled}
+                    disabled={isModalButtonDisabled || planChangePending}
                     onClick={() => {
-                      const proceedWithPlanSave = () => {
+                      const proceedWithPlanSave = async () => {
+                        if (!(await changePlan(tempPlan, tempCycle))) return;
                         if (tempPlan === "essential" && lines.length > 1) {
                           const nextLines = lines.filter(l => l.id === selectedLineToKeep);
                           setLines(nextLines);
@@ -929,17 +1043,7 @@ export function AccountView({
                         }
                         set({ plan: tempPlan, billingCycle: tempCycle });
                         setPlanModalOpen(false);
-                        showToast(lang === "es" ? "Plan actualizado correctamente"
-                          : lang === "fr" ? "Forfait mis à jour avec succès"
-                          : lang === "ja" ? "プランが正常に更新されました"
-                          : lang === "zh" ? "方案已成功更新"
-                          : lang === "ar" ? "تم تحديث الباقة بنجاح"
-                          : lang === "hi" ? "प्लान सफलतापूर्वक अपडेट किया गया"
-                          : lang === "pt" ? "Plano atualizado com sucesso"
-                          : lang === "de" ? "Tarif erfolgreich aktualisiert"
-                          : lang === "it" ? "Piano aggiornato con successo"
-                          : lang === "ko" ? "플랜이 성공적으로 업데이트되었습니다"
-                          : "Plan updated successfully");
+                        showToast(planUpdatedMsg);
                       };
 
                       const isUpgradingCycle = account.billingCycle === "monthly" && tempCycle === "yearly";
@@ -951,8 +1055,9 @@ export function AccountView({
                       }
                     }}
                   >
-                    {getModalButtonText()}
+                    {planChangePending ? pcs.updating : getModalButtonText()}
                   </button>
+                </div>
                 </div>
               }
             >
@@ -2006,27 +2111,11 @@ export function AccountView({
             >
               <div style={{ display: "flex", flexDirection: "column", gap: 16, textAlign: "left" }}>
                 <p style={{ color: "var(--ink-soft)", fontSize: "0.98rem", margin: 0, lineHeight: 1.5 }}>
-                  {lang === "es"
-                    ? "¿Está seguro de que desea cambiar a la facturación anual? Su método de pago registrado se cargará de inmediato."
-                    : lang === "fr"
-                    ? "Êtes-vous sûr de vouloir passer à la facturation annuelle ? Votre mode de paiement enregistré sera débité immédiatement."
-                    : lang === "ja"
-                    ? "年間請求に切り替えてもよろしいですか？登録済みのお支払い方法にすぐに請求されます。"
-                    : lang === "zh"
-                    ? "确定要切换为按年计费吗？将立即从您登记的付款方式中扣款。"
-                    : lang === "ar"
-                    ? "هل أنت متأكد أنك تريد التحول إلى الفوترة السنوية؟ سيتم الخصم فوراً من وسيلة الدفع المسجلة."
-                    : lang === "hi"
-                    ? "क्या आप वाकई वार्षिक बिलिंग पर स्विच करना चाहते हैं? आपकी दर्ज भुगतान विधि से तुरंत शुल्क लिया जाएगा।"
-                    : lang === "pt"
-                    ? "Tem certeza de que deseja mudar para a cobrança anual? Seu método de pagamento cadastrado será cobrado imediatamente."
-                    : lang === "de"
-                    ? "Möchten Sie wirklich zur jährlichen Abrechnung wechseln? Ihre hinterlegte Zahlungsmethode wird sofort belastet."
-                    : lang === "it"
-                    ? "Sei sicuro di voler passare alla fatturazione annuale? Il tuo metodo di pagamento registrato verrà addebitato immediatamente."
-                    : lang === "ko"
-                    ? "연간 결제로 전환하시겠습니까? 등록된 결제 수단으로 즉시 청구됩니다."
-                    : "Are you sure you want to switch to annual billing? Your payment method on file will be charged immediately."}
+                  {pcs.annualConfirm}{" "}
+                  {planChangeNotice(lang, planChangeMode, isPlanChangeChargedNow(
+                    { plan: account.plan, billingCycle: account.billingCycle },
+                    { plan: annualTargetPlan, billingCycle: "yearly" },
+                  ))}
                 </p>
                 <div style={{
                   fontSize: "0.92rem",
@@ -2038,7 +2127,7 @@ export function AccountView({
                   fontWeight: 600
                 }}>
                   {(() => {
-                    const annual = planConfig(account.plan).annualAmount.toFixed(2);
+                    const annual = planConfig(annualTargetPlan).annualAmount.toFixed(2);
                     const usd = `$${annual}`;
                     const fr = `${annual.replace(".", ",")} $`;
                     return lang === "es"
@@ -2246,7 +2335,10 @@ export function AccountView({
                 <div className="seg" style={{ padding: 4 }}>
                   <button
                     className={`seg-btn ${account.billingCycle === "monthly" ? "active" : ""}`}
-                    onClick={() => {
+                    disabled={planChangePending}
+                    onClick={async () => {
+                      if (account.billingCycle === "monthly") return;
+                      if (!(await changePlan(account.plan, "monthly"))) return;
                       set({ billingCycle: "monthly" });
                       showToast(lang === "es" ? "Cambiado a facturación mensual"
                         : lang === "fr" ? "Facturation mensuelle activée"
@@ -2277,7 +2369,8 @@ export function AccountView({
                   <button
                     className={`seg-btn ${account.billingCycle === "yearly" ? "active" : ""}`}
                     onClick={() => {
-                      const proceedWithYearlySwitch = () => {
+                      const proceedWithYearlySwitch = async () => {
+                        if (!(await changePlan(account.plan, "yearly"))) return;
                         set({ billingCycle: "yearly" });
                         const yr = planConfig(account.plan).annualAmount;
                         showToast(account.plan === "pro"
@@ -2295,11 +2388,10 @@ export function AccountView({
                            : `Switched to annual billing — $${yr}/yr`));
                       };
 
+                      // Already annual: re-submitting would ask Creem to switch to the same product.
                       if (account.billingCycle === "monthly") {
                         annualBillingConfirmCallback.current = proceedWithYearlySwitch;
                         setAnnualBillingConfirmOpen(true);
-                      } else {
-                        proceedWithYearlySwitch();
                       }
                     }}
                     style={{ 
