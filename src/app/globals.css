@@ -109,6 +109,11 @@ h3 { font-size: clamp(1.25rem, 2vw, 1.6rem); }
 .btn-primary:hover:not(:disabled) { background: var(--accent-deep); transform: translateY(-2px); box-shadow: 0 10px 24px oklch(0.58 0.115 232 / 0.38); }
 .btn:disabled { opacity: 0.5; cursor: not-allowed; color: inherit; }
 .btn-ghost { background: transparent; color: var(--ink); border-color: var(--line); }
+/* Destructive action that should read as a button without shouting: outlined in the danger hue. */
+.btn-danger-ghost { background: var(--surface); color: oklch(0.5 0.18 22); border-color: oklch(0.8 0.1 22); }
+.btn-danger-ghost:hover:not(:disabled) { background: oklch(0.96 0.03 22); border-color: oklch(0.6 0.17 22); transform: translateY(-2px); }
+.btn-danger { background: oklch(0.55 0.19 22); color: #fff; box-shadow: 0 6px 18px oklch(0.55 0.19 22 / 0.28); }
+.btn-danger:hover:not(:disabled) { background: oklch(0.48 0.19 22); transform: translateY(-2px); }
 .btn-ghost:hover:not(:disabled) { background: var(--tint); border-color: var(--accent); transform: translateY(-2px); }
 .btn-lg { padding: 17px 34px; font-size: 1.06rem; }
 .btn-text { background: none; border: none; color: var(--ink-soft); font-weight: 600; cursor: pointer; padding: 14px 10px; display: inline-flex; align-items: center; gap: 7px; }

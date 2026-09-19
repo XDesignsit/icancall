@@ -1,9 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { cookies } from "next/headers";
-import { verifySession } from "@/lib/session";
-import { isSessionLive } from "@/lib/userSessions";
 import { supabase } from "@/lib/supabase";
-import { resolveAccount } from "@/lib/account";
+import { authorizeOwner, loadSettings, type Settings } from "@/lib/billingOwner";
 import { isPlanChangeChargedNow, type PlanId } from "@/lib/planConfig";
 import {
   CREEM_API,
@@ -17,8 +14,6 @@ import {
   type BillingCycle,
 } from "@/lib/creem";
 
-type Settings = Record<string, unknown>;
-
 async function savePlan(userId: string, settings: Settings, patch: Settings): Promise<boolean> {
   const { error } = await supabase
     .from("profiles")
@@ -26,36 +21,6 @@ async function savePlan(userId: string, settings: Settings, patch: Settings): Pr
     .eq("id", userId);
   if (error) console.error("change-plan: failed to persist plan:", error);
   return !error;
-}
-
-// Session → the account owner allowed to manage the subscription, or the
-// error response to send back.
-async function authorizeOwner(): Promise<{ userId: string; email: string } | NextResponse> {
-  const cookieStore = await cookies();
-  const sessionToken = cookieStore.get("session")?.value;
-  const payload = sessionToken ? await verifySession(sessionToken) : null;
-  if (!payload?.userId || (payload.sid && !(await isSessionLive(payload.sid)))) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
-  // The subscription belongs to the account owner; caregivers can't touch it.
-  const resolved = await resolveAccount(payload.userId);
-  if (resolved.role === "member") {
-    return NextResponse.json(
-      { error: "Caregivers can't change account or billing settings. Ask the account owner." },
-      { status: 403 }
-    );
-  }
-  return { userId: payload.userId, email: payload.email };
-}
-
-async function loadSettings(userId: string): Promise<Settings> {
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("settings")
-    .eq("id", userId)
-    .maybeSingle();
-  return (profile?.settings as Settings) || {};
 }
 
 // How a plan change will be billed for this account, so the dashboard can show

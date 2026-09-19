@@ -68,6 +68,9 @@ export interface Account {
   billingAddr: string;
   plan: PlanId;
   billingCycle: "monthly" | "yearly";
+  /** Creem subscription state, written server-side only. "scheduled_cancel" = cancelled but active until subscriptionEndsAt. */
+  subscriptionStatus?: string;
+  subscriptionEndsAt?: string | null;
   addons: {
     extraNumbers: number;
     minuteBlocks: number;
