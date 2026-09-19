@@ -68,3 +68,19 @@ export const PLAN_CONFIG: Record<PlanId, PlanConfig> = {
 export function planConfig(plan: string | undefined | null): PlanConfig {
   return PLAN_CONFIG[(plan as PlanId) || "pro"] || PLAN_CONFIG.pro;
 }
+
+const PLAN_RANK: Record<PlanId, number> = { essential: 0, pro: 1, careteam: 2 };
+
+/**
+ * Whether switching subscriptions bills the customer right away. Moving up a
+ * tier (or to annual billing on the same tier) charges the prorated difference
+ * immediately; moving down takes no payment — Creem refunds the unused time
+ * to the original payment method instead.
+ */
+export function isPlanChangeChargedNow(
+  from: { plan: PlanId; billingCycle: "monthly" | "yearly" },
+  to: { plan: PlanId; billingCycle: "monthly" | "yearly" },
+): boolean {
+  if (PLAN_RANK[to.plan] !== PLAN_RANK[from.plan]) return PLAN_RANK[to.plan] > PLAN_RANK[from.plan];
+  return from.billingCycle === "monthly" && to.billingCycle === "yearly";
+}

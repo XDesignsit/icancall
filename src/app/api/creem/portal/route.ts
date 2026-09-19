@@ -2,10 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { verifySession } from "@/lib/session";
 import { supabase } from "@/lib/supabase";
-
-const CREEM_API = process.env.CREEM_API_KEY?.startsWith("creem_test_")
-  ? "https://test-api.creem.io/v1"
-  : "https://api.creem.io/v1";
+import { CREEM_API, creemHeaders } from "@/lib/creem";
 
 export async function POST(_req: NextRequest) {
   // Verify the logged-in user
@@ -35,10 +32,7 @@ export async function POST(_req: NextRequest) {
   // Request a Creem billing portal session
   const res = await fetch(`${CREEM_API}/customers/${customerId}/billing-portal`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "x-api-key": process.env.CREEM_API_KEY!,
-    },
+    headers: creemHeaders(),
   });
 
   if (!res.ok) {
