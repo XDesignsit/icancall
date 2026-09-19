@@ -1,14 +1,9 @@
 import { NextResponse } from "next/server";
 import { randomInt } from "crypto";
 import { sendEmail } from "@/lib/mail";
+import { checkOtp, saveOtp } from "@/lib/otpStore";
 import { ACCOUNT_EXISTS_RESPONSE, isEmailTakenForSignup } from "@/lib/accountLookup";
 import { EMAIL_PROOF_COOKIE, EMAIL_PROOF_MAX_AGE_SECONDS, issueEmailProof, sessionCookieOptions } from "@/lib/session";
-
-// In-memory store: email -> { code, expiresAt, attempts }
-const otpStore = new Map<string, { code: string; expiresAt: number; attempts: number }>();
-
-const OTP_TTL_MS = 10 * 60 * 1000; // 10 minutes
-const MAX_ATTEMPTS = 5;
 
 export async function POST(request: Request) {
   try {
@@ -36,7 +31,7 @@ export async function POST(request: Request) {
       }
 
       const otp = String(randomInt(100000, 1000000));
-      otpStore.set(email.toLowerCase(), { code: otp, expiresAt: Date.now() + OTP_TTL_MS, attempts: 0 });
+      await saveOtp(`email:${email.toLowerCase()}`, otp);
 
       await sendEmail({
         to: email,
@@ -64,28 +59,9 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: "Verification code is required." }, { status: 400 });
       }
 
-      const entry = otpStore.get(email.toLowerCase());
+      const check = await checkOtp(`email:${email.toLowerCase()}`, String(code).trim());
+      if (!check.ok) return NextResponse.json({ error: check.error }, { status: check.status });
 
-      if (!entry) {
-        return NextResponse.json({ error: "No code was sent to this address. Please request a new one." }, { status: 400 });
-      }
-
-      if (Date.now() > entry.expiresAt) {
-        otpStore.delete(email.toLowerCase());
-        return NextResponse.json({ error: "Code has expired. Please request a new one." }, { status: 400 });
-      }
-
-      entry.attempts += 1;
-      if (entry.attempts > MAX_ATTEMPTS) {
-        otpStore.delete(email.toLowerCase());
-        return NextResponse.json({ error: "Too many attempts. Please request a new code." }, { status: 429 });
-      }
-
-      if (code !== entry.code) {
-        return NextResponse.json({ error: `Incorrect code. ${MAX_ATTEMPTS - entry.attempts} attempts remaining.` }, { status: 400 });
-      }
-
-      otpStore.delete(email.toLowerCase());
       // Keep a server-side record of the verification: /api/auth/signup only
       // signs a new customer in when it sees this proof for their address.
       const response = NextResponse.json({ success: true, verified: true });
