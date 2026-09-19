@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
 import { authorizeOwner, loadSettings, type Settings } from "@/lib/billingOwner";
+import { REACTIVATED_PATCH, isEndedStatus } from "@/lib/subscriptionEnd";
 import { isPlanChangeChargedNow, type PlanId } from "@/lib/planConfig";
 import {
   CREEM_API,
@@ -10,6 +11,7 @@ import {
   isBillingCycle,
   isPlanId,
   isSimulatedBilling,
+  subscriptionLiveness,
   verifyPlanCheckout,
   type BillingCycle,
 } from "@/lib/creem";
@@ -23,6 +25,14 @@ async function savePlan(userId: string, settings: Settings, patch: Settings): Pr
   return !error;
 }
 
+// The subscription a plan change can act on. One that has ended (canceled /
+// expired) cannot be upgraded or resumed at Creem: the customer resubscribes
+// through a checkout, exactly like an account that never had one.
+function liveSubscriptionId(settings: Settings): string {
+  if (isEndedStatus(settings.subscriptionStatus)) return "";
+  return typeof settings.creem_subscription_id === "string" ? settings.creem_subscription_id : "";
+}
+
 // How a plan change will be billed for this account, so the dashboard can show
 // an accurate notice before the customer commits:
 //   simulated    → demo account / no Creem credentials, nothing is charged
@@ -34,7 +44,7 @@ export async function GET() {
     if (owner instanceof NextResponse) return owner;
     if (isSimulatedBilling(owner.email)) return NextResponse.json({ mode: "simulated" });
     const settings = await loadSettings(owner.userId);
-    return NextResponse.json({ mode: settings.creem_subscription_id ? "subscription" : "checkout" });
+    return NextResponse.json({ mode: liveSubscriptionId(settings) ? "subscription" : "checkout" });
   } catch (err) {
     console.error("Creem change-plan exception:", err);
     return NextResponse.json({ error: "Internal error" }, { status: 500 });
@@ -70,7 +80,7 @@ export async function POST(req: NextRequest) {
       // the webhook got here first) the stored plan is the truth. Never
       // re-apply a checkout — an old one could be replayed after a downgrade
       // to get its plan back for free.
-      if (settings.creem_subscription_id) {
+      if (liveSubscriptionId(settings)) {
         if (!isPlanId(settings.plan) || !isBillingCycle(settings.billingCycle)) {
           return NextResponse.json({ error: "Nothing to confirm" }, { status: 400 });
         }
@@ -85,7 +95,23 @@ export async function POST(req: NextRequest) {
       }
       const { customerId, subscriptionId: paidSubscriptionId, ...paidFor } = check.purchase;
 
+      // Resubscribing after the old subscription ended: the checkout must have
+      // opened a new subscription that is running now. Replaying the ended
+      // subscription's own (completed) checkout must not bring the plan back.
+      if (isEndedStatus(settings.subscriptionStatus)) {
+        const fresh = !!paidSubscriptionId && paidSubscriptionId !== settings.creem_subscription_id
+          ? await subscriptionLiveness(paidSubscriptionId)
+          : { state: "ended" as const };
+        if (fresh.state !== "live") {
+          return fresh.state === "unknown"
+            ? NextResponse.json({ error: "We couldn't verify your payment. If you were charged, your plan will update shortly." }, { status: 502 })
+            : NextResponse.json({ error: "This checkout has not been paid." }, { status: 402 });
+        }
+      }
+
       const saved = await savePlan(userId, settings, {
+        // A running subscription stops the number-release clock.
+        ...REACTIVATED_PATCH,
         ...paidFor,
         creem_customer_id: customerId ?? settings.creem_customer_id,
         creem_subscription_id: paidSubscriptionId ?? settings.creem_subscription_id,
@@ -104,7 +130,7 @@ export async function POST(req: NextRequest) {
     // Demo accounts and unconfigured environments never reach the gateway.
     if (simulated) {
       console.warn(`[MOCK] Simulating Creem plan change to ${plan}/${billing} — no subscription was modified.`);
-      await savePlan(userId, settings, target);
+      await savePlan(userId, settings, isEndedStatus(settings.subscriptionStatus) ? { ...REACTIVATED_PATCH, ...target } : target);
       return NextResponse.json({ success: true, ...target, charged: false, simulated: true });
     }
 
@@ -114,7 +140,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "This plan is not yet available for purchase" }, { status: 503 });
     }
 
-    const subscriptionId = typeof settings.creem_subscription_id === "string" ? settings.creem_subscription_id : "";
+    const subscriptionId = liveSubscriptionId(settings);
 
     // No subscription on record: there is nothing to upgrade, so the customer
     // buys the plan through a normal checkout and comes back to the dashboard.

@@ -35,6 +35,9 @@ import { isPlanChangeChargedNow, planConfig, type PlanId } from "@/lib/planConfi
 import { planChangeNotice, planChangeStrings, type PlanChangeMode } from "./planChangeStrings";
 import { cancelStrings, formatEndDate } from "./cancelStrings";
 
+// Account fields once a subscription is running (again): the number-release clock is off.
+const REACTIVATED = { subscriptionStatus: "active", subscriptionEndsAt: null, subscriptionEndedAt: null, numbersReleaseAt: null, numbersReleasedAt: null } as const;
+
 import {
   AVATAR_COLORS,
   getLineDefaultLabel,
@@ -381,7 +384,8 @@ export function AccountView({
         });
         const data = await res.json().catch(() => ({}));
         if (!res.ok || !data.success) throw new Error(lang === "en" && data.error ? data.error : pcs.failed);
-        set({ plan: data.plan, billingCycle: data.billingCycle });
+        // A confirmed checkout is a running subscription: any "ended" state is over.
+        set({ plan: data.plan, billingCycle: data.billingCycle, ...REACTIVATED });
         setPlanChangeMode("subscription");
         showToast(planUpdatedMsg);
       } catch (err) {
@@ -581,6 +585,7 @@ export function AccountView({
   }, []);
 
   const getModalButtonText = () => {
+    if (subscriptionEnded) return `${cs.resubscribe} · ${planDisplayName(tempPlan, lang)}`;
     const isCurrentPlan = tempPlan === account.plan;
     const isCurrentCycle = tempCycle === account.billingCycle;
     
@@ -646,7 +651,7 @@ export function AccountView({
 
   const isUpgradingToPro = tempPlan === "pro" && account.plan === "essential";
   const isModalButtonDisabled =
-    (tempPlan === account.plan && tempCycle === account.billingCycle) ||
+    (!subscriptionEnded && tempPlan === account.plan && tempCycle === account.billingCycle) ||
     (isUpgradingToPro && !upgradeSelectedNumber);
 
   const planChangeBillingNotice = planChangeNotice(
@@ -1079,7 +1084,7 @@ export function AccountView({
                           setLines(nextLines);
                           localStorage.setItem("ic_lines_data", JSON.stringify(nextLines));
                         }
-                        set({ plan: tempPlan, billingCycle: tempCycle });
+                        set({ plan: tempPlan, billingCycle: tempCycle, ...(subscriptionEnded ? REACTIVATED : {}) });
                         setPlanModalOpen(false);
                         showToast(planUpdatedMsg);
                       };
@@ -2947,7 +2952,13 @@ export function AccountView({
               {(cancelScheduled || subscriptionEnded) && (
                 <div role="status" style={{ fontSize: "0.95rem", lineHeight: 1.55, color: "var(--ink)", fontWeight: 600 }}>
                   {subscriptionEnded
-                    ? cs.ended
+                    ? (formatEndDate(account.numbersReleasedAt, lang)
+                        ? cs.endedReleased.replace("{date}", formatEndDate(account.numbersReleasedAt, lang))
+                        : account.numbersReleaseAt
+                          ? cs.endedHeld
+                              .replace("{ended}", formatEndDate(account.subscriptionEndedAt, lang))
+                              .replace("{release}", formatEndDate(account.numbersReleaseAt, lang))
+                          : cs.ended)
                     : formatEndDate(account.subscriptionEndsAt, lang)
                       ? cs.endsOn.replace("{date}", formatEndDate(account.subscriptionEndsAt, lang))
                       : cs.endsSoon}
@@ -2957,7 +2968,11 @@ export function AccountView({
                 <button className="btn btn-primary" disabled={cancelPending} onClick={() => updateSubscription("resume")}>
                   {cancelPending ? cs.working : cs.resume}
                 </button>
-              ) : !subscriptionEnded && (
+              ) : subscriptionEnded ? (
+                <button className="btn btn-primary" onClick={() => setPlanModalOpen(true)}>
+                  {cs.resubscribe}
+                </button>
+              ) : (
                 <button
                   className="btn btn-danger-ghost"
                   onClick={() => { setCancelError(""); setCancelConfirmOpen(true); }}

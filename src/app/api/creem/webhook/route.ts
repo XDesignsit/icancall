@@ -3,6 +3,7 @@ import crypto from "crypto";
 import { supabase } from "@/lib/supabase";
 import { planConfig } from "@/lib/planConfig";
 import { creemEntityId, planForProductId } from "@/lib/creem";
+import { REACTIVATED_PATCH, endedPatch, isEndedStatus, sendSubscriptionEndedEmail } from "@/lib/subscriptionEnd";
 
 type Settings = Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
 
@@ -19,17 +20,17 @@ interface CreemObject {
 
 // Checkouts started by a signed-in user carry metadata.user_id (copied onto the
 // subscription by Creem); anything else is matched on the customer's email.
-async function findProfile(obj: CreemObject): Promise<{ id: string; settings: Settings } | null> {
+async function findProfile(obj: CreemObject): Promise<{ id: string; email?: string; settings: Settings } | null> {
   const subMeta = typeof obj.subscription === "object" ? obj.subscription?.metadata : undefined;
   const userId = obj.metadata?.user_id ?? subMeta?.user_id;
   if (typeof userId === "string" && userId) {
-    const { data } = await supabase.from("profiles").select("id, settings").eq("id", userId).maybeSingle();
-    if (data) return { id: data.id, settings: data.settings || {} };
+    const { data } = await supabase.from("profiles").select("id, email, settings").eq("id", userId).maybeSingle();
+    if (data) return { id: data.id, email: data.email || undefined, settings: data.settings || {} };
   }
   const email = typeof obj.customer === "object" ? obj.customer?.email : undefined;
   if (email) {
-    const { data } = await supabase.from("profiles").select("id, settings").eq("email", email).maybeSingle();
-    if (data) return { id: data.id, settings: data.settings || {} };
+    const { data } = await supabase.from("profiles").select("id, email, settings").eq("email", email).maybeSingle();
+    if (data) return { id: data.id, email: data.email || undefined, settings: data.settings || {} };
   }
   return null;
 }
@@ -129,16 +130,25 @@ export async function POST(req: NextRequest) {
 
     if (profile && isPlanSub && status && profile.settings.subscriptionStatus !== status) {
       console.log(`Creem ${eventType} — ${profile.id} subscription is now ${status}`);
+      const wasEnded = isEndedStatus(profile.settings.subscriptionStatus);
+      // Ended: calls keep routing and the numbers are held for the grace
+      // period (src/lib/subscriptionEnd.ts), then released by the daily job.
+      // Running again: the clock stops and nothing is released.
+      const patch = isEndedStatus(status)
+        ? endedPatch(profile.settings, status)
+        : status === "active" || status === "trialing"
+          ? REACTIVATED_PATCH
+          : { subscriptionStatus: status, subscriptionEndsAt: obj.current_period_end_date ?? profile.settings.subscriptionEndsAt ?? null };
       await supabase
         .from("profiles")
-        .update({
-          settings: {
-            ...profile.settings,
-            subscriptionStatus: status,
-            subscriptionEndsAt: status === "active" || status === "trialing" ? null : (obj.current_period_end_date ?? profile.settings.subscriptionEndsAt ?? null),
-          },
-        })
+        .update({ settings: { ...profile.settings, ...patch } })
         .eq("id", profile.id);
+
+      if (isEndedStatus(status) && !wasEnded) {
+        // The account's own address, not whichever one was typed at checkout.
+        const email = profile.email || (typeof obj.customer === "object" ? obj.customer?.email : undefined);
+        if (email) await sendSubscriptionEndedEmail(email, patch.numbersReleaseAt);
+      }
     }
   }
 
