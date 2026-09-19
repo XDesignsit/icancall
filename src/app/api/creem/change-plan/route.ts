@@ -194,7 +194,11 @@ export async function POST(req: NextRequest) {
       headers: creemHeaders(),
       body: JSON.stringify({
         product_id: productId,
-        update_behavior: charged ? "proration-charge-immediately" : "proration-charge",
+        // Creem settles both directions right away: an upgrade charges the
+        // prorated difference, a downgrade refunds the unused time to the
+        // original payment method. ("proration-charge" is deprecated and
+        // behaves the same.)
+        update_behavior: "proration-charge-immediately",
       }),
     });
 
