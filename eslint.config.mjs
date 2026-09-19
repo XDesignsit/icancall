@@ -18,6 +18,11 @@ const eslintConfig = defineConfig([
     "extract.js",
     // One-off local test/maintenance scripts and the mock DB working dir.
     "scratch/**",
+    // Claude agent worktrees.
+    ".claude/**",
+    // Design system bundle and sync tooling.
+    "ds-bundle/**",
+    ".ds-sync/**",
   ]),
   {
     rules: {
