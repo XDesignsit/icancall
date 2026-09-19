@@ -1,12 +1,7 @@
 import { NextResponse } from "next/server";
 import { randomInt } from "crypto";
 import { toE164 } from "@/lib/phone";
-
-// In-memory store: normalizedPhone -> { code, expiresAt, attempts }
-const otpStore = new Map<string, { code: string; expiresAt: number; attempts: number }>();
-
-const OTP_TTL_MS = 10 * 60 * 1000; // 10 minutes
-const MAX_ATTEMPTS = 5;
+import { checkOtp, saveOtp } from "@/lib/otpStore";
 
 export async function POST(request: Request) {
   try {
@@ -22,7 +17,7 @@ export async function POST(request: Request) {
     // ── SEND ──────────────────────────────────────────────────────────────────
     if (action === "send") {
       const otp = String(randomInt(100000, 1000000));
-      otpStore.set(normalized, { code: otp, expiresAt: Date.now() + OTP_TTL_MS, attempts: 0 });
+      await saveOtp(`phone:${normalized}`, otp);
 
       const { sendSms } = await import("@/lib/twilio");
       await sendSms(normalized, `Your iCanCall verification code is: ${otp}. It expires in 10 minutes.`);
@@ -36,28 +31,9 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: "Verification code is required." }, { status: 400 });
       }
 
-      const entry = otpStore.get(normalized);
+      const check = await checkOtp(`phone:${normalized}`, String(code).replace(/\D/g, ""));
+      if (!check.ok) return NextResponse.json({ error: check.error }, { status: check.status });
 
-      if (!entry) {
-        return NextResponse.json({ error: "No code was sent to this number. Please request a new one." }, { status: 400 });
-      }
-
-      if (Date.now() > entry.expiresAt) {
-        otpStore.delete(normalized);
-        return NextResponse.json({ error: "Code has expired. Please request a new one." }, { status: 400 });
-      }
-
-      entry.attempts += 1;
-      if (entry.attempts > MAX_ATTEMPTS) {
-        otpStore.delete(normalized);
-        return NextResponse.json({ error: "Too many attempts. Please request a new code." }, { status: 429 });
-      }
-
-      if (code !== entry.code) {
-        return NextResponse.json({ error: `Incorrect code. ${MAX_ATTEMPTS - entry.attempts} attempts remaining.` }, { status: 400 });
-      }
-
-      otpStore.delete(normalized);
       return NextResponse.json({ success: true, verified: true });
     }
 
