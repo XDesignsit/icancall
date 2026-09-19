@@ -189,49 +189,29 @@ export async function POST(req: NextRequest) {
     };
     const charged = isPlanChangeChargedNow(current, target);
 
-    let res = await fetch(`${CREEM_API}/subscriptions/${encodeURIComponent(subscriptionId)}/upgrade`, {
+    const res = await fetch(`${CREEM_API}/subscriptions/${encodeURIComponent(subscriptionId)}/upgrade`, {
       method: "POST",
       headers: creemHeaders(),
       body: JSON.stringify({
         product_id: productId,
-        // Creem settles both directions right away: an upgrade charges the
-        // prorated difference, a downgrade refunds the unused time to the
-        // original payment method. ("proration-charge" is deprecated and
-        // behaves the same.)
-        update_behavior: "proration-charge-immediately",
+        // Upgrades charge the prorated difference right away. Downgrades take
+        // effect now with no proration: the lower price starts at the next
+        // billing date and nothing is refunded. Creem's refunding mode is not
+        // usable here — it can only refund against the single most recent
+        // charge, and refuses (subscription_concurrent_change) whenever the
+        // refund is larger, e.g. after an upgrade earlier in the same period.
+        update_behavior: charged ? "proration-charge-immediately" : "proration-none",
       }),
     });
 
-    let errText = "";
     if (!res.ok) {
-      errText = await res.text();
-      // If Creem cannot process a downgrade refund because it exceeds the
-      // last in-cycle transaction amount, it returns "subscription_concurrent_change".
-      // Fallback to "proration-none" so the downgrade succeeds immediately without
-      // blocking the customer.
-      if (!charged && errText.includes("subscription_concurrent_change")) {
-        console.warn(`[Creem] Downgrade for ${subscriptionId} received subscription_concurrent_change with proration-charge-immediately; retrying with proration-none...`);
-        res = await fetch(`${CREEM_API}/subscriptions/${encodeURIComponent(subscriptionId)}/upgrade`, {
-          method: "POST",
-          headers: creemHeaders(),
-          body: JSON.stringify({
-            product_id: productId,
-            update_behavior: "proration-none",
-          }),
-        });
-        if (!res.ok) {
-          errText = await res.text();
-        }
-      }
-    }
-
-    if (!res.ok) {
+      const errText = await res.text();
       console.error(`Creem plan change error (${res.status}) for subscription ${subscriptionId}:`, errText);
-      // Creem settles one change (e.g. an upgrade's prorated charge) before it
-      // accepts the next; a second change moments later is refused, not failed.
+      // Creem could not fit this change onto the subscription's current billing
+      // state. It is not a payment failure and does not clear by waiting.
       if (errText.includes("subscription_concurrent_change")) {
         return NextResponse.json(
-          { error: "Your previous plan change is still being processed, so your plan was not changed. Please wait a few minutes and try again." },
+          { error: "We couldn't apply this change to your subscription right now, so your plan was not changed. Please contact support and we'll sort it out." },
           { status: 409 }
         );
       }
