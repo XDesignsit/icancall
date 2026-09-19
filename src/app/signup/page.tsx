@@ -449,6 +449,21 @@ const PAYMENT_UNVERIFIED: Record<string, string> = {
   ko: "결제를 확인하지 못해 계정이 아직 생성되지 않았습니다. 계속하려면 결제를 완료해 주세요. 요금이 청구되었다면 support@icancall.co로 문의해 주세요.",
 };
 
+// Shown when signup finds the address already registered (nothing new was created).
+const ACCOUNT_EXISTS: Record<string, string> = {
+  en: "An account with this email already exists. Please sign in to continue.",
+  es: "Ya existe una cuenta con este correo electrónico. Inicie sesión para continuar.",
+  fr: "Un compte existe déjà avec cette adresse e-mail. Veuillez vous connecter pour continuer.",
+  ja: "このメールアドレスのアカウントは既に存在します。続行するにはサインインしてください。",
+  zh: "该邮箱已注册账户。请登录以继续。",
+  ar: "يوجد حساب بهذا البريد الإلكتروني بالفعل. يرجى تسجيل الدخول للمتابعة.",
+  hi: "इस ईमेल से एक खाता पहले से मौजूद है। जारी रखने के लिए कृपया साइन इन करें।",
+  pt: "Já existe uma conta com este e-mail. Faça login para continuar.",
+  de: "Mit dieser E-Mail-Adresse besteht bereits ein Konto. Bitte melden Sie sich an, um fortzufahren.",
+  it: "Esiste già un account con questa email. Accedi per continuare.",
+  ko: "이 이메일로 등록된 계정이 이미 있습니다. 계속하려면 로그인해 주세요.",
+};
+
 /* ============ INTERNAL COMPONENTS ============ */
 function BrandMark({ dark, lang }: { dark?: boolean; lang: string }) {
   return (
@@ -700,6 +715,9 @@ function AccountStep({ data, set, onNext, onBack, t, lang }: { data: OnboardingD
   const [emailCodeTouched, setEmailCodeTouched] = useState(false);
   const [emailLoading, setEmailLoading] = useState(false);
   const [emailApiErr, setEmailApiErr] = useState("");
+  // The address already has an account: said up front, before any verifying, number picking or paying.
+  const [emailRegistered, setEmailRegistered] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [emailSuccessMsg, setEmailSuccessMsg] = useState("");
 
   const strength = passwordStrength(a.password || "");
@@ -755,13 +773,34 @@ function AccountStep({ data, set, onNext, onBack, t, lang }: { data: OnboardingD
     return touched[k] && errs[k];
   };
 
-  const submit = () => {
-    if (valid) onNext();
-    else {
+  /** False (and flags the field) when the address already has an account. Fails open on network errors. */
+  const checkEmailAvailable = async (): Promise<boolean> => {
+    try {
+      const res = await fetch("/api/auth/verify-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "check", email: a.email }),
+      });
+      if (res.status === 409) {
+        setEmailRegistered(true);
+        return false;
+      }
+    } catch {}
+    return true;
+  };
+
+  const submit = async () => {
+    if (!valid) {
       setTouched({ name: true, email: true, password: true, captcha: true });
       setPhoneTouched(true);
       setSmsTouched(true);
+      return;
     }
+    // Covers the SMS path too, where the email itself is never sent a code.
+    setSubmitting(true);
+    const available = await checkEmailAvailable();
+    setSubmitting(false);
+    if (available) onNext();
   };
 
   // ── Phone OTP ──────────────────────────────────────────────────────────────
@@ -772,6 +811,7 @@ function AccountStep({ data, set, onNext, onBack, t, lang }: { data: OnboardingD
     setPhoneApiErr("");
     setPhoneSuccessMsg("");
     try {
+      if (validEmail(a.email) && !(await checkEmailAvailable())) return;
       const res = await fetch("/api/auth/verify-phone", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -827,6 +867,10 @@ function AccountStep({ data, set, onNext, onBack, t, lang }: { data: OnboardingD
         body: JSON.stringify({ action: "send", email: a.email }),
       });
       const json = await res.json();
+      if (res.status === 409 && json.code === "account_exists") {
+        setEmailRegistered(true);
+        return;
+      }
       if (!res.ok) throw new Error(json.error || "Failed to send code.");
       setEmailCodeSent(true);
       setEmailOtp("");
@@ -905,7 +949,7 @@ function AccountStep({ data, set, onNext, onBack, t, lang }: { data: OnboardingD
               <Ico.mail className="ico" />
               <input className={"input" + (show("email") ? " error" : "")} type="email" placeholder={t.onboarding.placeholderEmail}
                 value={a.email}
-                onChange={(e) => { upd("email", e.target.value); setEmailCodeSent(false); set({ account: { ...a, email: e.target.value, emailVerified: false } }); setEmailApiErr(""); setEmailSuccessMsg(""); }}
+                onChange={(e) => { upd("email", e.target.value); setEmailCodeSent(false); set({ account: { ...a, email: e.target.value, emailVerified: false } }); setEmailApiErr(""); setEmailSuccessMsg(""); setEmailRegistered(false); }}
                 onBlur={() => setTouched((prev) => ({ ...prev, email: true }))}
                 disabled={emailLoading} />
             </div>
@@ -920,6 +964,14 @@ function AccountStep({ data, set, onNext, onBack, t, lang }: { data: OnboardingD
             )}
             {emailSuccessMsg && <div style={{ fontSize: "0.82rem", color: "oklch(0.45 0.12 140)", marginTop: 4 }}>{emailSuccessMsg}</div>}
             {emailApiErr && <div style={{ fontSize: "0.82rem", color: "var(--rose)", marginTop: 6 }}>{emailApiErr}</div>}
+            {emailRegistered && (
+              <div role="alert" style={{ fontSize: "0.88rem", color: "var(--rose)", marginTop: 8, lineHeight: 1.5 }}>
+                {ACCOUNT_EXISTS[lang] || ACCOUNT_EXISTS.en}{" "}
+                <Link href={`/login?lang=${lang}`} style={{ fontWeight: 700, textDecoration: "underline" }}>
+                  {(SIGNIN_PROMPTS[lang] || SIGNIN_PROMPTS.en).link}
+                </Link>
+              </div>
+            )}
             {!smsConsent && emailCodeSent && (
               <OtpCodeRow
                 value={emailOtp}
@@ -1056,6 +1108,7 @@ function AccountStep({ data, set, onNext, onBack, t, lang }: { data: OnboardingD
         onBack={onBack}
         onNext={submit}
         nextDisabled={
+          submitting || emailRegistered ||
           (touched.name && !!errs.name) ||
           (touched.email && !!errs.email) ||
           (touched.password && !!errs.password)
@@ -1368,8 +1421,10 @@ function PaymentStep({ data, onNext, onBack, t, lang }: { data: OnboardingData; 
         if (!res.ok) {
           const errData = await res.json().catch(() => ({}));
           console.error("Failed to register caregiver:", errData.error);
-          const unpaid = res.status === 402 || res.status === 409 || res.status === 502;
-          failure = unpaid && lang !== "en" ? (PAYMENT_UNVERIFIED[lang] || PAYMENT_UNVERIFIED.en) : (errData.error || PAYMENT_UNVERIFIED.en);
+          const unpaid = res.status === 402 || res.status === 502;
+          failure = errData.code === "account_exists" ? (ACCOUNT_EXISTS[lang] || ACCOUNT_EXISTS.en)
+            : unpaid && lang !== "en" ? (PAYMENT_UNVERIFIED[lang] || PAYMENT_UNVERIFIED.en)
+            : (errData.error || PAYMENT_UNVERIFIED.en);
         }
       } catch (err) {
         console.error("Error during Supabase signup registration:", err);

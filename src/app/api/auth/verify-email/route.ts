@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { randomInt } from "crypto";
 import { sendEmail } from "@/lib/mail";
+import { ACCOUNT_EXISTS_RESPONSE, isEmailTakenForSignup } from "@/lib/accountLookup";
+import { EMAIL_PROOF_COOKIE, EMAIL_PROOF_MAX_AGE_SECONDS, issueEmailProof, sessionCookieOptions } from "@/lib/session";
 
 // In-memory store: email -> { code, expiresAt, attempts }
 const otpStore = new Map<string, { code: string; expiresAt: number; attempts: number }>();
@@ -17,8 +19,22 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "A valid email address is required." }, { status: 400 });
     }
 
+    // ── CHECK ─────────────────────────────────────────────────────────────────
+    // Asked by the wizard before it lets the account step through.
+    if (action === "check") {
+      return (await isEmailTakenForSignup(email))
+        ? NextResponse.json(ACCOUNT_EXISTS_RESPONSE, { status: 409 })
+        : NextResponse.json({ success: true, available: true });
+    }
+
     // ── SEND ──────────────────────────────────────────────────────────────────
     if (action === "send") {
+      // Tell an existing customer right away, rather than after they have
+      // verified, picked numbers and paid.
+      if (await isEmailTakenForSignup(email)) {
+        return NextResponse.json(ACCOUNT_EXISTS_RESPONSE, { status: 409 });
+      }
+
       const otp = String(randomInt(100000, 1000000));
       otpStore.set(email.toLowerCase(), { code: otp, expiresAt: Date.now() + OTP_TTL_MS, attempts: 0 });
 
@@ -70,7 +86,14 @@ export async function POST(request: Request) {
       }
 
       otpStore.delete(email.toLowerCase());
-      return NextResponse.json({ success: true, verified: true });
+      // Keep a server-side record of the verification: /api/auth/signup only
+      // signs a new customer in when it sees this proof for their address.
+      const response = NextResponse.json({ success: true, verified: true });
+      response.cookies.set(EMAIL_PROOF_COOKIE, await issueEmailProof(email), {
+        ...sessionCookieOptions(),
+        maxAge: EMAIL_PROOF_MAX_AGE_SECONDS,
+      });
+      return response;
     }
 
     return NextResponse.json({ error: "Invalid action." }, { status: 400 });

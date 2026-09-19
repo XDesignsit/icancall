@@ -53,6 +53,9 @@ export async function verifySession(token: string): Promise<SessionPayload | nul
   try {
     const secret = getSecret();
     const { payload } = await jwtVerify(token, secret);
+    // Single-purpose tokens signed with the same secret (the signup email
+    // proof below) must never pass for a session.
+    if (payload.purpose) return null;
     return payload as unknown as SessionPayload;
   } catch {
     return null;
@@ -90,4 +93,31 @@ export function sessionCookieOptions() {
     maxAge: SESSION_MAX_AGE_SECONDS,
     path: "/",
   };
+}
+
+// ── Signup email proof ──────────────────────────────────────────────────────
+// The signup wizard verifies the customer's email with a PIN before payment.
+// That check used to live only in the browser's state; this signed, short-lived
+// token is the server's own record of it, so signup can safely sign the new
+// customer in. It proves control of one address and nothing else.
+
+export const EMAIL_PROOF_COOKIE = "signup_email_proof";
+export const EMAIL_PROOF_MAX_AGE_SECONDS = 2 * 60 * 60; // long enough to pick numbers and pay
+
+export async function issueEmailProof(email: string): Promise<string> {
+  return new SignJWT({ purpose: "signup_email", email: email.trim().toLowerCase() })
+    .setProtectedHeader({ alg: "HS256" })
+    .setExpirationTime(`${EMAIL_PROOF_MAX_AGE_SECONDS}s`)
+    .sign(getSecret());
+}
+
+/** True only for an unexpired proof issued for exactly this address. */
+export async function verifyEmailProof(token: string | undefined, email: string): Promise<boolean> {
+  if (!token) return false;
+  try {
+    const { payload } = await jwtVerify(token, getSecret());
+    return payload.purpose === "signup_email" && payload.email === email.trim().toLowerCase();
+  } catch {
+    return false;
+  }
 }
