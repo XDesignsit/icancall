@@ -199,7 +199,16 @@ export async function POST(req: NextRequest) {
     });
 
     if (!res.ok) {
-      console.error(`Creem plan change error (${res.status}) for subscription ${subscriptionId}:`, await res.text());
+      const errText = await res.text();
+      console.error(`Creem plan change error (${res.status}) for subscription ${subscriptionId}:`, errText);
+      // Creem settles one change (e.g. an upgrade's prorated charge) before it
+      // accepts the next; a second change moments later is refused, not failed.
+      if (errText.includes("subscription_concurrent_change")) {
+        return NextResponse.json(
+          { error: "Your previous plan change is still being processed, so your plan was not changed. Please wait a few minutes and try again." },
+          { status: 409 }
+        );
+      }
       // 401/403 is our own misconfiguration (bad key, or a scoped key without
       // subscription write access) — don't send the customer off to check a
       // payment method that was never tried.
