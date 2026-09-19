@@ -7,7 +7,6 @@ const TERMS_DICTS = {
   en: {
     back: "Back to Home",
     title: "Terms of Service",
-    lastUpdated: "Last updated: June 18, 2026",
     loading: "Please wait while the terms of service are loaded. If they do not load, please",
     clickHere: "click here to view the terms of service",
     error: "There was an error loading the terms of service, please"
@@ -15,7 +14,6 @@ const TERMS_DICTS = {
   es: {
     back: "Volver al inicio",
     title: "Términos de servicio",
-    lastUpdated: "Última actualización: 18 de junio de 2026",
     loading: "Por favor, espere mientras se cargan los términos de servicio. Si no se cargan, por favor",
     clickHere: "haga clic aquí para ver los términos de servicio",
     error: "Hubo un error al cargar los términos de servicio, por favor"
@@ -23,7 +21,6 @@ const TERMS_DICTS = {
   fr: {
     back: "Retour à l'accueil",
     title: "Conditions d'utilisation",
-    lastUpdated: "Dernière mise à jour : 18 juin 2026",
     loading: "Veuillez patienter pendant le chargement des conditions d'utilisation. Si elles ne se chargent pas, veuillez",
     clickHere: "cliquer ici pour consulter les conditions d'utilisation",
     error: "Une erreur est survenue lors du chargement des conditions d'utilisation, veuillez"
@@ -31,7 +28,6 @@ const TERMS_DICTS = {
   ja: {
     back: "ホームに戻る",
     title: "利用規約",
-    lastUpdated: "最終更新日: 2026年6月18日",
     loading: "利用規約が読み込まれるまでお待ちください。読み込まれない場合は、",
     clickHere: "こちらをクリックして利用規約を表示してください",
     error: "利用規約の読み込み中にエラーが発生しました。こちらを"
@@ -39,7 +35,6 @@ const TERMS_DICTS = {
   zh: {
     back: "返回首页",
     title: "服务条款",
-    lastUpdated: "最后更新时间：2026年6月18日",
     loading: "服务条款正在加载，请稍候。如果未加载成功，请",
     clickHere: "点击此处查看服务条款",
     error: "加载服务条款时出错，请"
@@ -47,7 +42,6 @@ const TERMS_DICTS = {
   ar: {
     back: "العودة إلى الصفحة الرئيسية",
     title: "شروط الخدمة",
-    lastUpdated: "آخر تحديث: 18 يونيو 2026",
     loading: "يرجى الانتظار أثناء تحميل شروط الخدمة. إذا لم يتم تحميلها، يرجى",
     clickHere: "الضغط هنا لعرض شروط الخدمة",
     error: "حدث خطأ أثناء تحميل شروط الخدمة، يرجى"
@@ -55,7 +49,6 @@ const TERMS_DICTS = {
   hi: {
     back: "होम पर वापस जाएं",
     title: "सेवा की शर्तें",
-    lastUpdated: "अंतिम अद्यतन: 18 जून, 2026",
     loading: "सेवा की शर्तें लोड होने तक कृपया प्रतीक्षा करें। यदि वे लोड नहीं होती हैं, तो कृपया",
     clickHere: "सेवा की शर्तें देखने के लिए यहां क्लिक करें",
     error: "सेवा की शर्तें लोड करने में त्रुटि हुई, कृपया"
@@ -63,7 +56,6 @@ const TERMS_DICTS = {
   pt: {
     back: "Voltar para o início",
     title: "Termos de Serviço",
-    lastUpdated: "Última atualização: 18 de junho de 2026",
     loading: "Por favor, aguarde enquanto os termos de serviço são carregados. Se não carregar, por favor",
     clickHere: "clique aqui para visualizar os termos de serviço",
     error: "Ocorreu um erro ao carregar os termos de serviço, por favor"
@@ -71,7 +63,6 @@ const TERMS_DICTS = {
   de: {
     back: "Zurück zur Startseite",
     title: "Nutzungsbedingungen",
-    lastUpdated: "Zuletzt aktualisiert: 18. Juni 2026",
     loading: "Bitte warten Sie, während die Nutzungsbedingungen geladen werden. Wenn sie nicht geladen werden, bitte",
     clickHere: "hier klicken, um die Nutzungsbedingungen anzuzeigen",
     error: "Beim Laden der Nutzungsbedingungen ist ein Fehler aufgetreten. Bitte"
@@ -79,7 +70,6 @@ const TERMS_DICTS = {
   it: {
     back: "Torna alla home",
     title: "Termini di servizio",
-    lastUpdated: "Ultimo aggiornamento: 18 giugno 2026",
     loading: "Attendere il caricamento dei termini di servizio. Se non si caricano, si prega di",
     clickHere: "fare clic qui per visualizzare i termini di servizio",
     error: "Si è verificato un errore durante il caricamento dei termini di servizio, si prega di"
@@ -87,7 +77,6 @@ const TERMS_DICTS = {
   ko: {
     back: "홈으로 돌아가기",
     title: "서비스 이용약관",
-    lastUpdated: "최종 수정일: 2026년 6월 18일",
     loading: "이용약관이 로드되는 동안 잠시 기다려 주십시오. 로드되지 않는 경우,",
     clickHere: "여기를 클릭하여 이용약관을 확인하십시오",
     error: "이용약관을 로드하는 동안 오류가 발생했습니다. 여기를"
@@ -202,17 +191,15 @@ export default function TermsOfServicePage() {
         >
           {t.title}
         </h1>
-        <p
+        {/* No date of our own here: the embedded policy prints when it was last
+            updated, and a second hardcoded date only goes stale. */}
+        <div
           style={{
-            fontSize: "1rem",
-            color: "oklch(0.55 0.015 240)",
             marginBottom: 40,
             borderBottom: "1px solid oklch(0.92 0.01 225)",
-            paddingBottom: 20,
+            paddingBottom: 12,
           }}
-        >
-          {t.lastUpdated}
-        </p>
+        />
 
         {/* Termageddon Embed Container */}
         <div
