@@ -189,7 +189,7 @@ export async function POST(req: NextRequest) {
     };
     const charged = isPlanChangeChargedNow(current, target);
 
-    const res = await fetch(`${CREEM_API}/subscriptions/${encodeURIComponent(subscriptionId)}/upgrade`, {
+    let res = await fetch(`${CREEM_API}/subscriptions/${encodeURIComponent(subscriptionId)}/upgrade`, {
       method: "POST",
       headers: creemHeaders(),
       body: JSON.stringify({
@@ -202,8 +202,30 @@ export async function POST(req: NextRequest) {
       }),
     });
 
+    let errText = "";
     if (!res.ok) {
-      const errText = await res.text();
+      errText = await res.text();
+      // If Creem cannot process a downgrade refund because it exceeds the
+      // last in-cycle transaction amount, it returns "subscription_concurrent_change".
+      // Fallback to "proration-none" so the downgrade succeeds immediately without
+      // blocking the customer.
+      if (!charged && errText.includes("subscription_concurrent_change")) {
+        console.warn(`[Creem] Downgrade for ${subscriptionId} received subscription_concurrent_change with proration-charge-immediately; retrying with proration-none...`);
+        res = await fetch(`${CREEM_API}/subscriptions/${encodeURIComponent(subscriptionId)}/upgrade`, {
+          method: "POST",
+          headers: creemHeaders(),
+          body: JSON.stringify({
+            product_id: productId,
+            update_behavior: "proration-none",
+          }),
+        });
+        if (!res.ok) {
+          errText = await res.text();
+        }
+      }
+    }
+
+    if (!res.ok) {
       console.error(`Creem plan change error (${res.status}) for subscription ${subscriptionId}:`, errText);
       // Creem settles one change (e.g. an upgrade's prorated charge) before it
       // accepts the next; a second change moments later is refused, not failed.
