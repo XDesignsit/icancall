@@ -2,7 +2,8 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { z } from "zod";
 import { createAuthClient, supabase } from "@/lib/supabase";
-import { issueSession, sessionCookieOptions, verifySession } from "@/lib/session";
+import { EMAIL_PROOF_COOKIE, issueSession, sessionCookieOptions, verifyEmailProof, verifySession } from "@/lib/session";
+import { startSession } from "@/lib/userSessions";
 import { toE164 } from "@/lib/phone";
 import { resolveSessionRole } from "@/lib/roles";
 import { isOnboarded } from "@/lib/onboarding";
@@ -52,6 +53,7 @@ export async function POST(request: Request) {
     const cookieStore = await cookies();
     const sessionToken = cookieStore.get("session")?.value;
     let userId: string | null = null;
+    let createdNewUser = false;
     let sessionEmail: string | null = null;
     let sessionId: string | undefined;
 
@@ -185,6 +187,18 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: authError?.message || "Failed to create user account." }, { status: 400 });
       }
 
+      // For an address that is already registered Supabase answers with a
+      // decoy user (no identities, an id that exists nowhere) instead of an
+      // error. Building a profile, buying numbers or issuing a session on that
+      // id would all go wrong — send the customer to sign in instead.
+      if (Array.isArray(authData.user.identities) && authData.user.identities.length === 0) {
+        return NextResponse.json(
+          { error: "An account with this email already exists. Please sign in to continue.", code: "account_exists" },
+          { status: 409 }
+        );
+      }
+      createdNewUser = true;
+
       userId = authData.user.id;
 
       // Insert profile record in profiles table
@@ -305,6 +319,21 @@ export async function POST(request: Request) {
       // still recognises this browser as "This device".
       const fresh = await issueSession({ email, role, userId, onboarding: !onboarded, sid: sessionId });
       response.cookies.set("session", fresh, sessionCookieOptions());
+    } else if (userId && createdNewUser && (await verifyEmailProof(cookieStore.get(EMAIL_PROOF_COOKIE)?.value, email))) {
+      // A brand-new email/password account, created by someone the wizard's
+      // PIN check proved controls this address: sign them in, so "Go to
+      // dashboard" lands on the dashboard instead of the login page. Without
+      // the proof (the wizard verified a phone instead, or the proof expired)
+      // they sign in with an emailed PIN as before.
+      const role = await resolveSessionRole(userId, email);
+      const onboarded = await isOnboarded(userId, email);
+      const sid = await startSession(userId, request.headers);
+      const fresh = await issueSession({ email, role, userId, onboarding: !onboarded, sid });
+      response.cookies.set("session", fresh, sessionCookieOptions());
+    }
+    // The proof is single-use.
+    if (cookieStore.get(EMAIL_PROOF_COOKIE)) {
+      response.cookies.set(EMAIL_PROOF_COOKIE, "", { ...sessionCookieOptions(), maxAge: 0 });
     }
 
     return response;

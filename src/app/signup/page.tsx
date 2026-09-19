@@ -449,6 +449,21 @@ const PAYMENT_UNVERIFIED: Record<string, string> = {
   ko: "결제를 확인하지 못해 계정이 아직 생성되지 않았습니다. 계속하려면 결제를 완료해 주세요. 요금이 청구되었다면 support@icancall.co로 문의해 주세요.",
 };
 
+// Shown when signup finds the address already registered (nothing new was created).
+const ACCOUNT_EXISTS: Record<string, string> = {
+  en: "An account with this email already exists. Please sign in to continue.",
+  es: "Ya existe una cuenta con este correo electrónico. Inicie sesión para continuar.",
+  fr: "Un compte existe déjà avec cette adresse e-mail. Veuillez vous connecter pour continuer.",
+  ja: "このメールアドレスのアカウントは既に存在します。続行するにはサインインしてください。",
+  zh: "该邮箱已注册账户。请登录以继续。",
+  ar: "يوجد حساب بهذا البريد الإلكتروني بالفعل. يرجى تسجيل الدخول للمتابعة.",
+  hi: "इस ईमेल से एक खाता पहले से मौजूद है। जारी रखने के लिए कृपया साइन इन करें।",
+  pt: "Já existe uma conta com este e-mail. Faça login para continuar.",
+  de: "Mit dieser E-Mail-Adresse besteht bereits ein Konto. Bitte melden Sie sich an, um fortzufahren.",
+  it: "Esiste già un account con questa email. Accedi per continuare.",
+  ko: "이 이메일로 등록된 계정이 이미 있습니다. 계속하려면 로그인해 주세요.",
+};
+
 /* ============ INTERNAL COMPONENTS ============ */
 function BrandMark({ dark, lang }: { dark?: boolean; lang: string }) {
   return (
@@ -1368,8 +1383,10 @@ function PaymentStep({ data, onNext, onBack, t, lang }: { data: OnboardingData; 
         if (!res.ok) {
           const errData = await res.json().catch(() => ({}));
           console.error("Failed to register caregiver:", errData.error);
-          const unpaid = res.status === 402 || res.status === 409 || res.status === 502;
-          failure = unpaid && lang !== "en" ? (PAYMENT_UNVERIFIED[lang] || PAYMENT_UNVERIFIED.en) : (errData.error || PAYMENT_UNVERIFIED.en);
+          const unpaid = res.status === 402 || res.status === 502;
+          failure = errData.code === "account_exists" ? (ACCOUNT_EXISTS[lang] || ACCOUNT_EXISTS.en)
+            : unpaid && lang !== "en" ? (PAYMENT_UNVERIFIED[lang] || PAYMENT_UNVERIFIED.en)
+            : (errData.error || PAYMENT_UNVERIFIED.en);
         }
       } catch (err) {
         console.error("Error during Supabase signup registration:", err);

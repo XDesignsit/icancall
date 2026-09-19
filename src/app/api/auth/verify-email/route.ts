@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { randomInt } from "crypto";
 import { sendEmail } from "@/lib/mail";
+import { EMAIL_PROOF_COOKIE, EMAIL_PROOF_MAX_AGE_SECONDS, issueEmailProof, sessionCookieOptions } from "@/lib/session";
 
 // In-memory store: email -> { code, expiresAt, attempts }
 const otpStore = new Map<string, { code: string; expiresAt: number; attempts: number }>();
@@ -70,7 +71,14 @@ export async function POST(request: Request) {
       }
 
       otpStore.delete(email.toLowerCase());
-      return NextResponse.json({ success: true, verified: true });
+      // Keep a server-side record of the verification: /api/auth/signup only
+      // signs a new customer in when it sees this proof for their address.
+      const response = NextResponse.json({ success: true, verified: true });
+      response.cookies.set(EMAIL_PROOF_COOKIE, await issueEmailProof(email), {
+        ...sessionCookieOptions(),
+        maxAge: EMAIL_PROOF_MAX_AGE_SECONDS,
+      });
+      return response;
     }
 
     return NextResponse.json({ error: "Invalid action." }, { status: 400 });
