@@ -142,10 +142,51 @@ h3 { font-size: clamp(1.25rem, 2vw, 1.6rem); }
 .nav { display: flex; align-items: center; gap: 20px; font-family: var(--font); }
 .nav a { font-family: var(--font); font-size: 0.94rem; color: var(--ink-soft); font-weight: 500; transition: color .15s; white-space: nowrap; }
 .nav a:hover { color: var(--ink); }
-.header-cta { display: flex; align-items: center; gap: 14px; }
+.header-cta { display: flex; align-items: center; gap: 14px; flex: none; }
+/* The row is brand + nav + CTA group and none of it may push the page wider
+   than the viewport. The brand and CTA group keep their size; the nav takes
+   what is left and lets links that do not fit wrap onto a clipped second row,
+   so longer translations drop trailing links instead of overflowing. */
+.header-inner { gap: 16px; }
+.header-inner .brand { flex: none; }
+.header-inner .nav {
+  flex: 1 1 0; min-width: 0; height: 40px; padding-inline: 4px;
+  flex-wrap: wrap; justify-content: center; overflow: clip;
+}
+.header-inner .nav a { line-height: 40px; }
+/* "See how it works" repeats the first nav link, so it is the first thing to
+   go: below 1180px everywhere, and at every width in the languages whose
+   labels never fit beside the full nav inside the 1180px wrap. */
+@media (max-width: 1180px) {
+  .header-inner .nav ~ .header-cta .btn-ghost { display: none; }
+}
+.header:lang(es) .nav ~ .header-cta .btn-ghost,
+.header:lang(fr) .nav ~ .header-cta .btn-ghost,
+.header:lang(pt) .nav ~ .header-cta .btn-ghost,
+.header:lang(hi) .nav ~ .header-cta .btn-ghost { display: none; }
+@media (max-width: 1080px) {
+  .header-inner .nav { gap: 14px; }
+  .header-cta .btn-primary { padding: 12px 20px; }
+}
 @media (max-width: 880px) {
   .nav { display: none; }
   .header-cta .btn-ghost { display: none; }
+  /* With the nav gone the CTA group takes the leftover width and uses the same
+     wrap-and-clip approach. row-reverse plus order keeps the visual order
+     (Login, Select a Plan, language) while making Login the first to drop on
+     narrow phones; it stays reachable from the footer. */
+  .header-cta {
+    flex: 1 1 0; min-width: 0; height: 48px;
+    flex-direction: row-reverse; flex-wrap: wrap; align-content: flex-start; overflow: clip;
+  }
+  .header-cta > * { height: 48px; }
+  .header-cta .lang-select { order: 1; height: auto; align-self: center; }
+  .header-cta .btn-primary { order: 2; }
+  .header-cta .btn-text { order: 3; }
+}
+@media (max-width: 480px) {
+  .header-inner { gap: 10px; }
+  .header-cta .btn-primary { padding: 10px 16px; font-size: 0.92rem; }
 }
 
 /* Hero */

@@ -849,7 +849,7 @@ export default function ComparisonChartPage() {
   return (
     <div className={lang === "ar" ? "rtl" : "ltr"} style={{ direction: lang === "ar" ? "rtl" : "ltr" }}>
       {/* ============== HEADER ============== */}
-      <header className={`header ${scrolled ? "scrolled" : ""}`}>
+      <header className={`header ${scrolled ? "scrolled" : ""}`} lang={lang}>
         <div className="wrap header-inner">
           <Link className="brand" href="/" aria-label="iCanCall home">
             <svg className="logo-main" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 553.0305" style={{ height: "40px", width: "auto", display: "block" }}>
