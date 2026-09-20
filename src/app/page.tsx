@@ -5,6 +5,7 @@ import Link from "next/link";
 import type { HomepageTranslations } from "@/lib/translations";
 import enTranslations from "@/lib/translations/en";
 import { PLAN_PRICING } from "@/lib/pricing";
+import UseCaseCards from "@/components/UseCaseCards";
 
 /* ============ TYPES ============ */
 interface Contact {
@@ -1095,68 +1096,7 @@ export default function Home() {
               <h2>{t.usecases.title}</h2>
               <p className="lead">{t.usecases.lead}</p>
             </div>
-            <div className="usecases">
-              <article className="usecase reveal in">
-                <a className="ph" href="/parents" aria-label={t.usecases.u1Title}>
-                  <img 
-                    src="/usecases/child-calling.png" 
-                    alt="Young children" 
-                    style={{
-                      width: '100%',
-                      height: '100%',
-                      objectFit: 'cover',
-                      transform: 'scale(1.25)',
-                      transformOrigin: 'center bottom',
-                      objectPosition: 'center bottom'
-                    }}
-                  />
-                </a>
-                <div className="body">
-                  <h3><a href="/parents">{t.usecases.u1Title}</a></h3>
-                  <p>{t.usecases.u1Desc}</p>
-                </div>
-              </article>
-              <article className="usecase reveal in">
-                <a className="ph" href="/seniors" aria-label={t.usecases.u2Title}>
-                  <img 
-                    src="/usecases/aging-parent.png" 
-                    alt="Aging parents" 
-                    style={{
-                      width: '100%',
-                      height: '100%',
-                      objectFit: 'cover',
-                      transform: 'scale(1.4)',
-                      transformOrigin: 'center center',
-                      objectPosition: 'center 58%'
-                    }}
-                  />
-                </a>
-                <div className="body">
-                  <h3><a href="/seniors">{t.usecases.u2Title}</a></h3>
-                  <p>{t.usecases.u2Desc}</p>
-                </div>
-              </article>
-              <article className="usecase reveal in">
-                <a className="ph" href="/caregivers" aria-label={t.usecases.u3Title}>
-                  <img 
-                    src="/usecases/special-abilities.png" 
-                    alt="Special abilities & caregivers" 
-                    style={{
-                      width: '100%',
-                      height: '100%',
-                      objectFit: 'cover',
-                      transform: 'scale(1.4)',
-                      transformOrigin: 'center center',
-                      objectPosition: 'center 70%'
-                    }}
-                  />
-                </a>
-                <div className="body">
-                  <h3><a href="/caregivers">{t.usecases.u3Title}</a></h3>
-                  <p>{t.usecases.u3Desc}</p>
-                </div>
-              </article>
-            </div>
+            <UseCaseCards t={t.usecases} />
           </div>
         </section>
                <section className="section tint-band" id="pricing">
