@@ -251,6 +251,9 @@ export default function DashboardApp() {
   // otherwise a failed load would push the hardcoded placeholder account/lines
   // over the user's real data (the lines POST also deletes unlisted rows).
   const serverDataLoadedRef = useRef(false);
+  // With live billing the server owns the add-on counts: an extra number has to
+  // be bought (Account → Add-ons) before the lines route will accept it.
+  const [liveBilling, setLiveBilling] = useState(false);
 
   // 2. Client-side profile to account mapping
   const mapProfileToAccount = (profile: ProfileRow): Account => {
@@ -360,6 +363,7 @@ export default function DashboardApp() {
           return;
         }
         setViewerRole(profileData.role === "member" ? "member" : "owner");
+        setLiveBilling(!!profileData.liveBilling);
 
         const linesRes = await fetch("/api/caregiver/lines");
         if (linesRes.status === 401) {
@@ -393,8 +397,9 @@ export default function DashboardApp() {
             setLog(generateDynamicLogs(mappedLines));
           }
 
-          // Auto-heal extraNumbers out-of-sync states on load
-          if (currentAccount) {
+          // Auto-heal extraNumbers out-of-sync states on load. Simulated billing
+          // only: with live billing the stored count is what was paid for.
+          if (currentAccount && !profileData.liveBilling) {
             const baseLinesLimit = planConfig(currentAccount.plan).includedLines;
             const correctExtraNumbers = Math.max(0, mappedLines.length - baseLinesLimit);
             if (currentAccount.addons && currentAccount.addons.extraNumbers !== correctExtraNumbers) {
@@ -615,6 +620,10 @@ export default function DashboardApp() {
 
       if (viewParam) {
         setView(viewParam);
+      }
+      const tabParam = params.get("tab");
+      if (viewParam === "account" && tabParam && ["profile", "security", "contact", "billing"].includes(tabParam)) {
+        setAcctTab(tabParam);
       }
       if (recordingUrl) {
         setActiveVoicemail({
@@ -1166,10 +1175,22 @@ export default function DashboardApp() {
                 className="btn btn-primary"
                 disabled={!headerSelectedNumber}
                 onClick={() => {
+                  // No paid room for another number: it is bought under
+                  // Account → Add-ons, where the payment is taken and verified.
+                  if (liveBilling && lines.length >= planConfig(account.plan).includedLines + (account.addons?.extraNumbers || 0)) {
+                    setHeaderAddonModalOpen(false);
+                    setAcctTab("billing");
+                    go("account");
+                    showToast(lang === "es" ? "Agregue un número adicional en Complementos para continuar."
+                      : lang === "fr" ? "Ajoutez un numéro supplémentaire dans Options pour continuer."
+                      : "Add an extra number under Add-ons to continue.");
+                    return;
+                  }
+
                   let updatedAccount = account;
                   setAccount((prev) => {
                     const baseLinesCount = planConfig(prev.plan).includedLines;
-                    const needsAddon = lines.length >= baseLinesCount;
+                    const needsAddon = !liveBilling && lines.length >= baseLinesCount;
                     if (!needsAddon) return prev;
 
                     const updated = {
@@ -1231,7 +1252,7 @@ export default function DashboardApp() {
               {(() => {
                 const baseLinesLimit = planConfig(account.plan).includedLines;
                 const planName = account.plan === "careteam" ? "Care Team" : account.plan === "pro" ? "Pro" : "Essential";
-                return lines.length >= baseLinesLimit ? (
+                return lines.length >= baseLinesLimit + (liveBilling ? account.addons?.extraNumbers || 0 : 0) ? (
                   <div style={{ background: "oklch(0.96 0.03 220 / 0.4)", border: "1px solid var(--border)", borderRadius: "var(--r-md)", padding: "10px 14px", marginBottom: 16, fontSize: "0.85rem", color: "var(--ink-soft)", lineHeight: 1.4 }}>
                     {lang === "es"
                       ? "Nota: Esta línea se agregará como un complemento y se cobrará a su tarifa de $6.99/mes inmediatamente al confirmar y guardar."

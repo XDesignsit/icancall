@@ -4,11 +4,13 @@ import { supabase } from "@/lib/supabase";
 import { planConfig } from "@/lib/planConfig";
 import { creemEntityId, planForProductId } from "@/lib/creem";
 import { REACTIVATED_PATCH, endedPatch, isEndedStatus, sendSubscriptionEndedEmail } from "@/lib/subscriptionEnd";
+import { MAX_ADDON_UNITS, addonForProductId, addonSubscriptions, creditAddonPurchase, followPlanSubscription, paidExtraNumbers } from "@/lib/addons";
 
 type Settings = Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
 
 interface CreemObject {
   id?: string;
+  units?: number;
   product?: unknown;
   customer?: { id?: string; email?: string } | string;
   subscription?: { id?: string; metadata?: Record<string, unknown> } | string;
@@ -67,7 +69,14 @@ export async function POST(req: NextRequest) {
     console.log(`Creem checkout.completed — customer: ${customerId}, subscription: ${subscriptionId}, plan: ${boughtPlan ? `${boughtPlan.plan}/${boughtPlan.billingCycle}` : "n/a"}`);
 
     const profile = customerId ? await findProfile(obj) : null;
-    if (profile) {
+    const boughtAddon = addonForProductId(creemEntityId(obj.product));
+    if (profile && boughtAddon && obj.id && obj.metadata?.user_id === profile.id) {
+      // Same crediting as api/creem/confirm-addon, for the customer who paid
+      // and closed the window before the dashboard could confirm. Once per
+      // checkout, whichever of the two gets here first.
+      const units = Math.min(MAX_ADDON_UNITS, Math.max(1, Math.floor(Number(obj.units) || 1)));
+      await creditAddonPurchase(profile.id, profile.settings, obj.id, { addon: boughtAddon, units, customerId, subscriptionId });
+    } else if (profile) {
       await supabase
         .from("profiles")
         .update({
@@ -128,6 +137,23 @@ export async function POST(req: NextRequest) {
       : eventType === "subscription.expired" ? "expired"
       : obj.status;
 
+    // An extra-number add-on that ended on its own (customer portal, failed
+    // renewal): it is no longer paid for, so it no longer raises the allowance.
+    const addonSub = profile && !isPlanSub ? addonSubscriptions(profile.settings).find((a) => a.id === obj.id) : undefined;
+    if (profile && addonSub && addonSub.status !== "canceled" && isEndedStatus(status)) {
+      console.log(`Creem ${eventType} — ${profile.id} add-on subscription ${obj.id} ended (${addonSub.units} number(s))`);
+      await supabase
+        .from("profiles")
+        .update({
+          settings: {
+            ...profile.settings,
+            addons: { ...(profile.settings.addons || {}), extraNumbers: Math.max(0, paidExtraNumbers(profile.settings) - addonSub.units) },
+            addonSubscriptions: addonSubscriptions(profile.settings).map((a) => (a.id === obj.id ? { ...a, status: "canceled", units: 0 } : a)),
+          },
+        })
+        .eq("id", profile.id);
+    }
+
     if (profile && isPlanSub && status && profile.settings.subscriptionStatus !== status) {
       console.log(`Creem ${eventType} — ${profile.id} subscription is now ${status}`);
       const wasEnded = isEndedStatus(profile.settings.subscriptionStatus);
@@ -139,9 +165,18 @@ export async function POST(req: NextRequest) {
         : status === "active" || status === "trialing"
           ? REACTIVATED_PATCH
           : { subscriptionStatus: status, subscriptionEndsAt: obj.current_period_end_date ?? profile.settings.subscriptionEndsAt ?? null };
+      // Add-on subscriptions follow the plan, however it was cancelled or
+      // brought back (the dashboard does the same in api/creem/cancel-subscription).
+      const addonPatch = isEndedStatus(status)
+        ? await followPlanSubscription(profile.settings, "immediate")
+        : status === "scheduled_cancel"
+          ? await followPlanSubscription(profile.settings, "scheduled")
+          : status === "active" && profile.settings.subscriptionStatus === "scheduled_cancel"
+            ? await followPlanSubscription(profile.settings, "resume")
+            : {};
       await supabase
         .from("profiles")
-        .update({ settings: { ...profile.settings, ...patch } })
+        .update({ settings: { ...profile.settings, ...patch, ...addonPatch } })
         .eq("id", profile.id);
 
       if (isEndedStatus(status) && !wasEnded) {

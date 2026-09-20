@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
 import { authorizeOwner, loadSettings, type Settings } from "@/lib/billingOwner";
 import { REACTIVATED_PATCH, isEndedStatus } from "@/lib/subscriptionEnd";
-import { isPlanChangeChargedNow, type PlanId } from "@/lib/planConfig";
+import { isPlanChangeChargedNow, planConfig, type PlanId } from "@/lib/planConfig";
+import { paidExtraNumbers } from "@/lib/addons";
 import {
   CREEM_API,
   PLAN_PRODUCT_IDS,
@@ -132,6 +133,19 @@ export async function POST(req: NextRequest) {
       console.warn(`[MOCK] Simulating Creem plan change to ${plan}/${billing} — no subscription was modified.`);
       await savePlan(userId, settings, isEndedStatus(settings.subscriptionStatus) ? { ...REACTIVATED_PATCH, ...target } : target);
       return NextResponse.json({ success: true, ...target, charged: false, simulated: true });
+    }
+
+    // A plan has to cover the numbers the account holds (its included lines
+    // plus paid extra-number add-ons). Otherwise a customer could fill Care
+    // Team's five lines and then pay for Essential's one.
+    const { data: heldRows } = await supabase.from("phone_lines").select("number").eq("user_id", userId);
+    const heldLines = (heldRows || []).length;
+    const room = planConfig(plan).includedLines + (isEndedStatus(settings.subscriptionStatus) ? 0 : paidExtraNumbers(settings));
+    if (heldLines > room) {
+      return NextResponse.json(
+        { error: `That plan covers ${room} phone number${room === 1 ? "" : "s"} and this account has ${heldLines}. Remove a number first, or choose a larger plan.` },
+        { status: 409 }
+      );
     }
 
     const productId = PLAN_PRODUCT_IDS[plan][billing];

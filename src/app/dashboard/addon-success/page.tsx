@@ -7,8 +7,26 @@ function AddonSuccessContent() {
   const searchParams = useSearchParams();
   const addon = searchParams.get("addon") ?? "";
   const qty = parseInt(searchParams.get("qty") ?? "1", 10);
+  // Creem appends checkout_id to the return URL.
+  const checkoutId = searchParams.get("checkout_id") ?? "";
 
   useEffect(() => {
+    // Popup blocked: the checkout ran in the dashboard's own tab, so there is
+    // no dashboard left open to confirm the purchase. Confirm it here (the
+    // server verifies it with Creem) and go back to the account page.
+    if (!window.opener) {
+      fetch("/api/creem/confirm-addon", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ checkoutId, addon, quantity: qty }),
+      })
+        .then((res) => res.ok)
+        .catch(() => false)
+        // addon_paid: the dashboard may now add the numbers picked before paying.
+        .then((paid) => { window.location.replace(`/dashboard?view=account&tab=billing${paid ? "&addon_paid=1" : ""}`); });
+      return;
+    }
+
     const payload = JSON.stringify({ addon, qty, ts: Date.now() });
 
     // 1. BroadcastChannel — most reliable for same-origin cross-window messaging
@@ -31,7 +49,7 @@ function AddonSuccessContent() {
     } catch {}
 
     setTimeout(() => { try { window.close(); } catch {} }, 1500);
-  }, [addon, qty]);
+  }, [addon, qty, checkoutId]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-50">

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
 import { authorizeOwner, loadSettings, type Settings } from "@/lib/billingOwner";
 import { CREEM_API, creemHeaders, isSimulatedBilling } from "@/lib/creem";
+import { followPlanSubscription } from "@/lib/addons";
 
 async function saveStatus(userId: string, settings: Settings, patch: Settings): Promise<void> {
   const { error } = await supabase
@@ -83,9 +84,12 @@ export async function POST(req: NextRequest) {
     const patch = action === "cancel"
       ? { subscriptionStatus: subscription.status as string, subscriptionEndsAt: (subscription.current_period_end_date as string) || null }
       : { subscriptionStatus: "active", subscriptionEndsAt: null };
+    // Extra-number add-ons bill on subscriptions of their own. They follow the
+    // plan: no further charges once it is set to end, back on if it is resumed.
+    const addonPatch = await followPlanSubscription(settings, action === "cancel" ? "scheduled" : "resume");
     // If this write fails, the subscription.scheduled_cancel / subscription.active
     // webhook records the same state moments later.
-    await saveStatus(userId, settings, patch);
+    await saveStatus(userId, settings, { ...patch, ...addonPatch });
     return NextResponse.json({ success: true, ...patch });
   } catch (err) {
     console.error("Creem cancel-subscription exception:", err);

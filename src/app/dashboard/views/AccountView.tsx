@@ -396,6 +396,51 @@ export function AccountView({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Back from an add-on checkout paid in this tab (popup blocked): add the
+  // numbers that were picked before leaving. The purchase was already verified
+  // and credited by the return page; the lines route still has the last word.
+  const addonReturnHandled = useRef(false);
+  useEffect(() => {
+    if (addonReturnHandled.current) return;
+    addonReturnHandled.current = true;
+    const raw = localStorage.getItem("ic_pending_addon_numbers");
+    localStorage.removeItem("ic_pending_addon_numbers");
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("addon_paid") !== "1") return;
+    window.history.replaceState({}, "", "/dashboard?view=account");
+    if (!raw) return;
+
+    try {
+      const pending = JSON.parse(raw) as { numbers?: string[]; ts?: number };
+      const last10 = (n: string) => n.replace(/\D/g, "").slice(-10);
+      const held = new Set(lines.map((l) => last10(l.number)));
+      const numbers = (pending.numbers || []).filter((n) => !held.has(last10(n)));
+      if (numbers.length === 0 || Date.now() - (pending.ts || 0) > 30 * 60 * 1000) return;
+
+      const newLines = numbers.map((number, index) => ({
+        id: "line_" + Date.now() + "_" + index,
+        label: getLineDefaultLabel(lines.length + index, account.plan, lang),
+        person: lang === "es" ? "Línea del círculo de confianza" : lang === "fr" ? "Ligne du cercle de confiance" : "Trusted contact line",
+        number,
+        color: AVATAR_COLORS[(lines.length + index) % AVATAR_COLORS.length],
+        mode: "cascade" as const,
+        minutesUsed: 0,
+        contacts: lines[0]?.contacts ? JSON.parse(JSON.stringify(lines[0].contacts)) : [],
+      }));
+      const nextLines = [...lines, ...newLines];
+      setLines(nextLines);
+      localStorage.setItem("ic_lines_data", JSON.stringify(nextLines));
+      const needed = Math.max(0, nextLines.length - planConfig(account.plan).includedLines);
+      setAccount((prev) => ({
+        ...prev,
+        addons: { ...(prev.addons || {}), extraNumbers: Math.max(prev.addons?.extraNumbers || 0, needed) } as Account["addons"],
+      }));
+      showToast(ext.addonsUpdatedToast);
+    } catch {}
+    // Runs once on mount, after the dashboard has loaded the account and lines.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   useEffect(() => {
     if (planModalOpen && lines && lines.length > 0) {
       setSelectedLineToKeep(lines[0].id);
@@ -421,7 +466,8 @@ export function AccountView({
   const [tempMinuteBlocks, setTempMinuteBlocks] = useState(0);
 
   const planMaxIncluded = planConfig(a.plan).includedLines;
-  const unusedPlanLines = Math.max(0, planMaxIncluded - lines.length);
+  // Room already paid for: the plan's lines plus extra-number add-ons not yet in use.
+  const unusedPlanLines = Math.max(0, planMaxIncluded + (a.addons?.extraNumbers || 0) - lines.length);
   const chargeableNewNumbers = tempExtraNumbers > 0 ? Math.max(0, tempExtraNumbers - unusedPlanLines) : 0;
 
   const [lastPropExtraNumbers, setLastPropExtraNumbers] = useState(a.addons?.extraNumbers || 0);
@@ -432,7 +478,7 @@ export function AccountView({
   }
   const [addonModalOpen, setAddonModalOpen] = useState(false);
   const [addonCheckoutLoading, setAddonCheckoutLoading] = useState(false);
-  const addonPendingAction = useRef<(() => void) | null>(null);
+  const addonPendingAction = useRef<(() => void | Promise<void>) | null>(null);
   const addonPopupRef = useRef<Window | null>(null);
   const [addonRemovalModalOpen, setAddonRemovalModalOpen] = useState(false);
   const [annualBillingConfirmOpen, setAnnualBillingConfirmOpen] = useState(false);
@@ -557,8 +603,9 @@ export function AccountView({
         }
         addonPopupRef.current = null;
       }
-      addonPendingAction.current();
+      const pending = addonPendingAction.current;
       addonPendingAction.current = null;
+      pending();
       localStorage.removeItem("creem_addon_success");
     };
 
@@ -1599,26 +1646,33 @@ export function AccountView({
                       const newMinuteBlocks = tempMinuteBlocks;
 
                       // Determine which add-ons need checkout
-                      const checkouts: Array<{ addon: string; quantity: number }> = [];
+                      const checkouts: Array<{ addon: "phone_number" | "voice_minutes"; quantity: number }> = [];
                       if (chargeableNewNumbers > 0) checkouts.push({ addon: "phone_number", quantity: chargeableNewNumbers });
                       if (newMinuteBlocks > 0) checkouts.push({ addon: "voice_minutes", quantity: newMinuteBlocks });
 
-                      // Save the local state action for after payment(s) succeed
-                      const applyAddons = () => {
+                      // The server's add-on counts after a confirmed purchase (null: nothing was bought).
+                      type ConfirmedAddons = { extraNumbers?: number; minuteBlocks?: number } | null;
+                      const adoptAddons = (confirmed: ConfirmedAddons) => {
+                        if (!confirmed) return;
                         setAccount((prev) => {
                           const updated = {
                             ...prev,
                             addons: {
                               ...(prev.addons || {}),
-                              extraNumbers: (prev.addons?.extraNumbers || 0) + chargeableNewNumbers,
-                              minuteBlocks: (prev.addons?.minuteBlocks || 0) + newMinuteBlocks,
+                              extraNumbers: confirmed.extraNumbers ?? prev.addons?.extraNumbers ?? 0,
+                              minuteBlocks: confirmed.minuteBlocks ?? prev.addons?.minuteBlocks ?? 0,
                             } as Account["addons"],
                           };
                           localStorage.setItem("ic_account_data", JSON.stringify(updated));
                           return updated;
                         });
+                      };
+
+                      // Adds the picked numbers as lines: free ones within the plan, and
+                      // paid ones once their purchase has been confirmed by the server.
+                      const applyNumbers = (confirmed: ConfirmedAddons) => {
+                        adoptAddons(confirmed);
                         setTempExtraNumbers(0);
-                        setTempMinuteBlocks(0);
 
                         const newLines = addedNumbersConfig.map((config, index) => ({
                           id: "line_" + Date.now() + "_" + index,
@@ -1634,14 +1688,26 @@ export function AccountView({
                         const nextLines = [...lines, ...newLines];
                         setLines(nextLines);
                         localStorage.setItem("ic_lines_data", JSON.stringify(nextLines));
-                        setAddonModalOpen(false);
-                        showToast(ext.addonsUpdatedToast);
+                        setAddedNumbersConfig([]);
+                      };
+
+                      const applyMinutes = (confirmed: ConfirmedAddons) => {
+                        adoptAddons(confirmed);
+                        setTempMinuteBlocks(0);
                       };
 
                       if (checkouts.length === 0) {
-                        applyAddons();
+                        applyNumbers(null);
+                        setAddonModalOpen(false);
+                        showToast(ext.addonsUpdatedToast);
                         return;
                       }
+
+                      // One Creem checkout buys one product. With both numbers and
+                      // minutes selected the first is paid now; the dialog then stays
+                      // open so the second is its own click (and its own popup).
+                      const first = checkouts[0];
+                      const moreToPay = checkouts.length > 1;
 
                       // Open popup immediately (must be synchronous within user gesture)
                       const w = 520, h = 720;
@@ -1650,7 +1716,6 @@ export function AccountView({
                       const popup = window.open("about:blank", "creem_addon_checkout", `width=${w},height=${h},left=${left},top=${top},resizable=yes,scrollbars=yes`);
 
                       addonPopupRef.current = popup;
-                      addonPendingAction.current = applyAddons;
 
                       // Clear any stale success flag before starting
                       localStorage.removeItem("creem_addon_success");
@@ -1658,19 +1723,57 @@ export function AccountView({
                       setAddonCheckoutLoading(true);
 
                       try {
-                        const first = checkouts[0];
                         const res = await fetch("/api/creem/checkout", {
                           method: "POST",
                           headers: { "Content-Type": "application/json" },
                           body: JSON.stringify({ addon: first.addon, quantity: first.quantity }),
                         });
                         if (!res.ok) throw new Error("checkout_failed");
-                        const { checkoutUrl } = await res.json();
+                        const { checkoutUrl, checkoutId } = await res.json();
+
+                        // The checkout window reporting success is only the cue: the
+                        // server asks Creem whether this checkout was really paid, and
+                        // nothing is added unless it says so. Runs once per checkout.
+                        addonPendingAction.current = async () => {
+                          try {
+                            const confirmRes = await fetch("/api/creem/confirm-addon", {
+                              method: "POST",
+                              headers: { "Content-Type": "application/json" },
+                              body: JSON.stringify({ checkoutId, addon: first.addon, quantity: first.quantity }),
+                            });
+                            const confirmData = await confirmRes.json().catch(() => ({}));
+                            if (!confirmRes.ok || !confirmData.success) {
+                              showToast(confirmData.error || "We couldn't verify your payment, so nothing was added.");
+                              return;
+                            }
+                            if (first.addon === "phone_number") {
+                              applyNumbers(confirmData.addons);
+                            } else {
+                              applyMinutes(confirmData.addons);
+                              // Numbers that fit the plan at no charge ride along with the minutes purchase.
+                              if (chargeableNewNumbers === 0 && addedNumbersConfig.length > 0) applyNumbers(null);
+                            }
+                            if (!moreToPay) setAddonModalOpen(false);
+                            showToast(ext.addonsUpdatedToast);
+                          } catch {
+                            showToast("We couldn't verify your payment, so nothing was added.");
+                          }
+                        };
 
                         if (popup) {
                           popup.location.href = checkoutUrl;
                         } else {
-                          window.open(checkoutUrl, "_blank");
+                          // Popup blocked: pay in this tab instead. The return page
+                          // confirms the purchase and comes back to the account page,
+                          // which then adds the numbers picked here.
+                          if (addedNumbersConfig.length > 0 && (first.addon === "phone_number" || chargeableNewNumbers === 0)) {
+                            localStorage.setItem("ic_pending_addon_numbers", JSON.stringify({
+                              numbers: addedNumbersConfig.map((c) => c.selectedNumber!.number),
+                              ts: Date.now(),
+                            }));
+                          }
+                          window.location.href = checkoutUrl;
+                          return;
                         }
 
                         // Poll localStorage for success flag (focus events are unreliable after cross-origin popup nav)
@@ -1686,7 +1789,9 @@ export function AccountView({
                                 if (addonPopupRef.current === popup) {
                                   addonPopupRef.current = null;
                                 }
-                                applyAddons();
+                                const pending = addonPendingAction.current;
+                                addonPendingAction.current = null;
+                                pending?.();
                               }
                             } catch {}
                           }
@@ -2477,7 +2582,7 @@ export function AccountView({
 
           {(() => {
             const planMaxIncluded = planConfig(a.plan).includedLines;
-            const unusedPlanLines = Math.max(0, planMaxIncluded - lines.length);
+            const unusedPlanLines = Math.max(0, planMaxIncluded + (a.addons?.extraNumbers || 0) - lines.length);
             const chargeableNewNumbers = tempExtraNumbers > 0 ? Math.max(0, tempExtraNumbers - unusedPlanLines) : tempExtraNumbers;
             
             const numCost = chargeableNewNumbers * 6.99;
