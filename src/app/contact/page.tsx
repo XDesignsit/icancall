@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import type { HomepageTranslations } from "@/lib/translations";
 import enTranslations from "@/lib/translations/en";
+import UseCaseCards from "@/components/UseCaseCards";
 
 type Lang =
   | "en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi" | "pt" | "de" | "it" | "ko";
@@ -483,6 +484,18 @@ export default function ContactPage() {
                 </form>
               )}
             </div>
+          </div>
+        </section>
+
+        {/* ============== USE CASES ============== */}
+        <section className="section" id="usecases">
+          <div className="wrap">
+            <div className="section-head reveal in">
+              <span className="eyebrow">{t.nav.who}</span>
+              <h2>{t.usecases.title}</h2>
+              <p className="lead">{t.usecases.lead}</p>
+            </div>
+            <UseCaseCards t={t.usecases} />
           </div>
         </section>
       </main>
