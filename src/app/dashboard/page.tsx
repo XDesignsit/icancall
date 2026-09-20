@@ -621,6 +621,10 @@ export default function DashboardApp() {
       if (viewParam) {
         setView(viewParam);
       }
+      const tabParam = params.get("tab");
+      if (viewParam === "account" && tabParam && ["profile", "security", "contact", "billing"].includes(tabParam)) {
+        setAcctTab(tabParam);
+      }
       if (recordingUrl) {
         setActiveVoicemail({
           recordingUrl,

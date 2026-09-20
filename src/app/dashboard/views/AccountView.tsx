@@ -1718,7 +1718,10 @@ export function AccountView({
                         if (popup) {
                           popup.location.href = checkoutUrl;
                         } else {
-                          window.open(checkoutUrl, "_blank");
+                          // Popup blocked: pay in this tab instead. The return page
+                          // confirms the purchase and comes back to the account page.
+                          window.location.href = checkoutUrl;
+                          return;
                         }
 
                         // Poll localStorage for success flag (focus events are unreliable after cross-origin popup nav)
