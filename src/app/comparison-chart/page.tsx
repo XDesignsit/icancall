@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { translations } from "@/lib/translations";
+import UseCaseCards from "@/components/UseCaseCards";
 
 const chartTranslations: Record<string, Record<string, string>> = {
   en: {
@@ -1140,6 +1141,18 @@ export default function ComparisonChartPage() {
               <span className="legend-item"><span style={{ color: "oklch(0.62 0.18 22)", marginRight: "4px" }}>✗</span> {c.legendNo}</span>
               <span className="legend-item"><span style={{ background: "oklch(0.96 0.02 90)", color: "oklch(0.60 0.10 80)", padding: "1px 5px", borderRadius: "5px", fontSize: "11px", fontWeight: "700", marginRight: "4px" }}>~ Partial</span> {c.legendPartial}</span>
             </div>
+          </div>
+        </section>
+
+        {/* ============== USE CASES ============== */}
+        <section className="section" id="usecases">
+          <div className="wrap">
+            <div className="section-head reveal in">
+              <span className="eyebrow">{t.nav.who}</span>
+              <h2>{t.usecases.title}</h2>
+              <p className="lead">{t.usecases.lead}</p>
+            </div>
+            <UseCaseCards t={t.usecases} />
           </div>
         </section>
 
