@@ -38,7 +38,9 @@ const t: HomepageTranslations = {
   "faq": "अक्सर पूछे जाने वाले प्रश्न",
   "login": "लॉगिन करें",
   "howWorksBtn": "देखें यह कैसे काम करता है",
-  "selectPlanBtn": "प्लान चुनें"
+  "selectPlanBtn": "प्लान चुनें",
+  "menu": "मेनू",
+  "language": "भाषा"
 },
 "hero": {
   "eyebrow": "ऑटोपायलट पर सुरक्षा",

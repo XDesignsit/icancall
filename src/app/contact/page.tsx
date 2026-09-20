@@ -5,6 +5,7 @@ import Link from "next/link";
 import type { HomepageTranslations } from "@/lib/translations";
 import enTranslations from "@/lib/translations/en";
 import UseCaseCards from "@/components/UseCaseCards";
+import MobileNav from "@/components/MobileNav";
 
 type Lang =
   | "en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi" | "pt" | "de" | "it" | "ko";
@@ -359,7 +360,7 @@ export default function ContactPage() {
   return (
     <div className="min-h-screen selection:bg-teal-500 selection:text-white overflow-x-hidden">
       {/* ============== HEADER ============== */}
-      <header className={`header ${scrolled ? "scrolled" : ""}`}>
+      <header className={`header ${scrolled ? "scrolled" : ""}`} lang={lang}>
         <div className="wrap header-inner">
           <Link className="brand" href="/" aria-label="iCanCall home">
             <LogoMark height={40} />
@@ -406,6 +407,7 @@ export default function ContactPage() {
               <option value="ko">🇰🇷 KO</option>
             </select>
           </div>
+          <MobileNav t={t.nav} lang={lang} onLangChange={changeLanguage} />
         </div>
       </header>
 
