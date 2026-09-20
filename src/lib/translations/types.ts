@@ -37,6 +37,8 @@ export interface HomepageTranslations {
     login: string;
     howWorksBtn: string;
     selectPlanBtn: string;
+    menu: string;
+    language: string;
   };
   hero: {
     eyebrow: string;

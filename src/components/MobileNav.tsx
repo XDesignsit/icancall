@@ -77,7 +77,7 @@ export default function MobileNav({ t, lang, onLangChange }: MobileNavProps) {
         ref={buttonRef}
         type="button"
         className="nav-toggle"
-        aria-label="Menu"
+        aria-label={t.menu}
         aria-expanded={open}
         aria-controls={panelId}
         onClick={() => setOpen((o) => !o)}
@@ -91,7 +91,7 @@ export default function MobileNav({ t, lang, onLangChange }: MobileNavProps) {
         </svg>
       </button>
       <div id={panelId} className="mobile-nav-panel" hidden={!open}>
-        <nav className="wrap mobile-nav-links" aria-label="Menu">
+        <nav className="wrap mobile-nav-links" aria-label={t.menu}>
           <Link href="/#how" onClick={close}>{t.how}</Link>
           <Link href="/#features" onClick={close}>{t.features}</Link>
           <Link href="/#usecases" onClick={close}>{t.who}</Link>
@@ -100,7 +100,7 @@ export default function MobileNav({ t, lang, onLangChange }: MobileNavProps) {
           <a className="mobile-nav-login" href="/login" onClick={close}>{t.login}</a>
           <select
             className="mobile-nav-lang"
-            aria-label="Language"
+            aria-label={t.language}
             value={lang}
             onChange={(e) => onLangChange(e.target.value as MobileNavLang)}
           >
