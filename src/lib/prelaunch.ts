@@ -2,7 +2,7 @@ import type { NextRequest } from "next/server";
 
 // Single launch switch: flip to false at launch to disable the coming-soon
 // gate everywhere (proxy redirect + markdown/llms.txt AI surfaces).
-export const PRELAUNCH = true;
+export const PRELAUNCH = false;
 
 // True when this request should see prelaunch (coming-soon) content:
 // production hosts only, unless the preview bypass cookie is present.
