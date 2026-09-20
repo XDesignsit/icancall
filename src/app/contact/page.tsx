@@ -5,6 +5,7 @@ import Link from "next/link";
 import type { HomepageTranslations } from "@/lib/translations";
 import enTranslations from "@/lib/translations/en";
 import UseCaseCards from "@/components/UseCaseCards";
+import MobileNav from "@/components/MobileNav";
 
 type Lang =
   | "en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi" | "pt" | "de" | "it" | "ko";
@@ -406,6 +407,7 @@ export default function ContactPage() {
               <option value="ko">🇰🇷 KO</option>
             </select>
           </div>
+          <MobileNav t={t.nav} lang={lang} onLangChange={changeLanguage} />
         </div>
       </header>
 

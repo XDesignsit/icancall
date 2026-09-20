@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { translations } from "@/lib/translations";
+import MobileNav from "@/components/MobileNav";
 
 const chartTranslations: Record<string, Record<string, string>> = {
   en: {
@@ -907,6 +908,7 @@ export default function ComparisonChartPage() {
               <option value="ko">🇰🇷 KO</option>
             </select>
           </div>
+          <MobileNav t={t.nav} lang={lang} onLangChange={changeLanguage} />
         </div>
       </header>
 

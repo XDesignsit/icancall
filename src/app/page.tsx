@@ -6,6 +6,7 @@ import type { HomepageTranslations } from "@/lib/translations";
 import enTranslations from "@/lib/translations/en";
 import { PLAN_PRICING } from "@/lib/pricing";
 import UseCaseCards from "@/components/UseCaseCards";
+import MobileNav from "@/components/MobileNav";
 
 /* ============ TYPES ============ */
 interface Contact {
@@ -732,6 +733,7 @@ export default function Home() {
               <option value="ko">🇰🇷 KO</option>
             </select>
           </div>
+          <MobileNav t={t.nav} lang={lang} onLangChange={changeLanguage} />
         </div>
       </header>
 

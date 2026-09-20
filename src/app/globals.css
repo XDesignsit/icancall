@@ -171,23 +171,46 @@ h3 { font-size: clamp(1.25rem, 2vw, 1.6rem); }
 @media (max-width: 880px) {
   .nav { display: none; }
   .header-cta .btn-ghost { display: none; }
-  /* With the nav gone the CTA group takes the leftover width and uses the same
-     wrap-and-clip approach. row-reverse plus order keeps the visual order
-     (Login, Select a Plan, language) while making Login the first to drop on
-     narrow phones; it stays reachable from the footer. */
-  .header-cta {
-    flex: 1 1 0; min-width: 0; height: 48px;
-    flex-direction: row-reverse; flex-wrap: wrap; align-content: flex-start; overflow: clip;
-  }
-  .header-cta > * { height: 48px; }
-  .header-cta .lang-select { order: 1; height: auto; align-self: center; }
-  .header-cta .btn-primary { order: 2; }
-  .header-cta .btn-text { order: 3; }
+  /* The inline nav and Login move into the hamburger panel. */
+  .header-inner .nav ~ .header-cta .btn-text { display: none; }
+  .header-inner .mobile-nav { display: block; flex: none; }
 }
 @media (max-width: 480px) {
   .header-inner { gap: 10px; }
   .header-cta .btn-primary { padding: 10px 16px; font-size: 0.92rem; }
+  /* Not enough room beside the button and the hamburger: the panel carries
+     its own language select. */
+  .header-inner .nav ~ .header-cta .lang-select { display: none; }
 }
+
+/* Hamburger + drop-down panel (MobileNav), only below the nav breakpoint */
+.mobile-nav { display: none; }
+.nav-toggle {
+  width: 44px; height: 44px; display: grid; place-items: center;
+  background: transparent; border: 1px solid var(--line); border-radius: 12px;
+  color: var(--ink); cursor: pointer; transition: background .15s ease;
+}
+.nav-toggle:hover { background: oklch(0.96 0.01 225); }
+.nav-toggle svg { width: 22px; height: 22px; }
+.mobile-nav-panel {
+  position: absolute; top: 100%; inset-inline: 0;
+  background: oklch(0.992 0.005 220);
+  border-block: 1px solid var(--line);
+  box-shadow: var(--shadow-md);
+  max-height: calc(100dvh - 72px); overflow-y: auto;
+}
+.mobile-nav-links { display: flex; flex-direction: column; padding-block: 8px 20px; font-family: var(--font); }
+.mobile-nav-links a {
+  padding: 14px 0; font-size: 1.05rem; font-weight: 500; color: var(--ink);
+  border-bottom: 1px solid var(--line-soft);
+}
+.mobile-nav-links a.mobile-nav-login { font-weight: 700; color: var(--blue-deep); }
+.mobile-nav-lang {
+  margin-top: 18px; align-self: flex-start;
+  background: transparent; border: 1px solid var(--line); border-radius: 20px;
+  color: var(--ink-soft); padding: 8px 12px; font: 600 0.92rem var(--font); cursor: pointer;
+}
+@media (min-width: 481px) { .mobile-nav-lang { display: none; } }
 
 /* Hero */
 .hero { position: relative; overflow: hidden; padding-top: clamp(48px, 7vw, 86px); padding-bottom: clamp(60px, 8vw, 110px); }
