@@ -396,6 +396,51 @@ export function AccountView({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Back from an add-on checkout paid in this tab (popup blocked): add the
+  // numbers that were picked before leaving. The purchase was already verified
+  // and credited by the return page; the lines route still has the last word.
+  const addonReturnHandled = useRef(false);
+  useEffect(() => {
+    if (addonReturnHandled.current) return;
+    addonReturnHandled.current = true;
+    const raw = localStorage.getItem("ic_pending_addon_numbers");
+    localStorage.removeItem("ic_pending_addon_numbers");
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("addon_paid") !== "1") return;
+    window.history.replaceState({}, "", "/dashboard?view=account");
+    if (!raw) return;
+
+    try {
+      const pending = JSON.parse(raw) as { numbers?: string[]; ts?: number };
+      const last10 = (n: string) => n.replace(/\D/g, "").slice(-10);
+      const held = new Set(lines.map((l) => last10(l.number)));
+      const numbers = (pending.numbers || []).filter((n) => !held.has(last10(n)));
+      if (numbers.length === 0 || Date.now() - (pending.ts || 0) > 30 * 60 * 1000) return;
+
+      const newLines = numbers.map((number, index) => ({
+        id: "line_" + Date.now() + "_" + index,
+        label: getLineDefaultLabel(lines.length + index, account.plan, lang),
+        person: lang === "es" ? "Línea del círculo de confianza" : lang === "fr" ? "Ligne du cercle de confiance" : "Trusted contact line",
+        number,
+        color: AVATAR_COLORS[(lines.length + index) % AVATAR_COLORS.length],
+        mode: "cascade" as const,
+        minutesUsed: 0,
+        contacts: lines[0]?.contacts ? JSON.parse(JSON.stringify(lines[0].contacts)) : [],
+      }));
+      const nextLines = [...lines, ...newLines];
+      setLines(nextLines);
+      localStorage.setItem("ic_lines_data", JSON.stringify(nextLines));
+      const needed = Math.max(0, nextLines.length - planConfig(account.plan).includedLines);
+      setAccount((prev) => ({
+        ...prev,
+        addons: { ...(prev.addons || {}), extraNumbers: Math.max(prev.addons?.extraNumbers || 0, needed) } as Account["addons"],
+      }));
+      showToast(ext.addonsUpdatedToast);
+    } catch {}
+    // Runs once on mount, after the dashboard has loaded the account and lines.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   useEffect(() => {
     if (planModalOpen && lines && lines.length > 0) {
       setSelectedLineToKeep(lines[0].id);
@@ -1719,7 +1764,14 @@ export function AccountView({
                           popup.location.href = checkoutUrl;
                         } else {
                           // Popup blocked: pay in this tab instead. The return page
-                          // confirms the purchase and comes back to the account page.
+                          // confirms the purchase and comes back to the account page,
+                          // which then adds the numbers picked here.
+                          if (addedNumbersConfig.length > 0 && (first.addon === "phone_number" || chargeableNewNumbers === 0)) {
+                            localStorage.setItem("ic_pending_addon_numbers", JSON.stringify({
+                              numbers: addedNumbersConfig.map((c) => c.selectedNumber!.number),
+                              ts: Date.now(),
+                            }));
+                          }
                           window.location.href = checkoutUrl;
                           return;
                         }

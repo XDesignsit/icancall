@@ -20,8 +20,10 @@ function AddonSuccessContent() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ checkoutId, addon, quantity: qty }),
       })
-        .catch(() => null)
-        .finally(() => { window.location.replace("/dashboard?view=account&tab=billing"); });
+        .then((res) => res.ok)
+        .catch(() => false)
+        // addon_paid: the dashboard may now add the numbers picked before paying.
+        .then((paid) => { window.location.replace(`/dashboard?view=account&tab=billing${paid ? "&addon_paid=1" : ""}`); });
       return;
     }
 
