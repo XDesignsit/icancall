@@ -2585,9 +2585,11 @@ export function AccountView({
             const unusedPlanLines = Math.max(0, planMaxIncluded + (a.addons?.extraNumbers || 0) - lines.length);
             const chargeableNewNumbers = tempExtraNumbers > 0 ? Math.max(0, tempExtraNumbers - unusedPlanLines) : tempExtraNumbers;
             
+            // Extra numbers bill monthly; minutes are a one-time credit purchase.
             const numCost = chargeableNewNumbers * 6.99;
             const minCost = tempMinuteBlocks * 4.99;
-            const total = numCost + minCost;
+            const oneTimeLabel = lang === "es" ? "pago único" : lang === "fr" ? "paiement unique" : lang === "ja" ? "1回払い" : lang === "zh" ? "一次性" : lang === "ar" ? "دفعة واحدة" : lang === "hi" ? "एकमुश्त" : lang === "pt" ? "pagamento único" : lang === "de" ? "einmalig" : lang === "it" ? "una tantum" : lang === "ko" ? "일회성" : "one-time";
+            const oneTimeMinutesLabel = lang === "es" ? "Minutos adicionales (compra única)" : lang === "fr" ? "Minutes supplémentaires (achat unique)" : lang === "ja" ? "追加通話時間（1回限りの購入）" : lang === "zh" ? "额外通话分钟（一次性购买）" : lang === "ar" ? "دقائق إضافية (شراء لمرة واحدة)" : lang === "hi" ? "अतिरिक्त मिनट (एकमुश्त खरीद)" : lang === "pt" ? "Minutos adicionais (compra única)" : lang === "de" ? "Zusatzminuten (Einmalkauf)" : lang === "it" ? "Minuti aggiuntivi (acquisto una tantum)" : lang === "ko" ? "추가 통화 시간 (일회성 구매)" : "Extra minutes (one-time purchase)";
             const maxBlocks = 10;
 
             const proceedWithSaveAddons = (delta: number, minBlocksToSave: number) => {
@@ -2707,7 +2709,7 @@ export function AccountView({
                         />
                       </div>
                       <span className="sub">
-                        {tempMinuteBlocks * 30} {lang === "es" ? "min" : lang === "fr" ? "min" : lang === "ja" ? "分" : lang === "zh" ? "分钟" : lang === "ar" ? "دقيقة" : lang === "hi" ? "मिनट" : lang === "pt" ? "min" : lang === "de" ? "Min" : lang === "it" ? "min" : lang === "ko" ? "분" : "min"} · {minCost > 0 ? `+$${minCost.toFixed(2)}/${lang === "es" ? "mes" : lang === "fr" ? "mois" : lang === "ja" ? "月" : lang === "zh" ? "月" : lang === "ar" ? "شهر" : lang === "hi" ? "माह" : lang === "pt" ? "mês" : lang === "de" ? "Monat" : lang === "it" ? "mese" : lang === "ko" ? "월" : "mo"}` : `$0.00/${lang === "es" ? "mes" : lang === "fr" ? "mois" : lang === "ja" ? "月" : lang === "zh" ? "月" : lang === "ar" ? "شهر" : lang === "hi" ? "माह" : lang === "pt" ? "mês" : lang === "de" ? "Monat" : lang === "it" ? "mese" : lang === "ko" ? "월" : "mo"}`}
+                        {tempMinuteBlocks * 30} {lang === "es" ? "min" : lang === "fr" ? "min" : lang === "ja" ? "分" : lang === "zh" ? "分钟" : lang === "ar" ? "دقيقة" : lang === "hi" ? "मिनट" : lang === "pt" ? "min" : lang === "de" ? "Min" : lang === "it" ? "min" : lang === "ko" ? "분" : "min"} · {minCost > 0 ? `+$${minCost.toFixed(2)} ${oneTimeLabel}` : "$0.00"}
                       </span>
                     </div>
                   </div>
@@ -2717,10 +2719,19 @@ export function AccountView({
                       {lang === "es" ? "Total mensual de complementos" : lang === "fr" ? "Total mensuel des options" : "Add-ons monthly total"}
                     </span>
                     <span className="big">
-                      {total < 0 ? `-$${Math.abs(total).toFixed(2)}` : `$${total.toFixed(2)}`}
+                      {numCost < 0 ? `-$${Math.abs(numCost).toFixed(2)}` : `$${numCost.toFixed(2)}`}
                       <span> / {lang === "es" ? "mes" : lang === "fr" ? "mois" : lang === "ja" ? "月" : lang === "zh" ? "月" : lang === "ar" ? "شهر" : lang === "hi" ? "माह" : lang === "pt" ? "mês" : lang === "de" ? "Monat" : lang === "it" ? "mese" : lang === "ko" ? "월" : "mo"}</span>
                     </span>
                   </div>
+                  {minCost > 0 && (
+                    <div className="addon-total" style={{ marginTop: 8 }}>
+                      <span className="lbl">{oneTimeMinutesLabel}</span>
+                      <span className="big">
+                        ${minCost.toFixed(2)}
+                        <span> {oneTimeLabel}</span>
+                      </span>
+                    </div>
+                  )}
                   <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 16 }}>
                     <button className="btn btn-primary" onClick={handleSaveAddons}>
                       <Icon name="check" /> {ext.saveAddons}

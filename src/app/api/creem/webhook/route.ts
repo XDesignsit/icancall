@@ -209,13 +209,12 @@ export async function POST(req: NextRequest) {
       const addons = found.settings.addons || {};
       const planBaseMinutes = planConfig(found.settings.plan || "essential").voiceMinutes;
 
-      const addonMinutes = (addons.minuteBlocks || 0) * 30;
-      const totalPool = planBaseMinutes + addonMinutes + (addons.rolloverMin || 0);
-      const usedMin = Math.min(addons.usedMin || 0, totalPool);
-
-      // Only unused add-on minutes roll over — base plan minutes do not
-      const unusedAddonMin = Math.max(0, addonMinutes - Math.max(0, usedMin - planBaseMinutes));
-      const newRolloverMin = (addons.rolloverMin || 0) + unusedAddonMin;
+      // Add-on minutes are one-time credits: blocks bought this cycle plus
+      // whatever was carried over. Plan minutes are used first; the credits
+      // that are left roll over, and the purchase itself does not repeat.
+      const creditMinutes = (addons.minuteBlocks || 0) * 30 + (addons.rolloverMin || 0);
+      const usedMin = Math.min(addons.usedMin || 0, planBaseMinutes + creditMinutes);
+      const newRolloverMin = Math.max(0, creditMinutes - Math.max(0, usedMin - planBaseMinutes));
 
       await supabase
         .from("profiles")
@@ -226,13 +225,14 @@ export async function POST(req: NextRequest) {
             addons: {
               ...addons,
               usedMin: 0,
+              minuteBlocks: 0,
               rolloverMin: newRolloverMin,
             },
           },
         })
         .eq("id", found.id);
 
-      console.log(`Billing reset for ${found.id}: rollover=${newRolloverMin} min (unused addon: ${unusedAddonMin})`);
+      console.log(`Billing reset for ${found.id}: ${newRolloverMin} add-on min carried over`);
     }
   }
 
