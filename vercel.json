@@ -38,6 +38,10 @@
     {
       "path": "/api/cron/release-ended-numbers",
       "schedule": "0 9 * * *"
+    },
+    {
+      "path": "/api/cron/reset-annual-minutes",
+      "schedule": "0 8 * * *"
     }
   ]
 }

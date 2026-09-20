@@ -152,6 +152,7 @@ export async function POST(request: Request) {
       delete newSettings.creem_customer_id;
       delete newSettings.creem_subscription_id;
       delete newSettings.creem_period_start;
+      delete newSettings.minutes_cycle_start;
     }
 
     // Fetch existing settings to prevent overwriting payment metadata keys set by webhooks
