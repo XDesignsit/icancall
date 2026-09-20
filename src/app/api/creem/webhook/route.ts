@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
 import { supabase } from "@/lib/supabase";
-import { planConfig } from "@/lib/planConfig";
 import { creemEntityId, planForProductId } from "@/lib/creem";
+import { resetMinutesPool } from "@/lib/minutesCycle";
 import { REACTIVATED_PATCH, endedPatch, isEndedStatus, sendSubscriptionEndedEmail } from "@/lib/subscriptionEnd";
 import { MAX_ADDON_UNITS, addonForProductId, addonSubscriptions, creditAddonPurchase, followPlanSubscription, paidExtraNumbers } from "@/lib/addons";
 
@@ -206,33 +206,20 @@ export async function POST(req: NextRequest) {
         .update({ settings: { ...found.settings, creem_period_start: periodStart } })
         .eq("id", found.id);
     } else if (found && isPlanSub && (!periodStart || periodStart !== lastPeriod)) {
-      const addons = found.settings.addons || {};
-      const planBaseMinutes = planConfig(found.settings.plan || "essential").voiceMinutes;
-
-      const addonMinutes = (addons.minuteBlocks || 0) * 30;
-      const totalPool = planBaseMinutes + addonMinutes + (addons.rolloverMin || 0);
-      const usedMin = Math.min(addons.usedMin || 0, totalPool);
-
-      // Only unused add-on minutes roll over — base plan minutes do not
-      const unusedAddonMin = Math.max(0, addonMinutes - Math.max(0, usedMin - planBaseMinutes));
-      const newRolloverMin = (addons.rolloverMin || 0) + unusedAddonMin;
+      const addons = resetMinutesPool(found.settings);
 
       await supabase
         .from("profiles")
         .update({
           settings: {
             ...found.settings,
-            ...(periodStart ? { creem_period_start: periodStart } : {}),
-            addons: {
-              ...addons,
-              usedMin: 0,
-              rolloverMin: newRolloverMin,
-            },
+            ...(periodStart ? { creem_period_start: periodStart, minutes_cycle_start: periodStart } : {}),
+            addons,
           },
         })
         .eq("id", found.id);
 
-      console.log(`Billing reset for ${found.id}: rollover=${newRolloverMin} min (unused addon: ${unusedAddonMin})`);
+      console.log(`Billing reset for ${found.id}: ${addons.rolloverMin} add-on min carried over`);
     }
   }
 

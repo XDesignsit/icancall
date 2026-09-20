@@ -114,7 +114,7 @@ export async function findAccountByTwilioNumber(phoneNumber: string): Promise<Ac
     const addons = settings.addons || {};
     const plan = settings.plan || 'pro';
     // Telephony allotment is 2x the marketed minutes (both call legs count).
-    const allotted = planConfig(plan).voiceMinutes * 2 + (Number(addons.minuteBlocks || 0) * 60);
+    const allotted = planConfig(plan).voiceMinutes * 2 + (Number(addons.minuteBlocks || 0) * 60) + (Number(addons.rolloverMin || 0) * 2);
     const used = Number(addons.usedMin || 0);
 
     const lineSettings = line.settings || {};
