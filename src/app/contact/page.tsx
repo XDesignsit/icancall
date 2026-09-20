@@ -359,7 +359,7 @@ export default function ContactPage() {
   return (
     <div className="min-h-screen selection:bg-teal-500 selection:text-white overflow-x-hidden">
       {/* ============== HEADER ============== */}
-      <header className={`header ${scrolled ? "scrolled" : ""}`}>
+      <header className={`header ${scrolled ? "scrolled" : ""}`} lang={lang}>
         <div className="wrap header-inner">
           <Link className="brand" href="/" aria-label="iCanCall home">
             <LogoMark height={40} />
