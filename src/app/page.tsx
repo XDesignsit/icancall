@@ -1097,7 +1097,7 @@ export default function Home() {
             </div>
             <div className="usecases">
               <article className="usecase reveal in">
-                <div className="ph">
+                <a className="ph" href="/parents" aria-label={t.usecases.u1Title}>
                   <img 
                     src="/usecases/child-calling.png" 
                     alt="Young children" 
@@ -1110,14 +1110,14 @@ export default function Home() {
                       objectPosition: 'center bottom'
                     }}
                   />
-                </div>
+                </a>
                 <div className="body">
-                  <h3>{t.usecases.u1Title}</h3>
+                  <h3><a href="/parents">{t.usecases.u1Title}</a></h3>
                   <p>{t.usecases.u1Desc}</p>
                 </div>
               </article>
               <article className="usecase reveal in">
-                <div className="ph">
+                <a className="ph" href="/seniors" aria-label={t.usecases.u2Title}>
                   <img 
                     src="/usecases/aging-parent.png" 
                     alt="Aging parents" 
@@ -1130,14 +1130,14 @@ export default function Home() {
                       objectPosition: 'center 58%'
                     }}
                   />
-                </div>
+                </a>
                 <div className="body">
-                  <h3>{t.usecases.u2Title}</h3>
+                  <h3><a href="/seniors">{t.usecases.u2Title}</a></h3>
                   <p>{t.usecases.u2Desc}</p>
                 </div>
               </article>
               <article className="usecase reveal in">
-                <div className="ph">
+                <a className="ph" href="/caregivers" aria-label={t.usecases.u3Title}>
                   <img 
                     src="/usecases/special-abilities.png" 
                     alt="Special abilities & caregivers" 
@@ -1150,9 +1150,9 @@ export default function Home() {
                       objectPosition: 'center 70%'
                     }}
                   />
-                </div>
+                </a>
                 <div className="body">
-                  <h3>{t.usecases.u3Title}</h3>
+                  <h3><a href="/caregivers">{t.usecases.u3Title}</a></h3>
                   <p>{t.usecases.u3Desc}</p>
                 </div>
               </article>

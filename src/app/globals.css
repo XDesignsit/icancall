@@ -411,6 +411,8 @@ h3 { font-size: clamp(1.25rem, 2vw, 1.6rem); }
 .usecase .ph span { font-family: var(--mono); font-size: 0.74rem; color: var(--ink-faint); background: oklch(1 0 0 / 0.7); padding: 5px 10px; border-radius: 6px; }
 .usecase .body { padding: 24px 24px 28px; }
 .usecase h3 { font-size: 1.22rem; margin-bottom: 9px; }
+.usecase h3 a { transition: color .15s; }
+.usecase h3 a:hover, .usecase:hover h3 a { color: var(--accent); }
 .usecase p { color: var(--ink-soft); font-size: 0.96rem; }
 @media (max-width: 820px) { .usecases { grid-template-columns: 1fr; } }
 
