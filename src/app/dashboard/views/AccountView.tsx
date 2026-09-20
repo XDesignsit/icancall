@@ -421,7 +421,8 @@ export function AccountView({
   const [tempMinuteBlocks, setTempMinuteBlocks] = useState(0);
 
   const planMaxIncluded = planConfig(a.plan).includedLines;
-  const unusedPlanLines = Math.max(0, planMaxIncluded - lines.length);
+  // Room already paid for: the plan's lines plus extra-number add-ons not yet in use.
+  const unusedPlanLines = Math.max(0, planMaxIncluded + (a.addons?.extraNumbers || 0) - lines.length);
   const chargeableNewNumbers = tempExtraNumbers > 0 ? Math.max(0, tempExtraNumbers - unusedPlanLines) : 0;
 
   const [lastPropExtraNumbers, setLastPropExtraNumbers] = useState(a.addons?.extraNumbers || 0);
@@ -432,7 +433,7 @@ export function AccountView({
   }
   const [addonModalOpen, setAddonModalOpen] = useState(false);
   const [addonCheckoutLoading, setAddonCheckoutLoading] = useState(false);
-  const addonPendingAction = useRef<(() => void) | null>(null);
+  const addonPendingAction = useRef<(() => void | Promise<void>) | null>(null);
   const addonPopupRef = useRef<Window | null>(null);
   const [addonRemovalModalOpen, setAddonRemovalModalOpen] = useState(false);
   const [annualBillingConfirmOpen, setAnnualBillingConfirmOpen] = useState(false);
@@ -557,8 +558,9 @@ export function AccountView({
         }
         addonPopupRef.current = null;
       }
-      addonPendingAction.current();
+      const pending = addonPendingAction.current;
       addonPendingAction.current = null;
+      pending();
       localStorage.removeItem("creem_addon_success");
     };
 
@@ -1599,26 +1601,33 @@ export function AccountView({
                       const newMinuteBlocks = tempMinuteBlocks;
 
                       // Determine which add-ons need checkout
-                      const checkouts: Array<{ addon: string; quantity: number }> = [];
+                      const checkouts: Array<{ addon: "phone_number" | "voice_minutes"; quantity: number }> = [];
                       if (chargeableNewNumbers > 0) checkouts.push({ addon: "phone_number", quantity: chargeableNewNumbers });
                       if (newMinuteBlocks > 0) checkouts.push({ addon: "voice_minutes", quantity: newMinuteBlocks });
 
-                      // Save the local state action for after payment(s) succeed
-                      const applyAddons = () => {
+                      // The server's add-on counts after a confirmed purchase (null: nothing was bought).
+                      type ConfirmedAddons = { extraNumbers?: number; minuteBlocks?: number } | null;
+                      const adoptAddons = (confirmed: ConfirmedAddons) => {
+                        if (!confirmed) return;
                         setAccount((prev) => {
                           const updated = {
                             ...prev,
                             addons: {
                               ...(prev.addons || {}),
-                              extraNumbers: (prev.addons?.extraNumbers || 0) + chargeableNewNumbers,
-                              minuteBlocks: (prev.addons?.minuteBlocks || 0) + newMinuteBlocks,
+                              extraNumbers: confirmed.extraNumbers ?? prev.addons?.extraNumbers ?? 0,
+                              minuteBlocks: confirmed.minuteBlocks ?? prev.addons?.minuteBlocks ?? 0,
                             } as Account["addons"],
                           };
                           localStorage.setItem("ic_account_data", JSON.stringify(updated));
                           return updated;
                         });
+                      };
+
+                      // Adds the picked numbers as lines: free ones within the plan, and
+                      // paid ones once their purchase has been confirmed by the server.
+                      const applyNumbers = (confirmed: ConfirmedAddons) => {
+                        adoptAddons(confirmed);
                         setTempExtraNumbers(0);
-                        setTempMinuteBlocks(0);
 
                         const newLines = addedNumbersConfig.map((config, index) => ({
                           id: "line_" + Date.now() + "_" + index,
@@ -1634,14 +1643,26 @@ export function AccountView({
                         const nextLines = [...lines, ...newLines];
                         setLines(nextLines);
                         localStorage.setItem("ic_lines_data", JSON.stringify(nextLines));
-                        setAddonModalOpen(false);
-                        showToast(ext.addonsUpdatedToast);
+                        setAddedNumbersConfig([]);
+                      };
+
+                      const applyMinutes = (confirmed: ConfirmedAddons) => {
+                        adoptAddons(confirmed);
+                        setTempMinuteBlocks(0);
                       };
 
                       if (checkouts.length === 0) {
-                        applyAddons();
+                        applyNumbers(null);
+                        setAddonModalOpen(false);
+                        showToast(ext.addonsUpdatedToast);
                         return;
                       }
+
+                      // One Creem checkout buys one product. With both numbers and
+                      // minutes selected the first is paid now; the dialog then stays
+                      // open so the second is its own click (and its own popup).
+                      const first = checkouts[0];
+                      const moreToPay = checkouts.length > 1;
 
                       // Open popup immediately (must be synchronous within user gesture)
                       const w = 520, h = 720;
@@ -1650,7 +1671,6 @@ export function AccountView({
                       const popup = window.open("about:blank", "creem_addon_checkout", `width=${w},height=${h},left=${left},top=${top},resizable=yes,scrollbars=yes`);
 
                       addonPopupRef.current = popup;
-                      addonPendingAction.current = applyAddons;
 
                       // Clear any stale success flag before starting
                       localStorage.removeItem("creem_addon_success");
@@ -1658,14 +1678,42 @@ export function AccountView({
                       setAddonCheckoutLoading(true);
 
                       try {
-                        const first = checkouts[0];
                         const res = await fetch("/api/creem/checkout", {
                           method: "POST",
                           headers: { "Content-Type": "application/json" },
                           body: JSON.stringify({ addon: first.addon, quantity: first.quantity }),
                         });
                         if (!res.ok) throw new Error("checkout_failed");
-                        const { checkoutUrl } = await res.json();
+                        const { checkoutUrl, checkoutId } = await res.json();
+
+                        // The checkout window reporting success is only the cue: the
+                        // server asks Creem whether this checkout was really paid, and
+                        // nothing is added unless it says so. Runs once per checkout.
+                        addonPendingAction.current = async () => {
+                          try {
+                            const confirmRes = await fetch("/api/creem/confirm-addon", {
+                              method: "POST",
+                              headers: { "Content-Type": "application/json" },
+                              body: JSON.stringify({ checkoutId, addon: first.addon, quantity: first.quantity }),
+                            });
+                            const confirmData = await confirmRes.json().catch(() => ({}));
+                            if (!confirmRes.ok || !confirmData.success) {
+                              showToast(confirmData.error || "We couldn't verify your payment, so nothing was added.");
+                              return;
+                            }
+                            if (first.addon === "phone_number") {
+                              applyNumbers(confirmData.addons);
+                            } else {
+                              applyMinutes(confirmData.addons);
+                              // Numbers that fit the plan at no charge ride along with the minutes purchase.
+                              if (chargeableNewNumbers === 0 && addedNumbersConfig.length > 0) applyNumbers(null);
+                            }
+                            if (!moreToPay) setAddonModalOpen(false);
+                            showToast(ext.addonsUpdatedToast);
+                          } catch {
+                            showToast("We couldn't verify your payment, so nothing was added.");
+                          }
+                        };
 
                         if (popup) {
                           popup.location.href = checkoutUrl;
@@ -1686,7 +1734,9 @@ export function AccountView({
                                 if (addonPopupRef.current === popup) {
                                   addonPopupRef.current = null;
                                 }
-                                applyAddons();
+                                const pending = addonPendingAction.current;
+                                addonPendingAction.current = null;
+                                pending?.();
                               }
                             } catch {}
                           }
@@ -2477,7 +2527,7 @@ export function AccountView({
 
           {(() => {
             const planMaxIncluded = planConfig(a.plan).includedLines;
-            const unusedPlanLines = Math.max(0, planMaxIncluded - lines.length);
+            const unusedPlanLines = Math.max(0, planMaxIncluded + (a.addons?.extraNumbers || 0) - lines.length);
             const chargeableNewNumbers = tempExtraNumbers > 0 ? Math.max(0, tempExtraNumbers - unusedPlanLines) : tempExtraNumbers;
             
             const numCost = chargeableNewNumbers * 6.99;

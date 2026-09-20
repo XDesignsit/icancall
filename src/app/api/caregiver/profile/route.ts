@@ -49,7 +49,7 @@ export async function GET() {
       if (ownerErr || !ownerProfile) {
         return NextResponse.json({ error: "Failed to fetch account data" }, { status: 500 });
       }
-      return NextResponse.json({ success: true, profile: ownerProfile, role: "member" });
+      return NextResponse.json({ success: true, profile: ownerProfile, role: "member", liveBilling: !isSimulatedBilling(ownerProfile.email) });
     }
 
     // 1. Fetch profile from Supabase
@@ -101,7 +101,9 @@ export async function GET() {
       profile = inserted;
     }
 
-    return NextResponse.json({ success: true, profile, role: "owner" });
+    // liveBilling: add-on counts are server-owned (see POST) — the dashboard
+    // must show them as stored instead of recomputing them from the line count.
+    return NextResponse.json({ success: true, profile, role: "owner", liveBilling: !isSimulatedBilling(sessionEmail) });
   } catch (err) {
     console.error("Caregiver Profile GET Error:", err);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
@@ -141,6 +143,15 @@ export async function POST(request: Request) {
       delete newSettings.numbersReleasedAt;
       delete newSettings.releaseReminderSentAt;
       delete newSettings.archivedLines;
+      // Paid add-ons are credited by api/creem/confirm-addon and lowered by the
+      // lines route; minute usage is written by the call webhooks. A browser
+      // copy of any of it is stale at best and a free upgrade at worst.
+      delete newSettings.addons;
+      delete newSettings.addonSubscriptions;
+      delete newSettings.addonCheckouts;
+      delete newSettings.creem_customer_id;
+      delete newSettings.creem_subscription_id;
+      delete newSettings.creem_period_start;
     }
 
     // Fetch existing settings to prevent overwriting payment metadata keys set by webhooks

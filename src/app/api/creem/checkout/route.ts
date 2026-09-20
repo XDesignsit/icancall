@@ -1,14 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { CREEM_API, PLAN_PRODUCT_IDS, creemHeaders, isBillingCycle, isPlanId, isSimulatedBilling, sessionIdentity } from "@/lib/creem";
-
-const ADDON_PRODUCT_IDS: Record<string, string> = {
-  phone_number:  process.env.CREEM_PRODUCT_ID_ADDON_PHONE_NUMBER!,
-  voice_minutes: process.env.CREEM_PRODUCT_ID_ADDON_VOICE_MINUTES!,
-};
+import { ADDON_PRODUCT_IDS, MAX_ADDON_UNITS, isAddonId } from "@/lib/addons";
+import { authorizeOwner, loadSettings } from "@/lib/billingOwner";
+import { isEndedStatus } from "@/lib/subscriptionEnd";
 
 export async function POST(req: NextRequest) {
   try {
     const { plan, billing, addon, quantity, email } = await req.json();
+    const units = Math.floor(Number(quantity) || 1);
 
     const host = req.headers.get("host") || "localhost:3000";
     const proto = host.startsWith("localhost") ? "http" : "https";
@@ -18,11 +17,24 @@ export async function POST(req: NextRequest) {
     let successUrl: string;
 
     if (addon) {
-      if (!(addon in ADDON_PRODUCT_IDS)) {
-        return NextResponse.json({ error: "Invalid add-on type" }, { status: 400 });
+      if (!isAddonId(addon) || units < 1 || units > MAX_ADDON_UNITS) {
+        return NextResponse.json({ error: "Invalid add-on type or quantity" }, { status: 400 });
+      }
+      // Add-ons are bought by the account owner, on top of a running plan. The
+      // purchase is later credited to whoever metadata.user_id names
+      // (api/creem/confirm-addon), so it must be a real signed-in owner.
+      const owner = await authorizeOwner();
+      if (owner instanceof NextResponse) return owner;
+      if (!isSimulatedBilling(owner.email) && isEndedStatus((await loadSettings(owner.userId)).subscriptionStatus)) {
+        return NextResponse.json({ error: "Your subscription has ended. Choose a plan before buying add-ons." }, { status: 409 });
       }
       productId = ADDON_PRODUCT_IDS[addon];
-      successUrl = `${appUrl}/dashboard/addon-success?addon=${addon}&qty=${quantity || 1}`;
+      successUrl = `${appUrl}/dashboard/addon-success?addon=${addon}&qty=${units}`;
+
+      if (process.env.CREEM_API_KEY && !productId) {
+        console.error(`Creem product id missing for add-on ${addon}`);
+        return NextResponse.json({ error: "This add-on is not yet available for purchase" }, { status: 503 });
+      }
     } else {
       if (!isPlanId(plan) || !isBillingCycle(billing)) {
         return NextResponse.json({ error: "Invalid plan or billing cycle" }, { status: 400 });
@@ -56,7 +68,7 @@ export async function POST(req: NextRequest) {
       product_id: productId,
       success_url: successUrl,
     };
-    if (quantity && quantity > 1) body.units = quantity;
+    if (addon && units > 1) body.units = units;
     // Tie the purchase to the signed-in account so the webhook can match it
     // even if the customer pays with a different email address.
     // An email/password signup has no session yet, so the wizard sends the
@@ -67,6 +79,7 @@ export async function POST(req: NextRequest) {
     const metadata: Record<string, string> = {};
     if (identity?.userId) metadata.user_id = identity.userId;
     if (buyerEmail) metadata.signup_email = buyerEmail;
+    if (addon) metadata.addon = addon;
     if (Object.keys(metadata).length > 0) body.metadata = metadata;
 
     const res = await fetch(`${CREEM_API}/checkouts`, {
