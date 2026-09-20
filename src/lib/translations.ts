@@ -37,6 +37,8 @@ export interface HomepageTranslations {
     login: string;
     howWorksBtn: string;
     selectPlanBtn: string;
+    menu: string;
+    language: string;
   };
   hero: {
     eyebrow: string;
@@ -393,7 +395,9 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "faq": "FAQ",
     "login": "Login",
     "howWorksBtn": "See how it works",
-    "selectPlanBtn": "Select a Plan"
+    "selectPlanBtn": "Select a Plan",
+    "menu": "Menu",
+    "language": "Language"
   },
   "hero": {
     "eyebrow": "Safety on autopilot",
@@ -747,7 +751,9 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "faq": "Preguntas",
     "login": "Iniciar Sesión",
     "howWorksBtn": "Ver cómo funciona",
-    "selectPlanBtn": "Elegir un Plan"
+    "selectPlanBtn": "Elegir un Plan",
+    "menu": "Menú",
+    "language": "Idioma"
   },
   "hero": {
     "eyebrow": "Seguridad en piloto automático",
@@ -1101,7 +1107,9 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "faq": "FAQ",
     "login": "Connexion",
     "howWorksBtn": "Voir le fonctionnement",
-    "selectPlanBtn": "Choisir un forfait"
+    "selectPlanBtn": "Choisir un forfait",
+    "menu": "Menu",
+    "language": "Langue"
   },
   "hero": {
     "eyebrow": "La sécurité en pilote automatique",
@@ -1455,7 +1463,9 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "faq": "よくある質問",
     "login": "ログイン",
     "howWorksBtn": "仕組みを見る",
-    "selectPlanBtn": "プランを選択"
+    "selectPlanBtn": "プランを選択",
+    "menu": "メニュー",
+    "language": "言語"
   },
   "hero": {
     "eyebrow": "安心をオートパイロットで",
@@ -1809,7 +1819,9 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "faq": "常见问题",
     "login": "登录后台",
     "howWorksBtn": "了解工作原理",
-    "selectPlanBtn": "选择方案"
+    "selectPlanBtn": "选择方案",
+    "menu": "菜单",
+    "language": "语言"
   },
   "hero": {
     "eyebrow": "看护安全自动导航",
@@ -2163,7 +2175,9 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "faq": "الأسئلة الشائعة",
     "login": "تسجيل الدخول",
     "howWorksBtn": "اكتشف كيف يعمل",
-    "selectPlanBtn": "اختر خطة"
+    "selectPlanBtn": "اختر خطة",
+    "menu": "القائمة",
+    "language": "اللغة"
   },
   "hero": {
     "eyebrow": "الأمان والاتصال التلقائي",
@@ -2517,7 +2531,9 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "faq": "अक्सर पूछे जाने वाले प्रश्न",
     "login": "लॉगिन करें",
     "howWorksBtn": "देखें यह कैसे काम करता है",
-    "selectPlanBtn": "प्लान चुनें"
+    "selectPlanBtn": "प्लान चुनें",
+    "menu": "मेनू",
+    "language": "भाषा"
   },
   "hero": {
     "eyebrow": "ऑटोपायलट पर सुरक्षा",
@@ -2871,7 +2887,9 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "faq": "Perguntas frequentes",
     "login": "Entrar",
     "howWorksBtn": "Ver funcionamento",
-    "selectPlanBtn": "Escolher plano"
+    "selectPlanBtn": "Escolher plano",
+    "menu": "Menu",
+    "language": "Idioma"
   },
   "hero": {
     "eyebrow": "Segurança no piloto automático",
@@ -3225,7 +3243,9 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "faq": "FAQ",
     "login": "Anmelden",
     "howWorksBtn": "Wie es funktioniert",
-    "selectPlanBtn": "Tarif wählen"
+    "selectPlanBtn": "Tarif wählen",
+    "menu": "Menü",
+    "language": "Sprache"
   },
   "hero": {
     "eyebrow": "Sicherheit auf Autopilot",
@@ -3579,7 +3599,9 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "faq": "FAQ",
     "login": "Accedi",
     "howWorksBtn": "Come funziona",
-    "selectPlanBtn": "Scegli un piano"
+    "selectPlanBtn": "Scegli un piano",
+    "menu": "Menu",
+    "language": "Lingua"
   },
   "hero": {
     "eyebrow": "Sicurezza con autopilota",
@@ -3933,7 +3955,9 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "faq": "자주 묻는 질문",
     "login": "로그인",
     "howWorksBtn": "이용 방법 보기",
-    "selectPlanBtn": "요금제 선택"
+    "selectPlanBtn": "요금제 선택",
+    "menu": "메뉴",
+    "language": "언어"
   },
   "hero": {
     "eyebrow": "안심 통화 자동 설정",

@@ -38,7 +38,9 @@ const t: HomepageTranslations = {
   "faq": "자주 묻는 질문",
   "login": "로그인",
   "howWorksBtn": "이용 방법 보기",
-  "selectPlanBtn": "요금제 선택"
+  "selectPlanBtn": "요금제 선택",
+  "menu": "메뉴",
+  "language": "언어"
 },
 "hero": {
   "eyebrow": "안심 통화 자동 설정",

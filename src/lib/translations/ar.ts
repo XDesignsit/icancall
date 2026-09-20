@@ -38,7 +38,9 @@ const t: HomepageTranslations = {
   "faq": "الأسئلة الشائعة",
   "login": "تسجيل الدخول",
   "howWorksBtn": "اكتشف كيف يعمل",
-  "selectPlanBtn": "اختر خطة"
+  "selectPlanBtn": "اختر خطة",
+  "menu": "القائمة",
+  "language": "اللغة"
 },
 "hero": {
   "eyebrow": "الأمان والاتصال التلقائي",

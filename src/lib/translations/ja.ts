@@ -38,7 +38,9 @@ const t: HomepageTranslations = {
   "faq": "よくある質問",
   "login": "ログイン",
   "howWorksBtn": "仕組みを見る",
-  "selectPlanBtn": "プランを選択"
+  "selectPlanBtn": "プランを選択",
+  "menu": "メニュー",
+  "language": "言語"
 },
 "hero": {
   "eyebrow": "安心をオートパイロットで",

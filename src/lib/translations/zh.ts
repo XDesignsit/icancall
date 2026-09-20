@@ -38,7 +38,9 @@ const t: HomepageTranslations = {
   "faq": "常见问题",
   "login": "登录后台",
   "howWorksBtn": "了解工作原理",
-  "selectPlanBtn": "选择方案"
+  "selectPlanBtn": "选择方案",
+  "menu": "菜单",
+  "language": "语言"
 },
 "hero": {
   "eyebrow": "看护安全自动导航",
