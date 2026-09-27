@@ -291,7 +291,7 @@ export async function POST(request: Request) {
                     to: c.phone,
                     from: activeNumber,
                     url: `${baseUrl}/api/twilio/agent-join?room=${encodeURIComponent(roomName)}&screen=1`,
-                    statusCallback: `${baseUrl}/api/twilio/agent-completed?room=${encodeURIComponent(roomName)}`,
+                    statusCallback: `${baseUrl}/api/twilio/agent-completed?room=${encodeURIComponent(roomName)}&missed=1`,
                     statusCallbackEvent: ['completed'],
                   });
                 } catch (err) {
