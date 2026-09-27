@@ -399,6 +399,8 @@ export function RoutingView({
   setView,
   setAcctTab,
   setAutoOpenPlanModal,
+  saveState,
+  onRetrySave,
 }: {
   line: Line;
   setLine: React.Dispatch<React.SetStateAction<Line[]>>;
@@ -411,8 +413,14 @@ export function RoutingView({
   setView: (v: string) => void;
   setAcctTab: (t: string) => void;
   setAutoOpenPlanModal: (open: boolean) => void;
+  /** Outcome of the latest background save of the account's lines. */
+  saveState: "idle" | "saving" | "saved" | "error";
+  onRetrySave: () => void;
 }) {
   const ext = dashboardExtraTranslations[lang as keyof typeof dashboardExtraTranslations] || dashboardExtraTranslations.en;
+  // The line whose connection method was changed on this visit; the save
+  // status is shown only after such a change.
+  const [modeChangedOn, setModeChangedOn] = useState<string | null>(null);
   const [localSchedule, setLocalSchedule] = useState<CoverageSlot[]>([]);
   const [currentTime, setCurrentTime] = useState(new Date());
 
@@ -584,8 +592,14 @@ export function RoutingView({
       return;
     }
     setLine((prev) => prev.map((l) => (l.id === line.id ? { ...l, mode } : l)));
-    showToast(d.common.savedToast);
+    setModeChangedOn(line.id);
   };
+
+  const modeCheck = (
+    <span className="check" aria-hidden="true">
+      <Icon name="check" />
+    </span>
+  );
 
   return (
     <div className="content-inner">
@@ -631,6 +645,29 @@ export function RoutingView({
               {d.routing.connMethodSub}
             </p>
           </div>
+          <div role="status" aria-live="polite" style={{ display: "flex", alignItems: "center", gap: 10, flexShrink: 0 }}>
+            {modeChangedOn === line.id && saveState === "saving" && (
+              <Badge kind="gray">{ext.saveSaving}</Badge>
+            )}
+            {modeChangedOn === line.id && saveState === "saved" && (
+              <span className="badge badge-green">
+                <Icon name="check" style={{ width: 13, height: 13 }} />
+                {ext.saveSaved}
+              </span>
+            )}
+            {modeChangedOn === line.id && saveState === "error" && (
+              <>
+                <Badge kind="rose">{ext.saveFailed}</Badge>
+                <button
+                  type="button"
+                  onClick={onRetrySave}
+                  style={{ background: "none", border: 0, padding: 0, cursor: "pointer", color: "var(--blue-deep)", fontSize: "0.8rem", fontWeight: 600, textDecoration: "underline", textUnderlineOffset: 3 }}
+                >
+                  {ext.saveRetry}
+                </button>
+              </>
+            )}
+          </div>
         </div>
         <div className="card-pad">
           <div className="mode-cards" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 16 }}>
@@ -644,6 +681,7 @@ export function RoutingView({
               }}
               onClick={() => setMode("cascade")}
             >
+              {modeCheck}
               <div className="ic" style={{ marginBottom: 12 }}>
                 <Icon name="routing" style={{ width: 24, height: 24 }} />
               </div>
@@ -663,6 +701,7 @@ export function RoutingView({
               }}
               onClick={() => setMode("simultaneous")}
             >
+              {plan !== "essential" && modeCheck}
               <div className="ic" style={{ marginBottom: 12, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <Icon name="spark" style={{ width: 24, height: 24 }} />
                 {plan === "essential" && <Badge kind="blue">PRO</Badge>}
@@ -683,6 +722,7 @@ export function RoutingView({
               }}
               onClick={() => setMode("menu")}
             >
+              {plan !== "essential" && modeCheck}
               <div className="ic" style={{ marginBottom: 12, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <Icon name="list" style={{ width: 24, height: 24 }} />
                 {plan === "essential" && <Badge kind="blue">PRO</Badge>}
@@ -703,6 +743,7 @@ export function RoutingView({
               }}
               onClick={() => setMode("schedule")}
             >
+              {plan !== "essential" && modeCheck}
               <div className="ic" style={{ marginBottom: 12, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <Icon name="clock" style={{ width: 24, height: 24 }} />
                 {plan === "essential" && <Badge kind="blue">PRO</Badge>}

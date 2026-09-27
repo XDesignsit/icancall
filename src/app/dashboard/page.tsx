@@ -467,19 +467,41 @@ export default function DashboardApp() {
   // Declared ahead of the line sync below, which reports carrier failures through it.
   const [toast, setToast] = useState<string | null>(null);
 
+  // The lines the latest finished save carried and whether it stored them, so
+  // views can confirm a change was saved rather than only made on screen. Any
+  // edit since then reads as still saving, from the very render that made it.
+  const [lastLinesSave, setLastLinesSave] = useState<{ lines: Line[]; ok: boolean } | null>(null);
+  const linesSaveState = !lastLinesSave
+    ? "idle"
+    : lastLinesSave.lines !== lines
+    ? "saving"
+    : lastLinesSave.ok
+    ? "saved"
+    : "error";
+  // Line saves run one at a time and only the newest runs: every POST writes
+  // all lines, so an older request landing last would restore stale settings.
+  const linesSaveSeq = useRef(0);
+  const linesSaveChain = useRef<Promise<void>>(Promise.resolve());
+
   // 5. Synchronize lines updates to Supabase
   useEffect(() => {
     if (!initialLoadComplete || !serverDataLoadedRef.current) return;
     const imp = localStorage.getItem("impersonatingUser");
     if (imp) return; // Skip updating real user database if impersonating
 
+    const seq = ++linesSaveSeq.current;
+
     async function syncLines() {
+      // A newer edit is queued behind this one and carries it too.
+      if (seq !== linesSaveSeq.current) return;
+      let saved = false;
       try {
         const res = await fetch("/api/caregiver/lines", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ lines }),
         });
+        saved = res.ok;
         if (!res.ok) {
           const data = await res.json().catch(() => ({}));
           const failed: string[] = Array.isArray(data.failedNumbers) ? data.failedNumbers : [];
@@ -495,9 +517,13 @@ export default function DashboardApp() {
       } catch (err) {
         console.error("Error syncing phone lines to backend:", err);
       }
+      setLastLinesSave({ lines, ok: saved });
     }
-    syncLines();
+    linesSaveChain.current = linesSaveChain.current.then(syncLines);
   }, [lines, initialLoadComplete]);
+
+  // A fresh array re-runs the line sync above with the current settings.
+  const retryLinesSave = () => setLines((prev) => [...prev]);
 
   useEffect(() => {
     const savedLang = localStorage.getItem("lang");
@@ -1118,6 +1144,8 @@ export default function DashboardApp() {
               setView={go}
               setAcctTab={setAcctTab}
               setAutoOpenPlanModal={setAutoOpenPlanModal}
+              saveState={linesSaveState}
+              onRetrySave={retryLinesSave}
             />
           )}
           {view === "log" && line && <CallLogView line={line} log={log} d={d} lang={lang} />}
