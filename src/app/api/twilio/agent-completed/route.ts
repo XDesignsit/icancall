@@ -1,8 +1,12 @@
 import { NextResponse } from 'next/server';
+import { verifyTelephonyWebhook } from '@/lib/twilioWebhook';
 
 export const preferredRegion = 'iad1';
 
 export async function POST(request: Request) {
+  const denied = await verifyTelephonyWebhook(request);
+  if (denied) return denied;
+
   try {
     const requestUrl = new URL(request.url);
     const parentCallSid = requestUrl.searchParams.get('parentCallSid');

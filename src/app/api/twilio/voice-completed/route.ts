@@ -1,9 +1,13 @@
 import { NextResponse } from 'next/server';
+import { verifyTelephonyWebhook } from '@/lib/twilioWebhook';
 import { deductMinutes } from '@/lib/db';
 
 export const preferredRegion = 'iad1';
 
 export async function POST(request: Request) {
+  const denied = await verifyTelephonyWebhook(request, { telnyx: true });
+  if (denied) return denied;
+
   try {
     let toPhoneNumber = null;
     let durationSeconds = 0;
