@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { verifyTelephonyWebhook } from '@/lib/twilioWebhook';
 import { findAccountByTwilioNumber } from '@/lib/db';
 import { parseConferenceRoom } from '@/lib/conferenceRoom';
-import { callerAwaitingPickup, releaseCallerIfAlone } from '@/lib/conferenceBridge';
+import { callerWaitingAlone, releaseCallerIfAlone } from '@/lib/conferenceBridge';
 import { cascadeOrder, parseLeadIndex } from '@/lib/coverageSchedule';
 
 export const preferredRegion = 'iad1';
@@ -41,11 +41,11 @@ export async function POST(request: Request) {
 
     const baseUrl = `${requestUrl.protocol}//${requestUrl.host}`;
 
-    // Nobody has accepted the call yet: this leg was busy, went unanswered or
-    // failed, or was answered by voicemail (or a caregiver who hung up) at
-    // agent-join's prompt. Ring the next contact while there is one. The leg's
-    // CallStatus cannot tell these apart -- voicemail answering is "completed".
-    if (await callerAwaitingPickup(twilioClient, room)) {
+    // Only legs that never reached the caller report here: busy, unanswered or
+    // failed, or answered by voicemail (or a caregiver who hung up) at
+    // agent-join's prompt. A leg someone accepts is repointed at agent-completed.
+    // Ring the next contact while there is one and the caller is still waiting.
+    if (await callerWaitingAlone(twilioClient, room)) {
       const nextIdx = contactIndexStr ? parseInt(contactIndexStr, 10) : 0;
       const activeNumber = conference.lineNumber;
       const account = await findAccountByTwilioNumber(activeNumber);
@@ -70,10 +70,9 @@ export async function POST(request: Request) {
       }
     }
 
-    // The leg was answered and has ended -- the caregiver hung up, or pressed *
-    // and handed the caller on -- or there is nobody left to ring. The caller
-    // stays on the line while anyone else is still there for them.
-    await releaseCallerIfAlone(twilioClient, { room, endedCallSid: callSid, baseUrl });
+    // Nobody left to ring: the caller leaves a message, unless someone else is
+    // still there for them.
+    await releaseCallerIfAlone(twilioClient, { room, endedCallSid: callSid, baseUrl, missed: true });
 
     return new NextResponse('OK');
   } catch (error) {

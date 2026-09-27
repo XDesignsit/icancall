@@ -18,6 +18,12 @@ import { parseConferenceRoom } from '@/lib/conferenceRoom';
  * Cascade and simultaneous legs only join the conference once a person presses
  * a key at agent-join's screening prompt. Carrier voicemail answers a call like
  * a person does, and without the prompt it would join and take the caller.
+ * Those legs are placed reporting as missed (cascade-callback, or
+ * agent-completed with missed=1); agent-join repoints a leg's status callback
+ * at plain agent-completed once someone accepts it. A leg's own CallStatus
+ * cannot tell the two apart -- voicemail that answered is "completed" too --
+ * and neither can the conference, which Twilio reports as in-progress while
+ * the caller waits in it alone.
  */
 
 export type CallerOutcome =
@@ -50,27 +56,40 @@ async function legsInOtherRooms(client: Twilio, lineNumber: string, room: string
 }
 
 /**
- * Whether the caller is still waiting for their first caregiver. A conference
- * only starts once a second participant joins, so a room still in "init" has
- * never had anyone accept the call: the leg that just ended was busy, went
- * unanswered, or was picked up by voicemail that never got past agent-join's
- * prompt. The cascade uses this to decide whether to ring the next contact.
+ * Who is in the caller's room while the caller is still there; null once they
+ * have hung up or been moved on to voicemail. Before the room exists -- the
+ * caller is still hearing the greeting, and a leg that fails or is declined at
+ * once can report before they get there -- that is just the caller.
  */
-export async function callerAwaitingPickup(client: Twilio, room: string): Promise<boolean> {
+async function callerRoom(client: Twilio, room: string, callerCallSid: string): Promise<string[] | null> {
+  const rooms = await client.conferences.list({ friendlyName: room, limit: 20 });
+  const open = rooms.find((c) => c.status !== 'completed');
+  if (open) {
+    const present = await participantCallSids(client, open.sid);
+    return present.includes(callerCallSid) ? present : null;
+  }
+  if (rooms.length > 0) return null;
+  const caller = await client.calls(callerCallSid).fetch();
+  return caller.status === 'in-progress' ? [callerCallSid] : null;
+}
+
+/** Whether the caller is still on the line with nobody in their room: the cascade should ring its next contact. */
+export async function callerWaitingAlone(client: Twilio, room: string): Promise<boolean> {
   const conference = parseConferenceRoom(room);
   if (!conference) return false;
-  const rooms = await client.conferences.list({ friendlyName: room, limit: 20 });
-  // No room yet: the caller is still hearing the greeting on their way in. A
-  // leg that fails or is declined at once can report before they get there.
-  if (rooms.length === 0) return true;
-  const waiting = rooms.find((c) => c.status === 'init');
-  if (!waiting) return false;
-  return (await participantCallSids(client, waiting.sid)).includes(conference.callerCallSid);
+  const present = await callerRoom(client, room, conference.callerCallSid);
+  return present !== null && present.every((sid) => sid === conference.callerCallSid);
 }
 
 export async function releaseCallerIfAlone(
   client: Twilio,
-  { room, endedCallSid, baseUrl }: { room: string; endedCallSid?: string | null; baseUrl: string }
+  { room, endedCallSid, baseUrl, missed = false }: {
+    room: string;
+    endedCallSid?: string | null;
+    baseUrl: string;
+    /** The leg that ended never reached the caller (see above). */
+    missed?: boolean;
+  }
 ): Promise<CallerOutcome> {
   const conference = parseConferenceRoom(room);
   if (!conference) return 'gone';
@@ -79,11 +98,8 @@ export async function releaseCallerIfAlone(
 
   // 1. The caller must still be waiting in this room. Once they hang up, or have
   //    been moved on to voicemail, there is nothing left to decide.
-  const rooms = await client.conferences.list({ friendlyName: room, limit: 20 });
-  const open = rooms.find((c) => c.status !== 'completed');
-  if (!open) return 'gone';
-  const present = await participantCallSids(client, open.sid);
-  if (!present.includes(callerCallSid)) return 'gone';
+  const present = await callerRoom(client, room, callerCallSid);
+  if (!present) return 'gone';
 
   // 2. A caregiver is still in the conference with them.
   if (present.some(isOtherLeg)) return 'kept';
@@ -103,10 +119,10 @@ export async function releaseCallerIfAlone(
     if (live.some((c) => !elsewhere.has(c.sid))) return 'kept';
   }
 
-  // 4. Nobody is left. A conference only starts once a second participant joins,
-  //    so one still in "init" means no caregiver ever picked up: take a message,
-  //    as the other no-answer paths do. Otherwise the conversation is over.
-  if (open.status === 'init') {
+  // 4. Nobody is left. If the last leg never reached the caller, nobody picked
+  //    up for them: take a message, as the other no-answer paths do. Otherwise
+  //    the conversation is over.
+  if (missed) {
     await client.calls(callerCallSid).update({
       url: `${baseUrl}/api/twilio/voice?Digits=no-answer&To=${encodeURIComponent(lineNumber)}`,
       method: 'POST',

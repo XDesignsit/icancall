@@ -9,7 +9,9 @@ export const preferredRegion = 'iad1';
 // simultaneous ringing) first ask for a key press, because carrier voicemail
 // answers a call exactly like a person does: without the prompt it would join
 // the conference, take the caller, and stop the cascade. Nobody pressing a key
-// ends the leg unjoined, and its status callback moves on to the next contact.
+// ends the leg unjoined, and its status callback -- which reports the leg as
+// missed -- moves on to the next contact or takes a message. A key press
+// repoints that callback at agent-completed before joining (conferenceBridge).
 // Transfer legs skip the prompt: the caregiver chose that person, and their
 // voicemail is a fair place for the caller to land.
 export async function POST(request: Request) {
@@ -20,7 +22,8 @@ export async function POST(request: Request) {
     const requestUrl = new URL(request.url);
     let room = requestUrl.searchParams.get('room');
     const screen = requestUrl.searchParams.get('screen') === '1';
-    let digits = requestUrl.searchParams.get('Digits');
+    const accepted = requestUrl.searchParams.get('accepted') === '1';
+    let callSid = requestUrl.searchParams.get('CallSid');
 
     if (request.method === 'POST') {
       try {
@@ -28,7 +31,7 @@ export async function POST(request: Request) {
         if (contentType.includes('form-data') || contentType.includes('x-www-form-urlencoded')) {
           const formData = await request.formData();
           room = formData.get('room')?.toString() || room;
-          digits = formData.get('Digits')?.toString() || digits;
+          callSid = formData.get('CallSid')?.toString() || callSid;
         }
       } catch (err) {
         console.warn('Could not parse form data:', err);
@@ -44,17 +47,17 @@ export async function POST(request: Request) {
       });
     }
 
+    const baseUrl = `${requestUrl.protocol}//${requestUrl.host}`;
     let twiml: string;
-    if (screen && !digits) {
-      // Any key accepts. The Gather posts back here without screen=1, which
-      // joins the conference below; silence falls through to the hangup.
+    if (screen && !accepted) {
+      // Any key accepts (finishOnKey="" makes # and * count too); the Gather
+      // posts back here with accepted=1. Silence falls through to the hangup.
       const account = await findAccountByTwilioNumber(conference.lineNumber);
       const voiceId = account?.line?.settings?.voiceId || '21m00Tcm4TlvDq8ikWAM';
-      const baseUrl = `${requestUrl.protocol}//${requestUrl.host}`;
       const prompt = ttsPlayTag(baseUrl, "Incoming call from your family's iCanCall line. Press 1 to accept.", voiceId);
       twiml = `<?xml version="1.0" encoding="UTF-8"?>
 <Response>
-  <Gather numDigits="1" timeout="5" action="/api/twilio/agent-join?room=${encodeURIComponent(room)}" method="POST">
+  <Gather numDigits="1" finishOnKey="" timeout="5" action="/api/twilio/agent-join?room=${encodeURIComponent(room)}&amp;accepted=1" method="POST">
     ${prompt}
     <Pause length="1"/>
     ${prompt}
@@ -62,6 +65,19 @@ export async function POST(request: Request) {
   <Hangup/>
 </Response>`;
     } else {
+      if (accepted && callSid) {
+        // From here on this leg has reached the caller: when it ends, the
+        // conversation is over rather than the next contact being due.
+        const twilioClient = (await import('@/lib/twilio')).default;
+        try {
+          await twilioClient?.calls(callSid).update({
+            statusCallback: `${baseUrl}/api/twilio/agent-completed?room=${encodeURIComponent(room)}`,
+          });
+        } catch (err) {
+          console.error('Could not repoint the accepted caregiver leg; its end will count as missed:', err);
+        }
+      }
+
       // Connect the caregiver to the conference room
       // hangupOnStar="true": enables them to press * to leave and trigger the action callback
       twiml = `<?xml version="1.0" encoding="UTF-8"?>

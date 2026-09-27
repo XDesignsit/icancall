@@ -7,7 +7,9 @@ export const preferredRegion = 'iad1';
 
 // Status callback for caregiver legs that are not part of a cascade: every leg
 // of a simultaneous-mode call, and the leg placed by a "*" transfer. It fires
-// once the leg has ended, answered or not.
+// once the leg has ended, answered or not. agent-join also repoints any leg a
+// caregiver accepts here, cascade legs included. missed=1 marks a screened leg
+// nobody accepted (see conferenceBridge).
 export async function POST(request: Request) {
   const denied = await verifyTelephonyWebhook(request);
   if (denied) return denied;
@@ -17,6 +19,7 @@ export async function POST(request: Request) {
     let room = requestUrl.searchParams.get('room');
     // Legs placed before the room was passed here carry only the caller's CallSid.
     const parentCallSid = requestUrl.searchParams.get('parentCallSid');
+    const missed = requestUrl.searchParams.get('missed') === '1';
     let callSid = requestUrl.searchParams.get('CallSid');
     let from = requestUrl.searchParams.get('From');
 
@@ -41,7 +44,7 @@ export async function POST(request: Request) {
     const twilioClient = (await import('@/lib/twilio')).default;
     if (twilioClient && room) {
       const baseUrl = `${requestUrl.protocol}//${requestUrl.host}`;
-      await releaseCallerIfAlone(twilioClient, { room, endedCallSid: callSid, baseUrl });
+      await releaseCallerIfAlone(twilioClient, { room, endedCallSid: callSid, baseUrl, missed });
     }
 
     return new NextResponse('OK');
