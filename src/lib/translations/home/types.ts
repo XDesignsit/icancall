@@ -247,7 +247,12 @@ export interface HomeTranslations {
     showingAnnual: string;
   };
   faq: {
-    title: string;
+    eyebrow: string;
+    titleStart: string;
+    titleAccent: string;
+    lead: string;
+    /** The support card beside the questions; its button goes to /contact. */
+    help: { title: string; body: string; cta: string };
     /** {numberPrice} is the monthly price of an extra number. */
     items: { q: string; a: string }[];
   };

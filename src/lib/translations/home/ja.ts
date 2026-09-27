@@ -352,7 +352,11 @@ const t: HomeTranslations = {
     showingAnnual: "年払いの料金を表示しています。",
   },
   faq: {
-    title: "よくある質問",
+    eyebrow: "お申し込みの前に",
+    titleStart: "よくある",
+    titleAccent: "質問",
+    lead: "ご家族から特によくいただくご質問に、わかりやすくお答えします。",
+    help: { title: "ほかにご質問はありますか？", body: "実際のスタッフが1営業日以内にご返信します。", cta: "お問い合わせ" },
     items: [
       {
         q: "特別な機器は必要ですか？",

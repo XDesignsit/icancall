@@ -1247,17 +1247,40 @@ function HomeV2({ t, base, lang, onLang, root }: Props) {
         </section>
 
         {/* ============ FAQ ============ */}
+        {/* The heading and support card stay in view beside the questions on desktop. The
+            controller opens one question at a time, animating the height, and cascades the
+            cards in once (.play on the list). */}
         <section className="section hp-faq" id="faq" aria-labelledby="faq-title">
-          <div className="wrap">
-            <div className="section-head">
-              <h2 className="hp-h2" id="faq-title">{t.faq.title}</h2>
+          <div className="hp-faq-bg" aria-hidden="true" />
+          <div className="wrap hp-faq-grid">
+            <div className="hp-faq-side">
+              <div className="section-head rv">
+                <span className="eyebrow">{t.faq.eyebrow}</span>
+                <h2 className="hp-h2" id="faq-title">
+                  {t.faq.titleStart}
+                  <span className="accent">{t.faq.titleAccent}</span>
+                </h2>
+                <p className="lead">{t.faq.lead}</p>
+              </div>
+              <aside className="hp-faq-help rv" aria-labelledby="faq-help-title">
+                <span className="av" aria-hidden="true">
+                  <Icon id="i-headset" />
+                </span>
+                <h3 id="faq-help-title">{t.faq.help.title}</h3>
+                <p>{t.faq.help.body}</p>
+                <a className="btn" href="/contact">
+                  {t.faq.help.cta}
+                  <Icon id="i-arrow-r" />
+                </a>
+              </aside>
             </div>
-            <div className="faq">
-              {t.faq.items.map((item) => (
-                <details key={item.q} className="faq-item" name="faq">
+            <div className="faq hp-qa-list">
+              {t.faq.items.map((item, i) => (
+                <details key={item.q} className="faq-item hp-qa" name="faq" style={vars({ "--i": i })}>
                   <summary className="faq-q">
-                    {item.q}
-                    <span className="pm"><Icon id="i-plus" /></span>
+                    <span className="n mono" aria-hidden="true">{String(i + 1).padStart(2, "0")}</span>
+                    <span className="t">{item.q}</span>
+                    <span className="pm" aria-hidden="true"><i /><i /></span>
                   </summary>
                   <div className="faq-a">
                     <p>{fill(item.a, { numberPrice: ADDON_PRICING.extraNumberLabel })}</p>

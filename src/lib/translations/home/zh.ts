@@ -352,7 +352,11 @@ const t: HomeTranslations = {
     showingAnnual: "当前显示按年价格。",
   },
   faq: {
-    title: "常见问题",
+    eyebrow: "注册之前",
+    titleStart: "常见",
+    titleAccent: "问题",
+    lead: "我们为家庭最常问的问题，给出清楚直接的回答。",
+    help: { title: "还有其他问题？", body: "真人客服将在一个工作日内回复您。", cta: "联系我们" },
     items: [
       {
         q: "需要什么特殊硬件吗？",

@@ -352,7 +352,11 @@ const t: HomeTranslations = {
     showingAnnual: "연간 요금을 표시하고 있습니다.",
   },
   faq: {
-    title: "궁금한 점, 답해 드립니다.",
+    eyebrow: "가입 전에",
+    titleStart: "궁금한 점, ",
+    titleAccent: "답해 드립니다.",
+    lead: "가족들이 가장 자주 묻는 질문에 명확하게 답해 드립니다.",
+    help: { title: "더 궁금한 점이 있으신가요?", body: "실제 상담원이 영업일 기준 하루 안에 답변합니다.", cta: "문의하기" },
     items: [
       {
         q: "특별한 장비가 필요한가요?",

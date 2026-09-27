@@ -362,7 +362,11 @@ const t: HomeTranslations = {
     showingAnnual: "Showing annual prices.",
   },
   faq: {
-    title: "Questions, answered.",
+    eyebrow: "Before you sign up",
+    titleStart: "Questions, ",
+    titleAccent: "answered.",
+    lead: "Straight answers to the questions families ask us most.",
+    help: { title: "Still have a question?", body: "Real people reply within one business day.", cta: "Contact us" },
     items: [
       {
         q: "Do I need any special hardware?",

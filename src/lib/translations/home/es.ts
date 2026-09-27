@@ -369,7 +369,15 @@ const t: HomeTranslations = {
     showingAnnual: "Mostrando precios anuales.",
   },
   faq: {
-    title: "Tus preguntas, respondidas.",
+    eyebrow: "Antes de registrarte",
+    titleStart: "Tus preguntas, ",
+    titleAccent: "respondidas.",
+    lead: "Respuestas claras a lo que más nos preguntan las familias.",
+    help: {
+      title: "¿Tienes otra pregunta?",
+      body: "Personas reales te responden en un plazo de un día hábil.",
+      cta: "Contáctanos",
+    },
     items: [
       {
         q: "¿Necesito algún equipo especial?",
