@@ -106,7 +106,7 @@ ${h.trust.points.map((p) => `- ${p}`).join("\n")}
 
 ${h.trust.disclaimer}
 
-## ${h.pricing.eyebrow}: ${h.pricing.title}
+## ${h.pricing.eyebrow}: ${h.pricing.titleStart}${h.pricing.titleAccent}
 
 ${h.pricing.lead}
 

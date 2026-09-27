@@ -350,7 +350,8 @@ const t: HomeTranslations = {
   },
   pricing: {
     eyebrow: "Precios simples y transparentes",
-    title: "Tranquilidad por menos que una factura de teléfono.",
+    titleStart: "Tranquilidad por ",
+    titleAccent: "menos que una factura de teléfono.",
     lead: "Todos los planes funcionan en cualquier teléfono e incluyen buzón de voz. Sin tarifas de configuración, puedes cancelar cuando quieras y tienes una garantía de reembolso de 30 días.",
     billingPeriod: "Periodo de facturación",
     monthly: "Mensual",

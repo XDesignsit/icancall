@@ -333,7 +333,8 @@ const t: HomeTranslations = {
   },
   pricing: {
     eyebrow: "简单透明的价格",
-    title: "不到一份电话账单的价格，换来一份安心。",
+    titleStart: "不到一份电话账单的价格，",
+    titleAccent: "换来一份安心。",
     lead: "每个方案都支持任何电话，并包含语音留言信箱。无设置费，随时取消，还有30天无忧退款保证。",
     billingPeriod: "计费周期",
     monthly: "按月",

@@ -343,7 +343,8 @@ const t: HomeTranslations = {
   },
   pricing: {
     eyebrow: "Simple, transparent pricing",
-    title: "Peace of mind for less than a phone bill.",
+    titleStart: "Peace of mind for ",
+    titleAccent: "less than a phone bill.",
     lead: "Every plan works on any phone and includes a voicemail box. No setup fees, cancel anytime, and a 30-day money-back guarantee.",
     billingPeriod: "Billing period",
     monthly: "Monthly",

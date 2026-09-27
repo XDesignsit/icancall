@@ -92,10 +92,11 @@ export function initHome(root: HTMLElement, { t, lang, billedMonthly, signupPath
   if (motion()) { root.classList.add("rvr"); once(".rv", "in", { rootMargin: "0px 0px -8% 0px", threshold: 0.12 }); }
   once(".hp-tile", "play", { threshold: 0.45 });
   once(".hp-pc", "play", { threshold: 0.4 });
+  once(".hp-plan", "play", { threshold: 0.2 });
 
-  /* trust cards: a soft spotlight follows the pointer (writes CSS vars only) */
+  /* trust and plan cards: a soft spotlight follows the pointer (writes CSS vars only) */
   if (mq("(hover:hover) and (pointer:fine)")) {
-    $$(".hp-pc").forEach((c) =>
+    $$(".hp-pc, .hp-plan").forEach((c) =>
       c.addEventListener("pointermove", (e) => {
         const r = c.getBoundingClientRect();
         c.style.setProperty("--mx", `${(e.clientX - r.left).toFixed(0)}px`);
@@ -179,7 +180,19 @@ export function initHome(root: HTMLElement, { t, lang, billedMonthly, signupPath
   observers.push(ioHero, ioPrice);
 
   /* pricing: monthly / annual, prices tween, CTA links follow the toggle */
-  const bseg = $(".hp-bill .seg"), bbtn = $$<HTMLButtonElement>("[data-bill]", bseg), plans = $$(".hp-plan");
+  const price = $("#pricing"), bseg = $(".hp-bill .seg"), bbtn = $$<HTMLButtonElement>("[data-bill]", bseg), plans = $$(".hp-plan");
+  // A pill slides under the selected option; buttons differ in width per language, so it is measured.
+  const pill = $(".hp-seg-pill", bseg);
+  const placePill = () => {
+    const b = bbtn.find((x) => x.classList.contains("active"))!;
+    pill.style.width = `${b.offsetWidth}px`;
+    pill.style.transform = `translateX(${b.offsetLeft}px)`;
+  };
+  placePill();
+  void pill.offsetWidth;
+  bseg.classList.add("has-pill");
+  addEventListener("resize", placePill, on);
+  document.fonts?.ready.then(() => { if (!ac.signal.aborted) placePill(); });
   const blive = document.createElement("p");
   blive.className = "sr-only";
   blive.setAttribute("aria-live", "polite");
@@ -197,6 +210,8 @@ export function initHome(root: HTMLElement, { t, lang, billedMonthly, signupPath
       x.tabIndex = sel ? 0 : -1;
       if (sel && focus) x.focus();
     });
+    placePill();
+    price.classList.toggle("is-annual", a);
     plans.forEach((p) => {
       const amt = $(".amt", p), v0 = parseFloat(p.dataset[from === "annual" ? "a" : "m"]!), v1 = parseFloat(p.dataset[a ? "a" : "m"]!);
       $(".per", p).textContent = a ? t.pricing.perYear : t.pricing.perMonth;

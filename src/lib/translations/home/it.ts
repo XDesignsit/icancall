@@ -349,7 +349,8 @@ const t: HomeTranslations = {
   },
   pricing: {
     eyebrow: "Prezzi semplici e trasparenti",
-    title: "Tranquillità a meno di una bolletta del telefono.",
+    titleStart: "Tranquillità ",
+    titleAccent: "a meno di una bolletta del telefono.",
     lead: "Ogni piano funziona con qualsiasi telefono e include la segreteria. Nessun costo di attivazione, disdetta in qualsiasi momento e garanzia di rimborso di 30 giorni.",
     billingPeriod: "Periodo di fatturazione",
     monthly: "Mensile",
