@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { verifyTelephonyWebhook } from '@/lib/twilioWebhook';
 import { findAccountByTwilioNumber } from '@/lib/db';
 import { parseConferenceRoom } from '@/lib/conferenceRoom';
-import { releaseCallerIfAlone } from '@/lib/conferenceBridge';
+import { callerAwaitingPickup, releaseCallerIfAlone } from '@/lib/conferenceBridge';
 import { cascadeOrder, parseLeadIndex } from '@/lib/coverageSchedule';
 
 export const preferredRegion = 'iad1';
@@ -15,7 +15,6 @@ export async function POST(request: Request) {
     const requestUrl = new URL(request.url);
     let room = requestUrl.searchParams.get('room');
     let contactIndexStr = requestUrl.searchParams.get('contactIndex');
-    let callStatus = requestUrl.searchParams.get('CallStatus');
     let callSid = requestUrl.searchParams.get('CallSid');
     // Schedule-mode calls pin the on-duty contact they rang first (voice route).
     const leadIndex = parseLeadIndex(requestUrl.searchParams.get('lead'));
@@ -27,7 +26,6 @@ export async function POST(request: Request) {
           const formData = await request.formData();
           room = formData.get('room')?.toString() || room;
           contactIndexStr = formData.get('contactIndex')?.toString() || contactIndexStr;
-          callStatus = formData.get('CallStatus')?.toString() || callStatus;
           callSid = formData.get('CallSid')?.toString() || callSid;
         }
       } catch (err) {
@@ -43,8 +41,11 @@ export async function POST(request: Request) {
 
     const baseUrl = `${requestUrl.protocol}//${requestUrl.host}`;
 
-    // Busy, no answer or failed: ring the next contact while there is one.
-    if (callStatus !== 'completed') {
+    // Nobody has accepted the call yet: this leg was busy, went unanswered or
+    // failed, or was answered by voicemail (or a caregiver who hung up) at
+    // agent-join's prompt. Ring the next contact while there is one. The leg's
+    // CallStatus cannot tell these apart -- voicemail answering is "completed".
+    if (await callerAwaitingPickup(twilioClient, room)) {
       const nextIdx = contactIndexStr ? parseInt(contactIndexStr, 10) : 0;
       const activeNumber = conference.lineNumber;
       const account = await findAccountByTwilioNumber(activeNumber);
@@ -57,7 +58,7 @@ export async function POST(request: Request) {
           await twilioClient.calls.create({
             to: nextContact.phone,
             from: activeNumber,
-            url: `${baseUrl}/api/twilio/agent-join?room=${encodeURIComponent(room)}`,
+            url: `${baseUrl}/api/twilio/agent-join?room=${encodeURIComponent(room)}&screen=1`,
             statusCallback: `${baseUrl}/api/twilio/cascade-callback?room=${encodeURIComponent(room)}&contactIndex=${nextIdx + 1}${leadIndex === null ? '' : `&lead=${leadIndex}`}`,
             statusCallbackEvent: ['completed', 'busy', 'no-answer', 'failed'],
             timeout: 15
