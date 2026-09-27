@@ -573,6 +573,19 @@ export const getLocalizedRelationship = (rel: string, lang: string): string => {
     if (lang === "ko") return "음성 사서함에 녹음됨";
     return "Voicemail left";
   }
+  if (r === "no message left") {
+    if (lang === "es") return "Sin mensaje";
+    if (lang === "fr") return "Aucun message";
+    if (lang === "ja") return "メッセージなし";
+    if (lang === "zh") return "未留言";
+    if (lang === "ar") return "لم تُترك رسالة";
+    if (lang === "hi") return "कोई संदेश नहीं छोड़ा";
+    if (lang === "pt") return "Sem mensagem";
+    if (lang === "de") return "Keine Nachricht";
+    if (lang === "it") return "Nessun messaggio";
+    if (lang === "ko") return "메시지 없음";
+    return "No message left";
+  }
   if (r === "cardiologist") {
     if (lang === "es") return "Cardiólogo";
     if (lang === "fr") return "Cardiologue";
@@ -921,6 +934,24 @@ const WHEN_TOKENS: Record<string, Record<string, string>> = {
   Fri: { es: "Vie", fr: "Ven", ja: "金", zh: "周五", ar: "الجمعة", hi: "शुक्र", pt: "Sex", de: "Fr", it: "Ven", ko: "금" },
   Sat: { es: "Sáb", fr: "Sam", ja: "土", zh: "周六", ar: "السبت", hi: "शनि", pt: "Sáb", de: "Sa", it: "Sab", ko: "토" },
   Sun: { es: "Dom", fr: "Dim", ja: "日", zh: "周日", ar: "الأحد", hi: "रवि", pt: "Dom", de: "So", it: "Dom", ko: "일" },
+};
+
+/**
+ * When a call came in, in the call log's "Today · 2:48 PM" form (weekday for
+ * the last week, then the date), in this browser's time. localizeWhen
+ * translates it.
+ */
+export const callWhen = (iso: string, now: Date = new Date()): string => {
+  const at = new Date(iso);
+  const time = at.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
+  const startOfDay = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+  const daysAgo = Math.round((startOfDay(now) - startOfDay(at)) / 86_400_000);
+  const day =
+    daysAgo <= 0 ? "Today"
+    : daysAgo === 1 ? "Yesterday"
+    : daysAgo < 7 ? at.toLocaleDateString("en-US", { weekday: "short" })
+    : at.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  return `${day} · ${time}`;
 };
 
 /** "Today · 2:48 PM" -> "Hoy · 2:48 PM" */

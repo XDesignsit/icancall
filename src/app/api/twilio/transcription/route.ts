@@ -1,123 +1,88 @@
 import { NextResponse } from 'next/server';
-import { verifyTelephonyWebhook } from '@/lib/twilioWebhook';
-import { sendVoicemailAlertEmail } from '@/lib/mail';
+import { ttsPlayTag, verifyTelephonyWebhook } from '@/lib/twilioWebhook';
 import { findAccountByTwilioNumber } from '@/lib/db';
+import { claimCallAlert, recordTranscript, recordVoicemail, type CallRow } from '@/lib/callRecords';
+import { sendCallAlert } from '@/lib/callAlerts';
 
 export const preferredRegion = 'iad1';
 
+// The voicemail <Record> reports here twice (voice webhook):
+//  - kind=recording, its action, as soon as the caller finishes. The call log
+//    gets the recording, and the caller hears a goodbye -- this answer is
+//    TwiML they are still on the line for.
+//  - kind=transcript, its transcribeCallback, when the transcript is ready
+//    (or transcription failed). The caregiver's voicemail alert goes out
+//    then, once, transcript included.
+// Records made before the kind parameter tell the two apart by whether
+// Twilio sent a TranscriptionStatus.
 export async function POST(request: Request) {
   const denied = await verifyTelephonyWebhook(request, { telnyx: true });
   if (denied) return denied;
 
+  const url = new URL(request.url);
+  const baseUrl = `${url.protocol}//${url.host}`;
+  const lineNumber = url.searchParams.get('To') || '';
+
   try {
-    const formData = await request.formData();
-    
-    // Parse Twilio standard webhook POST parameters
-    const callSid = formData.get('CallSid') || 'Unknown Call';
-    const fromNumber = formData.get('From') || 'Unknown Caller';
-    const recordingUrl = formData.get('RecordingUrl') || '';
-    const transcriptionText = formData.get('TranscriptionText');
-    const transcriptionStatus = formData.get('TranscriptionStatus');
-    const recordingDuration = formData.get('RecordingDuration') || '0:30';
+    const form = await request.formData();
+    const callSid = form.get('CallSid')?.toString() || '';
+    const recordingUrl = form.get('RecordingUrl')?.toString() || '';
+    const transcriptionStatus = form.get('TranscriptionStatus')?.toString() || '';
+    const kind = url.searchParams.get('kind') || (transcriptionStatus ? 'transcript' : 'recording');
+    const account = lineNumber ? await findAccountByTwilioNumber(lineNumber) : undefined;
 
-    console.log('📞 Twilio Webhook Callback Received:', {
-      callSid,
-      fromNumber,
-      recordingUrl,
-      transcriptionStatus,
-      recordingDuration,
-    });
+    if (kind === 'recording') {
+      const seconds = Number(form.get('RecordingDuration') || 0);
+      // A recording with nothing in it is a caller who hung up at the beep:
+      // the call stays a missed call.
+      if (callSid && recordingUrl && seconds > 0) await recordVoicemail(callSid, recordingUrl, seconds);
 
-    // Check if transcription is completed (or fallback to recording trigger)
-    const transcript = transcriptionText 
-      ? String(transcriptionText) 
-      : 'Recording captured. Audio transcript is currently processing...';
-
-    // Parse target phone line To number from query params
-    const url = new URL(request.url);
-    const toPhoneNumber = url.searchParams.get('To');
-
-    let alertRecipient = process.env.SMTP_FROM_EMAIL || 'support@icancall.co';
-    let callerLabel = String(fromNumber);
-    let account = null;
-
-    if (toPhoneNumber) {
-      account = await findAccountByTwilioNumber(toPhoneNumber);
-      if (account) {
-        // Check if Missed Call Notifications toggle is enabled
-        const lineSettings = account.line?.settings || {};
-        const notifMissed = lineSettings.notifMissed ?? true;
-        if (!notifMissed) {
-          console.log(`✉️ Voicemail email notification skipped for call ${callSid} to ${account.email} because Missed Call Notifications toggle is disabled.`);
-          return NextResponse.json({ success: true, message: 'Voicemail alert skipped (disabled in settings)' });
-        }
-
-        // Set email recipient to caregiver's dynamic profile email
-        alertRecipient = account.notifyEmail || account.email || alertRecipient;
-
-        // Try to match fromNumber in contacts list
-        const fromClean = String(fromNumber).replace(/\D/g, '');
-        if (fromClean.length >= 7) {
-          const contacts = account.line?.contacts || [];
-          const match = contacts.find((c) => {
-            if (!c.phone) return false;
-            const cleanPhone = String(c.phone).replace(/\D/g, '');
-            // Match last 10 digits to bypass country prefix matching differences
-            return cleanPhone.endsWith(fromClean.slice(-10));
-          });
-
-          if (match) {
-            callerLabel = `${match.name} (${match.rel || 'Contact'})`;
-          }
-        }
-      }
+      const voiceId = account?.line?.settings?.voiceId || '21m00Tcm4TlvDq8ikWAM';
+      return new NextResponse(
+        `<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+  ${ttsPlayTag(baseUrl, 'Thank you. Your message has been sent. Goodbye.', voiceId)}
+  <Hangup/>
+</Response>`,
+        { headers: { 'Content-Type': 'application/xml' } }
+      );
     }
 
-    // Dispatch the gorgeous Maileroo Voicemail Alert Email instantly!
-    const result = await sendVoicemailAlertEmail(
-      alertRecipient,
-      callerLabel,
-      `${recordingDuration} seconds`,
-      String(recordingUrl),
-      transcript
-    );
+    const transcriptText = form.get('TranscriptionText')?.toString().trim() || null;
+    const transcript = transcriptionStatus === 'completed' ? transcriptText : null;
+    console.log(`Voicemail transcript for ${callSid}: ${transcriptionStatus || 'unknown'}`);
+    if (!callSid || !account) return new NextResponse('OK');
 
-    if (result.success) {
-      console.log(`✉️ Automated Voicemail Alert email dispatched via Maileroo for call ${callSid} to ${alertRecipient}`);
-
-      // Try sending SMS alert if notifSMS is enabled
-      if (account) {
-        const lineSettings = account.line?.settings || {};
-        const notifSMS = lineSettings.notifSMS ?? true;
-        const smsPhone = account.smsPhone;
-
-        if (notifSMS && smsPhone) {
-          try {
-            const { sendSms } = await import('@/lib/twilio');
-            // Clean/truncate transcript to fit nicely in an SMS if it's very long
-            const cleanTranscript = transcript.length > 100
-              ? `${transcript.substring(0, 97)}...`
-              : transcript;
-            const host = request.headers.get('x-forwarded-host') || request.headers.get('host') || 'app.icancall.co';
-            const protocol = host.startsWith('localhost') ? 'http' : 'https';
-            const dashboardUrl = `${protocol}://${host}/dashboard?view=log`;
-            const smsBody = `iCanCall Voicemail Alert: New message from ${callerLabel} (${recordingDuration}s). Transcript: "${cleanTranscript}" View call log: ${dashboardUrl}`;
-            await sendSms(smsPhone, smsBody);
-            console.log(`💬 Automated Voicemail Alert SMS sent to ${smsPhone}`);
-          } catch (smsError) {
-            console.error('❌ Failed to dispatch voicemail SMS alert:', smsError);
-          }
-        }
-      }
-
-      return NextResponse.json({ success: true, message: 'Voicemail alert dispatched successfully!' });
+    const logged = await recordTranscript(callSid, transcript);
+    if (logged) {
+      if (await claimCallAlert(callSid)) await sendCallAlert(account, logged, baseUrl);
     } else {
-      console.error('❌ Failed to dispatch voicemail email alert:', result.error);
-      return NextResponse.json({ success: false, error: 'Email dispatch failure' }, { status: 500 });
+      // A call the log never saw (it came in before the call log existed):
+      // this webhook fires once per message, so alert from what it carries.
+      const unlogged: CallRow = {
+        call_sid: callSid,
+        line_id: account.line?.id || '',
+        from_number: form.get('From')?.toString() || null,
+        status: 'voicemail',
+        answered_by: null,
+        answered_rel: null,
+        answered_at: null,
+        voicemail_offered_at: null,
+        recording_url: recordingUrl || null,
+        recording_seconds: null,
+        transcript,
+        duration_seconds: null,
+        talk_seconds: null,
+        started_at: new Date().toISOString(),
+        ended_at: null,
+        alerted_at: null,
+      };
+      await sendCallAlert(account, unlogged, baseUrl);
     }
+    return new NextResponse('OK');
   } catch (error) {
-    console.error('Twilio Callback Endpoint Error:', error);
-    return NextResponse.json({ error: 'Internal server processing error' }, { status: 500 });
+    console.error('Voicemail webhook error:', error);
+    return new NextResponse('Error', { status: 500 });
   }
 }
 

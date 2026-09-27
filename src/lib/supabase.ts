@@ -101,7 +101,9 @@ class MockSupabaseClient {
 
     let action: 'select' | 'insert' | 'update' | 'upsert' | 'delete' = 'select';
     let actionPayload: MockRow | MockRow[] | null = null;
-    const filters: { type: 'eq' | 'not'; column: string; value: unknown; operator?: string }[] = [];
+    const filters: { type: 'eq' | 'not' | 'is' | 'in'; column: string; value: unknown; operator?: string }[] = [];
+    let sort: { column: string; ascending: boolean } | null = null;
+    let maxRows: number | null = null;
 
     const builder = {
       select: (_columns: string = '*') => {
@@ -116,6 +118,22 @@ class MockSupabaseClient {
       },
       not: (column: string, operator: string, value: string) => {
         filters.push({ type: 'not', column, value, operator });
+        return builder;
+      },
+      is: (column: string, value: null | boolean) => {
+        filters.push({ type: 'is', column, value });
+        return builder;
+      },
+      in: (column: string, values: unknown[]) => {
+        filters.push({ type: 'in', column, value: values });
+        return builder;
+      },
+      order: (column: string, opts: { ascending?: boolean } = {}) => {
+        sort = { column, ascending: opts.ascending ?? true };
+        return builder;
+      },
+      limit: (count: number) => {
+        maxRows = count;
         return builder;
       },
       insert: (rowOrRows: MockRow | MockRow[]) => {
@@ -148,6 +166,11 @@ class MockSupabaseClient {
           } else if (f.type === 'not' && f.operator === 'in') {
             const ids = String(f.value).replace(/[()']/g, '').split(',').map((s) => s.trim());
             data = data.filter((item) => !ids.includes(String(item[f.column])));
+          } else if (f.type === 'is') {
+            data = data.filter((item) => (item[f.column] ?? null) === f.value);
+          } else if (f.type === 'in') {
+            const values = f.value as unknown[];
+            data = data.filter((item) => values.includes(item[f.column]));
           }
         });
 
@@ -215,7 +238,11 @@ class MockSupabaseClient {
           return { data, error: null };
         }
 
-        return { data, error: null };
+        if (sort) {
+          const { column, ascending } = sort;
+          data.sort((x, y) => (String(x[column]) < String(y[column]) ? -1 : String(x[column]) > String(y[column]) ? 1 : 0) * (ascending ? 1 : -1));
+        }
+        return { data: maxRows === null ? data : data.slice(0, maxRows), error: null };
       },
 
       maybeSingle: async () => {

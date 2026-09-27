@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 
 import { guessAccountTimeZone } from "@/lib/coverageSchedule";
 import { dashboardExtraTranslations } from "@/lib/dashboardExtraTranslations";
@@ -11,6 +11,7 @@ import { cancelStrings, formatEndDate } from "./views/cancelStrings";
 
 import {
   AVATAR_COLORS,
+  callWhen,
   getLineDefaultLabel,
   getLocalizedLineLabel,
   getLocalizedPersonName,
@@ -81,6 +82,7 @@ interface ProfileSettings {
   notifyEmail?: string;
   phone?: string;
   smsPhone?: string;
+  smsConsent?: boolean;
   address?: string;
   billingAddr?: string;
   timezone?: string;
@@ -209,6 +211,22 @@ export default function DashboardApp() {
   const [activeLineId, setActiveLineId] = useState("");
   const [log, setLog] = useState<Record<string, CallLogEntry[]>>({});
   const [loadError, setLoadError] = useState(false);
+  // Real accounts read their calls from the call log; demo logins get samples.
+  const [liveCallLog, setLiveCallLog] = useState(false);
+  const loadCallLog = useCallback(async () => {
+    try {
+      const res = await fetch("/api/caregiver/calls");
+      if (!res.ok) return;
+      const data = await res.json();
+      const byLine: Record<string, CallLogEntry[]> = {};
+      for (const [lineId, entries] of Object.entries((data.calls || {}) as Record<string, CallLogEntry[]>)) {
+        byLine[lineId] = entries.map((c) => ({ ...c, when: c.at ? callWhen(c.at) : c.when }));
+      }
+      setLog(byLine);
+    } catch (err) {
+      console.error("Failed to load the call log:", err);
+    }
+  }, []);
 
   const [requestedView, setView] = useState("overview");
   const [activeVoicemail, setActiveVoicemail] = useState<{
@@ -265,6 +283,8 @@ export default function DashboardApp() {
       email: profile.email || "",
       notifyEmail: settings.notifyEmail || profile.email || "",
       phone: settings.phone || settings.smsPhone || "",
+      smsConsent: settings.smsConsent === true,
+      smsPhone: settings.smsPhone || "",
       address: settings.address || settings.billingAddr || "",
       // Coverage schedules ring by this zone, so an account that has never
       // picked one starts from the browser's rather than a fixed Pacific.
@@ -292,7 +312,6 @@ export default function DashboardApp() {
       settings: {
         notifyEmail: account.notifyEmail,
         phone: account.phone,
-        smsPhone: account.phone,
         address: account.address,
         timezone: account.timezone,
         language: account.language,
@@ -398,6 +417,9 @@ export default function DashboardApp() {
           // Real accounts only ever see calls their own numbers received.
           if (currentAccount && isDemoEmail(currentAccount.email)) {
             setLog(generateDynamicLogs(mappedLines));
+          } else {
+            setLiveCallLog(true);
+            await loadCallLog();
           }
 
           // Auto-heal extraNumbers out-of-sync states on load. Simulated billing
@@ -442,7 +464,7 @@ export default function DashboardApp() {
       }
     }
     loadData();
-  }, []);
+  }, [loadCallLog]);
 
   // 4. Synchronize profile/account updates to Supabase
   useEffect(() => {
@@ -732,6 +754,11 @@ export default function DashboardApp() {
   // downgrade) falls back to the overview instead of an empty page.
   const supportsTeamAdmin = planConfig(account.plan).seats > 1;
   const view = requestedView === "team" && !supportsTeamAdmin ? "overview" : requestedView;
+
+  // Coming back to the call log or the overview picks up calls since the last look.
+  useEffect(() => {
+    if (liveCallLog && (view === "log" || view === "overview")) loadCallLog();
+  }, [liveCallLog, view, loadCallLog]);
 
   const [t1, t2] = TITLES[view as keyof typeof TITLES] || ["Dashboard", "iCanCall Routing Panel"];
 

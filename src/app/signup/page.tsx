@@ -655,14 +655,16 @@ function PlanStep({ data, set, onNext, onBack, t }: { data: OnboardingData; set:
 }
 
 /* ── Shared sub-components (must be defined outside AccountStep to avoid remount on every render) ── */
-function VerifiedBadge({ label, onClear, btnChange }: { label: string; onClear: () => void; btnChange: string }) {
+function VerifiedBadge({ label, onClear, btnChange }: { label: string; onClear?: () => void; btnChange?: string }) {
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 14px", borderRadius: 8, background: "oklch(0.97 0.03 140)", border: "1px solid oklch(0.85 0.10 140)", color: "oklch(0.40 0.12 140)", fontSize: "0.9rem", fontWeight: 500 }}>
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
       {label}
-      <button type="button" onClick={onClear} style={{ marginLeft: "auto", background: "none", border: "none", cursor: "pointer", fontSize: "0.8rem", color: "oklch(0.50 0.10 140)", textDecoration: "underline" }}>
-        {btnChange}
-      </button>
+      {onClear && (
+        <button type="button" onClick={onClear} style={{ marginLeft: "auto", background: "none", border: "none", cursor: "pointer", fontSize: "0.8rem", color: "oklch(0.50 0.10 140)", textDecoration: "underline" }}>
+          {btnChange}
+        </button>
+      )}
     </div>
   );
 }
@@ -745,6 +747,9 @@ function AccountStep({ data, set, onNext, onBack, t, lang }: { data: OnboardingD
     ko: "보안 검사를 완료하십시오."
   };
   const errCaptchaText = captchaErrors[lang] || captchaErrors.en;
+  // Session-backed signup: back from Google, or resuming an unfinished one.
+  // The account and its email are already proven, so this step only asks for
+  // the name and the SMS opt-in (with its phone check), like an email signup.
   const isGoogle = a.password === "google_oauth_bypass";
   // CAPTCHA check is optional/bypassed on the signup page since the flow ends in a paid credit card checkout (zero spam bot risk)
   const captchaBypass = true;
@@ -753,7 +758,7 @@ function AccountStep({ data, set, onNext, onBack, t, lang }: { data: OnboardingD
   const phoneValid = phoneDigits.length === 10 || (phoneDigits.length === 11 && phoneDigits.startsWith("1"));
 
   // Verified = phone verified (SMS consent) OR email verified (no SMS consent)
-  const isVerified = smsConsent ? !!a.phoneVerified : !!a.emailVerified;
+  const isVerified = smsConsent ? !!a.phoneVerified : isGoogle || !!a.emailVerified;
 
   const errs = {
     name: a.name.trim().length < 2 ? t.onboarding.errName : "",
@@ -796,6 +801,11 @@ function AccountStep({ data, set, onNext, onBack, t, lang }: { data: OnboardingD
       setSmsTouched(true);
       return;
     }
+    // The session's account is this email, so it is meant to exist already.
+    if (isGoogle) {
+      onNext();
+      return;
+    }
     // Covers the SMS path too, where the email itself is never sent a code.
     setSubmitting(true);
     const available = await checkEmailAvailable();
@@ -811,7 +821,7 @@ function AccountStep({ data, set, onNext, onBack, t, lang }: { data: OnboardingD
     setPhoneApiErr("");
     setPhoneSuccessMsg("");
     try {
-      if (validEmail(a.email) && !(await checkEmailAvailable())) return;
+      if (!isGoogle && validEmail(a.email) && !(await checkEmailAvailable())) return;
       const res = await fetch("/api/auth/verify-phone", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -916,12 +926,16 @@ function AccountStep({ data, set, onNext, onBack, t, lang }: { data: OnboardingD
       <h1>{t.onboarding.step1Title}</h1>
       <p className="sub">{t.onboarding.step1Subtitle}</p>
 
-      <button className="btn btn-google btn-block" style={{ marginTop: 22 }} onClick={() => {
-        window.location.href = `/api/auth/google?next=${encodeURIComponent("/signup?google=true")}`;
-      }}>
-        <Ico.google className="w-[19px] h-[19px]" /> {t.onboarding.btnGoogle}
-      </button>
-      <div className="auth-divider">{t.onboarding.dividerOr}</div>
+      {!isGoogle && (
+        <>
+          <button className="btn btn-google btn-block" style={{ marginTop: 22 }} onClick={() => {
+            window.location.href = `/api/auth/google?next=${encodeURIComponent("/signup?google=true")}`;
+          }}>
+            <Ico.google className="w-[19px] h-[19px]" /> {t.onboarding.btnGoogle}
+          </button>
+          <div className="auth-divider">{t.onboarding.dividerOr}</div>
+        </>
+      )}
 
       <div className="field">
         <label>{t.onboarding.labelName}</label>
@@ -937,7 +951,9 @@ function AccountStep({ data, set, onNext, onBack, t, lang }: { data: OnboardingD
       {/* ── Email field + optional email OTP (when no SMS consent) ── */}
       <div className="field">
         <label>{t.onboarding.labelEmail}</label>
-        {!smsConsent && a.emailVerified ? (
+        {isGoogle ? (
+          <VerifiedBadge label={`${t.onboarding.emailVerified} — ${a.email}`} />
+        ) : !smsConsent && a.emailVerified ? (
           <VerifiedBadge
             label={`${t.onboarding.emailVerified} — ${a.email}`}
             onClear={() => { set({ account: { ...a, emailVerified: false } }); setEmailCodeSent(false); setEmailOtp(""); setEmailCodeTouched(false); setEmailApiErr(""); setEmailSuccessMsg(""); }}
@@ -989,6 +1005,7 @@ function AccountStep({ data, set, onNext, onBack, t, lang }: { data: OnboardingD
         )}
       </div>
 
+      {!isGoogle && (
       <div className="field">
         <label>{t.onboarding.labelPassword}</label>
         <div className="input-icon">
@@ -1005,6 +1022,7 @@ function AccountStep({ data, set, onNext, onBack, t, lang }: { data: OnboardingD
         )}
         <div className={"field-err" + (show("password") ? " show" : "")}>{errs.password}</div>
       </div>
+      )}
 
       {/* ── SMS consent checkbox ── */}
       <div className="field" style={{ marginTop: 24, marginBottom: 8 }}>
@@ -1017,7 +1035,7 @@ function AccountStep({ data, set, onNext, onBack, t, lang }: { data: OnboardingD
               // Persist consent in wizard data (sent to the signup API) and
               // reset whichever verification path is now inactive
               if (e.target.checked) {
-                set({ account: { ...a, smsConsent: true, emailVerified: false } });
+                set({ account: { ...a, smsConsent: true, emailVerified: isGoogle && !!a.emailVerified } });
                 setEmailCodeSent(false); setEmailOtp(""); setEmailApiErr(""); setEmailSuccessMsg("");
               } else {
                 set({ account: { ...a, smsConsent: false, phoneVerified: false } });
@@ -1649,7 +1667,9 @@ function OnboardingContent() {
 
   // Resuming with an existing session -- back from Google consent, or a PIN
   // login on an account that never finished signup. The user is already
-  // authenticated, so skip the account step and go straight to plan selection.
+  // authenticated, so the account step shrinks to their name and the SMS
+  // opt-in (AccountStep's session-backed form); it is not skipped, or these
+  // customers would never be offered text alerts.
   useEffect(() => {
     const isResume = searchParams.get("google") === "true" || searchParams.get("resume") === "1";
     if (!isResume) return;
@@ -1674,9 +1694,6 @@ function OnboardingContent() {
             password: "google_oauth_bypass", // No password on a session-backed signup
           },
         }));
-        // With a name on file the account step has nothing left to ask;
-        // without one, stay on it so the customer can type their name.
-        if (hasName) setStep(1);
       } catch (err) {
         console.error("Failed to load profile while resuming signup:", err);
       }

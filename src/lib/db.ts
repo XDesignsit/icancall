@@ -32,6 +32,10 @@ export interface Account {
   name: string;
   email: string;
   notifyEmail: string;
+  /**
+   * Where call alerts are texted: the number the owner verified and opted in
+   * with (signup, or Account → Contact info). Empty without that consent.
+   */
   smsPhone?: string;
   plan: string;
   used_minutes: number;
@@ -46,6 +50,8 @@ export interface Account {
     mode: 'menu' | 'cascade' | 'simultaneous' | 'schedule';
     schedule: CoverageSlot[];
     settings: LineSettings;
+    /** How the number was bought (lib/numbers), when it was. */
+    telephony?: { provider?: string; sid?: string; statusCallback?: string };
   };
 }
 
@@ -137,7 +143,7 @@ export async function findAccountByTwilioNumber(phoneNumber: string): Promise<Ac
       name: profile.name || 'Caregiver',
       email: profile.email,
       notifyEmail: settings.notifyEmail || profile.email,
-      smsPhone: settings.smsPhone || settings.phone || profile.phone || '',
+      smsPhone: settings.smsConsent === true ? toE164(settings.smsPhone) : '',
       plan,
       used_minutes: used,
       allotted_minutes: allotted,
@@ -150,6 +156,7 @@ export async function findAccountByTwilioNumber(phoneNumber: string): Promise<Ac
         mode: lineSettings.mode || 'menu',
         schedule: Array.isArray(lineSettings.schedule) ? lineSettings.schedule : [],
         settings: lineSettings.extraSettings || {},
+        telephony: lineSettings.telephony,
       }
     };
 

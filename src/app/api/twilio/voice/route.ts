@@ -5,6 +5,8 @@ import { buildConferenceRoom } from '@/lib/conferenceRoom';
 import { cascadeOrder, hourInTimeZone, onDutyContactIndex, parseLeadIndex } from '@/lib/coverageSchedule';
 import { supabase } from '@/lib/supabase';
 import twilioClient, { providerForNumber } from '@/lib/twilio';
+import { recordCallAnswered, recordCallStarted, recordVoicemailOffered } from '@/lib/callRecords';
+import { ensureCallStatusWebhook } from '@/lib/numbers';
 
 export const preferredRegion = 'iad1';
 
@@ -86,6 +88,14 @@ export async function POST(request: Request) {
     const contacts = account?.line?.contacts || [];
 
     if (!digits) {
+      // A new call (or the menu again after a bad key; recording is a no-op then).
+      if (account?.line && callSid) {
+        await Promise.all([
+          recordCallStarted(callSid, account.line.id, fromNumber),
+          ensureCallStatusWebhook(account.line, activeNumber),
+        ]);
+      }
+
       // 2. Initial Call Greeting & Interactive IVR Menu
       let greetingVoiceUrl = null;
       if (greetingAudioPath) {
@@ -149,6 +159,11 @@ export async function POST(request: Request) {
       const dialStatus = dialCallStatus;
       if (dialStatus === 'completed' || dialStatus === 'answered') {
         const durationSeconds = dialCallDuration ? parseInt(dialCallDuration.toString(), 10) : 0;
+        if (callSid) {
+          const answeredIdx = (contactIndexStr ? parseInt(contactIndexStr.toString(), 10) : 1) - 1;
+          const answered = cascadeOrder(contacts, leadFromQuery, fromNumber)[answeredIdx] || null;
+          await recordCallAnswered(callSid, answered, durationSeconds);
+        }
         if (durationSeconds > 0 && activeNumber) {
           const minutesUsed = Math.ceil(durationSeconds / 60);
           await deductMinutes(activeNumber, minutesUsed);
@@ -182,6 +197,8 @@ export async function POST(request: Request) {
       const dialStatus = dialCallStatus;
       if (dialStatus === 'completed' || dialStatus === 'answered') {
         const durationSeconds = dialCallDuration ? parseInt(dialCallDuration.toString(), 10) : 0;
+        // <Dial> to several numbers does not say which of them picked up.
+        if (callSid) await recordCallAnswered(callSid, null, durationSeconds);
         if (durationSeconds > 0 && activeNumber) {
           const minutesUsed = Math.ceil(durationSeconds / 60);
           await deductMinutes(activeNumber, minutesUsed);
@@ -197,6 +214,10 @@ export async function POST(request: Request) {
       const dialStatus = dialCallStatus;
       if (dialStatus === 'completed' || dialStatus === 'answered') {
         const durationSeconds = dialCallDuration ? parseInt(dialCallDuration.toString(), 10) : 0;
+        if (callSid) {
+          const picked = parseLeadIndex(requestUrl.searchParams.get('contact'));
+          await recordCallAnswered(callSid, picked === null ? null : contacts[picked] || null, durationSeconds);
+        }
         if (durationSeconds > 0 && activeNumber) {
           const minutesUsed = Math.ceil(durationSeconds / 60);
           await deductMinutes(activeNumber, minutesUsed);
@@ -220,7 +241,7 @@ export async function POST(request: Request) {
             ${getTtsPlayTag("Connecting you to " + contact.name + ". Please stand by.")}
             <Dial 
               timeout="15" 
-              action="/api/twilio/voice?Digits=menu-completed&amp;To=${encodeURIComponent(activeNumber)}" 
+              action="/api/twilio/voice?Digits=menu-completed&amp;contact=${d - 1}&amp;To=${encodeURIComponent(activeNumber)}" 
               method="POST" 
               timeLimit="${timeLimitSeconds}"
             >
@@ -234,15 +255,16 @@ export async function POST(request: Request) {
           `;
         }
       } else if (digits === '9' || digits === 'no-answer') {
+        if (callSid) await recordVoicemailOffered(callSid);
         if (digits === 'no-answer') {
           twiml += getTtsPlayTag("The contact is currently unavailable.");
         }
         twiml += `
           ${getTtsPlayTag("Please leave your message after the tone. When you are finished, you can hang up.")}
           <Record 
-            action="/api/twilio/transcription?To=${encodeURIComponent(activeNumber)}" 
+            action="/api/twilio/transcription?kind=recording&amp;To=${encodeURIComponent(activeNumber)}" 
             transcribe="true" 
-            transcribeCallback="/api/twilio/transcription?To=${encodeURIComponent(activeNumber)}"
+            transcribeCallback="/api/twilio/transcription?kind=transcript&amp;To=${encodeURIComponent(activeNumber)}"
             maxLength="120"
             playBeep="true"
           />
@@ -355,15 +377,16 @@ export async function POST(request: Request) {
           `;
         }
       } else if (digits === '2' || digits === 'no-answer') {
+        if (callSid) await recordVoicemailOffered(callSid);
         if (digits === 'no-answer') {
           twiml += getTtsPlayTag("The primary contacts are currently unavailable.");
         }
         twiml += `
           ${getTtsPlayTag("Please leave your message after the tone. When you are finished, you can hang up.")}
           <Record 
-            action="/api/twilio/transcription?To=${encodeURIComponent(activeNumber)}" 
+            action="/api/twilio/transcription?kind=recording&amp;To=${encodeURIComponent(activeNumber)}" 
             transcribe="true" 
-            transcribeCallback="/api/twilio/transcription?To=${encodeURIComponent(activeNumber)}"
+            transcribeCallback="/api/twilio/transcription?kind=transcript&amp;To=${encodeURIComponent(activeNumber)}"
             maxLength="120"
             playBeep="true"
           />

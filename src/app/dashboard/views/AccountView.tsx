@@ -48,6 +48,7 @@ import { Icon } from "../_icons";
 import { AREA_SUGGESTIONS, AreaFlag, fetchNumbersLive } from "../_numbers";
 import { Badge, initials, Modal, Toggle } from "../_primitives";
 import type { Account, Line, PickerNumber } from "../_types";
+import { SmsAlertsCard } from "./SmsAlertsCard";
 
 interface SeatMemberView { email: string; status: "invited" | "active"; invitedAt: string; acceptedAt?: string }
 
@@ -1053,6 +1054,10 @@ export function AccountView({
             )}
           </div>
         </div>
+      )}
+
+      {tab === "contact" && canEditProfile && (
+        <SmsAlertsCard account={a} setAccount={setAccount} lang={lang} showToast={showToast} />
       )}
 
       {tab === "billing" && (
