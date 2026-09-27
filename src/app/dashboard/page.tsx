@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useEffect } from "react";
 
+import { guessAccountTimeZone } from "@/lib/coverageSchedule";
 import { dashboardExtraTranslations } from "@/lib/dashboardExtraTranslations";
 import { dashboardTranslations } from "@/lib/dashboardTranslations";
 import { isDemoEmail } from "@/lib/demoEmails";
@@ -265,7 +266,9 @@ export default function DashboardApp() {
       notifyEmail: settings.notifyEmail || profile.email || "",
       phone: settings.phone || settings.smsPhone || "",
       address: settings.address || settings.billingAddr || "",
-      timezone: settings.timezone || "Pacific (PT)",
+      // Coverage schedules ring by this zone, so an account that has never
+      // picked one starts from the browser's rather than a fixed Pacific.
+      timezone: settings.timezone || guessAccountTimeZone(),
       language: settings.language || "English",
       twoFactor: !!settings.twoFactor,
       card: settings.card || { brand: "Visa", last4: "4242", exp: "08 / 27" },
@@ -1111,6 +1114,7 @@ export default function DashboardApp() {
               d={d}
               lang={lang}
               plan={account.plan}
+              timeZone={account.timezone}
               setView={go}
               setAcctTab={setAcctTab}
               setAutoOpenPlanModal={setAutoOpenPlanModal}

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
-import { findAccountByTwilioNumber, getAvailableMinutes, deductMinutes, type LineContact } from '@/lib/db';
+import { findAccountByTwilioNumber, getAvailableMinutes, deductMinutes } from '@/lib/db';
+import { cascadeOrder, hourInTimeZone, onDutyContactIndex, parseLeadIndex } from '@/lib/coverageSchedule';
 import { supabase } from '@/lib/supabase';
 import twilioClient, { providerForNumber } from '@/lib/twilio';
 
@@ -14,6 +15,8 @@ export async function POST(request: Request) {
     let dialCallDuration = requestUrl.searchParams.get('DialCallDuration');
     let contactIndexStr = requestUrl.searchParams.get('contactIndex');
     let callSid = requestUrl.searchParams.get('CallSid');
+    // Set on cascade legs of a schedule-mode call: the contact rung first.
+    const leadFromQuery = parseLeadIndex(requestUrl.searchParams.get('lead'));
 
     if (request.method === 'POST') {
       try {
@@ -148,9 +151,7 @@ export async function POST(request: Request) {
         }
         twiml += '\n  <Hangup />';
       } else {
-        const availableContacts = contacts.filter(
-          (c): c is LineContact & { phone: string } => Boolean(c.available && c.phone)
-        );
+        const availableContacts = cascadeOrder(contacts, leadFromQuery);
         const nextIdx = contactIndexStr ? parseInt(contactIndexStr.toString(), 10) : 0;
         if (nextIdx < availableContacts.length) {
           const nextContact = availableContacts[nextIdx];
@@ -159,7 +160,7 @@ export async function POST(request: Request) {
             ${getTtsPlayTag("Trying the next contact. Please stand by.")}
             <Dial 
               timeout="15" 
-              action="/api/twilio/voice?Digits=cascade-next&amp;contactIndex=${nextIdx + 1}&amp;To=${encodeURIComponent(activeNumber)}" 
+              action="/api/twilio/voice?Digits=cascade-next&amp;contactIndex=${nextIdx + 1}${leadFromQuery === null ? '' : `&amp;lead=${leadFromQuery}`}&amp;To=${encodeURIComponent(activeNumber)}" 
               method="POST" 
               timeLimit="${timeLimitSeconds}"
             >
@@ -249,11 +250,16 @@ export async function POST(request: Request) {
         `;
       }
     } else {
-      // 4. Process digits for Cascade or Simultaneous mode
+      // 4. Process digits for Cascade, Simultaneous or Schedule mode
       if (digits === '1') {
-        const availableContacts = contacts.filter(
-          (c): c is LineContact & { phone: string } => Boolean(c.available && c.phone)
-        );
+        // Around-the-clock coverage rings whoever the schedule has on duty in
+        // the account's time zone first, then cascades through the rest of the
+        // circle. The lead is fixed here and handed to every later leg, so a
+        // cascade that runs across a slot boundary keeps its order.
+        const leadIndex = lineMode === 'schedule' && account
+          ? onDutyContactIndex(account.line?.schedule, contacts, hourInTimeZone(new Date(), account.timeZone))
+          : null;
+        const availableContacts = cascadeOrder(contacts, leadIndex);
 
         if (availableContacts.length > 0) {
           const timeLimitSeconds = Math.floor(availableMinutes * 60);
@@ -290,14 +296,14 @@ export async function POST(request: Request) {
                 }
               });
             } else {
-              // Cascade mode (sequential) - Call the first caregiver
+              // Cascade and Schedule modes (sequential) - Call the first caregiver
               const firstContact = availableContacts[0];
               try {
                 await twilioClient!.calls.create({
                   to: firstContact.phone,
                   from: activeNumber,
                   url: `${baseUrl}/api/twilio/agent-join?room=${encodeURIComponent(roomName)}`,
-                  statusCallback: `${baseUrl}/api/twilio/cascade-callback?room=${encodeURIComponent(roomName)}&contactIndex=1&parentCallSid=${encodeURIComponent(activeCallSid)}`,
+                  statusCallback: `${baseUrl}/api/twilio/cascade-callback?room=${encodeURIComponent(roomName)}&contactIndex=1${leadIndex === null ? '' : `&lead=${leadIndex}`}&parentCallSid=${encodeURIComponent(activeCallSid)}`,
                   statusCallbackEvent: ['completed', 'busy', 'no-answer', 'failed'],
                   timeout: 15
                 });
@@ -321,13 +327,13 @@ export async function POST(request: Request) {
               });
               twiml += `\n            </Dial>`;
             } else {
-              // Cascade mode (sequential)
+              // Cascade and Schedule modes (sequential)
               const firstContact = availableContacts[0];
               twiml += `
                 ${getTtsPlayTag("Connecting you to your primary trusted contacts. Please stand by.")}
                 <Dial 
                   timeout="15" 
-                  action="/api/twilio/voice?Digits=cascade-next&amp;contactIndex=1&amp;To=${encodeURIComponent(activeNumber)}" 
+                  action="/api/twilio/voice?Digits=cascade-next&amp;contactIndex=1${leadIndex === null ? '' : `&amp;lead=${leadIndex}`}&amp;To=${encodeURIComponent(activeNumber)}" 
                   method="POST" 
                   timeLimit="${timeLimitSeconds}"
                 >
