@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { ttsPlayTag, verifyTelephonyWebhook } from '@/lib/twilioWebhook';
 import { findAccountByTwilioNumber } from '@/lib/db';
 import { parseConferenceRoom } from '@/lib/conferenceRoom';
-import { markLegAccepted } from '@/lib/conferenceBridge';
+import { callerStillThere, firstAcceptedLeg, markLegAccepted, stopPlacedLegs } from '@/lib/conferenceBridge';
 import { recordCallAnswered } from '@/lib/callRecords';
 import { toE164 } from '@/lib/phone';
 
@@ -17,6 +17,8 @@ export const preferredRegion = 'iad1';
 // knows the leg reached the caller (conferenceBridge).
 // Transfer legs skip the prompt: the caregiver chose that person, and their
 // voicemail is a fair place for the caller to land.
+// A key press that comes too late -- another contact accepted first (All Ring),
+// or the caller has hung up -- is told so instead of joining an empty room.
 export async function POST(request: Request) {
   const denied = await verifyTelephonyWebhook(request);
   if (denied) return denied;
@@ -75,10 +77,34 @@ export async function POST(request: Request) {
       // log names whoever this leg rang.
       if (accepted && callSid) {
         const account = await findAccountByTwilioNumber(conference.lineNumber);
+        const voiceId = account?.line?.settings?.voiceId || '21m00Tcm4TlvDq8ikWAM';
+        const twilioClient = (await import('@/lib/twilio')).default;
+
+        // All Ring rings everyone at once: the first to accept takes the call
+        // and the rest stop ringing. The acceptance is recorded before asking
+        // who was first, so two people pressing at once cannot both win.
+        await markLegAccepted(callSid, room);
+        const [first, callerThere] = await Promise.all([
+          firstAcceptedLeg(room),
+          twilioClient ? callerStillThere(twilioClient, room) : Promise.resolve(true),
+        ]);
+        const farewell = first && first !== callSid
+          ? 'Another family member has already answered this call. Thank you.'
+          : !callerThere
+            ? 'Sorry, the caller has already hung up.'
+            : null;
+        if (farewell) {
+          return new NextResponse(`<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+  ${ttsPlayTag(baseUrl, farewell, voiceId)}
+  <Hangup/>
+</Response>`, { headers: { 'Content-Type': 'application/xml' } });
+        }
+
         const dialed = toE164(legTo);
         const contact = account?.line?.contacts.find((c) => c.phone && toE164(String(c.phone)) === dialed) || null;
         await Promise.all([
-          markLegAccepted(callSid, room),
+          twilioClient ? stopPlacedLegs(twilioClient, room) : Promise.resolve(),
           recordCallAnswered(conference.callerCallSid, contact),
         ]);
       }
