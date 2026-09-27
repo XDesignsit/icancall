@@ -211,8 +211,18 @@ export interface HomeTranslations {
     private: { title: string; body: string; callerId: string; yourLine: string; hidden: string };
   };
   trust: {
-    title: string;
+    eyebrow: string;
+    titleStart: string;
+    titleAccent: string;
+    lead: string;
+    /** Card headings: guarantee, no contracts, privacy, two-step sign-in, support. */
     points: [string, string, string, string, string];
+    /** Labels inside the cards' illustrations. */
+    guarantee: { days: string; refund: string };
+    terms: { setupFee: string; contract: string; none: string; cancel: string; anytime: string };
+    privacy: { title: string; numbers: string; hidden: string; sold: string; never: string };
+    signIn: { enterCode: string; verified: string };
+    support: { question: string; answer: string; team: string };
     disclaimer: string;
   };
   pricing: {

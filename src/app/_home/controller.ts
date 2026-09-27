@@ -91,6 +91,18 @@ export function initHome(root: HTMLElement, { t, lang, billedMonthly, signupPath
   /* reveals + once-only micro animations */
   if (motion()) { root.classList.add("rvr"); once(".rv", "in", { rootMargin: "0px 0px -8% 0px", threshold: 0.12 }); }
   once(".hp-tile", "play", { threshold: 0.45 });
+  once(".hp-pc", "play", { threshold: 0.4 });
+
+  /* trust cards: a soft spotlight follows the pointer (writes CSS vars only) */
+  if (mq("(hover:hover) and (pointer:fine)")) {
+    $$(".hp-pc").forEach((c) =>
+      c.addEventListener("pointermove", (e) => {
+        const r = c.getBoundingClientRect();
+        c.style.setProperty("--mx", `${(e.clientX - r.left).toFixed(0)}px`);
+        c.style.setProperty("--my", `${(e.clientY - r.top).toFixed(0)}px`);
+      }, on),
+    );
+  }
   if (root.classList.contains("no-sda")) once(".hp-lines .ln, .hp-mmorph, .hp-s3-line, .hp-stage.is-rest", "in", { rootMargin: "0px 0px -25% 0px" });
 
   /* hero intro: ~2.5s, breathes 3 cycles, rests. Pause / play / replay control */

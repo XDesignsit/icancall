@@ -312,7 +312,11 @@ const t: HomeTranslations = {
     },
   },
   trust: {
-    title: "Tranquilidade já incluída.",
+    eyebrow: "Nossa promessa",
+    titleStart: "Tranquilidade ",
+    titleAccent: "já incluída.",
+    lead:
+      "Todos os planos têm as mesmas garantias, então experimentar o iCanCall com sua família é fácil e sem riscos.",
     points: [
       "Garantia de reembolso de 30 dias",
       "Sem fidelidade e sem taxa de adesão",
@@ -320,6 +324,27 @@ const t: HomeTranslations = {
       "O login em duas etapas protege seu painel",
       "Pessoas de verdade no suporte, com resposta em até um dia útil",
     ],
+    guarantee: { days: "dias", refund: "Reembolso total, sem perguntas" },
+    terms: {
+      setupFee: "Taxa de adesão",
+      contract: "Fidelidade",
+      none: "Nenhuma",
+      cancel: "Cancelamento",
+      anytime: "Quando quiser",
+    },
+    privacy: {
+      title: "Os dados da sua família",
+      numbers: "Números pessoais",
+      hidden: "Ocultos",
+      sold: "Venda a terceiros",
+      never: "Nunca",
+    },
+    signIn: { enterCode: "Digite seu código de 6 dígitos", verified: "Verificado" },
+    support: {
+      question: "Vocês podem me ajudar a adicionar a vovó ao nosso círculo?",
+      answer: "Claro! Vamos configurar juntos.",
+      team: "Suporte iCanCall",
+    },
     disclaimer:
       "O iCanCall ajuda sua família a se falar rápido. Ele não é um serviço de alerta médico nem de emergência. Em uma emergência, ligue sempre para o 911.",
   },

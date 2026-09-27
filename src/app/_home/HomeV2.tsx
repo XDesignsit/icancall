@@ -63,6 +63,13 @@ const SEATS = {
   d: { x: "14%", y: "29.17%", pos: "top" },
 } as const;
 
+/** The sign-in code typed into the trust section's two-step card (not the demo PIN). */
+const OTP_DIGITS = "482916";
+
+/** When each of the guarantee dial's 30 ticks lights: in step with its 1.5s ease-out
+    (cubic) fill that starts at 0.3s, so the ticks keep pace with the arc and the count. */
+const TICK_DELAYS = Array.from({ length: 30 }, (_, k) => `${(0.3 + 1.5 * (1 - Math.cbrt(1 - (k + 1) / 30))).toFixed(3)}s`);
+
 const THREADS = {
   m: "M300 300 C 400 300 440 175 516 175",
   j: "M300 300 C 400 300 440 425 516 425",
@@ -926,22 +933,184 @@ function HomeV2({ t, base, lang, onLang, root }: Props) {
         </section>
 
         {/* ============ TRUST ============ */}
-        <section className="section hp-trust" id="trust" aria-labelledby="trust-title">
+        {/* Each promise card has a small illustration (aria-hidden: the heading carries
+            the meaning) that plays once when the card scrolls into view. */}
+        <section className="section hp-trust hp-dark" id="trust" aria-labelledby="trust-title">
+          <div className="hp-trust-bg" aria-hidden="true">
+            <i />
+            <i />
+          </div>
           <div className="wrap">
-            <div className="section-head">
-              <h2 className="hp-h2" id="trust-title">{t.trust.title}</h2>
+            <div className="section-head rv">
+              <span className="eyebrow">{t.trust.eyebrow}</span>
+              <h2 className="hp-h2" id="trust-title">
+                {t.trust.titleStart}
+                <span className="accent">{t.trust.titleAccent}</span>
+              </h2>
+              <p className="lead">{t.trust.lead}</p>
             </div>
-            <ul className="hp-points">
-              {(["i-shield", "i-nocontract", "i-eye-off", "i-2step", "i-headset"] as const).map((icon, i) => (
-                <li key={icon} className="rv" style={vars({ "--i": i })}>
-                  <span className="ic"><Icon id={icon} /></span>
-                  <p>{t.trust.points[i]}</p>
-                </li>
-              ))}
+            <ul className="hp-pcs">
+              <li className="hp-pc pc-guar rv" style={vars({ "--i": 0 })}>
+                <div className="hp-pc-vis" aria-hidden="true">
+                  <div className="hp-pc-float">
+                    <div className="hp-dial">
+                      <svg viewBox="0 0 200 200">
+                        <defs>
+                          <linearGradient id="hp-dial-g" x1="0" y1="0" x2="1" y2="1">
+                            <stop offset="0" />
+                            <stop offset="1" />
+                          </linearGradient>
+                        </defs>
+                        <circle className="trk" cx="100" cy="100" r="96" />
+                        <circle className="arc" cx="100" cy="100" r="96" pathLength={1} transform="rotate(-90 100 100)" />
+                        {Array.from({ length: 30 }, (_, k) => (
+                          <line
+                            key={k}
+                            className="tk"
+                            x1="100"
+                            y1="15"
+                            x2="100"
+                            y2="24"
+                            transform={`rotate(${k * 12} 100 100)`}
+                            style={vars({ "--d": TICK_DELAYS[k] })}
+                          />
+                        ))}
+                      </svg>
+                      <div className="hp-dial-n">
+                        <b />
+                        <span>{t.trust.guarantee.days}</span>
+                      </div>
+                    </div>
+                    <span className="hp-pc-chip">
+                      <Icon id="i-check" />
+                      {t.trust.guarantee.refund}
+                    </span>
+                  </div>
+                </div>
+                <div className="hp-pc-txt">
+                  <span className="ic"><Icon id="i-shield" /></span>
+                  <h3>{t.trust.points[0]}</h3>
+                </div>
+              </li>
+              <li className="hp-pc pc-priv rv" style={vars({ "--i": 1 })}>
+                <div className="hp-pc-vis" aria-hidden="true">
+                  <div className="hp-pc-float hp-pv">
+                    <div className="hp-ui hp-pv-card">
+                      <span className="ava">MD</span>
+                      <div className="info">
+                        <b>Maria Delgado</b>
+                        <span className="rel">{t.rel.daughter}</span>
+                        <span className="hp-mask mono">
+                          <span className="real">(415) 555-0142</span>
+                          <span className="dots">(•••) •••-••42</span>
+                          <i className="scan" />
+                        </span>
+                      </div>
+                      <span className="lock"><Icon id="i-lock" /></span>
+                    </div>
+                    <div className="hp-ui hp-pv-data">
+                      <div className="hd">
+                        <Icon id="i-shield" />
+                        {t.trust.privacy.title}
+                      </div>
+                      <div className="row" style={vars({ "--i": 0 })}>
+                        <span>{t.trust.privacy.numbers}</span>
+                        <b>{t.trust.privacy.hidden}</b>
+                      </div>
+                      <div className="row" style={vars({ "--i": 1 })}>
+                        <span>{t.trust.privacy.sold}</span>
+                        <b className="stamp">{t.trust.privacy.never}</b>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="hp-pc-txt">
+                  <span className="ic"><Icon id="i-eye-off" /></span>
+                  <h3>{t.trust.points[2]}</h3>
+                </div>
+              </li>
+              <li className="hp-pc pc-terms rv" style={vars({ "--i": 2 })}>
+                <div className="hp-pc-vis" aria-hidden="true">
+                  <div className="hp-pc-float hp-rcpt-w">
+                    <div className="hp-rcpt">
+                      <svg className="hp-logo" viewBox="0 0 800 154.5652">
+                        <use href="#logo" />
+                      </svg>
+                      {(
+                        [
+                          [t.trust.terms.setupFee, "$0"],
+                          [t.trust.terms.contract, t.trust.terms.none],
+                          [t.trust.terms.cancel, t.trust.terms.anytime],
+                        ] as const
+                      ).map(([k, v], i) => (
+                        <div className="row" key={i} style={vars({ "--i": i })}>
+                          <span>{k}</span>
+                          <b>{v}</b>
+                          <i className="ck"><Icon id="i-check" /></i>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+                <div className="hp-pc-txt">
+                  <span className="ic"><Icon id="i-nocontract" /></span>
+                  <h3>{t.trust.points[1]}</h3>
+                </div>
+              </li>
+              <li className="hp-pc pc-otp rv" style={vars({ "--i": 3 })}>
+                <div className="hp-pc-vis" aria-hidden="true">
+                  <div className="hp-pc-float hp-ui hp-otp">
+                    <div className="hd">
+                      <Icon id="i-lock" />
+                      {t.trust.signIn.enterCode}
+                    </div>
+                    <div className="boxes mono">
+                      {[...OTP_DIGITS].map((d, k) => (
+                        <span key={k} style={vars({ "--k": k })}>
+                          <b>{d}</b>
+                        </span>
+                      ))}
+                    </div>
+                    <span className="ok">
+                      <Icon id="i-check" />
+                      {t.trust.signIn.verified}
+                    </span>
+                  </div>
+                </div>
+                <div className="hp-pc-txt">
+                  <span className="ic"><Icon id="i-2step" /></span>
+                  <h3>{t.trust.points[3]}</h3>
+                </div>
+              </li>
+              <li className="hp-pc pc-help rv" style={vars({ "--i": 4 })}>
+                <div className="hp-pc-vis" aria-hidden="true">
+                  <div className="hp-pc-float hp-chat">
+                    <p className="q">{t.trust.support.question}</p>
+                    <div className="from">
+                      <span className="av"><Icon id="i-headset" /></span>
+                      <div className="col">
+                        <span className="who">{t.trust.support.team}</span>
+                        <div className="cell">
+                          <span className="typing">
+                            <i style={vars({ "--k": 0 })} />
+                            <i style={vars({ "--k": 1 })} />
+                            <i style={vars({ "--k": 2 })} />
+                          </span>
+                          <p className="a">{t.trust.support.answer}</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="hp-pc-txt">
+                  <span className="ic"><Icon id="i-headset" /></span>
+                  <h3>{t.trust.points[4]}</h3>
+                </div>
+              </li>
             </ul>
             {/* The design's testimonial row (.hp-quotes) is left out until there are
                 real customer quotes to show; its styles are kept in home-sections.css. */}
-            <p className="hp-disc">
+            <p className="hp-disc rv">
               <Icon id="i-info" />
               <span>{t.trust.disclaimer}</span>
             </p>

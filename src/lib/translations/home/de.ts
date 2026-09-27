@@ -312,7 +312,11 @@ const t: HomeTranslations = {
     },
   },
   trust: {
-    title: "Ein gutes Gefühl inklusive.",
+    eyebrow: "Unser Versprechen",
+    titleStart: "Ein gutes Gefühl ",
+    titleAccent: "inklusive.",
+    lead:
+      "Jeder Tarif enthält dieselben Garantien, damit Sie iCanCall mit Ihrer Familie einfach und ohne Risiko ausprobieren können.",
     points: [
       "30 Tage Geld-zurück-Garantie",
       "Keine Vertragsbindung, keine Einrichtungsgebühr",
@@ -320,6 +324,27 @@ const t: HomeTranslations = {
       "Zwei-Faktor-Anmeldung schützt Ihr Dashboard",
       "Echte Menschen im Support, Antwort innerhalb eines Werktags",
     ],
+    guarantee: { days: "Tage", refund: "Volle Erstattung, ohne Fragen" },
+    terms: {
+      setupFee: "Einrichtungsgebühr",
+      contract: "Vertragsbindung",
+      none: "Keine",
+      cancel: "Kündigung",
+      anytime: "Jederzeit",
+    },
+    privacy: {
+      title: "Die Daten Ihrer Familie",
+      numbers: "Private Nummern",
+      hidden: "Verborgen",
+      sold: "Verkauf an Dritte",
+      never: "Niemals",
+    },
+    signIn: { enterCode: "6-stelligen Code eingeben", verified: "Bestätigt" },
+    support: {
+      question: "Können Sie mir helfen, Oma zu unserem Rufkreis hinzuzufügen?",
+      answer: "Sehr gern! Wir richten es gemeinsam ein.",
+      team: "iCanCall-Support",
+    },
     disclaimer:
       "iCanCall hilft Ihrer Familie, sich schnell zu erreichen. Es ist weder ein Hausnotruf noch ein Notrufdienst. Im Notfall wählen Sie immer die 911.",
   },
