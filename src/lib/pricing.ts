@@ -30,3 +30,13 @@ export const PLAN_PRICING = {
     voiceMinutes: 150,
   },
 } as const;
+
+// Add-on prices quoted on the homepage (pricing footnote and FAQ). They must
+// match what checkout actually charges: the Creem add-on products and the
+// dashboard's add-on stepper (src/app/dashboard/views/AccountView.tsx).
+export const ADDON_PRICING = {
+  /** Extra phone number, recurring monthly */
+  extraNumberLabel: "$6.99",
+  /** One-time block of 30 extra voice minutes */
+  extraMinutesLabel: "$4.99",
+} as const;
