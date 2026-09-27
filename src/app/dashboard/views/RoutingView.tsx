@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 
+import { activeCoverageSlot, hourInTimeZone, onDutyContactIndex, scheduleTimeZone } from "@/lib/coverageSchedule";
 import { dashboardExtraTranslations } from "@/lib/dashboardExtraTranslations";
 import { type DashboardTranslations } from "@/lib/dashboardTranslations";
 import { type PlanId } from "@/lib/planConfig";
@@ -11,8 +12,46 @@ import { Badge, initials } from "../_primitives";
 import { type Contact, type CoverageSlot, type Line } from "../_types";
 
 
+/* Sample timeline shown for a line that has never had a schedule. */
+function seedSchedule(line: Line): CoverageSlot[] {
+  return [
+    {
+      id: "slot1",
+      name: "Nurse Dawn",
+      description: "Overnight support",
+      startHour: 0,
+      endHour: 7,
+      color: "oklch(0.44 0.105 240)",
+    },
+    {
+      id: "slot2",
+      name: line.contacts[0]?.name || "Caregiver",
+      description: "Daytime coverage",
+      startHour: 7,
+      endHour: 15,
+      color: line.contacts[0]?.color || "oklch(0.62 0.10 198)",
+    },
+    {
+      id: "slot3",
+      name: line.contacts[1]?.name || "Primary Caregiver",
+      description: "Afternoon primary",
+      startHour: 15,
+      endHour: 21,
+      color: line.contacts[1]?.color || "oklch(0.58 0.115 232)",
+    },
+    {
+      id: "slot4",
+      name: line.contacts[2]?.name || "Evening contact",
+      description: "Evening shift",
+      startHour: 21,
+      endHour: 24,
+      color: line.contacts[2]?.color || "oklch(0.55 0.11 280)",
+    },
+  ];
+}
+
 /* Call Simulator */
-function TestCall({ line, d, lang }: { line: Line; d: DashboardTranslations; lang: string }) {
+function TestCall({ line, d, lang, timeZone }: { line: Line; d: DashboardTranslations; lang: string; timeZone: string }) {
   const [screen, setScreen] = useState({
     cls: "",
     av: "—",
@@ -92,16 +131,16 @@ function TestCall({ line, d, lang }: { line: Line; d: DashboardTranslations; lan
     return false;
   }
 
-  async function runCascade() {
-    setDots(contacts.length);
+  async function runCascade(order: Contact[] = contacts) {
+    setDots(order.length);
     setActiveDots({});
     setScreen({ cls: "", av: "•", avColor: null, name: d.sim.connecting, state: d.sim.connecting, ring: false });
     await sleep(800);
     let done = false;
-    for (let i = 0; i < contacts.length; i++) {
+    for (let i = 0; i < order.length; i++) {
       if (cancelled.current) return;
       setActiveDots((d) => ({ ...d, [i]: "active" }));
-      const c = contacts[i];
+      const c = order[i];
       const ok = await ringConnect(c, i);
       if (cancelled.current) return;
       if (ok) {
@@ -223,99 +262,12 @@ function TestCall({ line, d, lang }: { line: Line; d: DashboardTranslations; lan
   }
 
   async function runSchedule() {
-    setDots(0);
-    setActiveDots({});
-    setScreen({ cls: "", av: "•", avColor: null, name: d.sim.connecting, state: d.sim.connecting, ring: false });
-    await sleep(900);
-    if (cancelled.current) return;
-
-    const now = new Date();
-    const currentHour = now.getHours() + now.getMinutes() / 60;
-    
-    const schedule = line.schedule || [
-      {
-        id: "slot1",
-        name: "Nurse Dawn",
-        description: "Overnight support",
-        startHour: 0,
-        endHour: 7,
-        color: "oklch(0.44 0.105 240)",
-      },
-      {
-        id: "slot2",
-        name: line.contacts[0]?.name || "Caregiver",
-        description: "Daytime coverage",
-        startHour: 7,
-        endHour: 15,
-        color: line.contacts[0]?.color || "oklch(0.62 0.10 198)",
-      },
-      {
-        id: "slot3",
-        name: line.contacts[1]?.name || "Primary Caregiver",
-        description: "Afternoon primary",
-        startHour: 15,
-        endHour: 21,
-        color: line.contacts[1]?.color || "oklch(0.58 0.115 232)",
-      },
-      {
-        id: "slot4",
-        name: line.contacts[2]?.name || "Evening contact",
-        description: "Evening shift",
-        startHour: 21,
-        endHour: 24,
-        color: line.contacts[2]?.color || "oklch(0.55 0.11 280)",
-      },
-    ];
-    
-    const activeSlot = schedule.find(s => currentHour >= s.startHour && currentHour < s.endHour);
-    
-    if (!activeSlot) {
-      setScreen({
-        cls: "voicemail",
-        av: "✉",
-        avColor: null,
-        name: d.routing.noCaregivers,
-        state: d.sim.vmSent,
-        ring: false,
-      });
-      return;
-    }
-
-    const contact = line.contacts.find(c => c.name === activeSlot.name);
-    
-    setScreen({
-      cls: "ring-state",
-      av: initials(activeSlot.name),
-      avColor: activeSlot.color,
-      name: activeSlot.name,
-      state: `${d.sim.ringing} (${activeSlot.description})…`,
-      ring: true,
-    });
-    
-    await sleep(1800);
-    if (cancelled.current) return;
-
-    const available = contact ? contact.available : true;
-
-    if (available) {
-      setScreen({
-        cls: "connected",
-        av: initials(activeSlot.name),
-        avColor: activeSlot.color,
-        name: activeSlot.name,
-        state: `${d.sim.connected} — ${d.common.activeNow}`,
-        ring: false,
-      });
-    } else {
-      setScreen({
-        cls: "voicemail",
-        av: "✉",
-        avColor: null,
-        name: `${activeSlot.name} (${d.contacts.busy})`,
-        state: d.sim.vmSent,
-        ring: false,
-      });
-    }
+    // Same rule as a real call (api/twilio/voice): whoever the schedule has on
+    // duty now rings first, then the rest of the circle cascades as usual. An
+    // uncovered hour, or a slot for someone outside the circle, is a plain cascade.
+    const hour = hourInTimeZone(new Date(), scheduleTimeZone(timeZone, line.number));
+    const lead = onDutyContactIndex(line.schedule || seedSchedule(line), contacts, hour);
+    await runCascade(lead === null ? contacts : [contacts[lead], ...contacts.filter((_, i) => i !== lead)]);
   }
 
   async function run() {
@@ -443,6 +395,7 @@ export function RoutingView({
   d,
   lang,
   plan,
+  timeZone,
   setView,
   setAcctTab,
   setAutoOpenPlanModal,
@@ -453,6 +406,8 @@ export function RoutingView({
   d: DashboardTranslations;
   lang: string;
   plan: PlanId;
+  /** The account's time zone label (Account → Profile), which schedules run on. */
+  timeZone: string;
   setView: (v: string) => void;
   setAcctTab: (t: string) => void;
   setAutoOpenPlanModal: (open: boolean) => void;
@@ -474,40 +429,7 @@ export function RoutingView({
   const [showAddForm, setShowAddForm] = useState(false);
 
   useEffect(() => {
-    setLocalSchedule(line.schedule || [
-      {
-        id: "slot1",
-        name: "Nurse Dawn",
-        description: "Overnight support",
-        startHour: 0,
-        endHour: 7,
-        color: "oklch(0.44 0.105 240)",
-      },
-      {
-        id: "slot2",
-        name: line.contacts[0]?.name || "Caregiver",
-        description: "Daytime coverage",
-        startHour: 7,
-        endHour: 15,
-        color: line.contacts[0]?.color || "oklch(0.62 0.10 198)",
-      },
-      {
-        id: "slot3",
-        name: line.contacts[1]?.name || "Primary Caregiver",
-        description: "Afternoon primary",
-        startHour: 15,
-        endHour: 21,
-        color: line.contacts[1]?.color || "oklch(0.58 0.115 232)",
-      },
-      {
-        id: "slot4",
-        name: line.contacts[2]?.name || "Evening contact",
-        description: "Evening shift",
-        startHour: 21,
-        endHour: 24,
-        color: line.contacts[2]?.color || "oklch(0.55 0.11 280)",
-      },
-    ]);
+    setLocalSchedule(line.schedule || seedSchedule(line));
     // Reseed the schedule only when switching lines; depending on line.schedule
     // would clobber in-progress edits whenever the schedule state changes.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -518,10 +440,17 @@ export function RoutingView({
     return () => clearInterval(timer);
   }, []);
 
-  const currentHour = currentTime.getHours() + currentTime.getMinutes() / 60;
-  const activeSlot = localSchedule.find(
-    (slot) => currentHour >= slot.startHour && currentHour < slot.endHour
-  );
+  // The timeline runs on the account's time zone, as real calls do, not on
+  // this browser's clock.
+  const scheduleZone = scheduleTimeZone(timeZone, line.number);
+  const currentHour = hourInTimeZone(currentTime, scheduleZone);
+  const activeSlot = activeCoverageSlot(localSchedule, currentHour);
+  const currentTimeLabel = new Intl.DateTimeFormat("en-US", {
+    timeZone: scheduleZone,
+    hour: "numeric",
+    minute: "2-digit",
+    timeZoneName: "short",
+  }).format(currentTime);
 
   const saveSchedule = (newSchedule: CoverageSlot[]) => {
     setLocalSchedule(newSchedule);
@@ -810,7 +739,7 @@ export function RoutingView({
               <span style={{ fontSize: "0.86rem", fontWeight: 600 }}>{ext.coverageTimeline}</span>
               <span className="demo-status" style={{ fontSize: "0.78rem", padding: "4px 10px", borderRadius: 999 }}>
                 <span className="live" style={{ background: activeSlot ? "var(--green)" : "var(--ink-faint)" }}></span>
-                {ext.currentTimeLabel}: {formatHour(Math.floor(currentHour))}:{String(Math.floor((currentHour % 1) * 60)).padStart(2, '0')}
+                {ext.currentTimeLabel}: {currentTimeLabel}
               </span>
             </div>
             
@@ -1245,7 +1174,7 @@ export function RoutingView({
           </Badge>
         </div>
         <div className="card-pad">
-          <TestCall line={line} d={d} lang={lang} />
+          <TestCall line={line} d={d} lang={lang} timeZone={timeZone} />
         </div>
       </div>
     </div>

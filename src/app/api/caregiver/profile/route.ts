@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { verifySession } from "@/lib/session";
 import { supabase } from "@/lib/supabase";
+import { invalidateCachedAccount } from "@/lib/db";
 import { resolveAccount } from "@/lib/account";
 import { isOnboarded } from "@/lib/onboarding";
 import { isSessionLive } from "@/lib/userSessions";
@@ -182,6 +183,13 @@ export async function POST(request: Request) {
     if (error || !updated) {
       console.error("Failed to update profile:", error);
       return NextResponse.json({ error: "Failed to update profile data" }, { status: 500 });
+    }
+
+    // Coverage schedules run on the account's time zone, which the voice
+    // webhook reads through the per-number account cache.
+    if (mergedSettings.timezone !== profile?.settings?.timezone) {
+      const { data: lines } = await supabase.from("phone_lines").select("number").eq("user_id", userId);
+      (lines || []).forEach((l) => l.number && invalidateCachedAccount(l.number));
     }
 
     return NextResponse.json({ success: true, profile: updated });

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
-import { findAccountByTwilioNumber, type LineContact } from '@/lib/db';
+import { findAccountByTwilioNumber } from '@/lib/db';
+import { cascadeOrder, parseLeadIndex } from '@/lib/coverageSchedule';
 
 export const preferredRegion = 'iad1';
 
@@ -10,6 +11,8 @@ export async function POST(request: Request) {
     let contactIndexStr = requestUrl.searchParams.get('contactIndex');
     let callStatus = requestUrl.searchParams.get('CallStatus');
     let parentCallSid = requestUrl.searchParams.get('parentCallSid');
+    // Schedule-mode calls pin the on-duty contact they rang first (voice route).
+    const leadIndex = parseLeadIndex(requestUrl.searchParams.get('lead'));
 
     if (request.method === 'POST') {
       try {
@@ -51,9 +54,7 @@ export async function POST(request: Request) {
     const activeNumber = '+' + parts[1];
     const account = await findAccountByTwilioNumber(activeNumber);
     const contacts = account?.line?.contacts || [];
-    const availableContacts = contacts.filter(
-      (c): c is LineContact & { phone: string } => Boolean(c.available && c.phone)
-    );
+    const availableContacts = cascadeOrder(contacts, leadIndex);
 
     const baseUrl = `${requestUrl.protocol}//${requestUrl.host}`;
 
@@ -64,7 +65,7 @@ export async function POST(request: Request) {
           to: nextContact.phone,
           from: activeNumber,
           url: `${baseUrl}/api/twilio/agent-join?room=${encodeURIComponent(room)}`,
-          statusCallback: `${baseUrl}/api/twilio/cascade-callback?room=${encodeURIComponent(room)}&contactIndex=${nextIdx + 1}&parentCallSid=${encodeURIComponent(parentCallSid || '')}`,
+          statusCallback: `${baseUrl}/api/twilio/cascade-callback?room=${encodeURIComponent(room)}&contactIndex=${nextIdx + 1}${leadIndex === null ? '' : `&lead=${leadIndex}`}&parentCallSid=${encodeURIComponent(parentCallSid || '')}`,
           statusCallbackEvent: ['completed', 'busy', 'no-answer', 'failed'],
           timeout: 15
         });

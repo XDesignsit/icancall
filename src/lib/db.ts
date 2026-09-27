@@ -1,6 +1,7 @@
 import { supabase } from './supabase';
 import { planConfig } from './planConfig';
 import { toE164 } from './phone';
+import { scheduleTimeZone } from './coverageSchedule';
 
 export interface LineContact {
   name?: string;
@@ -17,6 +18,15 @@ export interface LineSettings {
   [key: string]: unknown;
 }
 
+/** One stretch of a line's around-the-clock coverage; `name` is the contact's name. */
+export interface CoverageSlot {
+  name?: string;
+  description?: string;
+  startHour?: number;
+  endHour?: number;
+  [key: string]: unknown;
+}
+
 export interface Account {
   id: string;
   name: string;
@@ -26,12 +36,15 @@ export interface Account {
   plan: string;
   used_minutes: number;
   allotted_minutes: number;
+  /** IANA zone the line's coverage schedule runs on (see lib/coverageSchedule). */
+  timeZone: string;
   line?: {
     id: string;
     name: string;
     type: string;
     contacts: LineContact[];
-    mode: 'menu' | 'cascade' | 'schedule';
+    mode: 'menu' | 'cascade' | 'simultaneous' | 'schedule';
+    schedule: CoverageSlot[];
     settings: LineSettings;
   };
 }
@@ -128,12 +141,14 @@ export async function findAccountByTwilioNumber(phoneNumber: string): Promise<Ac
       plan,
       used_minutes: used,
       allotted_minutes: allotted,
+      timeZone: scheduleTimeZone(settings.timezone, normalizedSearch),
       line: {
         id: line.id,
         name: line.name || '',
         type: line.type || '',
         contacts: line.contacts || [],
         mode: lineSettings.mode || 'menu',
+        schedule: Array.isArray(lineSettings.schedule) ? lineSettings.schedule : [],
         settings: lineSettings.extraSettings || {},
       }
     };
