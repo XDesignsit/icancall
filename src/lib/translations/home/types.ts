@@ -282,5 +282,7 @@ export interface HomeTranslations {
     copyright: string;
     moments: string;
     badgeAlt: string;
+    /** Accessible label of the back-to-top button. */
+    top: string;
   };
 }

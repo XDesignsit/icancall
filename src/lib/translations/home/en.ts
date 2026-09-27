@@ -432,6 +432,7 @@ const t: HomeTranslations = {
     copyright: "© 2026 iCanCall, Inc.",
     moments: "Made for the moments that matter.",
     badgeAlt: "ElevenLabs Grants",
+    top: "Back to top",
   },
 };
 

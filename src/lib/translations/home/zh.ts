@@ -422,6 +422,7 @@ const t: HomeTranslations = {
     copyright: "© 2026 iCanCall, Inc.",
     moments: "为那些重要的时刻而生。",
     badgeAlt: "ElevenLabs Grants",
+    top: "返回顶部",
   },
 };
 
