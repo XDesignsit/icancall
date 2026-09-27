@@ -55,7 +55,7 @@ export async function POST(request: Request) {
 
     const logged = await recordTranscript(callSid, transcript);
     if (logged) {
-      if (await claimCallAlert(callSid)) await sendCallAlert(account, logged, baseUrl);
+      if (await claimCallAlert(callSid)) await sendCallAlert(account, logged);
     } else {
       // A call the log never saw (it came in before the call log existed):
       // this webhook fires once per message, so alert from what it carries.
@@ -77,7 +77,7 @@ export async function POST(request: Request) {
         ended_at: null,
         alerted_at: null,
       };
-      await sendCallAlert(account, unlogged, baseUrl);
+      await sendCallAlert(account, unlogged);
     }
     return new NextResponse('OK');
   } catch (error) {

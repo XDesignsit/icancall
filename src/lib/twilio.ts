@@ -164,12 +164,18 @@ export async function sendSms(to: string, body: string) {
   }
 
   const fromNumber = a2pSender();
-  
+  // Carriers can accept a text and still drop it (a filtered link, an
+  // unregistered use); Twilio only says so in the delivery report, which
+  // api/twilio/sms-status writes to the logs.
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL?.trim().replace(/\/$/, '');
+  const statusCallback = appUrl?.startsWith('https://') ? `${appUrl}/api/twilio/sms-status` : undefined;
+
   try {
     const message = await client.messages.create({
       to,
       from: fromNumber,
       body,
+      statusCallback,
     });
     return message;
   } catch (error) {
