@@ -15,6 +15,8 @@ interface Options {
   lang: string;
   /** "Billed monthly · cancel anytime" from the shared pricing copy. */
   billedMonthly: string;
+  /** Where the plan buttons send people; the standalone HTML copy points this at its signup file. */
+  signupPath?: string;
 }
 
 type Job = {
@@ -34,7 +36,7 @@ const fmt = (s: number) => {
 };
 
 /** `root` is the .hp-page wrapper; it carries the motion classes (.m / .rm / .no-sda / .rvr). */
-export function initHome(root: HTMLElement, { t, lang, billedMonthly }: Options): () => void {
+export function initHome(root: HTMLElement, { t, lang, billedMonthly, signupPath = "/signup" }: Options): () => void {
   const $ = <E extends Element = HTMLElement>(s: string, r: ParentNode = root) => r.querySelector<E>(s)!;
   const $$ = <E extends Element = HTMLElement>(s: string, r: ParentNode = root) => [...r.querySelectorAll<E>(s)];
   const motion = () => root.classList.contains("m");
@@ -187,7 +189,7 @@ export function initHome(root: HTMLElement, { t, lang, billedMonthly }: Options)
       const amt = $(".amt", p), v0 = parseFloat(p.dataset[from === "annual" ? "a" : "m"]!), v1 = parseFloat(p.dataset[a ? "a" : "m"]!);
       $(".per", p).textContent = a ? t.pricing.perYear : t.pricing.perMonth;
       $(".hp-plan-note", p).textContent = a ? p.dataset.noteA! : billedMonthly;
-      $<HTMLAnchorElement>(".btn", p).href = `/signup?plan=${p.dataset.plan}&billing=${b}&lang=${lang}`;
+      $<HTMLAnchorElement>(".btn", p).href = `${signupPath}?plan=${p.dataset.plan}&billing=${b}&lang=${lang}`;
       const fin = a ? String(Math.round(v1)) : v1.toFixed(2);
       if (!motion()) { amt.textContent = fin; return; }
       const s0 = performance.now(), D = 650;
