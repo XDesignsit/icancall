@@ -257,7 +257,8 @@ export interface HomeTranslations {
     items: { q: string; a: string }[];
   };
   final: {
-    title: string;
+    titleStart: string;
+    titleAccent: string;
     lead: string;
     talk: string;
     fine: [string, string, string];

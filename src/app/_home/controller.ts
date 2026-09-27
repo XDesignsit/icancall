@@ -180,6 +180,12 @@ export function initHome(root: HTMLElement, { t, lang, billedMonthly, signupPath
   ioPrice.observe($("#pricing"));
   observers.push(ioHero, ioPrice);
 
+  /* final CTA: its ambient loops run only while it is on screen */
+  const fin = $("#start");
+  const ioFin = new IntersectionObserver(([e]) => fin.classList.toggle("on", e.isIntersecting));
+  ioFin.observe(fin);
+  observers.push(ioFin);
+
   /* pricing: monthly / annual, prices tween, CTA links follow the toggle */
   const price = $("#pricing"), bseg = $(".hp-bill .seg"), bbtn = $$<HTMLButtonElement>("[data-bill]", bseg), plans = $$(".hp-plan");
   // A pill slides under the selected option; buttons differ in width per language, so it is measured.

@@ -418,7 +418,8 @@ const t: HomeTranslations = {
     ],
   },
   final: {
-    title: "Regálales un número. Regálate tranquilidad.",
+    titleStart: "Regálales un número. Regálate ",
+    titleAccent: "tranquilidad.",
     lead: "Configúralo en menos de cinco minutos. Tu familia puede empezar a llamar hoy mismo.",
     talk: "Habla con una persona real",
     fine: ["Sin tarifas de configuración", "Cancela cuando quieras", "Garantía de reembolso de 30 días"],

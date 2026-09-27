@@ -132,7 +132,7 @@ ${h.faq.lead}
 
 ${h.faq.items.map((f) => `### ${f.q}\n\n${fill(f.a, { numberPrice })}`).join("\n\n")}
 
-## ${h.final.title}
+## ${h.final.titleStart}${h.final.titleAccent}
 
 ${h.final.lead}
 
