@@ -178,7 +178,7 @@ const t: HomepageTranslations = {
   "q1": "Preciso comprar aparelhos adicionais ou hardware especial?",
   "a1": "Não. O iCanCall é um serviço virtual na nuvem. Seus familiares podem ligar de qualquer aparelho existente (telefone fixo, flip-phone, smartphone etc.) e nós encaminhamos aos telefones atuais dos cuidadores.",
   "q2": "Posso obter mais de um número de segurança?",
-  "a2": "Sim. O Plano Essencial vem com 1 número e o Plano Pro vem com 2. Você pode adquirir linhas virtuais extras por $3.99/mês por número diretamente no painel no plano Pro.",
+  "a2": "Sim. O Plano Essencial vem com 1 número e o Plano Pro vem com 2. Você pode adquirir linhas virtuais extras por $6.99/mês por número diretamente no painel no plano Pro.",
   "q3": "Como funcionam as chamadas em cascata?",
   "a3": "As chamadas soam nos telefones da lista um a um na ordem estabelecida. Se o primeiro não responder ou estiver ocupado, a ligação é transferida automaticamente ao próximo contato.",
   "q4": "Existe taxa de ativação ou fidelidade contratual?",

@@ -1,5 +1,8 @@
 import { translations } from "@/lib/translations";
-import { PLAN_PRICING } from "@/lib/pricing";
+import homeEn from "@/lib/translations/home/en";
+import { ADDON_PRICING, PLAN_PRICING } from "@/lib/pricing";
+import { planFeatures } from "@/lib/planFeatures";
+import { fill } from "@/lib/translations/home/format";
 
 /**
  * Prelaunch edition served to non-bypassed clients while PRELAUNCH is on —
@@ -49,126 +52,85 @@ ${t.footer.allRights}
 /**
  * Renders the marketing homepage as Markdown for text/markdown clients
  * (LLM agents, CLI tools). Copy is pulled from the same translations used
- * by the React homepage so the two never drift apart.
+ * by the React homepage (src/app/_home) so the two never drift apart.
  */
 export function renderHomepageMarkdown(): string {
   const t = translations.en;
+  const h = homeEn;
+  const feats = planFeatures(t);
+  const numberPrice = ADDON_PRICING.extraNumberLabel;
 
-  const essentialFeatures = [
-    t.pricing.eFeat1,
-    t.pricing.eFeat2,
-    t.pricing.eFeat3,
-    `${PLAN_PRICING.essential.voiceMinutes} ${t.ui.voiceMinutes}`,
-    t.pricing.eFeat4,
-    t.pricing.eFeat5,
-    t.ui.worksOnAnyPhoneNoApp,
-    t.pricing.shortGuarantee,
+  const plans = [
+    { title: t.pricing.essentialTitle, desc: t.pricing.essentialDesc, annual: t.ui.justPriceAnnualEssential, price: PLAN_PRICING.essential, feats: feats.essential, badge: "" },
+    { title: t.pricing.proTitle, desc: t.pricing.proDesc, annual: t.ui.justPriceAnnualPro, price: PLAN_PRICING.pro, feats: feats.pro, badge: ` (${h.pricing.mostPopular})` },
+    { title: t.pricing.careteamTitle, desc: t.pricing.careteamDesc, annual: t.ui.justPriceAnnualCareteam, price: PLAN_PRICING.careteam, feats: feats.careteam, badge: "" },
   ];
 
-  const proFeatures = [
-    t.pricing.pFeat1,
-    t.pricing.pFeat2,
-    t.pricing.eFeat3,
-    `${PLAN_PRICING.pro.voiceMinutes} ${t.ui.minutesIncluded}`,
-    t.pricing.pFeat3,
-    t.pricing.eFeat5,
-    t.pricing.pFeat4,
-    t.pricing.pFeat5,
-    t.ui.worksOnAnyPhoneNoApp,
-    t.pricing.shortGuarantee,
-  ];
+  const tiles = [h.features.phones, h.features.cascade, h.features.menu, h.features.voicemail, h.features.voice, h.features.dashboard, h.features.private];
 
-  const careteamFeatures = [
-    t.pricing.cFeat1,
-    t.pricing.cFeat2,
-    t.pricing.cFeat3,
-    `${PLAN_PRICING.careteam.voiceMinutes} ${t.ui.minutesIncluded}`,
-    t.pricing.cFeat5,
-    t.ui.worksOnAnyPhoneNoApp,
-    t.pricing.shortGuarantee,
-  ];
+  const usecases = h.usecases.cards.map((c, i) => ({ ...c, href: ["/parents", "/seniors", "/caregivers"][i] }));
 
-  const faqs = [
-    [t.faq.q1, t.faq.a1],
-    [t.faq.q2, t.faq.a2],
-    [t.faq.q3, t.faq.a3],
-    [t.faq.q4, t.faq.a4],
-    [t.faq.q5, t.faq.a5],
-    [t.faq.q6, t.faq.a6],
-  ];
+  return `# iCanCall — ${h.hero.titleStart}${h.hero.titleAccent}
 
-  const testimonials = [
-    [t.testimonials.t1Quote, t.testimonials.t1By, t.testimonials.t1Role],
-    [t.testimonials.t2Quote, t.testimonials.t2By, t.testimonials.t2Role],
-    [t.testimonials.t3Quote, t.testimonials.t3By, t.testimonials.t3Role],
-  ];
+${h.hero.lead}
 
-  return `# iCanCall — ${t.hero.titleAccent}${t.hero.titleRest}
+${fill(h.hero.fromPrice, { price: PLAN_PRICING.essential.monthlyLabel })} · ${h.hero.guarantee} · ${h.hero.noContracts}
 
-${t.hero.lead}
+## ${h.problem.titleStart}${h.problem.titleAccent}
 
-${t.hero.trustLine}
+${h.problem.lines.join(" ")}
 
-## ${t.steps.title}
+## ${h.how.eyebrow}: ${h.how.title}
 
-${t.steps.lead}
+${h.how.steps.map((s, i) => `${i + 1}. **${s.title}** ${s.body}`).join("\n")}
 
-1. **${t.steps.step1Title.replace(/^\d+\.\s*/, "")}** — ${t.steps.step1Desc}
-2. **${t.steps.step2Title.replace(/^\d+\.\s*/, "")}** — ${t.steps.step2Desc}
-3. **${t.steps.step3Title.replace(/^\d+\.\s*/, "")}** — ${t.steps.step3Desc}
+## ${h.setup.title}
 
-## ${t.features.title}
+${h.setup.lead}
 
-${t.features.lead}
+${h.setup.cards.map((c, i) => `${i + 1}. **${c.title}** ${c.body}`).join("\n")}
 
-- **${t.features.f1Title}** — ${t.features.f1Desc}
-- **${t.features.f2Title}** — ${t.features.f2Desc}
-- **${t.features.f3Title}** — ${t.features.f3Desc}
-- **${t.features.f4Title}** — ${t.features.f4Desc}
-- **${t.features.f5Title}** — ${t.features.f5Desc}
-- **${t.features.f6Title}** — ${t.features.f6Desc}
+## ${h.usecases.eyebrow}: ${h.usecases.title}
 
-## ${t.usecases.title}
+${usecases.map((c) => `- **${c.audience}** — ${c.title} ${c.body} [${c.link}](https://icancall.co${c.href})`).join("\n")}
 
-${t.usecases.lead}
+## ${h.features.eyebrow}: ${h.features.title}
 
-- **${t.usecases.u1Title}** — ${t.usecases.u1Desc}
-- **${t.usecases.u2Title}** — ${t.usecases.u2Desc}
-- **${t.usecases.u3Title}** — ${t.usecases.u3Desc}
+${tiles.map((f) => `- **${f.title}** — ${f.body}`).join("\n")}
 
-## ${t.pricing.title}
+## ${h.trust.title}
 
-${t.pricing.lead} ${t.ui.bothPlansInclude}
+${h.trust.points.map((p) => `- ${p}`).join("\n")}
 
-### ${t.pricing.essentialTitle} — ${PLAN_PRICING.essential.monthlyLabel}/month or ${PLAN_PRICING.essential.annualLabel}/year
+${h.trust.disclaimer}
 
-${t.pricing.essentialDesc} Annual billing: ${t.ui.justPriceAnnualEssential.toLowerCase()}.
+## ${h.pricing.eyebrow}: ${h.pricing.title}
 
-${essentialFeatures.map((f) => `- ${f}`).join("\n")}
+${h.pricing.lead}
 
-### ${t.pricing.proTitle} (${t.pricing.mostPopular}) — ${PLAN_PRICING.pro.monthlyLabel}/month or ${PLAN_PRICING.pro.annualLabel}/year
+${plans
+  .map(
+    (p) => `### ${p.title}${p.badge} — ${p.price.monthlyLabel}/month or ${p.price.annualLabel}/year
 
-${t.pricing.proDesc} Annual billing: ${t.ui.justPriceAnnualPro.toLowerCase()}.
+${p.desc} Annual billing: ${p.annual.toLowerCase()}.
 
-${proFeatures.map((f) => `- ${f}`).join("\n")}
+${p.feats.map((f) => `- ${f}`).join("\n")}`,
+  )
+  .join("\n\n")}
 
-### ${t.pricing.careteamTitle} — ${PLAN_PRICING.careteam.monthlyLabel}/month or ${PLAN_PRICING.careteam.annualLabel}/year
+### ${h.pricing.guaranteeTitle}
 
-${t.pricing.careteamDesc} Annual billing: ${t.ui.justPriceAnnualCareteam.toLowerCase()}.
+${h.pricing.guaranteeBody}
 
-${careteamFeatures.map((f) => `- ${f}`).join("\n")}
+${fill(h.pricing.more, { numberPrice, minutesPrice: ADDON_PRICING.extraMinutesLabel })}
 
-### ${t.pricing.guaranteeTitle}
+## ${h.faq.title}
 
-${t.pricing.guaranteeDesc}
+${h.faq.items.map((f) => `### ${f.q}\n\n${fill(f.a, { numberPrice })}`).join("\n\n")}
 
-## ${t.ui.whyFamiliesChoose}
+## ${h.final.title}
 
-${testimonials.map(([quote, by, role]) => `> ${quote}\n> — ${by}, ${role}`).join("\n\n")}
-
-## ${t.faq.title}
-
-${faqs.map(([q, a]) => `### ${q}\n\n${a}`).join("\n\n")}
+${h.final.lead}
 
 ## Links
 
@@ -178,13 +140,14 @@ ${faqs.map(([q, a]) => `### ${q}\n\n${a}`).join("\n\n")}
 - [For Parents](https://icancall.co/parents)
 - [For Caregivers](https://icancall.co/caregivers)
 - [Comparison Chart](https://icancall.co/comparison-chart)
+- [Contact](https://icancall.co/contact)
 - [Privacy Policy](https://icancall.co/privacy-policy)
 - [Terms of Service](https://icancall.co/terms-of-service)
 
 ---
 
-${t.footer.blurb}
+${h.footer.blurb}
 
-${t.footer.allRights}
+${h.footer.copyright}
 `;
 }

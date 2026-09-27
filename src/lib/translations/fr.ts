@@ -178,7 +178,7 @@ const t: HomepageTranslations = {
   "q1": "Dois-je acheter un appareil ou du matériel spécifique ?",
   "a1": "Non. iCanCall est un service de routage téléphonique virtuel dans le cloud. Votre proche peut appeler votre numéro iCanCall depuis n'importe quel téléphone (fixe, portable simple, smartphone, etc.), et le service transmet l'appel vers vos téléphones existants.",
   "q2": "Puis-je obtenir plusieurs numéros de sécurité ?",
-  "a2": "Oui. Le forfait Essentiel inclut 1 numéro, et le Pro en inclut 2. Vous pouvez acheter des numéros virtuels dédiés additionnels sur le forfait Pro pour 3,99 $/mois par numéro depuis votre tableau de bord.",
+  "a2": "Oui. Le forfait Essentiel inclut 1 numéro, et le Pro en inclut 2. Vous pouvez acheter des numéros virtuels dédiés additionnels sur le forfait Pro pour 6,99 $/mois par numéro depuis votre tableau de bord.",
   "q3": "Comment fonctionne l'appel en cascade ?",
   "a3": "Avec l'appel en cascade, les téléphones des aidants sonnent l'un après l'autre dans l'ordre choisi. Si le premier ne répond pas, l'appel bascule vers le suivant. Si personne ne répond, l'appelant est invité à laisser un message vocal.",
   "q4": "Y a-t-il des frais de mise en service ou un engagement ?",

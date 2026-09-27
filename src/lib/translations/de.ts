@@ -178,7 +178,7 @@ const t: HomepageTranslations = {
   "q1": "Muss ich spezielle Hardware oder Geräte kaufen?",
   "a1": "Nein. iCanCall ist ein virtueller Telefondienst in der Cloud. Ihr Angehöriger kann von jedem Telefon (Festnetz, Tastenhandy, Smartphone) anrufen; wir leiten den Anruf an die Handys der Betreuer weiter.",
   "q2": "Kann ich mehr als eine Nummer haben?",
-  "a2": "Ja. Der Essential-Tarif enthält 1 Nummer, der Pro-Tarif 2. Sie können im Pro-Tarif zusätzliche Nummern für $3.99/Monat pro Nummer direkt im Dashboard erwerben.",
+  "a2": "Ja. Der Essential-Tarif enthält 1 Nummer, der Pro-Tarif 2. Sie können im Pro-Tarif zusätzliche Nummern für $6.99/Monat pro Nummer direkt im Dashboard erwerben.",
   "q3": "Wie funktioniert die Kaskadenweiterleitung?",
   "a3": "Wir lassen die Kontakte in Ihrem Kreis nacheinander in der von Ihnen festgelegten Reihenfolge klingeln. Geht jemand nicht ran oder ist besetzt, springt der Ruf zum nächsten Kontakt weiter.",
   "q4": "Gibt es Einrichtungsgebühren oder Laufzeitverträge?",

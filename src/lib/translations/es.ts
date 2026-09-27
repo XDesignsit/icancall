@@ -178,7 +178,7 @@ const t: HomepageTranslations = {
   "q1": "¿Necesito comprar algún dispositivo o hardware especial?",
   "a1": "No. iCanCall es un servicio virtual en la nube. Su ser querido puede llamar desde cualquier teléfono existente (fijo, básico, smartphone, etc.), y nuestro servicio lo enruta directamente a los números de teléfono actuales de los cuidadores.",
   "q2": "¿Puedo agregar más de un número de seguridad?",
-  "a2": "Sí. El Plan Esencial incluye 1 número y el Plan Pro incluye 2. Puede comprar números virtuales dedicados adicionales en el plan Pro por $3.99/mes por número directamente desde su panel.",
+  "a2": "Sí. El Plan Esencial incluye 1 número y el Plan Pro incluye 2. Puede comprar números virtuales dedicados adicionales en el plan Pro por $6.99/mes por número directamente desde su panel.",
   "q3": "¿Cómo funciona la Llamada en Cascada?",
   "a3": "Con la llamada en cascada, llamamos a los contactos de su círculo uno por uno en el orden establecido. Si la primera persona no responde, la llamada pasa automáticamente a la siguiente. Si nadie responde, se les pide dejar un buzón de voz.",
   "q4": "¿Hay algún contrato o tarifa de configuración?",

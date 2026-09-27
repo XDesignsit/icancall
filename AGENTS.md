@@ -17,6 +17,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
   2. For path/slug changes, rename the corresponding standalone HTML files in all three locations.
   3. Run a link-patching script to parse and update links/routes in both raw HTML and script-embedded template JSON strings (`<script type="__bundler/template">`) inside the standalone pages.
   4. If modifying compiled React stepper flows (like the Signup page), run the compression/repacking script to compress and inject the updated base64 JS assets back into the manifest blocks of the standalone HTML pages.
+- The Main Landing standalone (`iCanCall Landing Page (standalone).html`) is generated from the homepage source, not hand-edited: after any homepage change run `npm run build && node scripts/build-standalone-home.mjs`, then copy the file to the pCloud and Google Drive directories.
 
 ## Security Headers & Browser APIs
 - When configuring or modifying security headers in `vercel.json` (such as `Permissions-Policy` or `Content-Security-Policy`):
