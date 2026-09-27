@@ -333,7 +333,8 @@ const t: HomeTranslations = {
   },
   pricing: {
     eyebrow: "간단하고 투명한 요금",
-    title: "전화 요금보다 적은 비용으로 누리는 안심.",
+    titleStart: "전화 요금보다 적은 비용으로 ",
+    titleAccent: "누리는 안심.",
     lead: "모든 요금제는 어떤 전화기에서나 작동하며 음성 사서함이 포함됩니다. 설치비 없이 언제든 해지할 수 있고, 30일 환불 보장이 적용됩니다.",
     billingPeriod: "결제 주기",
     monthly: "월간",

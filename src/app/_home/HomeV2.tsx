@@ -63,6 +63,9 @@ const SEATS = {
   d: { x: "14%", y: "29.17%", pos: "top" },
 } as const;
 
+/** The icon beside each plan's name on the pricing cards. */
+const PLAN_ICONS: Record<MarketingPlanId, string> = { essential: "i-phone", pro: "i-in", careteam: "i-circle" };
+
 /** The sign-in code typed into the trust section's two-step card (not the demo PIN). */
 const OTP_DIGITS = "482916";
 
@@ -1118,15 +1121,22 @@ function HomeV2({ t, base, lang, onLang, root }: Props) {
         </section>
 
         {/* ============ PRICING ============ */}
+        {/* The controller drives the billing toggle (prices tween, notes, CTA links,
+            .is-annual on the section) and plays each card's entrance once (.play). */}
         <section className="section hp-price hp-tint" id="pricing" aria-labelledby="price-title">
+          <div className="hp-price-bg" aria-hidden="true" />
           <div className="wrap">
-            <div className="section-head">
+            <div className="section-head rv">
               <span className="eyebrow">{t.pricing.eyebrow}</span>
-              <h2 className="hp-h2" id="price-title">{t.pricing.title}</h2>
+              <h2 className="hp-h2" id="price-title">
+                {t.pricing.titleStart}
+                <span className="accent">{t.pricing.titleAccent}</span>
+              </h2>
               <p className="lead">{t.pricing.lead}</p>
             </div>
-            <div className="hp-bill">
+            <div className="hp-bill rv">
               <div className="seg" role="radiogroup" aria-label={t.pricing.billingPeriod}>
+                <span className="hp-seg-pill" aria-hidden="true" />
                 <button type="button" className="seg-btn active" role="radio" aria-checked="true" tabIndex={0} data-bill="monthly">
                   {t.pricing.monthly}
                 </button>
@@ -1134,35 +1144,60 @@ function HomeV2({ t, base, lang, onLang, root }: Props) {
                   {t.pricing.annual}
                 </button>
               </div>
-              <span className="badge badge-blue">{base.ui.save17}</span>
+              <span className="badge hp-save">
+                <svg className="i" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M12 3.5 14 10l6.5 2-6.5 2-2 6.5-2-6.5-6.5-2L10 10Z" />
+                </svg>
+                {base.ui.save17}
+              </span>
             </div>
             <div className="hp-plans">
-              {plans.map((p) => (
+              {plans.map((p, i) => (
                 <article
                   key={p.id}
                   className={p.id === "pro" ? "hp-plan is-pop" : "hp-plan"}
+                  style={vars({ "--i": i })}
                   data-plan={p.id}
                   data-m={PLAN_PRICING[p.id].monthlyAmount}
                   data-a={PLAN_PRICING[p.id].annualAmount}
                   data-note-a={p.noteAnnual}
                   aria-labelledby={`pl-${p.id}`}
                 >
-                  {p.id === "pro" && <span className="hp-plan-badge">{t.pricing.mostPopular}</span>}
-                  <h3 id={`pl-${p.id}`}>{p.title}</h3>
+                  {p.id === "pro" && (
+                    <>
+                      <span className="hp-plan-ring" aria-hidden="true" />
+                      <span className="hp-plan-badge">
+                        <svg className="i" viewBox="0 0 24 24" aria-hidden="true">
+                          <path d="M12 3.5 14 10l6.5 2-6.5 2-2 6.5-2-6.5-6.5-2L10 10Z" />
+                        </svg>
+                        {t.pricing.mostPopular}
+                      </span>
+                    </>
+                  )}
+                  <div className="hp-plan-head">
+                    <span className="ic"><Icon id={PLAN_ICONS[p.id]} /></span>
+                    <h3 id={`pl-${p.id}`}>{p.title}</h3>
+                  </div>
                   <p className="hp-plan-tag">{p.tag}</p>
-                  <p className="hp-plan-price">
-                    <span className="cur">$</span>
-                    <b className="amt">{PLAN_PRICING[p.id].monthlyAmount.toFixed(2)}</b>
-                    <span className="per">{t.pricing.perMonth}</span>
-                  </p>
+                  <div className="hp-plan-cost">
+                    {/* What twelve monthly payments would cost; shown struck through while Annual is selected. */}
+                    <s className="was mono" aria-hidden="true">
+                      ${(PLAN_PRICING[p.id].monthlyAmount * 12).toFixed(2)}
+                    </s>
+                    <p className="hp-plan-price">
+                      <span className="cur">$</span>
+                      <b className="amt">{PLAN_PRICING[p.id].monthlyAmount.toFixed(2)}</b>
+                      <span className="per">{t.pricing.perMonth}</span>
+                    </p>
+                  </div>
                   <p className="hp-plan-note">{base.ui.billedMonthlyCancelAnytime}</p>
                   <a className={p.id === "pro" ? "btn btn-primary btn-lg" : "btn btn-ghost btn-lg"} href={`/signup?plan=${p.id}&billing=monthly&lang=${lang}`}>
                     {p.cta}
                   </a>
                   <ul className="hp-plan-feats">
-                    {feats[p.id].map((f) => (
-                      <li key={f}>
-                        <Icon id="i-check" />
+                    {feats[p.id].map((f, k) => (
+                      <li key={f} style={vars({ "--k": k })}>
+                        <span className="ck"><Icon id="i-check" /></span>
                         {f}
                       </li>
                     ))}
@@ -1170,14 +1205,34 @@ function HomeV2({ t, base, lang, onLang, root }: Props) {
                 </article>
               ))}
             </div>
-            <div className="pricing-guarantee hp-guar">
-              <span className="pricing-guarantee-icon"><Icon id="i-shield" /></span>
+            <div className="pricing-guarantee hp-guar rv">
+              <span className="hp-seal" aria-hidden="true">
+                <svg viewBox="0 0 100 100">
+                  <circle className="face" cx="50" cy="50" r="48" />
+                  {Array.from({ length: 30 }, (_, k) => (
+                    <line
+                      key={k}
+                      x1="50"
+                      y1="6"
+                      x2="50"
+                      y2="11"
+                      transform={`rotate(${k * 12} 50 50)`}
+                      style={vars({ "--k": k })}
+                    />
+                  ))}
+                </svg>
+                <b>30</b>
+                <span>{t.trust.guarantee.days}</span>
+              </span>
               <div>
                 <h4>{t.pricing.guaranteeTitle}</h4>
                 <p>{t.pricing.guaranteeBody}</p>
               </div>
             </div>
-            <p className="hp-more">{more}</p>
+            <p className="hp-more rv">
+              <span className="ic"><Icon id="i-plus" /></span>
+              <span>{more}</span>
+            </p>
             <div className="hp-price-links">
               <a className="hp-link" href="/contact">
                 {t.pricing.organizations}

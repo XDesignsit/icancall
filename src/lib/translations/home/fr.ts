@@ -349,7 +349,8 @@ const t: HomeTranslations = {
   },
   pricing: {
     eyebrow: "Des tarifs simples et transparents",
-    title: "La tranquillité d’esprit pour moins qu’une facture de téléphone.",
+    titleStart: "La tranquillité d’esprit pour ",
+    titleAccent: "moins qu’une facture de téléphone.",
     lead: "Tous les forfaits fonctionnent sur n’importe quel téléphone et incluent une messagerie vocale. Sans frais de mise en service, résiliables à tout moment, avec une garantie satisfait ou remboursé de 30 jours.",
     billingPeriod: "Période de facturation",
     monthly: "Mensuel",

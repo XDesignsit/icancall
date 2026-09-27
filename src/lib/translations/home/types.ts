@@ -227,7 +227,8 @@ export interface HomeTranslations {
   };
   pricing: {
     eyebrow: string;
-    title: string;
+    titleStart: string;
+    titleAccent: string;
     lead: string;
     billingPeriod: string;
     monthly: string;

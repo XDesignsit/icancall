@@ -333,7 +333,8 @@ const t: HomeTranslations = {
   },
   pricing: {
     eyebrow: "シンプルでわかりやすい料金",
-    title: "電話料金より手頃な価格で、安心を。",
+    titleStart: "電話料金より手頃な価格で、",
+    titleAccent: "安心を。",
     lead: "どのプランもあらゆる電話で使え、留守番電話も付いています。初期費用なし、いつでも解約可能、30日間返金保証付きです。",
     billingPeriod: "お支払い期間",
     monthly: "月払い",

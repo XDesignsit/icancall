@@ -350,7 +350,8 @@ const t: HomeTranslations = {
   },
   pricing: {
     eyebrow: "Einfache, transparente Preise",
-    title: "Sorgenfrei für weniger als eine Telefonrechnung.",
+    titleStart: "Sorgenfrei für ",
+    titleAccent: "weniger als eine Telefonrechnung.",
     lead: "Jeder Tarif funktioniert mit jedem Telefon und enthält eine Mailbox. Keine Einrichtungsgebühr, jederzeit kündbar und 30 Tage Geld-zurück-Garantie.",
     billingPeriod: "Abrechnungszeitraum",
     monthly: "Monatlich",

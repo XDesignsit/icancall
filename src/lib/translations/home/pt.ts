@@ -350,7 +350,8 @@ const t: HomeTranslations = {
   },
   pricing: {
     eyebrow: "Preços simples e transparentes",
-    title: "Tranquilidade por menos que uma conta de telefone.",
+    titleStart: "Tranquilidade por ",
+    titleAccent: "menos que uma conta de telefone.",
     lead: "Todos os planos funcionam em qualquer telefone e incluem caixa postal. Sem taxa de adesão, cancelamento a qualquer momento e garantia de reembolso de 30 dias.",
     billingPeriod: "Período de cobrança",
     monthly: "Mensal",
