@@ -37,15 +37,13 @@ function clock(seconds: number | null): string {
   return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
 }
 
-/** Twilio serves a recording as MP3 when asked (smaller than its default WAV). */
+/**
+ * Where the dashboard plays a voicemail: Twilio serves recordings only to the
+ * account's credentials, so through api/caregiver/recordings.
+ */
 function playable(recordingUrl: string | null): string | null {
-  if (!recordingUrl) return null;
-  const url = URL.canParse(recordingUrl) ? new URL(recordingUrl) : null;
-  if (url?.hostname === "api.twilio.com" && !/\.(mp3|wav)$/.test(url.pathname)) {
-    url.pathname += ".mp3";
-    return url.toString();
-  }
-  return recordingUrl;
+  const sid = /\/Recordings\/(RE[0-9a-f]{32})(?:\.\w+)?$/i.exec(recordingUrl || "")?.[1];
+  return sid ? `/api/caregiver/recordings/${sid}` : null;
 }
 
 function toEntry(call: CallRow, line: LineRow | undefined) {

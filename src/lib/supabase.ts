@@ -101,7 +101,7 @@ class MockSupabaseClient {
 
     let action: 'select' | 'insert' | 'update' | 'upsert' | 'delete' = 'select';
     let actionPayload: MockRow | MockRow[] | null = null;
-    const filters: { type: 'eq' | 'not' | 'is' | 'in'; column: string; value: unknown; operator?: string }[] = [];
+    const filters: { type: 'eq' | 'not' | 'is' | 'in' | 'like'; column: string; value: unknown; operator?: string }[] = [];
     let sort: { column: string; ascending: boolean } | null = null;
     let maxRows: number | null = null;
 
@@ -126,6 +126,10 @@ class MockSupabaseClient {
       },
       in: (column: string, values: unknown[]) => {
         filters.push({ type: 'in', column, value: values });
+        return builder;
+      },
+      like: (column: string, pattern: string) => {
+        filters.push({ type: 'like', column, value: pattern });
         return builder;
       },
       order: (column: string, opts: { ascending?: boolean } = {}) => {
@@ -171,6 +175,10 @@ class MockSupabaseClient {
           } else if (f.type === 'in') {
             const values = f.value as unknown[];
             data = data.filter((item) => values.includes(item[f.column]));
+          } else if (f.type === 'like') {
+            const escaped = String(f.value).split('%').map((part) => part.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+            const pattern = new RegExp(`^${escaped.join('.*')}$`);
+            data = data.filter((item) => pattern.test(String(item[f.column] ?? '')));
           }
         });
 
