@@ -43,10 +43,7 @@ export async function POST(request: Request) {
 
     if (closed.status !== 'voicemail') {
       const account = await findAccountByTwilioNumber(lineNumber);
-      if (account && (await claimCallAlert(callSid))) {
-        const requestUrl = new URL(request.url);
-        await sendCallAlert(account, closed, `${requestUrl.protocol}//${requestUrl.host}`);
-      }
+      if (account && (await claimCallAlert(callSid))) await sendCallAlert(account, closed);
     }
 
     return new NextResponse('OK');

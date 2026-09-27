@@ -35,7 +35,10 @@ function clip(text: string, max: number): string {
   return t.length > max ? `${t.slice(0, max - 1)}…` : t;
 }
 
-export function alertText(account: Account, call: CallRow, callLogUrl: string): string {
+// No links: carriers filter links in texts from the A2P 10DLC number unless
+// its campaign declares them, and the missed/voicemail alerts that carried a
+// dashboard link never arrived (2026-09-27) while link-free texts did.
+export function alertText(account: Account, call: CallRow): string {
   const caller = callerLabel(account, call.from_number);
   const line = account.line?.name?.trim() || 'your iCanCall line';
   if (call.status === 'connected') {
@@ -43,21 +46,18 @@ export function alertText(account: Account, call: CallRow, callLogUrl: string): 
   }
   if (call.status === 'voicemail') {
     const heard = call.transcript ? ` "${clip(call.transcript, 120)}"` : '';
-    return `iCanCall: Voicemail from ${caller} on ${line} (${spoken(call.recording_seconds)}).${heard} Call log: ${callLogUrl}`;
+    return `iCanCall: Voicemail from ${caller} on ${line} (${spoken(call.recording_seconds)}).${heard} Listen in your iCanCall call log.`;
   }
-  return `iCanCall: Missed call from ${caller} on ${line}. Nobody answered and no message was left. Call log: ${callLogUrl}`;
+  return `iCanCall: Missed call from ${caller} on ${line}. Nobody answered and no message was left.`;
 }
 
-export async function sendCallAlert(account: Account, call: CallRow, baseUrl: string): Promise<void> {
+export async function sendCallAlert(account: Account, call: CallRow): Promise<void> {
   const settings = account.line?.settings || {};
   const notifSMS = settings.notifSMS ?? true;
   const notifEmail = settings.notifEmail ?? true;
   const notifMissed = settings.notifMissed ?? true;
   const nobodyTookIt = call.status !== 'connected';
   if (nobodyTookIt && !notifMissed) return;
-
-  const appUrl = (process.env.NEXT_PUBLIC_APP_URL || baseUrl).replace(/\/$/, '');
-  const callLogUrl = `${appUrl}/dashboard?view=log`;
 
   if (call.status === 'voicemail' && notifEmail) {
     const to = account.notifyEmail || account.email;
@@ -79,7 +79,7 @@ export async function sendCallAlert(account: Account, call: CallRow, baseUrl: st
   if (notifSMS && account.smsPhone) {
     try {
       const { sendSms } = await import('@/lib/twilio');
-      await sendSms(account.smsPhone, alertText(account, call, callLogUrl));
+      await sendSms(account.smsPhone, alertText(account, call));
     } catch (err) {
       console.error(`Call alert text for ${call.call_sid} failed:`, err);
     }
