@@ -9,9 +9,26 @@ import { Badge } from "../_primitives";
 import { type CallLogEntry, type Line } from "../_types";
 
 
+const LISTEN: Record<string, [listen: string, hide: string, noTranscript: string]> = {
+  en: ["Listen", "Hide", "No transcript available."],
+  es: ["Escuchar", "Ocultar", "No hay transcripción disponible."],
+  fr: ["Écouter", "Masquer", "Aucune transcription disponible."],
+  ja: ["再生", "閉じる", "文字起こしはありません。"],
+  zh: ["收听", "隐藏", "暂无文字记录。"],
+  ar: ["استماع", "إخفاء", "لا يتوفر نص مكتوب."],
+  hi: ["सुनें", "छिपाएं", "कोई ट्रांसक्रिप्ट उपलब्ध नहीं है।"],
+  pt: ["Ouvir", "Ocultar", "Nenhuma transcrição disponível."],
+  de: ["Anhören", "Ausblenden", "Keine Abschrift verfügbar."],
+  it: ["Ascolta", "Nascondi", "Nessuna trascrizione disponibile."],
+  ko: ["듣기", "숨기기", "텍스트 변환 내용이 없습니다."],
+};
+
 /* Call log */
 export function CallLogView({ line, log, d, lang }: { line: Line; log: Record<string, CallLogEntry[]>; d: DashboardTranslations; lang: string }) {
   const [filter, setFilter] = useState("all");
+  // The voicemail whose player is open under its row.
+  const [openId, setOpenId] = useState<CallLogEntry["id"] | null>(null);
+  const [listenLabel, hideLabel, noTranscript] = LISTEN[lang] || LISTEN.en;
   const calls = log[line.id] || [];
   const counts = {
     all: calls.length,
@@ -59,8 +76,11 @@ export function CallLogView({ line, log, d, lang }: { line: Line; log: Record<st
           <div className="log">
             {shown.map((c) => {
               const m = STATUS_META[c.status as keyof typeof STATUS_META];
+              const playable = c.status === "voicemail" && !!c.recordingUrl;
+              const open = playable && openId === c.id;
               return (
-                <div className="logrow" key={c.id}>
+                <React.Fragment key={c.id}>
+                <div className="logrow" style={open ? { borderBottom: "none" } : undefined}>
                   <div className={`dir ${m.dirCls}`}>
                     <Icon
                       name={c.status === "voicemail" ? "voicemail" : c.status === "missed" ? "alert" : "in"}
@@ -68,7 +88,22 @@ export function CallLogView({ line, log, d, lang }: { line: Line; log: Record<st
                   </div>
                   <div className="who">
                     <b>{localizeCaller(c.caller, lang)}</b>
-                    <span>{c.status === "voicemail" ? d.sim.voicemail : c.status === "missed" ? d.sim.noAnswer : d.sim.connected}</span>
+                    <span>
+                      {c.status === "voicemail" ? d.sim.voicemail : c.status === "missed" ? d.sim.noAnswer : d.sim.connected}
+                      {playable && (
+                        <>
+                          {" · "}
+                          <button
+                            type="button"
+                            onClick={() => setOpenId(open ? null : c.id)}
+                            aria-expanded={open}
+                            style={{ background: "none", border: "none", padding: 0, font: "inherit", color: "var(--blue)", fontWeight: 600, cursor: "pointer" }}
+                          >
+                            {open ? hideLabel : listenLabel}
+                          </button>
+                        </>
+                      )}
+                    </span>
                   </div>
                   <div className="routed">
                     <b>{c.routed === "No one available" ? (lang === "es" ? "Nadie disponible" : lang === "fr" ? "Personne de disponible" : lang === "ja" ? "対応者なし" : lang === "zh" ? "无人可用" : lang === "ar" ? "لا أحد متاح" : lang === "hi" ? "कोई उपलब्ध नहीं" : lang === "pt" ? "Ninguém disponível" : lang === "de" ? "Niemand verfügbar" : lang === "it" ? "Nessuno disponibile" : lang === "ko" ? "연결 가능 도우미 없음" : "No one available") : c.routed}</b>
@@ -84,6 +119,15 @@ export function CallLogView({ line, log, d, lang }: { line: Line; log: Record<st
                     </div>
                   </div>
                 </div>
+                {open && (
+                  <div style={{ padding: "0 8px 16px 62px", borderBottom: "1px solid var(--line-soft)" }}>
+                    <audio controls autoPlay src={c.recordingUrl || undefined} style={{ width: "100%", maxWidth: 420, height: 40 }} />
+                    <p style={{ margin: "10px 0 0", fontSize: "0.88rem", lineHeight: 1.5, color: c.transcript ? "var(--ink)" : "var(--ink-faint)", fontStyle: c.transcript ? "italic" : "normal" }}>
+                      {c.transcript ? `\u201c${c.transcript}\u201d` : noTranscript}
+                    </p>
+                  </div>
+                )}
+                </React.Fragment>
               );
             })}
             {shown.length === 0 && (
