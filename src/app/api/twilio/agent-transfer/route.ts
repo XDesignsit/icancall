@@ -68,10 +68,11 @@ export async function POST(request: Request) {
       const contact = contacts[idx];
 
       if (contact && contact.phone) {
-        twiml += `\n  ${getTtsPlayTag("Transferring call to " + contact.name + ". Goodbye.")}`;
-        twiml += '\n  <Hangup />';
-
-        // Asynchronously place the outbound call to the new contact
+        // Place the new leg before this caregiver hangs up: their leg's status
+        // callback then finds it ringing and keeps the caller on the line. The
+        // new leg reports to agent-completed, which lets the caller go once
+        // nobody is left.
+        let placed = false;
         const twilioClient = (await import('@/lib/twilio')).default;
         if (twilioClient) {
           try {
@@ -79,10 +80,22 @@ export async function POST(request: Request) {
               to: contact.phone,
               from: activeNumber,
               url: `${baseUrl}/api/twilio/agent-join?room=${encodeURIComponent(room)}`,
+              statusCallback: `${baseUrl}/api/twilio/agent-completed?room=${encodeURIComponent(room)}`,
+              statusCallbackEvent: ['completed'],
             });
+            placed = true;
           } catch (err) {
             console.error('Failed to create outbound call for transfer:', err);
           }
+        }
+
+        if (placed) {
+          twiml += `\n  ${getTtsPlayTag("Transferring call to " + contact.name + ". Goodbye.")}`;
+          twiml += '\n  <Hangup />';
+        } else {
+          // Hanging up now would leave the caller with nobody, so offer the menu again.
+          twiml += `\n  ${getTtsPlayTag("Sorry, the call to " + contact.name + " could not be placed.")}`;
+          twiml += `\n  <Redirect method="POST">/api/twilio/agent-transfer?room=${encodeURIComponent(room)}</Redirect>`;
         }
       } else {
         twiml += `\n  ${getTtsPlayTag("Invalid selection.")}`;
