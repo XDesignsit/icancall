@@ -1,0 +1,40 @@
+/* Signups-paused notice (src/app/signup/SignupsPaused.tsx) */
+
+.sp {
+  flex: 1;
+  min-height: 100vh;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 28px;
+  padding: 48px 16px;
+  background: linear-gradient(180deg, var(--tint), var(--bg) 60%);
+  font-family: var(--font);
+  color: var(--ink);
+}
+.sp-brand { color: var(--ink); text-decoration: none; }
+
+.sp-card {
+  width: 100%; max-width: 500px;
+  padding: clamp(28px, 6vw, 44px);
+  box-shadow: var(--shadow-md);
+}
+.sp-title {
+  margin: 16px 0 10px;
+  font-size: clamp(1.6rem, 5vw, 2rem); font-weight: 700; letter-spacing: -0.03em; line-height: 1.15;
+}
+.sp-lead { margin: 0; color: var(--ink-soft); font-size: 1.02rem; line-height: 1.6; }
+.sp-lead strong { color: var(--ink); overflow-wrap: anywhere; }
+
+.sp-form { margin-top: 8px; }
+.sp-form .field { margin: 18px 0 0; }
+.sp-submit { width: 100%; margin-top: 16px; }
+.sp-submit:disabled { opacity: 0.7; cursor: default; }
+
+.sp-foot {
+  margin-top: 26px; padding-top: 18px;
+  border-top: 1px solid var(--line-soft);
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px;
+  font-size: 0.92rem; color: var(--ink-soft);
+}
+.sp-foot a:not(.btn) { color: var(--blue-deep); font-weight: 600; text-decoration: none; }
+.sp-foot a:not(.btn):hover { text-decoration: underline; }
+.sp-foot .btn-text { padding: 6px 0; font-size: 0.92rem; }

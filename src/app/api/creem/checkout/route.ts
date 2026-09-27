@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { CREEM_API, PLAN_PRODUCT_IDS, creemHeaders, isBillingCycle, isPlanId, isSimulatedBilling, sessionIdentity } from "@/lib/creem";
+import { CREEM_API, PLAN_PRODUCT_IDS, creemHeaders, isBillingCycle, isPlanId, isSimulatedBilling, sessionIdentity, signupsPaused } from "@/lib/creem";
 import { ADDON_PRODUCT_IDS, MAX_ADDON_UNITS, isAddonId } from "@/lib/addons";
 import { authorizeOwner, loadSettings } from "@/lib/billingOwner";
 import { isEndedStatus } from "@/lib/subscriptionEnd";
@@ -38,6 +38,9 @@ export async function POST(req: NextRequest) {
     } else {
       if (!isPlanId(plan) || !isBillingCycle(billing)) {
         return NextResponse.json({ error: "Invalid plan or billing cycle" }, { status: 400 });
+      }
+      if (signupsPaused()) {
+        return NextResponse.json({ error: "Signups open soon. Please check back shortly." }, { status: 503 });
       }
       productId = PLAN_PRODUCT_IDS[plan][billing];
       successUrl = `${appUrl}/signup/creem-checkout?status=success`;
