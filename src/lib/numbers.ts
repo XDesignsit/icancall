@@ -1,6 +1,9 @@
 import { isTwilioConfigured, providerForNumber, purchaseNumber as twilioPurchase, releaseNumber as twilioRelease, type TelephonyProvider } from "./twilio";
 import { isTelnyxConfigured, purchaseNumber as telnyxPurchase, releaseNumber as telnyxRelease } from "./telnyx";
 import { isDemoEmail } from "./demoEmails";
+import twilioClient from "./twilio";
+import { supabase } from "./supabase";
+import { invalidateCachedAccount } from "./db";
 
 // Attaching a number to an account has to buy it from the carrier, or the
 // line is a row in our table pointing at inventory anyone else can take and
@@ -15,6 +18,8 @@ export interface TelephonyRecord {
   status: "purchased" | "skipped";
   reason?: string;
   purchasedAt?: string;
+  /** Where the number reports each call's end (Twilio), once it has been set. */
+  statusCallback?: string;
 }
 
 export type ProvisionOutcome =
@@ -44,6 +49,42 @@ function voiceWebhookUrl(): string {
   return `${appUrl.replace(/\/$/, "")}/api/twilio/voice`;
 }
 
+/** Twilio reports the end of every inbound call here; it closes the call log row. */
+export function callStatusWebhookUrl(): string {
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+  return `${appUrl.replace(/\/$/, "")}/api/twilio/call-status`;
+}
+
+/**
+ * Numbers bought before the call log existed only have their voice webhook.
+ * The voice webhook calls this for each call: the first time, it points the
+ * number's call-status webhook at the call log and notes that on the line, so
+ * every later call skips straight past. Never throws -- a call must not fail
+ * over bookkeeping -- and the call already under way is reported the old way.
+ */
+export async function ensureCallStatusWebhook(
+  line: { id: string; telephony?: { provider?: string; sid?: string; statusCallback?: string } },
+  lineNumber: string
+): Promise<void> {
+  const url = callStatusWebhookUrl();
+  const telephony = line.telephony;
+  if (!twilioClient || !telephony?.sid || telephony.provider !== "twilio" || telephony.statusCallback === url) return;
+  try {
+    await twilioClient.incomingPhoneNumbers(telephony.sid).update({ statusCallback: url, statusCallbackMethod: "POST" });
+    const { data: row } = await supabase.from("phone_lines").select("settings").eq("id", line.id).maybeSingle();
+    const settings = (row?.settings || {}) as Record<string, unknown>;
+    const stored = (settings.telephony || {}) as Record<string, unknown>;
+    await supabase
+      .from("phone_lines")
+      .update({ settings: { ...settings, telephony: { ...stored, statusCallback: url } } })
+      .eq("id", line.id);
+    invalidateCachedAccount(lineNumber);
+    console.log(`Pointed ${lineNumber}'s call-status webhook at ${url}`);
+  } catch (err) {
+    console.error(`Could not set ${lineNumber}'s call-status webhook:`, err);
+  }
+}
+
 /**
  * Buy a number for an account. Never throws: a purchase that cannot happen
  * for a benign reason (demo account, local dev, preview) comes back as a
@@ -64,9 +105,18 @@ export async function provisionNumber(phoneNumber: string, ownerEmail: string): 
   try {
     const { sid } = provider === "telnyx"
       ? await telnyxPurchase(phoneNumber)
-      : await twilioPurchase(phoneNumber, { voiceUrl: voiceWebhookUrl(), friendlyName: `iCanCall ${ownerEmail}` });
+      : await twilioPurchase(phoneNumber, { voiceUrl: voiceWebhookUrl(), statusCallback: callStatusWebhookUrl(), friendlyName: `iCanCall ${ownerEmail}` });
     console.log(`Purchased ${phoneNumber} from ${provider} for ${ownerEmail} (${sid})`);
-    return { ok: true, record: { provider, sid, status: "purchased", purchasedAt: new Date().toISOString() } };
+    return {
+      ok: true,
+      record: {
+        provider,
+        sid,
+        status: "purchased",
+        purchasedAt: new Date().toISOString(),
+        ...(provider === "twilio" ? { statusCallback: callStatusWebhookUrl() } : {}),
+      },
+    };
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     console.error(`Failed to purchase ${phoneNumber} from ${provider} for ${ownerEmail}:`, message);

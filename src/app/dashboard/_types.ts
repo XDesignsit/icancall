@@ -45,13 +45,16 @@ export interface Line {
 }
 
 export interface CallLogEntry {
-  id: number;
+  id: number | string;
   status: "connected" | "missed" | "voicemail";
   caller: string;
   routed: string;
   rel: string;
   dur: string;
   when: string;
+  /** When the call came in (ISO), for calls from the call log API. */
+  at?: string;
+  transcript?: string | null;
 }
 
 export interface Account {
@@ -60,6 +63,9 @@ export interface Account {
   email: string;
   notifyEmail: string;
   phone: string;
+  /** Text call alerts: on only for a number verified through api/caregiver/sms-alerts or signup. */
+  smsConsent?: boolean;
+  smsPhone?: string;
   address: string;
   timezone: string;
   language: string;

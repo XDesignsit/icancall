@@ -3,6 +3,8 @@ import { ttsPlayTag, verifyTelephonyWebhook } from '@/lib/twilioWebhook';
 import { findAccountByTwilioNumber } from '@/lib/db';
 import { parseConferenceRoom } from '@/lib/conferenceRoom';
 import { markLegAccepted } from '@/lib/conferenceBridge';
+import { recordCallAnswered } from '@/lib/callRecords';
+import { toE164 } from '@/lib/phone';
 
 export const preferredRegion = 'iad1';
 
@@ -25,6 +27,7 @@ export async function POST(request: Request) {
     const screen = requestUrl.searchParams.get('screen') === '1';
     const accepted = requestUrl.searchParams.get('accepted') === '1';
     let callSid = requestUrl.searchParams.get('CallSid');
+    let legTo = requestUrl.searchParams.get('To');
 
     if (request.method === 'POST') {
       try {
@@ -33,6 +36,7 @@ export async function POST(request: Request) {
           const formData = await request.formData();
           room = formData.get('room')?.toString() || room;
           callSid = formData.get('CallSid')?.toString() || callSid;
+          legTo = formData.get('To')?.toString() || legTo;
         }
       } catch (err) {
         console.warn('Could not parse form data:', err);
@@ -67,8 +71,17 @@ export async function POST(request: Request) {
 </Response>`;
     } else {
       // From here on this leg has reached the caller: when it ends, the
-      // conversation is over rather than the next contact being due.
-      if (accepted && callSid) await markLegAccepted(callSid, room);
+      // conversation is over rather than the next contact being due. The call
+      // log names whoever this leg rang.
+      if (accepted && callSid) {
+        const account = await findAccountByTwilioNumber(conference.lineNumber);
+        const dialed = toE164(legTo);
+        const contact = account?.line?.contacts.find((c) => c.phone && toE164(String(c.phone)) === dialed) || null;
+        await Promise.all([
+          markLegAccepted(callSid, room),
+          recordCallAnswered(conference.callerCallSid, contact),
+        ]);
+      }
 
       // Connect the caregiver to the conference room
       // hangupOnStar="true": enables them to press * to leave and trigger the action callback

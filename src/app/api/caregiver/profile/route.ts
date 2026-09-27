@@ -131,6 +131,15 @@ export async function POST(request: Request) {
 
     const { name, preferred_name, settings: newSettings } = await request.json();
 
+    // Text alerts are consent the owner gives by verifying a number (signup,
+    // or api/caregiver/sms-alerts); a browser copy must not grant or move it.
+    if (newSettings) {
+      delete newSettings.smsConsent;
+      delete newSettings.smsPhone;
+      delete newSettings.smsConsentAt;
+      delete newSettings.smsConsentSource;
+    }
+
     // With live billing the plan is whatever the Creem subscription says: it is
     // written by api/creem/change-plan and the Creem webhook only. Accepting it
     // from this sync would let a client grant itself a plan it isn't paying for.

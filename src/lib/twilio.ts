@@ -114,12 +114,13 @@ export async function searchAvailableNumbers(areaCode: string = '415') {
 
 /**
  * Buys a Twilio phone number and points its voice webhook at this deployment
- * so inbound calls reach the routing logic. Returns the number's SID, which
- * the caller stores so the number can be released later.
+ * so inbound calls reach the routing logic, and its call-status webhook at the
+ * call log. Returns the number's SID, which the caller stores so the number
+ * can be released later.
  */
 export async function purchaseNumber(
   phoneNumber: string,
-  opts: { voiceUrl: string; friendlyName?: string }
+  opts: { voiceUrl: string; statusCallback?: string; friendlyName?: string }
 ): Promise<{ sid: string }> {
   if (!client) {
     throw new Error('Twilio client not configured');
@@ -128,6 +129,8 @@ export async function purchaseNumber(
     phoneNumber,
     voiceUrl: opts.voiceUrl,
     voiceMethod: 'POST',
+    statusCallback: opts.statusCallback,
+    statusCallbackMethod: opts.statusCallback ? 'POST' : undefined,
     friendlyName: opts.friendlyName,
   });
   return { sid: purchased.sid };
