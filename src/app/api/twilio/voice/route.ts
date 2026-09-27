@@ -282,20 +282,21 @@ export async function POST(request: Request) {
             `;
 
             if (lineMode === 'simultaneous') {
-              // Outbound calls to all available contacts in parallel
-              availableContacts.forEach(async (c) => {
+              // Outbound calls to all available contacts in parallel. Wait for
+              // them to be placed: the function may be frozen once it responds.
+              await Promise.all(availableContacts.map(async (c) => {
                 try {
                   await twilioClient!.calls.create({
                     to: c.phone,
                     from: activeNumber,
                     url: `${baseUrl}/api/twilio/agent-join?room=${encodeURIComponent(roomName)}`,
-                    statusCallback: `${baseUrl}/api/twilio/agent-completed?parentCallSid=${encodeURIComponent(activeCallSid)}`,
+                    statusCallback: `${baseUrl}/api/twilio/agent-completed?room=${encodeURIComponent(roomName)}`,
                     statusCallbackEvent: ['completed'],
                   });
                 } catch (err) {
                   console.error(`Failed to call caregiver ${c.name}:`, err);
                 }
-              });
+              }));
             } else {
               // Cascade and Schedule modes (sequential) - Call the first caregiver
               const firstContact = availableContacts[0];
@@ -304,7 +305,7 @@ export async function POST(request: Request) {
                   to: firstContact.phone,
                   from: activeNumber,
                   url: `${baseUrl}/api/twilio/agent-join?room=${encodeURIComponent(roomName)}`,
-                  statusCallback: `${baseUrl}/api/twilio/cascade-callback?room=${encodeURIComponent(roomName)}&contactIndex=1${leadIndex === null ? '' : `&lead=${leadIndex}`}&parentCallSid=${encodeURIComponent(activeCallSid)}`,
+                  statusCallback: `${baseUrl}/api/twilio/cascade-callback?room=${encodeURIComponent(roomName)}&contactIndex=1${leadIndex === null ? '' : `&lead=${leadIndex}`}`,
                   statusCallbackEvent: ['completed', 'busy', 'no-answer', 'failed'],
                   timeout: 15
                 });
