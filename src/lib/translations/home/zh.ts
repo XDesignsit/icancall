@@ -312,7 +312,10 @@ const t: HomeTranslations = {
     },
   },
   trust: {
-    title: "安心，早已内置。",
+    eyebrow: "我们的承诺",
+    titleStart: "安心，",
+    titleAccent: "早已内置。",
+    lead: "每个套餐都享有同样的保障，让您和家人轻松、放心地试用 iCanCall。",
     points: [
       "30天无忧退款保证",
       "无合同，无设置费",
@@ -320,6 +323,11 @@ const t: HomeTranslations = {
       "双重身份验证，保护您的控制面板",
       "由真人提供客服支持，一个工作日内回复",
     ],
+    guarantee: { days: "天", refund: "全额退款，无需理由" },
+    terms: { setupFee: "设置费", contract: "合同", none: "无", cancel: "取消", anytime: "随时" },
+    privacy: { title: "您家人的数据", numbers: "私人号码", hidden: "已隐藏", sold: "出售给任何人", never: "绝不" },
+    signIn: { enterCode: "输入 6 位验证码", verified: "验证成功" },
+    support: { question: "能帮我把奶奶加入我们的信任圈吗？", answer: "当然可以！我们一起来设置。", team: "iCanCall 客服" },
     disclaimer:
       "iCanCall 帮助家人快速联系彼此，但它不是医疗警报或紧急服务。遇到紧急情况，请务必拨打 911。",
   },

@@ -98,7 +98,9 @@ ${usecases.map((c) => `- **${c.audience}** — ${c.title} ${c.body} [${c.link}](
 
 ${tiles.map((f) => `- **${f.title}** — ${f.body}`).join("\n")}
 
-## ${h.trust.title}
+## ${h.trust.eyebrow}: ${h.trust.titleStart}${h.trust.titleAccent}
+
+${h.trust.lead}
 
 ${h.trust.points.map((p) => `- ${p}`).join("\n")}
 

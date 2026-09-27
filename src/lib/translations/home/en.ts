@@ -312,7 +312,10 @@ const t: HomeTranslations = {
     },
   },
   trust: {
-    title: "Peace of mind, built in.",
+    eyebrow: "Our promise to you",
+    titleStart: "Peace of mind, ",
+    titleAccent: "built in.",
+    lead: "The same promises come with every plan, so trying iCanCall with your family is easy and risk-free.",
     points: [
       "30-day money-back guarantee",
       "No contracts, no setup fees",
@@ -320,6 +323,21 @@ const t: HomeTranslations = {
       "Two-step sign-in protects your dashboard",
       "Real people answer support, within one business day",
     ],
+    guarantee: { days: "days", refund: "Full refund, no questions asked" },
+    terms: { setupFee: "Setup fee", contract: "Contract", none: "None", cancel: "Cancel", anytime: "Anytime" },
+    privacy: {
+      title: "Your family's data",
+      numbers: "Personal numbers",
+      hidden: "Hidden",
+      sold: "Sold to anyone",
+      never: "Never",
+    },
+    signIn: { enterCode: "Enter your 6-digit code", verified: "Verified" },
+    support: {
+      question: "Can you help me add Grandma to our circle?",
+      answer: "Of course! Let's set it up together.",
+      team: "iCanCall Support",
+    },
     disclaimer:
       "iCanCall helps your family reach each other fast. It isn't a medical alert or emergency service. In an emergency, always call 911.",
   },

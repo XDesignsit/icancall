@@ -312,7 +312,10 @@ const t: HomeTranslations = {
     },
   },
   trust: {
-    title: "安心を、最初から。",
+    eyebrow: "私たちのお約束",
+    titleStart: "安心を、",
+    titleAccent: "最初から。",
+    lead: "どのプランにも同じ保証が付いているので、ご家族で気軽に、安心してiCanCallをお試しいただけます。",
     points: [
       "30日間返金保証",
       "契約の縛りなし、初期費用なし",
@@ -320,6 +323,11 @@ const t: HomeTranslations = {
       "2段階認証でダッシュボードを保護",
       "サポートには実際のスタッフが対応し、1営業日以内にご返信します",
     ],
+    guarantee: { days: "日間", refund: "理由を問わず全額返金" },
+    terms: { setupFee: "初期費用", contract: "契約の縛り", none: "なし", cancel: "解約", anytime: "いつでも可能" },
+    privacy: { title: "ご家族のデータ", numbers: "個人の電話番号", hidden: "非公開", sold: "第三者への販売", never: "一切なし" },
+    signIn: { enterCode: "6桁のコードを入力", verified: "認証完了" },
+    support: { question: "おばあちゃんを連絡先に追加したいのですが、手伝ってもらえますか？", answer: "もちろんです！一緒に設定しましょう。", team: "iCanCallサポート" },
     disclaimer:
       "iCanCallは、ご家族がすばやく連絡を取り合うためのサービスです。医療用の緊急通報サービスや救急サービスではありません。緊急時は必ず911に電話してください。",
   },

@@ -312,7 +312,10 @@ const t: HomeTranslations = {
     },
   },
   trust: {
-    title: "안심은 기본입니다.",
+    eyebrow: "iCanCall의 약속",
+    titleStart: "안심은 ",
+    titleAccent: "기본입니다.",
+    lead: "모든 요금제에 같은 보장이 포함되어 있어, 가족과 함께 부담 없이 iCanCall을 사용해 볼 수 있습니다.",
     points: [
       "30일 환불 보장",
       "약정 없음, 설치비 없음",
@@ -320,6 +323,11 @@ const t: HomeTranslations = {
       "2단계 로그인으로 대시보드를 보호합니다",
       "실제 상담원이 영업일 기준 하루 안에 답변합니다",
     ],
+    guarantee: { days: "일", refund: "이유 불문 전액 환불" },
+    terms: { setupFee: "설치비", contract: "약정", none: "없음", cancel: "해지", anytime: "언제든지" },
+    privacy: { title: "가족의 데이터", numbers: "개인 번호", hidden: "비공개", sold: "제3자 판매", never: "절대 없음" },
+    signIn: { enterCode: "6자리 코드를 입력하세요", verified: "인증 완료" },
+    support: { question: "할머니를 저희 서클에 추가하는 것 좀 도와주시겠어요?", answer: "물론이죠! 함께 설정해 드릴게요.", team: "iCanCall 고객지원" },
     disclaimer:
       "iCanCall은 가족이 서로에게 빠르게 연락할 수 있도록 돕습니다. 의료 경보 서비스나 긴급 구조 서비스가 아닙니다. 응급 상황에서는 반드시 911에 전화하세요.",
   },
