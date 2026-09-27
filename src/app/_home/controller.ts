@@ -93,6 +93,7 @@ export function initHome(root: HTMLElement, { t, lang, billedMonthly, signupPath
   once(".hp-tile", "play", { threshold: 0.45 });
   once(".hp-pc", "play", { threshold: 0.4 });
   once(".hp-plan", "play", { threshold: 0.2 });
+  once(".hp-qa-list", "play", { threshold: 0.15 });
 
   /* trust and plan cards: a soft spotlight follows the pointer (writes CSS vars only) */
   if (mq("(hover:hover) and (pointer:fine)")) {
@@ -239,8 +240,10 @@ export function initHome(root: HTMLElement, { t, lang, billedMonthly, signupPath
   /* FAQ: one open at a time, smooth height (native <details name> without JS) */
   const faqs = $$<HTMLDetailsElement>(".hp-faq details");
   faqs.forEach((x) => x.removeAttribute("name"));
+  // .is-closing lets the card drop its open styling while its answer collapses.
   const openF = (x: HTMLDetailsElement) => {
     const b = $(".faq-a", x);
+    x.classList.remove("is-closing");
     x.open = true;
     if (!motion()) return;
     b.animate([{ height: "0px", opacity: 0 }, { height: b.scrollHeight + "px", opacity: 1 }], { duration: 440, easing: "cubic-bezier(.22,1,.36,1)" });
@@ -248,8 +251,9 @@ export function initHome(root: HTMLElement, { t, lang, billedMonthly, signupPath
   const closeF = (x: HTMLDetailsElement) => {
     const b = $(".faq-a", x);
     if (!motion()) { x.open = false; return; }
+    x.classList.add("is-closing");
     const an = b.animate([{ height: b.scrollHeight + "px", opacity: 1 }, { height: "0px", opacity: 0 }], { duration: 320, easing: "cubic-bezier(.65,0,.35,1)", fill: "forwards" });
-    an.onfinish = () => { x.open = false; an.cancel(); };
+    an.onfinish = () => { if (x.classList.contains("is-closing")) x.open = false; x.classList.remove("is-closing"); an.cancel(); };
   };
   faqs.forEach((x) =>
     $("summary", x).addEventListener("click", (e) => {

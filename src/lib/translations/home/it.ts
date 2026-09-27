@@ -368,7 +368,15 @@ const t: HomeTranslations = {
     showingAnnual: "Stai vedendo i prezzi annuali.",
   },
   faq: {
-    title: "Domande e risposte.",
+    eyebrow: "Prima di iscriverti",
+    titleStart: "Domande e ",
+    titleAccent: "risposte.",
+    lead: "Risposte chiare alle domande che le famiglie ci fanno più spesso.",
+    help: {
+      title: "Hai ancora una domanda?",
+      body: "Ti risponde una persona vera, entro un giorno lavorativo.",
+      cta: "Contattaci",
+    },
     items: [
       {
         q: "Mi serve un apparecchio speciale?",

@@ -304,8 +304,8 @@
 :where(.hp-page) .hp-price-bg{position:absolute;inset:0;z-index:-1;pointer-events:none;background:radial-gradient(34% 38% at 50% 56%,color-mix(in oklab,var(--blue) 17%,transparent),transparent 72%),radial-gradient(26% 30% at 18% 26%,color-mix(in oklab,var(--teal) 16%,transparent),transparent 72%),radial-gradient(26% 30% at 84% 70%,color-mix(in oklab,var(--teal) 12%,transparent),transparent 72%)}
 :where(.hp-page) .hp-price-bg::after{content:"";position:absolute;inset:0;background:linear-gradient(color-mix(in oklab,var(--blue-ink) 6%,transparent) 1px,transparent 1px) 50% 0/56px 56px,linear-gradient(90deg,color-mix(in oklab,var(--blue-ink) 6%,transparent) 1px,transparent 1px) 50% 0/56px 56px;-webkit-mask-image:radial-gradient(56% 40% at 50% 12%,#000,transparent);mask-image:radial-gradient(56% 40% at 50% 12%,#000,transparent)}
 :where(.hp-page) .hp-price .section-head{margin-inline:auto;text-align:center}
-:where(.hp-page) .hp-price .hp-h2 .accent{background:linear-gradient(100deg,transparent 35%,#ffffffd9 50%,transparent 65%) 0 0/250% 100% no-repeat,linear-gradient(100deg,var(--blue-deep),var(--blue) 55%,var(--teal-deep));-webkit-background-clip:text;background-clip:text;color:transparent}
-:where(.hp-page).m.rvr .hp-price .section-head.in .accent{animation:hp-pc-shine 1.8s var(--ease-io) .5s backwards}
+:where(.hp-page) :is(.hp-price,.hp-faq) .hp-h2 .accent{background:linear-gradient(100deg,transparent 35%,#ffffffd9 50%,transparent 65%) 0 0/250% 100% no-repeat,linear-gradient(100deg,var(--blue-deep),var(--blue) 55%,var(--teal-deep));-webkit-background-clip:text;background-clip:text;color:transparent}
+:where(.hp-page).m.rvr :is(.hp-price,.hp-faq) .section-head.in .accent{animation:hp-pc-shine 1.8s var(--ease-io) .5s backwards}
 /* billing toggle: a pill slides under the selected option */
 :where(.hp-page) .hp-bill{display:flex;align-items:center;justify-content:center;gap:14px;margin-top:40px;flex-wrap:wrap}
 :where(.hp-page) .hp-bill .seg{position:relative;padding:5px;gap:4px;border:0;background:color-mix(in oklab,var(--surface) 88%,transparent);box-shadow:inset 0 0 0 1px var(--line),var(--shadow-sm)}
@@ -395,17 +395,57 @@
 @media (max-width:1023px){:where(.hp-page) .hp-plans{grid-template-columns:minmax(0,1fr);grid-template-rows:none;row-gap:40px;max-width:540px;margin-inline:auto}:where(.hp-page) .hp-plan{grid-row:auto;display:flex;flex-direction:column}:where(.hp-page) .hp-plan.is-pop{margin-block:0;padding-block:44px 36px}}
 @media (max-width:560px){:where(.hp-page) .hp-plan{padding:30px 22px 28px}:where(.hp-page) .hp-plan.is-pop{padding-block:42px 32px}:where(.hp-page) .hp-guar.pricing-guarantee{flex-direction:column;text-align:center;padding:28px 22px}:where(.hp-page) .hp-more{border-radius:22px}}
 /* ───── FAQ ───── */
-:where(.hp-page) .hp-faq .section-head{margin-inline:auto;text-align:center}
-:where(.hp-page) .hp-faq .faq{max-width:860px}
-:where(.hp-page) .hp-faq .faq-item>summary{list-style:none}
-:where(.hp-page) .hp-faq .faq-item>summary::-webkit-details-marker{display:none}
-:where(.hp-page) .hp-faq .faq-q{font-size:clamp(1.1rem,1.5vw,1.25rem);min-height:44px;padding:26px 4px}
-:where(.hp-page) .hp-faq .faq-q:hover{color:var(--blue-deep)}
-:where(.hp-page) .hp-faq .faq-q .pm{width:32px;height:32px}
-:where(.hp-page) .hp-faq .faq-q .pm .i{width:16px;height:16px;stroke-width:2}
-:where(.hp-page) .hp-faq details[open] .pm{background:var(--blue);color:#fff;transform:rotate(45deg)}
+/* On desktop the heading and support card stay in view beside the questions. The questions are
+   cards that cascade in once the list gets .play (controller.ts); .is-closing (also set there)
+   drops a card's open styling while its answer collapses. */
+:where(.hp-page) .hp-faq{position:relative;isolation:isolate;overflow:clip}
+:where(.hp-page) .hp-faq-bg{position:absolute;inset:0;z-index:-1;pointer-events:none;background:radial-gradient(38% 50% at 10% 32%,color-mix(in oklab,var(--teal) 11%,transparent),transparent 70%),radial-gradient(40% 45% at 90% 78%,color-mix(in oklab,var(--blue) 9%,transparent),transparent 70%)}
+:where(.hp-page) .hp-faq-grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));column-gap:var(--gut);align-items:start}
+:where(.hp-page) .hp-faq-side{grid-column:1/span 5;position:sticky;top:calc(var(--hdr-h) + 28px);display:flex;flex-direction:column;gap:40px;padding-inline-end:clamp(0px,2.5vw,32px)}
+:where(.hp-page) .hp-faq .section-head{margin:0;text-align:start}
+:where(.hp-page) .hp-faq .lead{max-width:34ch;color:var(--ink-soft)}
+/* support card */
+:where(.hp-page) .hp-faq-help{display:grid;grid-template-columns:auto minmax(0,1fr);column-gap:16px;align-items:center;padding:24px;border-radius:var(--r-xl);color:#fff;background:radial-gradient(120% 100% at 0% 0%,color-mix(in oklab,var(--blue) 40%,var(--blue-ink)),var(--blue-ink) 65%);box-shadow:inset 0 1px 0 color-mix(in oklab,#fff 20%,var(--blue-ink)),0 30px 60px -30px color-mix(in oklab,var(--blue-ink) 80%,transparent)}
+:where(.hp-page) .hp-faq-help .av{grid-row:1/span 2;position:relative;width:52px;height:52px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(160deg,var(--teal),var(--teal-deep));color:#fff;box-shadow:0 0 0 4px color-mix(in oklab,var(--teal) 22%,transparent)}
+:where(.hp-page) .hp-faq-help .av .i{width:24px;height:24px}
+:where(.hp-page) .hp-faq-help .av::after{content:"";position:absolute;inset:-4px;border-radius:50%;box-shadow:0 0 0 2px color-mix(in oklab,var(--teal) 65%,transparent);opacity:0;pointer-events:none}
+:where(.hp-page).m.rvr .hp-faq-help.in .av::after{animation:hp-fq-ping 2.4s var(--ease-out) .6s 3}
+@keyframes hp-fq-ping{0%{opacity:.9;transform:scale(1)}70%,100%{opacity:0;transform:scale(1.55)}}
+:where(.hp-page) .hp-faq-help h3{align-self:end;font-size:1.2rem;letter-spacing:-.015em;color:#fff}
+:where(.hp-page) .hp-faq-help p{align-self:start;margin-top:2px;font-size:1rem;line-height:1.45;color:var(--on-ink-soft)}
+:where(.hp-page) .hp-faq .hp-faq-help .btn{grid-column:1/-1;justify-self:start;min-height:48px;margin-top:20px;padding-inline:22px;border-color:transparent;background:#fff;color:var(--blue-ink);font-weight:700;box-shadow:0 12px 26px -14px #000000b3;transition:background .3s var(--ease-out),transform .3s var(--ease-out)}
+:where(.hp-page) .hp-faq .hp-faq-help .btn:hover{background:color-mix(in oklab,var(--teal) 14%,#fff);transform:translateY(-2px)}
+:where(.hp-page) .hp-faq-help .btn .i{width:18px;height:18px;transform:scaleX(var(--dir));transition:transform .3s var(--ease-out)}
+:where(.hp-page) .hp-faq-help .btn:hover .i{transform:translateX(calc(4px * var(--dir))) scaleX(var(--dir))}
+/* question cards */
+:where(.hp-page) .hp-faq .hp-qa-list{grid-column:6/span 7;max-width:none;margin:0;display:flex;flex-direction:column;gap:12px}
+:where(.hp-page) .hp-faq .hp-qa{--qa-in:calc(38px + 1.9rem);position:relative;border:0;border-radius:20px;background:var(--surface);box-shadow:inset 0 0 0 1px var(--line),var(--shadow-sm);transition:box-shadow .45s var(--ease-out),background .45s var(--ease-out)}
+:where(.hp-page) .hp-faq .hp-qa::before{content:"";position:absolute;inset-block:18px;inset-inline-start:0;width:3px;border-start-end-radius:3px;border-end-end-radius:3px;background:linear-gradient(180deg,var(--teal),var(--blue));transform:scaleY(0);transition:transform .45s var(--ease-out)}
+:where(.hp-page) .hp-faq .hp-qa[open]:not(.is-closing){background:linear-gradient(180deg,var(--surface),color-mix(in oklab,var(--tint) 55%,var(--surface)));box-shadow:inset 0 0 0 1px color-mix(in oklab,var(--blue) 35%,var(--line)),var(--shadow-md)}
+:where(.hp-page) .hp-faq .hp-qa[open]:not(.is-closing)::before{transform:none}
+@media (hover:hover){:where(.hp-page) .hp-faq .hp-qa:not([open]):hover{box-shadow:inset 0 0 0 1px color-mix(in oklab,var(--blue) 30%,var(--line)),var(--shadow-md)}}
+:where(.hp-page) .hp-faq .hp-qa>summary{list-style:none}
+:where(.hp-page) .hp-faq .hp-qa>summary::-webkit-details-marker{display:none}
+:where(.hp-page) .hp-faq .faq-q{justify-content:flex-start;gap:16px;min-height:44px;padding:20px 20px 20px 22px;font-size:clamp(1.06rem,1.4vw,1.16rem);line-height:1.35;text-align:start}
+:where(.hp-page) .hp-faq .faq-q .n{flex:none;width:2.2em;font-size:.86rem;font-weight:700;letter-spacing:.02em;color:var(--ink-faint);transition:color .35s var(--ease-out)}
+:where(.hp-page) .hp-faq .faq-q .t{flex:1;min-width:0;transition:color .35s var(--ease-out)}
+:where(.hp-page) .hp-faq .faq-q:hover .t{color:var(--blue-deep)}
+:where(.hp-page) .hp-faq .hp-qa[open]:not(.is-closing) .n{color:var(--blue-deep)}
+:where(.hp-page) .hp-faq .faq-q .pm{position:relative;flex:none;width:36px;height:36px;border-radius:50%;background:var(--tint);color:var(--blue-deep);transition:background .35s var(--ease-out),color .35s var(--ease-out),transform .5s var(--ease-out),box-shadow .35s var(--ease-out)}
+:where(.hp-page) .hp-faq .faq-q .pm i{position:absolute;left:50%;top:50%;width:14px;height:2px;margin:-1px 0 0 -7px;border-radius:2px;background:currentColor;transition:transform .5s var(--ease-out)}
+:where(.hp-page) .hp-faq .faq-q .pm i+i{transform:rotate(90deg)}
+:where(.hp-page) .hp-faq .hp-qa[open]:not(.is-closing) .pm{background:linear-gradient(160deg,var(--blue),var(--blue-deep));color:#fff;transform:rotate(180deg);box-shadow:0 6px 14px -6px color-mix(in oklab,var(--blue) 70%,transparent)}
+:where(.hp-page) .hp-faq .hp-qa[open]:not(.is-closing) .pm i+i{transform:none}
 :where(.hp-page) .hp-faq .faq-a{max-height:none;overflow:hidden}
-:where(.hp-page) .hp-faq .faq-a p{font-size:1.125rem;padding:0 4px 28px;max-width:66ch}
+:where(.hp-page) .hp-faq .faq-a p{max-width:60ch;padding:0 24px 24px var(--qa-in);font-size:1.06rem;line-height:1.6;color:var(--ink-soft)}
+:where(.hp-page).m .hp-faq .hp-qa[open] .faq-a p{animation:hp-fq-ans .5s var(--ease-out) .05s backwards}
+@keyframes hp-fq-ans{from{opacity:0;transform:translateY(-8px)}}
+/* entrance */
+:where(.hp-page).m.rvr .hp-faq .hp-qa{animation:hp-fq-rise .7s var(--ease-out) calc(var(--i) * 60ms) backwards}
+@keyframes hp-fq-rise{from{opacity:0;transform:translateY(24px)}}
+:where(.hp-page) .hp-qa-list:not(.play) *,:where(.hp-page) .hp-qa-list:not(.play) ::before,:where(.hp-page) .hp-qa-list:not(.play) ::after{animation-play-state:paused!important}
+@media (max-width:1023px){:where(.hp-page) .hp-faq-grid{display:flex;flex-direction:column;gap:40px}:where(.hp-page) .hp-faq-side{display:contents}:where(.hp-page) .hp-faq .section-head{order:1;margin-inline:auto;text-align:center}:where(.hp-page) .hp-faq .lead{margin-inline:auto}:where(.hp-page) .hp-faq .hp-qa-list{order:2;width:100%;max-width:760px;margin-inline:auto}:where(.hp-page) .hp-faq-help{order:3;width:100%;max-width:760px;margin-inline:auto}}
+@media (max-width:560px){:where(.hp-page) .hp-faq .hp-qa{--qa-in:16px}:where(.hp-page) .hp-faq .faq-q{gap:12px;padding:18px 14px 18px 16px}:where(.hp-page) .hp-faq .faq-q .n{width:auto}:where(.hp-page) .hp-faq .faq-a p{padding-inline-end:18px}:where(.hp-page) .hp-faq-help{grid-template-columns:minmax(0,1fr);justify-items:center;text-align:center;padding:28px 22px}:where(.hp-page) .hp-faq-help .av{grid-row:auto;margin-bottom:14px}:where(.hp-page) .hp-faq .hp-faq-help .btn{justify-self:center}}
 /* ───── final CTA ───── */
 :where(.hp-page) .hp-final{position:relative;background:var(--blue-ink);color:#fff;overflow:clip;padding-block:var(--sec)}
 :where(.hp-page) .hp-final-glow{position:absolute;width:min(900px,90vw);aspect-ratio:1.3;inset-inline-end:-12%;top:50%;translate:0 -50%;background:var(--grad);border-radius:50%;filter:blur(90px);opacity:.5;pointer-events:none}

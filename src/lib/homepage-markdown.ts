@@ -126,7 +126,9 @@ ${h.pricing.guaranteeBody}
 
 ${fill(h.pricing.more, { numberPrice, minutesPrice: ADDON_PRICING.extraMinutesLabel })}
 
-## ${h.faq.title}
+## ${h.faq.eyebrow}: ${h.faq.titleStart}${h.faq.titleAccent}
+
+${h.faq.lead}
 
 ${h.faq.items.map((f) => `### ${f.q}\n\n${fill(f.a, { numberPrice })}`).join("\n\n")}
 

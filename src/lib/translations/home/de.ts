@@ -369,7 +369,15 @@ const t: HomeTranslations = {
     showingAnnual: "Jahrespreise werden angezeigt.",
   },
   faq: {
-    title: "Fragen und Antworten.",
+    eyebrow: "Vor der Anmeldung",
+    titleStart: "Fragen und ",
+    titleAccent: "Antworten.",
+    lead: "Klare Antworten auf die Fragen, die Familien uns am häufigsten stellen.",
+    help: {
+      title: "Noch Fragen?",
+      body: "Echte Menschen antworten innerhalb eines Werktags.",
+      cta: "Kontakt aufnehmen",
+    },
     items: [
       {
         q: "Brauche ich spezielle Hardware?",
