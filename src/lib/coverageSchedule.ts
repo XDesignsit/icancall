@@ -8,6 +8,7 @@
 // number's area-code region.
 
 import { stateForAreaCode } from './areaCodeStates';
+import { toE164 } from './phone';
 
 /**
  * The labels offered by the Timezone select in AccountView (keep the two in
@@ -131,12 +132,19 @@ export function onDutyContactIndex(
  * Who a cascade rings, in order: every Available contact with a phone number,
  * in circle order, except that `leadIndex` (the on-duty member) goes first
  * when it is one of them. A Busy or missing lead leaves the plain cascade.
+ * A contact who is the caller -- a circle member phoning the line -- is left
+ * out: ringing them would only ring the phone they are calling from. Every
+ * leg of one call must pass the same caller, as legs find their place in this
+ * list by index.
  */
 export function cascadeOrder<T extends { available?: unknown; phone?: unknown }>(
   contacts: T[],
-  leadIndex: number | null
+  leadIndex: number | null,
+  callerNumber?: string | null
 ): (T & { phone: string })[] {
-  const reachable = (c: T | undefined): c is T & { phone: string } => Boolean(c?.available && c.phone);
+  const caller = toE164(callerNumber);
+  const reachable = (c: T | undefined): c is T & { phone: string } =>
+    Boolean(c?.available && c.phone && (!caller || toE164(String(c.phone)) !== caller));
   const inOrder = contacts.filter(reachable);
   const lead = leadIndex === null ? undefined : contacts[leadIndex];
   return reachable(lead) ? [lead, ...inOrder.filter((c) => c !== lead)] : inOrder;

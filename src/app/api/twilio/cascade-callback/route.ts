@@ -50,7 +50,16 @@ export async function POST(request: Request) {
       const activeNumber = conference.lineNumber;
       const account = await findAccountByTwilioNumber(activeNumber);
       const contacts = account?.line?.contacts || [];
-      const availableContacts = cascadeOrder(contacts, leadIndex);
+      // The voice webhook left the caller out of this list (cascadeOrder), so
+      // leave them out here too or the index would point at someone else.
+      const caller = await twilioClient.calls(conference.callerCallSid).fetch().then(
+        (call) => call.from,
+        (err) => {
+          console.warn('Could not look up the caller; the cascade may ring their own phone:', err);
+          return null;
+        }
+      );
+      const availableContacts = cascadeOrder(contacts, leadIndex, caller);
 
       if (nextIdx < availableContacts.length) {
         const nextContact = availableContacts[nextIdx];

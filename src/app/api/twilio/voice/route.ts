@@ -20,6 +20,7 @@ export async function POST(request: Request) {
     let dialCallDuration = requestUrl.searchParams.get('DialCallDuration');
     let contactIndexStr = requestUrl.searchParams.get('contactIndex');
     let callSid = requestUrl.searchParams.get('CallSid');
+    let fromNumber = requestUrl.searchParams.get('From');
     // Set on cascade legs of a schedule-mode call: the contact rung first.
     const leadFromQuery = parseLeadIndex(requestUrl.searchParams.get('lead'));
 
@@ -34,6 +35,7 @@ export async function POST(request: Request) {
           dialCallDuration = formData.get('DialCallDuration')?.toString() || dialCallDuration;
           contactIndexStr = formData.get('contactIndex')?.toString() || contactIndexStr;
           callSid = formData.get('CallSid')?.toString() || callSid;
+          fromNumber = formData.get('From')?.toString() || fromNumber;
         }
       } catch (err) {
         console.warn('Could not parse form data:', err);
@@ -153,7 +155,7 @@ export async function POST(request: Request) {
         }
         twiml += '\n  <Hangup />';
       } else {
-        const availableContacts = cascadeOrder(contacts, leadFromQuery);
+        const availableContacts = cascadeOrder(contacts, leadFromQuery, fromNumber);
         const nextIdx = contactIndexStr ? parseInt(contactIndexStr.toString(), 10) : 0;
         if (nextIdx < availableContacts.length) {
           const nextContact = availableContacts[nextIdx];
@@ -261,7 +263,7 @@ export async function POST(request: Request) {
         const leadIndex = lineMode === 'schedule' && account
           ? onDutyContactIndex(account.line?.schedule, contacts, hourInTimeZone(new Date(), account.timeZone))
           : null;
-        const availableContacts = cascadeOrder(contacts, leadIndex);
+        const availableContacts = cascadeOrder(contacts, leadIndex, fromNumber);
 
         if (availableContacts.length > 0) {
           const timeLimitSeconds = Math.floor(availableMinutes * 60);
