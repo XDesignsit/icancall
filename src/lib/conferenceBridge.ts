@@ -1,5 +1,6 @@
 import type { Twilio } from 'twilio';
 import { parseConferenceRoom } from '@/lib/conferenceRoom';
+import { supabase } from '@/lib/supabase';
 
 /**
  * When the caller's leg of the caregiver bridge should end.
@@ -18,12 +19,11 @@ import { parseConferenceRoom } from '@/lib/conferenceRoom';
  * Cascade and simultaneous legs only join the conference once a person presses
  * a key at agent-join's screening prompt. Carrier voicemail answers a call like
  * a person does, and without the prompt it would join and take the caller.
- * Those legs are placed reporting as missed (cascade-callback, or
- * agent-completed with missed=1); agent-join repoints a leg's status callback
- * at plain agent-completed once someone accepts it. A leg's own CallStatus
- * cannot tell the two apart -- voicemail that answered is "completed" too --
- * and neither can the conference, which Twilio reports as in-progress while
- * the caller waits in it alone.
+ * agent-join records each leg someone accepts (markLegAccepted), and a
+ * screened leg that ends without that record never reached the caller. A
+ * leg's own CallStatus cannot tell the two apart -- voicemail that answered is
+ * "completed" too -- nor can the conference, which Twilio reports as
+ * in-progress while the caller waits in it alone.
  */
 
 export type CallerOutcome =
@@ -53,6 +53,25 @@ async function legsInOtherRooms(client: Twilio, lineNumber: string, room: string
   const others = conferences.filter((c) => c.friendlyName.startsWith(prefix) && c.friendlyName !== room);
   const sids = await Promise.all(others.map((c) => participantCallSids(client, c.sid)));
   return new Set(sids.flat());
+}
+
+const ACCEPTED_LEGS = 'accepted_call_legs';
+
+/** Records that a person accepted this caregiver leg at agent-join's prompt. */
+export async function markLegAccepted(callSid: string, room: string): Promise<void> {
+  const { error } = await supabase.from(ACCEPTED_LEGS).upsert({ call_sid: callSid, room });
+  if (error) console.error('Could not record the accepted caregiver leg; its end will count as missed:', error);
+}
+
+/**
+ * Whether a person accepted this leg. When that cannot be read, the leg counts
+ * as missed: better to ring one contact too many than to drop the caller.
+ */
+export async function wasLegAccepted(callSid: string | null | undefined): Promise<boolean> {
+  if (!callSid) return false;
+  const { data, error } = await supabase.from(ACCEPTED_LEGS).select('call_sid').eq('call_sid', callSid).maybeSingle();
+  if (error) console.error('Could not look up the caregiver leg:', error);
+  return Boolean(data);
 }
 
 /**
@@ -87,7 +106,7 @@ export async function releaseCallerIfAlone(
     room: string;
     endedCallSid?: string | null;
     baseUrl: string;
-    /** The leg that ended never reached the caller (see above). */
+    /** The leg that ended never reached the caller (see wasLegAccepted). */
     missed?: boolean;
   }
 ): Promise<CallerOutcome> {

@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { ttsPlayTag, verifyTelephonyWebhook } from '@/lib/twilioWebhook';
 import { findAccountByTwilioNumber } from '@/lib/db';
 import { parseConferenceRoom } from '@/lib/conferenceRoom';
+import { markLegAccepted } from '@/lib/conferenceBridge';
 
 export const preferredRegion = 'iad1';
 
@@ -9,9 +10,9 @@ export const preferredRegion = 'iad1';
 // simultaneous ringing) first ask for a key press, because carrier voicemail
 // answers a call exactly like a person does: without the prompt it would join
 // the conference, take the caller, and stop the cascade. Nobody pressing a key
-// ends the leg unjoined, and its status callback -- which reports the leg as
-// missed -- moves on to the next contact or takes a message. A key press
-// repoints that callback at agent-completed before joining (conferenceBridge).
+// ends the leg unjoined, and its status callback moves on to the next contact
+// or takes a message. A key press is recorded before joining, so the callback
+// knows the leg reached the caller (conferenceBridge).
 // Transfer legs skip the prompt: the caregiver chose that person, and their
 // voicemail is a fair place for the caller to land.
 export async function POST(request: Request) {
@@ -65,18 +66,9 @@ export async function POST(request: Request) {
   <Hangup/>
 </Response>`;
     } else {
-      if (accepted && callSid) {
-        // From here on this leg has reached the caller: when it ends, the
-        // conversation is over rather than the next contact being due.
-        const twilioClient = (await import('@/lib/twilio')).default;
-        try {
-          await twilioClient?.calls(callSid).update({
-            statusCallback: `${baseUrl}/api/twilio/agent-completed?room=${encodeURIComponent(room)}`,
-          });
-        } catch (err) {
-          console.error('Could not repoint the accepted caregiver leg; its end will count as missed:', err);
-        }
-      }
+      // From here on this leg has reached the caller: when it ends, the
+      // conversation is over rather than the next contact being due.
+      if (accepted && callSid) await markLegAccepted(callSid, room);
 
       // Connect the caregiver to the conference room
       // hangupOnStar="true": enables them to press * to leave and trigger the action callback
