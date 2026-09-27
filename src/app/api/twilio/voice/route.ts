@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { findAccountByTwilioNumber, getAvailableMinutes, deductMinutes } from '@/lib/db';
+import { buildConferenceRoom } from '@/lib/conferenceRoom';
 import { cascadeOrder, hourInTimeZone, onDutyContactIndex, parseLeadIndex } from '@/lib/coverageSchedule';
 import { supabase } from '@/lib/supabase';
 import twilioClient, { providerForNumber } from '@/lib/twilio';
@@ -264,7 +265,7 @@ export async function POST(request: Request) {
         if (availableContacts.length > 0) {
           const timeLimitSeconds = Math.floor(availableMinutes * 60);
           const activeCallSid = callSid || 'mockCallSid';
-          const roomName = `conf_${activeNumber.replace('+', '')}_${activeCallSid}`;
+          const roomName = buildConferenceRoom(activeNumber, activeCallSid);
 
           // Telnyx (Caribbean) numbers execute this same markup as TeXML but do
           // not use Twilio's Conference + calls.create bridging, so they fall
