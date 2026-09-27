@@ -290,7 +290,7 @@ export async function POST(request: Request) {
                   await twilioClient!.calls.create({
                     to: c.phone,
                     from: activeNumber,
-                    url: `${baseUrl}/api/twilio/agent-join?room=${encodeURIComponent(roomName)}`,
+                    url: `${baseUrl}/api/twilio/agent-join?room=${encodeURIComponent(roomName)}&screen=1`,
                     statusCallback: `${baseUrl}/api/twilio/agent-completed?room=${encodeURIComponent(roomName)}`,
                     statusCallbackEvent: ['completed'],
                   });
@@ -305,7 +305,7 @@ export async function POST(request: Request) {
                 await twilioClient!.calls.create({
                   to: firstContact.phone,
                   from: activeNumber,
-                  url: `${baseUrl}/api/twilio/agent-join?room=${encodeURIComponent(roomName)}`,
+                  url: `${baseUrl}/api/twilio/agent-join?room=${encodeURIComponent(roomName)}&screen=1`,
                   statusCallback: `${baseUrl}/api/twilio/cascade-callback?room=${encodeURIComponent(roomName)}&contactIndex=1${leadIndex === null ? '' : `&lead=${leadIndex}`}`,
                   statusCallbackEvent: ['completed', 'busy', 'no-answer', 'failed'],
                   timeout: 15
