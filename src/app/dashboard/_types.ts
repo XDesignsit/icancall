@@ -41,6 +41,8 @@ export interface Line {
     notifWeekly?: boolean;
     greetingAudioPath?: string;
     voiceId?: string;
+    /** Skip the "Press 1" prompt and start ringing right after the greeting. */
+    directConnect?: boolean;
   };
 }
 

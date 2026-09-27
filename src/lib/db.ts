@@ -14,6 +14,7 @@ export interface LineSettings {
   voiceId?: string;
   greeting?: string;
   greetingAudioPath?: string;
+  directConnect?: boolean;
   [key: string]: unknown;
 }
 

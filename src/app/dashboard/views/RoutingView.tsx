@@ -7,7 +7,7 @@ import { type DashboardTranslations } from "@/lib/dashboardTranslations";
 import { type PlanId } from "@/lib/planConfig";
 import { getLocalizedLineLabel, getLocalizedPersonName, getLocalizedRelationship } from "../_data";
 import { Icon } from "../_icons";
-import { Badge, initials } from "../_primitives";
+import { Badge, Toggle, initials } from "../_primitives";
 import { type Contact, type CoverageSlot, type Line } from "../_types";
 
 
@@ -784,6 +784,28 @@ export function RoutingView({
               </p>
             </div>
           </div>
+
+          {/* The caller menu needs a key press to pick a contact, so direct connect doesn't apply */}
+          {line.mode !== "menu" && (
+            <div className="set-row" style={{ marginTop: 20, paddingTop: 16, borderTop: "1px solid var(--line)" }}>
+              <div className="txt">
+                <b>{ext.directConnectTitle}</b>
+                <p>{ext.directConnectDesc}</p>
+              </div>
+              <Toggle
+                on={line.settings?.directConnect ?? false}
+                onChange={(v) => {
+                  setLine((prev) =>
+                    prev.map((l) =>
+                      l.id === line.id ? { ...l, settings: { ...(l.settings || {}), directConnect: v } } : l
+                    )
+                  );
+                  showToast(d.common.savedToast);
+                }}
+                labels={[ext.toggleOff, ext.toggleOn]}
+              />
+            </div>
+          )}
         </div>
       </div>
 

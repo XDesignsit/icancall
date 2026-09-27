@@ -76,6 +76,8 @@ export async function POST(request: Request) {
     const customGreeting = account?.line?.settings?.greeting;
     const greetingText = customGreeting || "Thank you for calling the iCanCall priority line.";
     const greetingAudioPath = account?.line?.settings?.greetingAudioPath;
+    // Direct connect skips the "Press 1" prompt in cascade/simultaneous mode
+    const directConnect = account?.line?.settings?.directConnect === true;
     const contacts = account?.line?.contacts || [];
 
     if (!digits) {
@@ -128,6 +130,9 @@ export async function POST(request: Request) {
         twiml += menuPrompts.join('');
         twiml += `\n      ${getTtsPlayTag("Or press 9 to leave a voice message.")}\n  </Gather>`;
         twiml += `\n  <!-- Default fallback to leaving a voicemail if they wait and enter nothing -->\n  <Redirect method="POST">/api/twilio/voice?Digits=9&amp;To=${encodeURIComponent(activeNumber)}</Redirect>`;
+      } else if (directConnect) {
+        // Direct connect: go straight to routing as if the caller pressed 1
+        twiml += `\n  <Redirect method="POST">/api/twilio/voice?Digits=1&amp;To=${encodeURIComponent(activeNumber)}</Redirect>`;
       } else {
         // Cascade or Simultaneous mode prompt
         twiml += `
