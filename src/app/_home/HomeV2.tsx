@@ -1395,18 +1395,28 @@ function HomeV2({ t, base, lang, onLang, root }: Props) {
       </main>
 
       {/* ============ FOOTER ============ */}
+      {/* The large faded wordmark at the bottom rises into place as the page ends
+          (scroll-driven where supported, static otherwise). */}
       <footer className="footer hp-footer">
+        <div className="hp-foot-glow" aria-hidden="true" />
         <div className="wrap">
           <div className="footer-grid">
-            <div>
+            <div className="hp-foot-brand rv">
               <a className="brand" href="#top" aria-label={t.nav.home}>
                 <svg className="hp-logo" viewBox="0 0 800 154.5652" aria-hidden="true">
                   <use href="#logo" />
                 </svg>
               </a>
               <p className="blurb">{t.footer.blurb}</p>
+              <div className="hp-foot-actions">
+                <LangSelect t={t} lang={lang} onLang={onLang} />
+                <a className="hp-foot-talk" href="/contact">
+                  <span className="ic"><Icon id="i-headset" /></span>
+                  {t.final.talk}
+                </a>
+              </div>
             </div>
-            <div>
+            <div className="rv" style={vars({ "--i": 1 })}>
               <h5>{t.footer.product}</h5>
               <ul>
                 <li><a href="#how">{t.nav.how}</a></li>
@@ -1416,7 +1426,7 @@ function HomeV2({ t, base, lang, onLang, root }: Props) {
                 <li><a href="/login">{t.nav.login}</a></li>
               </ul>
             </div>
-            <div>
+            <div className="rv" style={vars({ "--i": 2 })}>
               <h5>{t.footer.who}</h5>
               <ul>
                 <li><a href="/parents">{t.footer.parents}</a></li>
@@ -1424,13 +1434,13 @@ function HomeV2({ t, base, lang, onLang, root }: Props) {
                 <li><a href="/caregivers">{t.footer.caregivers}</a></li>
               </ul>
             </div>
-            <div>
+            <div className="rv" style={vars({ "--i": 3 })}>
               <h5>{t.footer.company}</h5>
               <ul>
                 <li><a href="/contact">{t.footer.contact}</a></li>
               </ul>
             </div>
-            <div>
+            <div className="rv" style={vars({ "--i": 4 })}>
               <h5>{t.footer.legal}</h5>
               <ul>
                 <li><a href="/privacy-policy">{t.footer.privacy}</a></li>
@@ -1441,16 +1451,26 @@ function HomeV2({ t, base, lang, onLang, root }: Props) {
           <div className="footer-bottom">
             <span>{t.footer.copyright}</span>
             <span>{t.footer.moments}</span>
-            <a className="hp-badge-slot" href="https://elevenlabs.io/startup-grants" target="_blank" rel="noopener noreferrer">
-              <img
-                src="https://eleven-public-cdn.elevenlabs.io/payloadcms/pwsc4vchsqt-ElevenLabsGrants.webp"
-                alt={t.footer.badgeAlt}
-                width={120}
-                height={40}
-                loading="lazy"
-              />
-            </a>
+            <div className="hp-foot-end">
+              <a className="hp-badge-slot" href="https://elevenlabs.io/startup-grants" target="_blank" rel="noopener noreferrer">
+                <img
+                  src="https://eleven-public-cdn.elevenlabs.io/payloadcms/pwsc4vchsqt-ElevenLabsGrants.webp"
+                  alt={t.footer.badgeAlt}
+                  width={120}
+                  height={40}
+                  loading="lazy"
+                />
+              </a>
+              <a className="hp-top" href="#top" aria-label={t.footer.top}>
+                <Icon id="i-arrow-r" />
+              </a>
+            </div>
           </div>
+        </div>
+        <div className="hp-foot-mark" aria-hidden="true">
+          <svg viewBox="0 0 800 154.5652">
+            <use href="#logo" />
+          </svg>
         </div>
       </footer>
 

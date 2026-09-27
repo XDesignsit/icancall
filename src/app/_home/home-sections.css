@@ -516,18 +516,38 @@
 :where(.hp-page).m.no-sda .is-rest.in .hp-av{transform:none;opacity:1}
 @keyframes hp-close{from{transform:translate(calc(var(--dx) * 1px * var(--dir)),calc(var(--dy) * 1px));opacity:0}to{transform:none;opacity:1}}
 /* ───── footer ───── */
-:where(.hp-page) .hp-footer.footer{padding-block:72px 40px}
-:where(.hp-page) .hp-footer .footer-grid{grid-template-columns:1.6fr repeat(4,minmax(0,1fr))}
-:where(.hp-page) .hp-footer .hp-logo{height:30px}
-:where(.hp-page) .hp-footer .blurb{font-size:1rem;max-width:32ch}
-:where(.hp-page) .hp-footer h5{color:var(--ink-soft)}
+/* Brand, language and contact up front, the link columns, a bottom bar with a back-to-top button,
+   and a large faded wordmark that rises into place as the page ends. */
+:where(.hp-page) .hp-footer.footer{position:relative;isolation:isolate;overflow:clip;padding-block:80px 0;border-top:1px solid var(--line-soft);background:linear-gradient(180deg,var(--surface) 30%,color-mix(in oklab,var(--tint) 75%,var(--surface)))}
+:where(.hp-page) .hp-foot-glow{position:absolute;inset:auto 0 0;height:70%;z-index:-1;pointer-events:none;background:radial-gradient(50% 60% at 50% 100%,color-mix(in oklab,var(--teal) 16%,transparent),transparent 70%)}
+:where(.hp-page) .hp-footer .footer-grid{grid-template-columns:2.7fr repeat(4,minmax(0,1fr));gap:40px 28px}
+:where(.hp-page) .hp-footer .hp-logo{height:32px}
+:where(.hp-page) .hp-footer .blurb{max-width:32ch;margin-top:16px;font-size:1.02rem;line-height:1.55;color:var(--ink-soft)}
+:where(.hp-page) .hp-foot-actions{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:24px}
+:where(.hp-page) .hp-footer .hp-foot-talk{display:inline-flex;align-items:center;gap:10px;min-height:44px;padding:0 16px 0 6px;border-radius:999px;background:var(--surface);box-shadow:inset 0 0 0 1px var(--line);color:var(--ink);font-size:.95rem;font-weight:600;transition:color .3s var(--ease-out),box-shadow .3s var(--ease-out)}
+:where(.hp-page) .hp-footer .hp-foot-talk:hover{color:var(--blue-deep);box-shadow:inset 0 0 0 1px color-mix(in oklab,var(--blue) 45%,var(--line)),var(--shadow-sm)}
+:where(.hp-page) .hp-foot-talk .ic{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(160deg,var(--teal),var(--teal-deep));color:#fff}
+:where(.hp-page) .hp-foot-talk .ic .i{width:17px;height:17px}
+:where(.hp-page) .hp-footer.footer h5{margin-bottom:8px;font-size:.78rem;letter-spacing:.08em;color:var(--ink-faint)}
 :where(.hp-page) .hp-footer ul{gap:0}
-:where(.hp-page) .hp-footer ul a{display:inline-flex;align-items:center;min-height:44px;font-size:1rem}
-:where(.hp-page) .hp-footer .footer-bottom{color:var(--ink-soft);font-size:.95rem}
+:where(.hp-page) .hp-footer ul a{display:inline-flex;align-items:center;min-height:44px;font-size:1rem;color:var(--ink-soft);background:linear-gradient(currentColor,currentColor) 0 calc(100% - 11px)/0 1px no-repeat;transition:color .25s var(--ease-out),background-size .35s var(--ease-out)}
+[dir=rtl] :where(.hp-page) .hp-footer ul a{background-position:100% calc(100% - 11px)}
+:where(.hp-page) .hp-footer ul a:hover{color:var(--blue-deep);background-size:100% 1px}
+:where(.hp-page) .hp-footer .footer-bottom{margin-top:56px;padding-top:24px;border-top:1px solid var(--line-soft);color:var(--ink-soft);font-size:.95rem}
+:where(.hp-page) .hp-foot-end{display:flex;align-items:center;gap:14px}
 :where(.hp-page) .hp-badge-slot{display:flex;align-items:center;justify-content:center;width:132px;height:44px}
 :where(.hp-page) .hp-badge-slot img{max-width:120px;max-height:40px;width:auto;height:auto}
+:where(.hp-page) .hp-footer .hp-top{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:var(--surface);box-shadow:inset 0 0 0 1px var(--line),var(--shadow-sm);color:var(--blue-deep);transition:transform .35s var(--ease-out),background .35s var(--ease-out),color .35s var(--ease-out),box-shadow .35s var(--ease-out)}
+:where(.hp-page) .hp-footer .hp-top:hover{transform:translateY(-3px);background:var(--blue);color:#fff;box-shadow:0 10px 20px -8px color-mix(in oklab,var(--blue) 70%,transparent)}
+:where(.hp-page) .hp-top .i{width:18px;height:18px;transform:rotate(-90deg)}
+/* the wordmark: the logo at full width in pale brand tints, fading out at the bottom edge */
+:where(.hp-page) .hp-foot-mark{max-width:calc(var(--maxw) + 120px);height:clamp(64px,12.5vw,178px);margin:clamp(40px,5vw,64px) auto 0;padding-inline:var(--pad);overflow:hidden;pointer-events:none;-webkit-mask-image:linear-gradient(180deg,#000 15%,transparent 100%);mask-image:linear-gradient(180deg,#000 15%,transparent 100%)}
+:where(.hp-page) .hp-foot-mark svg{--lg-a:color-mix(in oklab,var(--blue-ink) 16%,var(--surface));--lg-b:color-mix(in oklab,var(--teal) 38%,var(--surface));display:block;width:100%;height:auto}
+@supports (animation-timeline:view()){:where(.hp-page).m .hp-foot-mark svg{animation:hp-ft-rise linear both;animation-timeline:view();animation-range:entry 0% entry 100%}}
+@keyframes hp-ft-rise{from{transform:translateY(60%);opacity:.25}}
 @media (max-width:900px){:where(.hp-page) .hp-footer .footer-grid{grid-template-columns:repeat(2,minmax(0,1fr))}:where(.hp-page) .hp-footer .footer-grid>:first-child{grid-column:1/-1}}
-@media (max-width:767px){:where(.hp-page) .hp-footer.footer{padding-bottom:110px}}
+@media (max-width:767px){:where(.hp-page) .hp-footer.footer{padding-block:64px 110px}}
+@media (max-width:560px){:where(.hp-page) .hp-footer .footer-bottom{flex-direction:column;align-items:flex-start;gap:12px}}
 
 :where(.hp-page) .hp-after-sim{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:12px 20px;margin-top:40px;color:var(--ink-soft)}
 :where(.hp-page) .hp-after-sim b{color:var(--ink)}

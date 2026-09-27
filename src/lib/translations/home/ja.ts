@@ -422,6 +422,7 @@ const t: HomeTranslations = {
     copyright: "© 2026 iCanCall, Inc.",
     moments: "大切な瞬間のために。",
     badgeAlt: "ElevenLabs Grants",
+    top: "ページの先頭へ",
   },
 };
 

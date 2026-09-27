@@ -443,6 +443,7 @@ const t: HomeTranslations = {
     copyright: "© 2026 iCanCall, Inc.",
     moments: "Feito para os momentos que importam.",
     badgeAlt: "ElevenLabs Grants",
+    top: "Voltar ao topo",
   },
 };
 
