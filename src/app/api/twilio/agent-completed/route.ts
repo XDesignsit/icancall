@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { verifyTelephonyWebhook } from '@/lib/twilioWebhook';
 import { buildConferenceRoom } from '@/lib/conferenceRoom';
 import { releaseCallerIfAlone } from '@/lib/conferenceBridge';
 
@@ -8,6 +9,9 @@ export const preferredRegion = 'iad1';
 // of a simultaneous-mode call, and the leg placed by a "*" transfer. It fires
 // once the leg has ended, answered or not.
 export async function POST(request: Request) {
+  const denied = await verifyTelephonyWebhook(request);
+  if (denied) return denied;
+
   try {
     const requestUrl = new URL(request.url);
     let room = requestUrl.searchParams.get('room');

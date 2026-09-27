@@ -1,10 +1,14 @@
 import { NextResponse } from 'next/server';
+import { ttsPlayTag, verifyTelephonyWebhook } from '@/lib/twilioWebhook';
 import { findAccountByTwilioNumber } from '@/lib/db';
 import { parseConferenceRoom } from '@/lib/conferenceRoom';
 
 export const preferredRegion = 'iad1';
 
 export async function POST(request: Request) {
+  const denied = await verifyTelephonyWebhook(request);
+  if (denied) return denied;
+
   try {
     const requestUrl = new URL(request.url);
     let room = requestUrl.searchParams.get('room');
@@ -37,10 +41,7 @@ export async function POST(request: Request) {
 
     const voiceId = account?.line?.settings?.voiceId || '21m00Tcm4TlvDq8ikWAM';
     const baseUrl = `${requestUrl.protocol}//${requestUrl.host}`;
-    const getTtsPlayTag = (text: string) => {
-      const escapedText = encodeURIComponent(text.trim());
-      return `<Play>${baseUrl}/api/twilio/tts?text=${escapedText}&amp;voiceId=${voiceId}</Play>`;
-    };
+    const getTtsPlayTag = (text: string) => ttsPlayTag(baseUrl, text, voiceId);
 
     let twiml = '<?xml version="1.0" encoding="UTF-8"?>\n<Response>';
 

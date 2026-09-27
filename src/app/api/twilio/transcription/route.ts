@@ -1,10 +1,14 @@
 import { NextResponse } from 'next/server';
+import { verifyTelephonyWebhook } from '@/lib/twilioWebhook';
 import { sendVoicemailAlertEmail } from '@/lib/mail';
 import { findAccountByTwilioNumber } from '@/lib/db';
 
 export const preferredRegion = 'iad1';
 
 export async function POST(request: Request) {
+  const denied = await verifyTelephonyWebhook(request, { telnyx: true });
+  if (denied) return denied;
+
   try {
     const formData = await request.formData();
     

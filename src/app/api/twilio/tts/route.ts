@@ -1,9 +1,16 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
+import { isSignedTtsUrl } from '@/lib/twilioWebhook';
 
 export async function GET(request: Request) {
   try {
-    const { searchParams } = new URL(request.url);
+    const url = new URL(request.url);
+    // Only text a voice webhook asked for (see ttsPlayTag), not whatever a caller of this URL wants voiced.
+    if (!isSignedTtsUrl(url)) {
+      return NextResponse.json({ error: 'Invalid signature' }, { status: 403 });
+    }
+
+    const { searchParams } = url;
     const text = searchParams.get('text');
     const voiceId = searchParams.get('voiceId') || '21m00Tcm4TlvDq8ikWAM'; // Rachel is default
 

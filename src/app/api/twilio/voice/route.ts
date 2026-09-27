@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { ttsPlayTag, verifyTelephonyWebhook } from '@/lib/twilioWebhook';
 import { findAccountByTwilioNumber, getAvailableMinutes, deductMinutes } from '@/lib/db';
 import { buildConferenceRoom } from '@/lib/conferenceRoom';
 import { cascadeOrder, hourInTimeZone, onDutyContactIndex, parseLeadIndex } from '@/lib/coverageSchedule';
@@ -8,6 +9,9 @@ import twilioClient, { providerForNumber } from '@/lib/twilio';
 export const preferredRegion = 'iad1';
 
 export async function POST(request: Request) {
+  const denied = await verifyTelephonyWebhook(request, { telnyx: true });
+  if (denied) return denied;
+
   try {
     const requestUrl = new URL(request.url);
     let digits = requestUrl.searchParams.get('Digits');
@@ -48,10 +52,7 @@ export async function POST(request: Request) {
     const baseUrl = `${requestUrl.protocol}//${requestUrl.host}`;
     
     // Helper to generate dynamic ElevenLabs TTS play tags
-    const getTtsPlayTag = (text: string) => {
-      const escapedText = encodeURIComponent(text.trim());
-      return `<Play>${baseUrl}/api/twilio/tts?text=${escapedText}&amp;voiceId=${voiceId}</Play>`;
-    };
+    const getTtsPlayTag = (text: string) => ttsPlayTag(baseUrl, text, voiceId);
 
     if (account) {
       availableMinutes = getAvailableMinutes(account);
