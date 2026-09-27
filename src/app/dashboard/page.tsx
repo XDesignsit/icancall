@@ -677,8 +677,11 @@ export default function DashboardApp() {
         setAcctTab(tabParam);
       }
       if (recordingUrl) {
+        // Voicemail emails link the Twilio recording, which a browser may not
+        // fetch itself; play it through api/caregiver/recordings instead.
+        const recordingSid = /\/Recordings\/(RE[0-9a-f]{32})(?:\.\w+)?$/i.exec(recordingUrl)?.[1];
         setActiveVoicemail({
-          recordingUrl,
+          recordingUrl: recordingSid ? `/api/caregiver/recordings/${recordingSid}` : recordingUrl,
           transcription: transcription || "No transcript available.",
           caller: caller || "Unknown Caller",
           duration: duration || "0:30",

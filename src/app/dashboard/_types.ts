@@ -55,6 +55,8 @@ export interface CallLogEntry {
   /** When the call came in (ISO), for calls from the call log API. */
   at?: string;
   transcript?: string | null;
+  /** The voicemail's audio, for voicemail calls from the call log API. */
+  recordingUrl?: string | null;
 }
 
 export interface Account {

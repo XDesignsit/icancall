@@ -37,6 +37,15 @@ function clock(seconds: number | null): string {
   return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
 }
 
+/**
+ * Where the dashboard plays a voicemail: Twilio serves recordings only to the
+ * account's credentials, so through api/caregiver/recordings.
+ */
+function playable(recordingUrl: string | null): string | null {
+  const sid = /\/Recordings\/(RE[0-9a-f]{32})(?:\.\w+)?$/i.exec(recordingUrl || "")?.[1];
+  return sid ? `/api/caregiver/recordings/${sid}` : null;
+}
+
 function toEntry(call: CallRow, line: LineRow | undefined) {
   const ringing = call.status === "ringing";
   if (ringing && Date.now() - new Date(call.started_at).getTime() < STALE_RINGING_MS) return null;
@@ -55,6 +64,7 @@ function toEntry(call: CallRow, line: LineRow | undefined) {
     dur: status === "connected" ? clock(call.talk_seconds) : status === "voicemail" ? clock(call.recording_seconds) : "—",
     at: call.started_at,
     transcript: status === "voicemail" ? call.transcript : null,
+    recordingUrl: status === "voicemail" ? playable(call.recording_url) : null,
   };
 }
 
