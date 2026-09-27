@@ -417,7 +417,8 @@ const t: HomeTranslations = {
     ],
   },
   final: {
-    title: "Offrez-leur un numéro. Offrez-vous la tranquillité d’esprit.",
+    titleStart: "Offrez-leur un numéro. Offrez-vous ",
+    titleAccent: "la tranquillité d’esprit.",
     lead: "Configuration en moins de cinq minutes. Votre famille peut commencer à appeler dès aujourd’hui.",
     talk: "Parler à une vraie personne",
     fine: ["Sans frais de mise en service", "Résiliable à tout moment", "Satisfait ou remboursé 30 jours"],

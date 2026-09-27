@@ -1292,75 +1292,100 @@ function HomeV2({ t, base, lang, onLang, root }: Props) {
         </section>
 
         {/* ============ FINAL CTA ============ */}
-        <section className="hp-final hp-dark" id="start" aria-labelledby="final-title">
-          <div className="hp-final-glow" aria-hidden="true" />
-          <div className="wrap hp-final-grid">
-            <div className="hp-final-copy">
-              <h2 className="hp-h2" id="final-title">{t.final.title}</h2>
-              <p className="lead">{t.final.lead}</p>
-              <div className="hp-ctas">
-                <a className="btn btn-primary btn-lg" href="#pricing">{t.nav.getStarted}</a>
-                <a className="btn btn-ghost btn-lg hp-on-dark" href="/contact">
-                  <Icon id="i-headset" />
-                  {t.final.talk}
-                </a>
-              </div>
-              <p className="hp-fine">
-                <span>{t.final.fine[0]}</span>
-                <span className="sep" aria-hidden="true">·</span>
-                <span>{t.final.fine[1]}</span>
-                <span className="sep" aria-hidden="true">·</span>
-                <span>{t.final.fine[2]}</span>
-              </p>
+        {/* A dark panel inset from the page edges. Its ambient loops (pulses along the threads,
+            the floating note, the drifting glows) run only while the section is on screen
+            (.on, set by the controller). */}
+        <section className="hp-final" id="start" aria-labelledby="final-title">
+          <div className="hp-final-panel hp-dark">
+            <div className="hp-final-bg" aria-hidden="true">
+              <i />
+              <i />
+              <i />
             </div>
-            <div className="hp-final-vis">
-              <div className="hp-stage is-rest" role="img" aria-label={t.final.stageLabel}>
-                <div className="hp-orbit">
-                  <svg className="hp-svg" viewBox="0 0 600 600" aria-hidden="true">
-                    <circle className="orb" cx="300" cy="300" r="250" />
-                    <circle className="orb2" cx="300" cy="300" r="186" />
-                    {(["m", "j", "r", "d"] as const).map((k) => (
-                      <path key={k} className="hot g" d={THREADS[k]} />
+            <div className="wrap hp-final-grid">
+              <div className="hp-final-copy">
+                <span className="hp-final-kicker rv">
+                  <span className="ic"><Icon id="i-phone" /></span>
+                  <span>{fromPrice}</span>
+                </span>
+                <h2 className="hp-h2 rv" id="final-title" style={vars({ "--i": 1 })}>
+                  {t.final.titleStart}
+                  <span className="accent">{t.final.titleAccent}</span>
+                </h2>
+                <p className="lead rv" style={vars({ "--i": 2 })}>{t.final.lead}</p>
+                <div className="hp-ctas rv" style={vars({ "--i": 3 })}>
+                  <a className="btn btn-primary btn-lg hp-go" href="#pricing">
+                    {t.nav.getStarted}
+                    <Icon id="i-arrow-r" />
+                  </a>
+                  <a className="btn btn-ghost btn-lg hp-on-dark" href="/contact">
+                    <Icon id="i-headset" />
+                    {t.final.talk}
+                  </a>
+                </div>
+                <ul className="hp-fine rv" style={vars({ "--i": 4 })}>
+                  {t.final.fine.map((f) => (
+                    <li key={f}>
+                      <Icon id="i-check" />
+                      {f}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div className="hp-final-vis">
+                <div className="hp-stage is-rest" role="img" aria-label={t.final.stageLabel}>
+                  <div className="hp-orbit">
+                    <svg className="hp-svg" viewBox="0 0 600 600" aria-hidden="true">
+                      <circle className="orb" cx="300" cy="300" r="250" />
+                      <circle className="orb2" cx="300" cy="300" r="186" />
+                      {(["m", "j", "r", "d"] as const).map((k) => (
+                        <path key={k} className="hot g" d={THREADS[k]} />
+                      ))}
+                      {/* a light pulse runs out along each thread in turn */}
+                      {(["m", "j", "r", "d"] as const).map((k, i) => (
+                        <path key={`s${k}`} className="sig" d={THREADS[k]} pathLength={100} style={vars({ "--k": i })} />
+                      ))}
+                    </svg>
+                    {(["m", "j", "r", "d"] as const).map((k, i) => (
+                      <div
+                        key={k}
+                        className={`hp-av ${SEATS[k].pos}`}
+                        style={vars({
+                          "--k": i,
+                          "--x": SEATS[k].x,
+                          "--y": SEATS[k].y,
+                          "--dx": k === "m" || k === "j" ? 70 : -70,
+                          "--dy": SEATS[k].pos === "top" ? -46 : 46,
+                        })}
+                      >
+                        <span className="av">{who[k][0][0]}</span>
+                        <span className="lbl">
+                          <b>{who[k][0]}</b>
+                          <span className="rel">{who[k][1]}</span>
+                        </span>
+                      </div>
                     ))}
-                  </svg>
-                  {(["m", "j", "r", "d"] as const).map((k) => (
-                    <div
-                      key={k}
-                      className={`hp-av ${SEATS[k].pos}`}
-                      style={vars({
-                        "--x": SEATS[k].x,
-                        "--y": SEATS[k].y,
-                        "--dx": k === "m" || k === "j" ? 70 : -70,
-                        "--dy": SEATS[k].pos === "top" ? -46 : 46,
-                      })}
-                    >
-                      <span className="av">{who[k][0][0]}</span>
-                      <span className="lbl">
-                        <b>{who[k][0]}</b>
-                        <span className="rel">{who[k][1]}</span>
+                  </div>
+                  <div className="hp-note-w">
+                    <div className="hp-note">
+                      <span className="hp-magnet" />
+                      <span className="hp-note-lbl">{t.hero.noteLabel}</span>
+                      <span className="hp-num">
+                        (415)&nbsp;200-<span className="v">CARE</span>
+                      </span>
+                      <span className="hp-note-foot">
+                        <span className="devs">
+                          <Icon id="i-landline" />
+                          <Icon id="i-flip" />
+                          <Icon id="i-smart" />
+                        </span>
+                        {t.final.anyPhone}
+                        <span className="hp-live">
+                          <i />
+                          {t.final.live}
+                        </span>
                       </span>
                     </div>
-                  ))}
-                </div>
-                <div className="hp-note-w">
-                  <div className="hp-note">
-                    <span className="hp-magnet" />
-                    <span className="hp-note-lbl">{t.hero.noteLabel}</span>
-                    <span className="hp-num">
-                      (415)&nbsp;200-<span className="v">CARE</span>
-                    </span>
-                    <span className="hp-note-foot">
-                      <span className="devs">
-                        <Icon id="i-landline" />
-                        <Icon id="i-flip" />
-                        <Icon id="i-smart" />
-                      </span>
-                      {t.final.anyPhone}
-                      <span className="hp-live">
-                        <i />
-                        {t.final.live}
-                      </span>
-                    </span>
                   </div>
                 </div>
               </div>

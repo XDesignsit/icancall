@@ -418,7 +418,8 @@ const t: HomeTranslations = {
     ],
   },
   final: {
-    title: "Geben Sie ihnen eine Nummer. Und sich selbst mehr Ruhe.",
+    titleStart: "Geben Sie ihnen eine Nummer. Und sich selbst ",
+    titleAccent: "mehr Ruhe.",
     lead: "In unter fünf Minuten eingerichtet. Ihre Familie kann noch heute anrufen.",
     talk: "Mit einem echten Menschen sprechen",
     fine: ["Keine Einrichtungsgebühr", "Jederzeit kündbar", "30 Tage Geld-zurück-Garantie"],

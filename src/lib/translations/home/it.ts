@@ -417,7 +417,8 @@ const t: HomeTranslations = {
     ],
   },
   final: {
-    title: "Dai loro un solo numero. Regalati la tranquillità.",
+    titleStart: "Dai loro un solo numero. Regalati ",
+    titleAccent: "la tranquillità.",
     lead: "Si configura in meno di cinque minuti. La tua famiglia può iniziare a chiamare già oggi.",
     talk: "Parla con una persona vera",
     fine: ["Nessun costo di attivazione", "Disdici quando vuoi", "Garanzia di rimborso di 30 giorni"],

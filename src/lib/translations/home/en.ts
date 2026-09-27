@@ -407,7 +407,8 @@ const t: HomeTranslations = {
     ],
   },
   final: {
-    title: "Give them one number. Give yourself peace of mind.",
+    titleStart: "Give them one number. Give yourself ",
+    titleAccent: "peace of mind.",
     lead: "Set up in under five minutes. Your family can start calling today.",
     talk: "Talk to a real person",
     fine: ["No setup fees", "Cancel anytime", "30-day money-back guarantee"],

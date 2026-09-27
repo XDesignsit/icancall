@@ -397,7 +397,8 @@ const t: HomeTranslations = {
     ],
   },
   final: {
-    title: "给他们一个号码，给自己一份安心。",
+    titleStart: "给他们一个号码，给自己",
+    titleAccent: "一份安心。",
     lead: "不到五分钟即可设置完成，您的家人今天就能开始拨打。",
     talk: "与真人沟通",
     fine: ["无设置费", "随时取消", "30天无忧退款保证"],

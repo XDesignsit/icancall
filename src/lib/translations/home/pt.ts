@@ -418,7 +418,8 @@ const t: HomeTranslations = {
     ],
   },
   final: {
-    title: "Dê a eles um só número. E a você, tranquilidade.",
+    titleStart: "Dê a eles um só número. E a você, ",
+    titleAccent: "tranquilidade.",
     lead: "Configure em menos de cinco minutos. Sua família já pode ligar hoje.",
     talk: "Fale com uma pessoa de verdade",
     fine: ["Sem taxa de adesão", "Cancele quando quiser", "Garantia de reembolso de 30 dias"],
