@@ -1,9 +1,13 @@
 import { NextResponse } from 'next/server';
+import { verifyTelephonyWebhook } from '@/lib/twilioWebhook';
 import { parseConferenceRoom } from '@/lib/conferenceRoom';
 
 export const preferredRegion = 'iad1';
 
 export async function POST(request: Request) {
+  const denied = await verifyTelephonyWebhook(request);
+  if (denied) return denied;
+
   try {
     const requestUrl = new URL(request.url);
     let room = requestUrl.searchParams.get('room');
