@@ -72,6 +72,22 @@ export function isSimulatedBilling(email: string | undefined | null): boolean {
   return !process.env.CREEM_API_KEY || (!!email && isDemoEmail(email));
 }
 
+/**
+ * Creem has not enabled live payments for the store yet: every live checkout
+ * page answers "Live payments are not enabled for your account". Until it
+ * does, new signups are paused wherever a live key is configured (production),
+ * so visitors join the waitlist instead of hitting that error. Test-mode
+ * environments (preview, local) keep the full signup flow.
+ *
+ * Flip to true once Creem approves the account for live payments.
+ */
+const LIVE_PAYMENTS_ENABLED = false;
+
+export function signupsPaused(): boolean {
+  const key = process.env.CREEM_API_KEY;
+  return !LIVE_PAYMENTS_ENABLED && !!key && !key.startsWith("creem_test_");
+}
+
 /** Email + user id of the signed-in user, or null when there is no valid session cookie. */
 export async function sessionIdentity(): Promise<{ email: string; userId?: string } | null> {
   try {
