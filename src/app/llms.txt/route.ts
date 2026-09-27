@@ -1,5 +1,6 @@
 import type { NextRequest } from "next/server";
 import { translations } from "@/lib/translations";
+import homeEn from "@/lib/translations/home/en";
 import { PLAN_PRICING } from "@/lib/pricing";
 import { PRELAUNCH, isPrelaunchGated } from "@/lib/prelaunch";
 
@@ -13,13 +14,13 @@ export async function GET(request: NextRequest) {
 
   const fullBody = `# iCanCall
 
-> ${t.hero.lead} ${t.footer.blurb}
+> ${homeEn.hero.lead} ${homeEn.footer.blurb}
 
 iCanCall is a virtual phone routing service: one dedicated, memorable phone number that rings a circle of up to six trusted contacts — in sequence (Call Cascade), simultaneously (Simultaneous Ring), or via a spoken menu — until someone answers. No hardware, no apps; works from any landline, flip phone, or smartphone. Plans: Essential ${PLAN_PRICING.essential.monthlyLabel}/mo or ${PLAN_PRICING.essential.annualLabel}/yr (1 number, 3 contacts, ${PLAN_PRICING.essential.voiceMinutes} voice minutes), Pro ${PLAN_PRICING.pro.monthlyLabel}/mo or ${PLAN_PRICING.pro.annualLabel}/yr (2 numbers, 6 contacts, ${PLAN_PRICING.pro.voiceMinutes} minutes, scheduling, voicemail transcription), and Care Team ${PLAN_PRICING.careteam.monthlyLabel}/mo or ${PLAN_PRICING.careteam.annualLabel}/yr (5 numbers, 15 contacts per number, ${PLAN_PRICING.careteam.voiceMinutes} pooled minutes, 2 caregiver logins). ${t.pricing.shortGuarantee}.
 
 ## Docs
 
-- [Homepage (Markdown)](https://icancall.co/index.md): Full marketing homepage as markdown — features, pricing, FAQ, and testimonials
+- [Homepage (Markdown)](https://icancall.co/index.md): Full marketing homepage as markdown — how it works, features, pricing, and FAQ
 
 ## Pages
 
