@@ -178,7 +178,7 @@ const t: HomepageTranslations = {
   "q1": "Do I need to buy any special hardware or devices?",
   "a1": "No. iCanCall is a virtual phone routing service. It runs entirely in the cloud. Your loved one can call your dedicated iCanCall number from any existing phone (landline, flip phone, smartphone, etc.), and the service routes it directly to the caregivers' existing phone numbers.",
   "q2": "Can I add more than one safety number?",
-  "a2": "Yes. The Essential Plan comes with 1 number, and the Pro Plan comes with 2 numbers. You can purchase additional dedicated virtual numbers on the Pro plan for $3.99/month per number directly from your dashboard.",
+  "a2": "Yes. The Essential Plan comes with 1 number, and the Pro Plan comes with 2 numbers. You can purchase additional dedicated virtual numbers on the Pro plan for $6.99/month per number directly from your dashboard.",
   "q3": "How does the Call Cascade work?",
   "a3": "With Call Cascade, we ring the contacts in your circle one by one in the order you set. If the first person doesn't answer or is busy, the call automatically cascades to the next person, and so on. If no one answers, the caller is prompted to leave a voicemail.",
   "q4": "Is there a setup fee or contract?",

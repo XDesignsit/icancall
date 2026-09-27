@@ -178,7 +178,7 @@ const t: HomepageTranslations = {
   "q1": "Devo acquistare qualche hardware o dispositivo speciale?",
   "a1": "No. iCanCall è un servizio telefonico virtuale operante in cloud. I tuoi cari possono chiamare da qualsiasi apparecchio (telefono fisso, cellulare a tastiera, smartphone) e la chiamata viene reindirizzata ai cellulari attuali dei caregiver.",
   "q2": "Posso aggiungere più di un numero di sicurezza?",
-  "a2": "Sì. Il Piano Essenziale include 1 numero, mentre il Pro ne include 2. È possibile acquistare linee virtuali aggiuntive sul piano Pro a $3.99/mese per numero direttamente dal pannello.",
+  "a2": "Sì. Il Piano Essenziale include 1 numero, mentre il Pro ne include 2. È possibile acquistare linee virtuali aggiuntive sul piano Pro a $6.99/mese per numero direttamente dal pannello.",
   "q3": "Come funziona l'inoltro in cascata?",
   "a3": "Facciamo squillare i contatti registrati uno ad uno nell'ordine da te stabilito. Se il primo non risponde o risulta occupato, la chiamata passa in automatico al successivo.",
   "q4": "Ci sono costi di attivazione o vincoli di durata contrattuale?",
