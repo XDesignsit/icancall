@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { findAccountByTwilioNumber } from '@/lib/db';
+import { parseConferenceRoom } from '@/lib/conferenceRoom';
 import { cascadeOrder, parseLeadIndex } from '@/lib/coverageSchedule';
 
 export const preferredRegion = 'iad1';
@@ -48,10 +49,10 @@ export async function POST(request: Request) {
     }
 
     const nextIdx = contactIndexStr ? parseInt(contactIndexStr, 10) : 0;
-    const parts = room.split('_');
-    if (parts.length < 2) return new NextResponse('OK');
-    
-    const activeNumber = '+' + parts[1];
+    const conference = parseConferenceRoom(room);
+    if (!conference) return new NextResponse('OK');
+
+    const activeNumber = conference.lineNumber;
     const account = await findAccountByTwilioNumber(activeNumber);
     const contacts = account?.line?.contacts || [];
     const availableContacts = cascadeOrder(contacts, leadIndex);

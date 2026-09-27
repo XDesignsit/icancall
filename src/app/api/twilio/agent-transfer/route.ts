@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { findAccountByTwilioNumber } from '@/lib/db';
+import { parseConferenceRoom } from '@/lib/conferenceRoom';
 
 export const preferredRegion = 'iad1';
 
@@ -22,14 +23,15 @@ export async function POST(request: Request) {
       }
     }
 
-    if (!room) {
+    const conference = parseConferenceRoom(room);
+    if (!room || !conference) {
       return new NextResponse('<?xml version="1.0" encoding="UTF-8"?><Response><Say>Error: No conference room specified.</Say></Response>', {
         status: 400,
         headers: { 'Content-Type': 'application/xml' },
       });
     }
 
-    const activeNumber = room.replace('conf_', '');
+    const activeNumber = conference.lineNumber;
     const account = await findAccountByTwilioNumber(activeNumber);
     const contacts = account?.line?.contacts || [];
 

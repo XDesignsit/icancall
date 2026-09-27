@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { parseConferenceRoom } from '@/lib/conferenceRoom';
 
 export const preferredRegion = 'iad1';
 
@@ -19,7 +20,8 @@ export async function POST(request: Request) {
       }
     }
 
-    if (!room) {
+    // The name is echoed into TwiML below, so only accept one the voice webhook built.
+    if (!room || !parseConferenceRoom(room)) {
       return new NextResponse('<?xml version="1.0" encoding="UTF-8"?><Response><Say>Error: No conference room specified.</Say></Response>', {
         status: 400,
         headers: { 'Content-Type': 'application/xml' },
@@ -31,9 +33,7 @@ export async function POST(request: Request) {
     const twiml = `<?xml version="1.0" encoding="UTF-8"?>
 <Response>
   <Dial hangupOnStar="true" action="/api/twilio/agent-transfer?room=${encodeURIComponent(room)}" method="POST">
-    <Conference beep="false" endConferenceOnExit="false" startConferenceOnEnter="true">
-      ${room}
-    </Conference>
+    <Conference beep="false" endConferenceOnExit="false" startConferenceOnEnter="true">${room}</Conference>
   </Dial>
 </Response>`;
 
