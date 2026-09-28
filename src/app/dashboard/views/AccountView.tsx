@@ -267,8 +267,8 @@ export function AccountView({
   const [tempCycle, setTempCycle] = useState<"monthly" | "yearly">(account.billingCycle || "monthly");
   const [selectedLineToKeep, setSelectedLineToKeep] = useState<string>("");
 
-  // Plan and billing-cycle changes go through /api/creem/change-plan, which
-  // switches the real Creem subscription. The new plan is only adopted locally
+  // Plan and billing-cycle changes go through /api/billing/change-plan, which
+  // switches the real Stripe subscription. The new plan is only adopted locally
   // once that succeeds.
   const pcs = planChangeStrings(lang);
   const planUpdatedMsg = lang === "es" ? "Plan actualizado correctamente"
@@ -287,7 +287,7 @@ export function AccountView({
   const [planChangeError, setPlanChangeError] = useState("");
   useEffect(() => { setPlanChangeError(""); }, [planModalOpen, tempPlan, tempCycle]);
 
-  // Cancelling (and undoing it) goes through /api/creem/cancel-subscription.
+  // Cancelling (and undoing it) goes through /api/billing/cancel-subscription.
   // The subscription always runs to the end of the period already paid for.
   const cs = cancelStrings(lang);
   const [cancelConfirmOpen, setCancelConfirmOpen] = useState(false);
@@ -305,7 +305,7 @@ export function AccountView({
     setCancelPending(true);
     setCancelError("");
     try {
-      const res = await fetch("/api/creem/cancel-subscription", {
+      const res = await fetch("/api/billing/cancel-subscription", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action }),
@@ -331,7 +331,7 @@ export function AccountView({
       setPlanChangeMode("simulated");
       return;
     }
-    fetch("/api/creem/change-plan")
+    fetch("/api/billing/change-plan")
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => { if (data?.mode) setPlanChangeMode(data.mode); })
       .catch(() => {});
@@ -343,7 +343,7 @@ export function AccountView({
     setPlanChangePending(true);
     setPlanChangeError("");
     try {
-      const res = await fetch("/api/creem/change-plan", {
+      const res = await fetch("/api/billing/change-plan", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ plan, billing: billingCycle }),
@@ -371,14 +371,14 @@ export function AccountView({
   useEffect(() => {
     if (checkoutReturnHandled.current) return;
     const params = new URLSearchParams(window.location.search);
-    const checkoutId = params.get("checkout_id");
+    const checkoutId = params.get("session_id");
     if (params.get("plan_change") !== "success" || !checkoutId) return;
     checkoutReturnHandled.current = true;
     window.history.replaceState({}, "", "/dashboard?view=account");
 
     (async () => {
       try {
-        const res = await fetch("/api/creem/change-plan", {
+        const res = await fetch("/api/billing/change-plan", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ checkoutId }),
@@ -607,22 +607,22 @@ export function AccountView({
       const pending = addonPendingAction.current;
       addonPendingAction.current = null;
       pending();
-      localStorage.removeItem("creem_addon_success");
+      localStorage.removeItem("stripe_addon_success");
     };
 
     // Primary: BroadcastChannel (reliable same-origin cross-window)
     let bc: BroadcastChannel | null = null;
     try {
-      bc = new BroadcastChannel("creem_addon");
+      bc = new BroadcastChannel("stripe_addon");
       bc.onmessage = (e) => {
-        if (e.data?.type === "CREEM_ADDON_SUCCESS") fireAddon();
+        if (e.data?.type === "STRIPE_ADDON_SUCCESS") fireAddon();
       };
     } catch {}
 
     // Secondary: postMessage from opener
     const handleMsg = (e: MessageEvent) => {
       if (e.origin !== window.location.origin) return;
-      if (e.data?.type === "CREEM_ADDON_SUCCESS") fireAddon();
+      if (e.data?.type === "STRIPE_ADDON_SUCCESS") fireAddon();
     };
     window.addEventListener("message", handleMsg);
 
@@ -1708,7 +1708,7 @@ export function AccountView({
                         return;
                       }
 
-                      // One Creem checkout buys one product. With both numbers and
+                      // One Stripe checkout buys one product. With both numbers and
                       // minutes selected the first is paid now; the dialog then stays
                       // open so the second is its own click (and its own popup).
                       const first = checkouts[0];
@@ -1718,17 +1718,17 @@ export function AccountView({
                       const w = 520, h = 720;
                       const left = Math.round(window.screenX + (window.outerWidth - w) / 2);
                       const top  = Math.round(window.screenY + (window.outerHeight - h) / 2);
-                      const popup = window.open("about:blank", "creem_addon_checkout", `width=${w},height=${h},left=${left},top=${top},resizable=yes,scrollbars=yes`);
+                      const popup = window.open("about:blank", "stripe_addon_checkout", `width=${w},height=${h},left=${left},top=${top},resizable=yes,scrollbars=yes`);
 
                       addonPopupRef.current = popup;
 
                       // Clear any stale success flag before starting
-                      localStorage.removeItem("creem_addon_success");
+                      localStorage.removeItem("stripe_addon_success");
 
                       setAddonCheckoutLoading(true);
 
                       try {
-                        const res = await fetch("/api/creem/checkout", {
+                        const res = await fetch("/api/billing/checkout", {
                           method: "POST",
                           headers: { "Content-Type": "application/json" },
                           body: JSON.stringify({ addon: first.addon, quantity: first.quantity }),
@@ -1737,11 +1737,11 @@ export function AccountView({
                         const { checkoutUrl, checkoutId } = await res.json();
 
                         // The checkout window reporting success is only the cue: the
-                        // server asks Creem whether this checkout was really paid, and
+                        // server asks Stripe whether this checkout was really paid, and
                         // nothing is added unless it says so. Runs once per checkout.
                         addonPendingAction.current = async () => {
                           try {
-                            const confirmRes = await fetch("/api/creem/confirm-addon", {
+                            const confirmRes = await fetch("/api/billing/confirm-addon", {
                               method: "POST",
                               headers: { "Content-Type": "application/json" },
                               body: JSON.stringify({ checkoutId, addon: first.addon, quantity: first.quantity }),
@@ -1783,13 +1783,13 @@ export function AccountView({
 
                         // Poll localStorage for success flag (focus events are unreliable after cross-origin popup nav)
                         const poll = setInterval(() => {
-                          const raw = localStorage.getItem("creem_addon_success");
+                          const raw = localStorage.getItem("stripe_addon_success");
                           if (raw) {
                             try {
                               const { ts } = JSON.parse(raw);
                               if (Date.now() - ts < 60000) {
                                 clearInterval(poll);
-                                localStorage.removeItem("creem_addon_success");
+                                localStorage.removeItem("stripe_addon_success");
                                 try { popup?.close(); } catch {}
                                 if (addonPopupRef.current === popup) {
                                   addonPopupRef.current = null;
@@ -2541,7 +2541,7 @@ export function AccountView({
                            : `Switched to annual billing — $${yr}/yr`));
                       };
 
-                      // Already annual: re-submitting would ask Creem to switch to the same product.
+                      // Already annual: re-submitting would ask Stripe to switch to the same price.
                       if (account.billingCycle === "monthly") {
                         annualBillingConfirmCallback.current = proceedWithYearlySwitch;
                         setAnnualBillingConfirmOpen(true);
@@ -2972,7 +2972,7 @@ export function AccountView({
                       : lang === "ko" ? "결제 포털을 여는 중…"
                       : "Opening billing portal…");
                     try {
-                      const res = await fetch("/api/creem/portal", { method: "POST" });
+                      const res = await fetch("/api/billing/portal", { method: "POST" });
                       if (!res.ok) {
                         const err = await res.json();
                         showToast(err.error || (lang === "es" ? "No se pudo abrir el portal de facturación."
@@ -2992,7 +2992,7 @@ export function AccountView({
                       const w = 560, h = 700;
                       const left = Math.round(window.screenX + (window.outerWidth - w) / 2);
                       const top  = Math.round(window.screenY + (window.outerHeight - h) / 2);
-                      window.open(portalUrl, "creem_portal", `width=${w},height=${h},left=${left},top=${top},resizable=yes,scrollbars=yes`);
+                      window.open(portalUrl, "stripe_portal", `width=${w},height=${h},left=${left},top=${top},resizable=yes,scrollbars=yes`);
                     } catch {
                       showToast(lang === "es" ? "No se pudo abrir el portal de facturación."
                         : lang === "fr" ? "Impossible d'ouvrir le portail de facturation."

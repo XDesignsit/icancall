@@ -1,4 +1,4 @@
-import { signupsPaused } from "@/lib/creem";
+import { signupsPaused } from "@/lib/stripe";
 import SignupsPaused from "./SignupsPaused";
 
 // While live payments are unavailable (see signupsPaused()), every /signup

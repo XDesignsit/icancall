@@ -3,7 +3,7 @@
 import { useSearchParams } from "next/navigation";
 import { useEffect, Suspense } from "react";
 
-function CreemCheckoutContent() {
+function StripeCheckoutContent() {
   const searchParams = useSearchParams();
   const status = searchParams.get("status");
 
@@ -11,9 +11,9 @@ function CreemCheckoutContent() {
     if (status === "success") {
       // Notify the opener (signup page) and close this popup
       if (window.opener) {
-        // Creem appends the checkout it just completed; the signup API verifies it server-side.
-        const checkoutId = searchParams.get("checkout_id") || undefined;
-        window.opener.postMessage({ type: "CREEM_PAYMENT_SUCCESS", checkoutId }, window.location.origin);
+        // Stripe appends the checkout session it just completed; the signup API verifies it server-side.
+        const checkoutId = searchParams.get("session_id") || undefined;
+        window.opener.postMessage({ type: "STRIPE_PAYMENT_SUCCESS", checkoutId }, window.location.origin);
         setTimeout(() => window.close(), 800);
       }
     }
@@ -49,10 +49,10 @@ function CreemCheckoutContent() {
   );
 }
 
-export default function CreemCheckoutPage() {
+export default function StripeCheckoutPage() {
   return (
     <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-slate-50 text-slate-500">Loading…</div>}>
-      <CreemCheckoutContent />
+      <StripeCheckoutContent />
     </Suspense>
   );
 }

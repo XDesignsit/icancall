@@ -5,8 +5,8 @@ import { isSessionLive } from "@/lib/userSessions";
 import { supabase } from "@/lib/supabase";
 import { resolveAccount } from "@/lib/account";
 
-// Shared by the routes that act on the account's Creem subscription
-// (api/creem/change-plan, api/creem/cancel-subscription).
+// Shared by the routes that act on the account's Stripe subscription
+// (api/billing/change-plan, api/billing/cancel-subscription).
 
 export type Settings = Record<string, unknown>;
 

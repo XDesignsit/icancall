@@ -1,24 +1,24 @@
 // Server-side source of truth for paid add-ons (extra phone numbers, voice
 // minute blocks). The counts in profiles.settings.addons are only ever raised
-// by a Creem checkout this server has verified (api/creem/confirm-addon) and
+// by a Stripe checkout this server has verified (api/billing/confirm-addon) and
 // only lowered here — never by what the browser sends.
 //
-// The phone-number add-on is its own recurring Creem subscription, separate
+// The phone-number add-on is its own recurring Stripe subscription, separate
 // from the plan's. Each purchase is recorded in settings.addonSubscriptions so
 // removing a number, cancelling the plan, or the plan ending also stops that
 // subscription from billing.
 
 import { supabase } from "@/lib/supabase";
 import { planConfig } from "@/lib/planConfig";
-import { CREEM_API, creemEntityId, creemHeaders, subscriptionLiveness } from "@/lib/creem";
+import { entityId, retrieveCheckoutSession, stripe, subscriptionItem, subscriptionLiveness } from "@/lib/stripe";
 
 type Settings = Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
 
 export type AddonId = "phone_number" | "voice_minutes";
 
-export const ADDON_PRODUCT_IDS: Record<AddonId, string | undefined> = {
-  phone_number:  process.env.CREEM_PRODUCT_ID_ADDON_PHONE_NUMBER,
-  voice_minutes: process.env.CREEM_PRODUCT_ID_ADDON_VOICE_MINUTES,
+export const ADDON_PRICE_IDS: Record<AddonId, string | undefined> = {
+  phone_number:  process.env.STRIPE_PRICE_ID_ADDON_PHONE_NUMBER,
+  voice_minutes: process.env.STRIPE_PRICE_ID_ADDON_VOICE_MINUTES,
 };
 
 /** Most units of one add-on a single checkout may buy. */
@@ -28,10 +28,10 @@ export function isAddonId(v: unknown): v is AddonId {
   return v === "phone_number" || v === "voice_minutes";
 }
 
-export function addonForProductId(productId: string | undefined | null): AddonId | null {
-  if (!productId) return null;
-  for (const addon of Object.keys(ADDON_PRODUCT_IDS) as AddonId[]) {
-    if (ADDON_PRODUCT_IDS[addon] === productId) return addon;
+export function addonForPriceId(priceId: string | undefined | null): AddonId | null {
+  if (!priceId) return null;
+  for (const addon of Object.keys(ADDON_PRICE_IDS) as AddonId[]) {
+    if (ADDON_PRICE_IDS[addon] === priceId) return addon;
   }
   return null;
 }
@@ -69,44 +69,26 @@ export type AddonPurchaseCheck =
   | { ok: true; purchase: VerifiedAddonPurchase }
   | { ok: false; reason: "lookup_failed" | "not_paid" | "not_an_addon" | "not_yours" };
 
-const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
 /**
- * Asks Creem whether an add-on checkout was really paid, what it bought, how
+ * Asks Stripe whether an add-on checkout was really paid, what it bought, how
  * many units, and whether it was started by this account. Add-on checkouts are
  * only ever created for a signed-in owner, so metadata.user_id must match.
  */
 export async function verifyAddonCheckout(checkoutId: string, userId: string): Promise<AddonPurchaseCheck> {
-  let checkout: Record<string, any> | null = null; // eslint-disable-line @typescript-eslint/no-explicit-any
-  // The customer is sent back the moment payment succeeds; give Creem a few
-  // seconds to mark the checkout completed before calling it unpaid.
-  for (let attempt = 0; attempt < 4; attempt++) {
-    if (attempt > 0) await sleep(1500);
-    const res = await fetch(`${CREEM_API}/checkouts?checkout_id=${encodeURIComponent(checkoutId)}`, {
-      headers: creemHeaders(),
-    });
-    if (!res.ok) {
-      console.error(`Creem add-on checkout lookup error (${res.status}):`, await res.text());
-      return { ok: false, reason: "lookup_failed" };
-    }
-    checkout = await res.json();
-    if (checkout?.status === "completed") break;
-  }
-  if (checkout?.status !== "completed") return { ok: false, reason: "not_paid" };
+  const found = await retrieveCheckoutSession(checkoutId);
+  if (!found) return { ok: false, reason: "lookup_failed" };
+  const { session, subscription, paid, item } = found;
+  if (!paid) return { ok: false, reason: "not_paid" };
 
-  const addon = addonForProductId(creemEntityId(checkout.product));
+  const addon = addonForPriceId(item.priceId);
   if (!addon) return { ok: false, reason: "not_an_addon" };
-  if (checkout.metadata?.user_id !== userId) return { ok: false, reason: "not_yours" };
+  if (session.metadata?.user_id !== userId) return { ok: false, reason: "not_yours" };
 
-  const units = Math.min(MAX_ADDON_UNITS, Math.max(1, Math.floor(Number(checkout.units) || 1)));
+  const units = Math.min(MAX_ADDON_UNITS, Math.max(1, Math.floor(Number(item.units) || 1)));
   return {
     ok: true,
-    purchase: {
-      addon,
-      units,
-      customerId: creemEntityId(checkout.customer),
-      subscriptionId: creemEntityId(checkout.subscription),
-    },
+    // A one-time purchase (voice minutes) has no subscription to record.
+    purchase: { addon, units, customerId: entityId(session.customer), subscriptionId: subscription?.id },
   };
 }
 
@@ -120,8 +102,8 @@ export function creditedAddons(addons: AddonCounts | undefined, addon: AddonId, 
 }
 
 /**
- * Credits a verified purchase, once per checkout — api/creem/confirm-addon and
- * the checkout.completed webhook both land here, in either order. Returns the
+ * Credits a verified purchase, once per checkout — api/billing/confirm-addon and
+ * the checkout.session.completed webhook both land here, in either order. Returns the
  * account's add-on counts afterwards, or null if they could not be saved.
  */
 export async function creditAddonPurchase(
@@ -138,7 +120,7 @@ export async function creditAddonPurchase(
   const saved = await saveSettingsPatch(userId, settings, {
     addons: next,
     addonCheckouts: [...applied, checkoutId],
-    creem_customer_id: settings.creem_customer_id ?? customerId,
+    stripe_customer_id: settings.stripe_customer_id ?? customerId,
     // The extra-number add-on bills monthly on a subscription of its own;
     // keep its id so it can be stopped when the number or the plan goes.
     ...(addon === "phone_number" && subscriptionId
@@ -150,42 +132,31 @@ export async function creditAddonPurchase(
 
 // ── Stopping add-on subscriptions ──
 
-async function creemSubscriptionCall(subscriptionId: string, path: string, body?: unknown): Promise<Record<string, any> | null> { // eslint-disable-line @typescript-eslint/no-explicit-any
+/** Runs one Stripe subscription call. Null (logged) when Stripe refuses or cannot be reached. */
+async function subscriptionCall<T>(label: string, subscriptionId: string, call: () => Promise<T>): Promise<T | null> {
   try {
-    const res = await fetch(`${CREEM_API}/subscriptions/${encodeURIComponent(subscriptionId)}${path}`, {
-      method: "POST",
-      headers: creemHeaders(),
-      body: body ? JSON.stringify(body) : undefined,
-    });
-    if (!res.ok) {
-      console.error(`Creem add-on subscription ${path || "update"} error (${res.status}) for ${subscriptionId}:`, await res.text());
-      return null;
-    }
-    return await res.json();
+    return await call();
   } catch (err) {
-    console.error(`Creem add-on subscription ${path || "update"} failed for ${subscriptionId}:`, err);
+    console.error(`Stripe add-on subscription ${label} failed for ${subscriptionId}:`, err);
     return null;
   }
 }
 
-/** Cancels today. Already over at Creem (customer portal, lapsed payment) counts as done. */
+/** Cancels today. Already over at Stripe (customer portal, lapsed payment) counts as done. */
 async function cancelNow(subscriptionId: string): Promise<boolean> {
-  if (await creemSubscriptionCall(subscriptionId, "/cancel", { mode: "immediate" })) return true;
+  if (await subscriptionCall("cancel", subscriptionId, () => stripe().subscriptions.cancel(subscriptionId))) return true;
   return (await subscriptionLiveness(subscriptionId)).state === "ended";
 }
 
 /** Lowers a subscription's unit count. No proration: nothing is refunded, the lower price starts at the next renewal. */
 async function setSubscriptionUnits(subscriptionId: string, units: number): Promise<boolean> {
-  const res = await fetch(`${CREEM_API}/subscriptions?subscription_id=${encodeURIComponent(subscriptionId)}`, {
-    headers: creemHeaders(),
-  }).catch(() => null);
-  if (!res?.ok) return false;
-  const sub = await res.json();
-  const item = Array.isArray(sub?.items) ? sub.items[0] : null;
-  if (!item?.id) return false;
-  const updated = await creemSubscriptionCall(subscriptionId, "", {
-    items: [{ id: item.id, units }],
-    update_behavior: "proration-none",
+  const updated = await subscriptionCall("update", subscriptionId, async () => {
+    const { itemId } = subscriptionItem(await stripe().subscriptions.retrieve(subscriptionId));
+    if (!itemId) throw new Error("subscription has no items");
+    return stripe().subscriptions.update(subscriptionId, {
+      items: [{ id: itemId, quantity: units }],
+      proration_behavior: "none",
+    });
   });
   return !!updated;
 }
@@ -193,7 +164,7 @@ async function setSubscriptionUnits(subscriptionId: string, units: number): Prom
 /**
  * Stops billing for `by` extra numbers the account no longer holds, newest
  * purchase first. Returns the settings patch to persist. The allowance drops
- * either way — the numbers are gone — and a subscription Creem would not
+ * either way — the numbers are gone — and a subscription Stripe would not
  * change stays recorded as active and is logged, so it can be stopped by hand.
  */
 export async function reduceExtraNumbers(settings: Settings, by: number): Promise<Settings> {
@@ -217,7 +188,7 @@ export async function reduceExtraNumbers(settings: Settings, by: number): Promis
     }
   }
   if (remaining > 0) {
-    console.error(`Add-on billing not fully reduced: ${remaining} extra number(s) still billed at Creem after removal.`);
+    console.error(`Add-on billing not fully reduced: ${remaining} extra number(s) still billed at Stripe after removal.`);
   }
 
   return {
@@ -239,10 +210,10 @@ export async function followPlanSubscription(settings: Settings, action: "schedu
     if (sub.status === "canceled") continue;
     if (action === "resume") {
       if (sub.status !== "scheduled_cancel") continue;
-      if (await creemSubscriptionCall(sub.id, "/resume")) sub.status = "active";
+      if (await subscriptionCall("resume", sub.id, () => stripe().subscriptions.update(sub.id, { cancel_at_period_end: false }))) sub.status = "active";
     } else if (action === "scheduled") {
       if (sub.status !== "active") continue;
-      if (await creemSubscriptionCall(sub.id, "/cancel", { mode: "scheduled", onExecute: "cancel" })) sub.status = "scheduled_cancel";
+      if (await subscriptionCall("schedule cancel", sub.id, () => stripe().subscriptions.update(sub.id, { cancel_at_period_end: true }))) sub.status = "scheduled_cancel";
     } else if (await cancelNow(sub.id)) {
       sub.status = "canceled";
       sub.units = 0;

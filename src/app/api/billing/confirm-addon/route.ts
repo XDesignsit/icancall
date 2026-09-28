@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { authorizeOwner, loadSettings } from "@/lib/billingOwner";
-import { isSimulatedBilling } from "@/lib/creem";
+import { isSimulatedBilling } from "@/lib/stripe";
 import {
   MAX_ADDON_UNITS,
   creditAddonPurchase,
@@ -12,7 +12,7 @@ import {
 
 // Credits an add-on purchase to the signed-in owner's account.
 //
-//   { checkoutId }  → verifies the checkout with Creem (paid, an add-on
+//   { checkoutId }  → verifies the checkout with Stripe (paid, an add-on
 //                     product, started by this account) and credits the units
 //                     it bought. Each checkout is credited once.
 //
@@ -56,7 +56,7 @@ export async function POST(req: NextRequest) {
     }
     return NextResponse.json({ success: true, addon: check.purchase.addon, units: check.purchase.units, addons });
   } catch (err) {
-    console.error("Creem confirm-addon exception:", err);
+    console.error("Stripe confirm-addon exception:", err);
     return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
 }

@@ -6,7 +6,7 @@ import { invalidateCachedAccount } from "@/lib/db";
 import { resolveAccount } from "@/lib/account";
 import { isOnboarded } from "@/lib/onboarding";
 import { isSessionLive } from "@/lib/userSessions";
-import { isSimulatedBilling, sessionIdentity } from "@/lib/creem";
+import { isSimulatedBilling, sessionIdentity } from "@/lib/stripe";
 
 async function getAuthenticatedUserId() {
   const cookieStore = await cookies();
@@ -140,8 +140,8 @@ export async function POST(request: Request) {
       delete newSettings.smsConsentSource;
     }
 
-    // With live billing the plan is whatever the Creem subscription says: it is
-    // written by api/creem/change-plan and the Creem webhook only. Accepting it
+    // With live billing the plan is whatever the Stripe subscription says: it is
+    // written by api/billing/change-plan and the Stripe webhook only. Accepting it
     // from this sync would let a client grant itself a plan it isn't paying for.
     if (newSettings && !isSimulatedBilling((await sessionIdentity())?.email)) {
       delete newSettings.plan;
@@ -153,15 +153,15 @@ export async function POST(request: Request) {
       delete newSettings.numbersReleasedAt;
       delete newSettings.releaseReminderSentAt;
       delete newSettings.archivedLines;
-      // Paid add-ons are credited by api/creem/confirm-addon and lowered by the
+      // Paid add-ons are credited by api/billing/confirm-addon and lowered by the
       // lines route; minute usage is written by the call webhooks. A browser
       // copy of any of it is stale at best and a free upgrade at worst.
       delete newSettings.addons;
       delete newSettings.addonSubscriptions;
       delete newSettings.addonCheckouts;
-      delete newSettings.creem_customer_id;
-      delete newSettings.creem_subscription_id;
-      delete newSettings.creem_period_start;
+      delete newSettings.stripe_customer_id;
+      delete newSettings.stripe_subscription_id;
+      delete newSettings.stripe_period_start;
       delete newSettings.minutes_cycle_start;
     }
 

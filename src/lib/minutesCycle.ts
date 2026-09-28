@@ -1,6 +1,6 @@
 // The voice-minute pool runs on a monthly cycle for every plan. Monthly
-// subscriptions reset when Creem reports the renewal payment
-// (api/creem/webhook). Annual subscriptions are only charged once a year, so
+// subscriptions reset when Stripe reports the renewal invoice paid
+// (api/billing/webhook). Annual subscriptions are only charged once a year, so
 // the daily job api/cron/reset-annual-minutes gives them the same monthly
 // reset, counted from the day their billing period started.
 

@@ -1,5 +1,5 @@
 // Copy for the plan-change flow in AccountView. Which billing notice applies is
-// decided by how the change will be billed (see api/creem/change-plan).
+// decided by how the change will be billed (see api/billing/change-plan).
 
 export type PlanChangeMode = "subscription" | "checkout" | "simulated";
 

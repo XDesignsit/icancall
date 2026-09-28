@@ -5,7 +5,7 @@
 /**
  * Demo logins are a deliberate auth bypass: a fixed PIN (123456) skips email
  * verification, admin@icancall.co grants the super-admin role, and demo emails
- * skip Creem checkout. That is fine on localhost and preview deploys, and must
+ * skip Stripe checkout. That is fine on localhost and preview deploys, and must
  * never be reachable in production.
  *
  * Fail closed: the flag has to be switched on explicitly. NEXT_PUBLIC_ so the

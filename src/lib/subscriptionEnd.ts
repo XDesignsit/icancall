@@ -2,7 +2,7 @@ import { supabase } from "@/lib/supabase";
 import { sendEmail } from "@/lib/mail";
 import { releaseProvisionedNumber, type TelephonyRecord } from "@/lib/numbers";
 
-// What happens when a subscription really ends (Creem: canceled / expired).
+// What happens when a subscription really ends (Stripe: canceled / incomplete_expired).
 //
 // The customer's numbers are what the product is — a family has memorised
 // them — and a number given back to the carrier cannot be recovered. So an

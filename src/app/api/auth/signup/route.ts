@@ -9,7 +9,7 @@ import { resolveSessionRole } from "@/lib/roles";
 import { isOnboarded } from "@/lib/onboarding";
 import { provisionNumber } from "@/lib/numbers";
 import { planConfig } from "@/lib/planConfig";
-import { activePlanForSubscription, isSimulatedBilling, verifyPlanCheckout, type VerifiedPlanPurchase } from "@/lib/creem";
+import { activePlanForSubscription, isSimulatedBilling, verifyPlanCheckout, type VerifiedPlanPurchase } from "@/lib/stripe";
 
 const signupSchema = z.object({
   email: z.string().email(),
@@ -22,7 +22,7 @@ const signupSchema = z.object({
   smsConsent: z.boolean().optional(),
   plan: z.enum(["essential", "pro", "careteam"]).optional(),
   billing: z.enum(["monthly", "yearly"]).optional(),
-  // The Creem checkout this signup paid for (from /api/creem/checkout).
+  // The Stripe checkout this signup paid for (from /api/billing/checkout).
   checkoutId: z.string().max(200).optional(),
 });
 
@@ -65,11 +65,11 @@ export async function POST(request: Request) {
     }
 
     // 1b. Proof of payment. An account, its plan and its phone numbers (which
-    // cost real money to buy) are only created for a checkout Creem confirms
+    // cost real money to buy) are only created for a checkout Stripe confirms
     // was paid by this person. The wizard's "payment succeeded" message comes
     // from the browser and proves nothing. What was paid for — not what the
     // wizard says was chosen — decides the plan. Demo accounts and
-    // environments without Creem credentials keep the simulated checkout.
+    // environments without Stripe credentials keep the simulated checkout.
     let purchase: VerifiedPlanPurchase | null = null;
     const ownerEmail = sessionEmail || email;
     if (!isSimulatedBilling(ownerEmail)) {
@@ -83,9 +83,9 @@ export async function POST(request: Request) {
         }
         purchase = check.purchase;
       } else if (userId) {
-        // Resuming an account whose checkout the Creem webhook already recorded.
+        // Resuming an account whose checkout the Stripe webhook already recorded.
         const { data: paidProfile } = await supabase.from("profiles").select("settings").eq("id", userId).maybeSingle();
-        const knownSub = paidProfile?.settings?.creem_subscription_id;
+        const knownSub = paidProfile?.settings?.stripe_subscription_id;
         purchase = typeof knownSub === "string" && knownSub ? await activePlanForSubscription(knownSub) : null;
       }
       if (!purchase) {
@@ -97,7 +97,7 @@ export async function POST(request: Request) {
         const { data: holders } = await supabase
           .from("profiles")
           .select("id, email")
-          .eq("settings->>creem_subscription_id", purchase.subscriptionId);
+          .eq("settings->>stripe_subscription_id", purchase.subscriptionId);
         const taken = (holders || []).some((h: { id: string; email: string | null }) =>
           userId ? h.id !== userId : (h.email || "").toLowerCase() !== email.toLowerCase());
         if (taken) {
@@ -109,17 +109,17 @@ export async function POST(request: Request) {
       plan = purchase.plan;
       billingCycle = purchase.billingCycle;
     }
-    const creemIds = purchase
+    const stripeIds = purchase
       ? {
-          ...(purchase.customerId ? { creem_customer_id: purchase.customerId } : {}),
-          ...(purchase.subscriptionId ? { creem_subscription_id: purchase.subscriptionId } : {}),
+          ...(purchase.customerId ? { stripe_customer_id: purchase.customerId } : {}),
+          ...(purchase.subscriptionId ? { stripe_subscription_id: purchase.subscriptionId } : {}),
         }
       : {};
 
     if (userId) {
       // Already authenticated (Google, or a PIN login that landed on an
       // unfinished account) and now completing the wizard. Merge onto the
-      // existing settings: the Creem webhook may already have written the
+      // existing settings: the Stripe webhook may already have written the
       // customer/subscription ids for this checkout, and a plain replace
       // would wipe them.
       const { data: existing } = await supabase
@@ -145,7 +145,7 @@ export async function POST(request: Request) {
             twoFactor: false,
             plan,
             billingCycle,
-            ...creemIds,
+            ...stripeIds,
             addons: existingSettings.addons || { extraNumbers: 0, minuteBlocks: 0, usedMin: 0, rolloverMin: 0 },
           }
         });
@@ -168,7 +168,7 @@ export async function POST(request: Request) {
       }
 
       // CAPTCHA is deliberately not required here: signup completes only after a
-      // paid Creem checkout, which is already bot-proof, so a challenge would add
+      // paid Stripe checkout, which is already bot-proof, so a challenge would add
       // friction without adding protection.
 
       // Sign up the user in Supabase Auth. Pass emailRedirectTo explicitly so the
@@ -218,7 +218,7 @@ export async function POST(request: Request) {
             twoFactor: false,
             plan,
             billingCycle,
-            ...creemIds,
+            ...stripeIds,
             addons: { extraNumbers: 0, minuteBlocks: 0, usedMin: 0, rolloverMin: 0 },
           }
         });
