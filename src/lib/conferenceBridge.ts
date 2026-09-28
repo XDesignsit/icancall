@@ -24,6 +24,13 @@ import { supabase } from '@/lib/supabase';
  * leg's own CallStatus cannot tell the two apart -- voicemail that answered is
  * "completed" too -- nor can the conference, which Twilio reports as
  * in-progress while the caller waits in it alone.
+ *
+ * All Ring (simultaneous mode) places every contact's leg at once, so only the
+ * first person to accept takes the call: agent-join then stops the other legs,
+ * and turns away anyone who accepts a moment later. The legs are recorded when
+ * placed (recordPlacedLegs), because a leg that is ringing or still at the
+ * prompt is not in the conference yet and Twilio cannot trace it to a room. The
+ * caller hanging up stops them as well (the call-status webhook).
  */
 
 export type CallerOutcome =
@@ -75,6 +82,67 @@ export async function wasLegAccepted(callSid: string | null | undefined): Promis
 }
 
 /**
+ * The leg in this room that a person accepted first; null when nobody has.
+ * When that cannot be read it is null too, which lets the leg asking join
+ * rather than turning a caregiver away from the caller.
+ */
+export async function firstAcceptedLeg(room: string): Promise<string | null> {
+  const { data, error } = await supabase
+    .from(ACCEPTED_LEGS)
+    .select('call_sid')
+    .eq('room', room)
+    .order('accepted_at', { ascending: true })
+    .order('call_sid', { ascending: true })
+    .limit(1)
+    .maybeSingle();
+  if (error) console.error('Could not look up who accepted the call:', error);
+  return (data?.call_sid as string | undefined) ?? null;
+}
+
+const PLACED_LEGS = 'placed_call_legs';
+
+/** Records the caregiver legs just placed for this room, so stopPlacedLegs can find them. */
+export async function recordPlacedLegs(room: string, callSids: string[]): Promise<void> {
+  if (callSids.length === 0) return;
+  const { error } = await supabase.from(PLACED_LEGS).upsert(callSids.map((call_sid) => ({ call_sid, room })));
+  if (error) console.error('Could not record the placed caregiver legs; they will ring out on their own:', error);
+}
+
+/**
+ * Stops the legs placed for this room that nobody accepted: one still ringing
+ * is cancelled, one answered but still at agent-join's prompt is hung up. A leg
+ * someone accepted is left alone -- it is talking to the caller, or has just
+ * been told another contact took the call -- so two people accepting at the
+ * same instant cannot cut each other off. Each leg's status callback still
+ * fires as usual.
+ */
+export async function stopPlacedLegs(client: Twilio, room: string): Promise<void> {
+  const [placed, accepted] = await Promise.all([
+    supabase.from(PLACED_LEGS).select('call_sid').eq('room', room),
+    supabase.from(ACCEPTED_LEGS).select('call_sid').eq('room', room),
+  ]);
+  const error = placed.error || accepted.error;
+  if (error) {
+    console.error('Could not look up the placed caregiver legs; they will ring out on their own:', error);
+    return;
+  }
+  const taken = new Set((accepted.data || []).map((row) => row.call_sid as string));
+  const sids = (placed.data || []).map((row) => row.call_sid as string).filter((sid) => !taken.has(sid));
+  await Promise.all(sids.map(async (sid) => {
+    try {
+      const { status } = await client.calls(sid).fetch();
+      if (status === 'queued' || status === 'ringing') {
+        await client.calls(sid).update({ status: 'canceled' });
+      } else if (status === 'in-progress') {
+        await client.calls(sid).update({ status: 'completed' });
+      }
+    } catch (err) {
+      console.warn(`Could not stop caregiver leg ${sid}:`, err);
+    }
+  }));
+}
+
+/**
  * Who is in the caller's room while the caller is still there; null once they
  * have hung up or been moved on to voicemail. Before the room exists -- the
  * caller is still hearing the greeting, and a leg that fails or is declined at
@@ -90,6 +158,22 @@ async function callerRoom(client: Twilio, room: string, callerCallSid: string): 
   if (rooms.length > 0) return null;
   const caller = await client.calls(callerCallSid).fetch();
   return caller.status === 'in-progress' ? [callerCallSid] : null;
+}
+
+/**
+ * Whether the caller is still waiting in their room, rather than gone or moved
+ * on to voicemail. When Twilio cannot be asked, they count as there: a
+ * caregiver who accepted is let in rather than turned away.
+ */
+export async function callerStillThere(client: Twilio, room: string): Promise<boolean> {
+  const conference = parseConferenceRoom(room);
+  if (!conference) return false;
+  try {
+    return (await callerRoom(client, room, conference.callerCallSid)) !== null;
+  } catch (err) {
+    console.warn('Could not check whether the caller is still on the line:', err);
+    return true;
+  }
 }
 
 /** Whether the caller is still on the line with nobody in their room: the cascade should ring its next contact. */

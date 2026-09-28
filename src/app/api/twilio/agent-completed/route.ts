@@ -1,14 +1,16 @@
 import { NextResponse } from 'next/server';
 import { verifyTelephonyWebhook } from '@/lib/twilioWebhook';
 import { buildConferenceRoom } from '@/lib/conferenceRoom';
-import { releaseCallerIfAlone, wasLegAccepted } from '@/lib/conferenceBridge';
+import { firstAcceptedLeg, releaseCallerIfAlone } from '@/lib/conferenceBridge';
 
 export const preferredRegion = 'iad1';
 
 // Status callback for caregiver legs that are not part of a cascade: every leg
 // of a simultaneous-mode call, and the leg placed by a "*" transfer. It fires
-// once the leg has ended, answered or not. missed=1 marks a screened leg, which
-// counts as missed unless someone accepted it (see conferenceBridge).
+// once the leg has ended, answered or not. missed=1 marks a screened leg. Its
+// end counts as missed only while nobody in the room has accepted the call
+// (see conferenceBridge): All Ring stops the other phones once someone does,
+// and those stopped legs must not send a caller who was answered to voicemail.
 export async function POST(request: Request) {
   const denied = await verifyTelephonyWebhook(request);
   if (denied) return denied;
@@ -43,7 +45,7 @@ export async function POST(request: Request) {
     const twilioClient = (await import('@/lib/twilio')).default;
     if (twilioClient && room) {
       const baseUrl = `${requestUrl.protocol}//${requestUrl.host}`;
-      const missed = screened && !(await wasLegAccepted(callSid));
+      const missed = screened && !(await firstAcceptedLeg(room));
       await releaseCallerIfAlone(twilioClient, { room, endedCallSid: callSid, baseUrl, missed });
     }
 

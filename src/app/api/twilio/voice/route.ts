@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { ttsPlayTag, verifyTelephonyWebhook } from '@/lib/twilioWebhook';
 import { findAccountByTwilioNumber, getAvailableMinutes, deductMinutes } from '@/lib/db';
 import { buildConferenceRoom } from '@/lib/conferenceRoom';
+import { recordPlacedLegs } from '@/lib/conferenceBridge';
 import { cascadeOrder, hourInTimeZone, onDutyContactIndex, parseLeadIndex } from '@/lib/coverageSchedule';
 import { supabase } from '@/lib/supabase';
 import twilioClient, { providerForNumber } from '@/lib/twilio';
@@ -298,30 +299,37 @@ export async function POST(request: Request) {
           const useTwilioConference = twilioClient && providerForNumber(activeNumber) === 'twilio';
 
           if (useTwilioConference) {
-            // PRODUCTION mode: Twilio Conference call-bridging with * transfer capability
+            // PRODUCTION mode: Twilio Conference call-bridging with * transfer capability.
+            // The room closes when the caller leaves it, so a caregiver is not
+            // left on a silent line after the caller hangs up.
             twiml += `
               ${getTtsPlayTag("Connecting you to your primary trusted contacts. Please stand by.")}
               <Dial timeLimit="${timeLimitSeconds}">
-                <Conference beep="false" waitUrl="http://twimlets.com/holdmusic?Bucket=com.twilio.music.classical">${roomName}</Conference>
+                <Conference beep="false" endConferenceOnExit="true" waitUrl="http://twimlets.com/holdmusic?Bucket=com.twilio.music.classical">${roomName}</Conference>
               </Dial>
             `;
 
             if (lineMode === 'simultaneous') {
               // Outbound calls to all available contacts in parallel. Wait for
               // them to be placed: the function may be frozen once it responds.
+              // They are recorded so the first to accept can stop the rest.
+              const placed: string[] = [];
               await Promise.all(availableContacts.map(async (c) => {
                 try {
-                  await twilioClient!.calls.create({
+                  const leg = await twilioClient!.calls.create({
                     to: c.phone,
                     from: activeNumber,
                     url: `${baseUrl}/api/twilio/agent-join?room=${encodeURIComponent(roomName)}&screen=1`,
                     statusCallback: `${baseUrl}/api/twilio/agent-completed?room=${encodeURIComponent(roomName)}&missed=1`,
                     statusCallbackEvent: ['completed'],
+                    timeout: 20
                   });
+                  placed.push(leg.sid);
                 } catch (err) {
                   console.error(`Failed to call caregiver ${c.name}:`, err);
                 }
               }));
+              await recordPlacedLegs(roomName, placed);
             } else {
               // Cascade and Schedule modes (sequential) - Call the first caregiver
               const firstContact = availableContacts[0];
