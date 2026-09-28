@@ -12,7 +12,7 @@
 // copies: sibling standalone files where one exists, site paths otherwise.
 //
 // Then copy the output to the pCloud and Google Drive "Pages" folders
-// (see AGENTS.md).
+// (see docs/guides/standalone-html-sync.md).
 import fs from "node:fs";
 import path from "node:path";
 import zlib from "node:zlib";
