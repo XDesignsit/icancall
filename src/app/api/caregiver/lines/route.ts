@@ -6,7 +6,7 @@ import { invalidateCachedAccount } from "@/lib/db";
 import { resolveAccount } from "@/lib/account";
 import { toE164 } from "@/lib/phone";
 import { provisionNumber, releaseProvisionedNumber, type TelephonyRecord } from "@/lib/numbers";
-import { isSimulatedBilling } from "@/lib/creem";
+import { isSimulatedBilling } from "@/lib/stripe";
 import { isEndedStatus } from "@/lib/subscriptionEnd";
 import { lineAllowance, paidExtraNumbers, reduceExtraNumbers, saveSettingsPatch } from "@/lib/addons";
 import { planConfig } from "@/lib/planConfig";
@@ -84,7 +84,7 @@ export async function POST(request: Request) {
 
     // 0b. Every new number is bought from the carrier, so the account may only
     //     add one it is paying for: within the plan's included lines plus the
-    //     extra-number add-ons credited by api/creem/confirm-addon. What the
+    //     extra-number add-ons credited by api/billing/confirm-addon. What the
     //     browser believes it is entitled to is never consulted. Saves that add
     //     nothing (contacts, routing, removing a line) are always allowed, even
     //     for an account that is over its allowance after a downgrade.
@@ -188,7 +188,7 @@ export async function POST(request: Request) {
       }
     }
     // 4b. Removed numbers that were paid extras stop billing too: the add-on
-    //     subscription is cancelled (or its unit count lowered) at Creem.
+    //     subscription is cancelled (or its unit count lowered) at Stripe.
     const removedCount = [...existingByNumber.keys()].filter((n) => !keptNumbers.has(n)).length;
     if (liveBilling && removedCount > 0) {
       const stillNeeded = Math.max(0, rows.length - planConfig(accountSettings.plan as string).includedLines);

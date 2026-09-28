@@ -6,7 +6,8 @@ import { invalidateCachedAccount } from "@/lib/db";
 import { resolveAccount } from "@/lib/account";
 import { isOnboarded } from "@/lib/onboarding";
 import { isSessionLive } from "@/lib/userSessions";
-import { isSimulatedBilling, sessionIdentity } from "@/lib/creem";
+import { isSimulatedBilling, sessionIdentity } from "@/lib/stripe";
+import { renewalDates } from "@/lib/minutesCycle";
 
 async function getAuthenticatedUserId() {
   const cookieStore = await cookies();
@@ -50,7 +51,7 @@ export async function GET() {
       if (ownerErr || !ownerProfile) {
         return NextResponse.json({ error: "Failed to fetch account data" }, { status: 500 });
       }
-      return NextResponse.json({ success: true, profile: ownerProfile, role: "member", liveBilling: !isSimulatedBilling(ownerProfile.email) });
+      return NextResponse.json({ success: true, profile: ownerProfile, role: "member", liveBilling: !isSimulatedBilling(ownerProfile.email), renewal: renewalDates(ownerProfile.settings || {}) });
     }
 
     // 1. Fetch profile from Supabase
@@ -104,7 +105,7 @@ export async function GET() {
 
     // liveBilling: add-on counts are server-owned (see POST) — the dashboard
     // must show them as stored instead of recomputing them from the line count.
-    return NextResponse.json({ success: true, profile, role: "owner", liveBilling: !isSimulatedBilling(sessionEmail) });
+    return NextResponse.json({ success: true, profile, role: "owner", liveBilling: !isSimulatedBilling(sessionEmail), renewal: renewalDates(profile.settings || {}) });
   } catch (err) {
     console.error("Caregiver Profile GET Error:", err);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
@@ -140,28 +141,29 @@ export async function POST(request: Request) {
       delete newSettings.smsConsentSource;
     }
 
-    // With live billing the plan is whatever the Creem subscription says: it is
-    // written by api/creem/change-plan and the Creem webhook only. Accepting it
+    // With live billing the plan is whatever the Stripe subscription says: it is
+    // written by api/billing/change-plan and the Stripe webhook only. Accepting it
     // from this sync would let a client grant itself a plan it isn't paying for.
     if (newSettings && !isSimulatedBilling((await sessionIdentity())?.email)) {
       delete newSettings.plan;
       delete newSettings.billingCycle;
       delete newSettings.subscriptionStatus;
       delete newSettings.subscriptionEndsAt;
+      delete newSettings.pendingPlanChange;
       delete newSettings.subscriptionEndedAt;
       delete newSettings.numbersReleaseAt;
       delete newSettings.numbersReleasedAt;
       delete newSettings.releaseReminderSentAt;
       delete newSettings.archivedLines;
-      // Paid add-ons are credited by api/creem/confirm-addon and lowered by the
+      // Paid add-ons are credited by api/billing/confirm-addon and lowered by the
       // lines route; minute usage is written by the call webhooks. A browser
       // copy of any of it is stale at best and a free upgrade at worst.
       delete newSettings.addons;
       delete newSettings.addonSubscriptions;
       delete newSettings.addonCheckouts;
-      delete newSettings.creem_customer_id;
-      delete newSettings.creem_subscription_id;
-      delete newSettings.creem_period_start;
+      delete newSettings.stripe_customer_id;
+      delete newSettings.stripe_subscription_id;
+      delete newSettings.stripe_period_start;
       delete newSettings.minutes_cycle_start;
     }
 

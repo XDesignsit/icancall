@@ -31,9 +31,10 @@ function relativeTime(iso: string, lang: string, activeNow: string): string {
 
 import { dashboardExtraTranslations } from "@/lib/dashboardExtraTranslations";
 import { type DashboardTranslations } from "@/lib/dashboardTranslations";
-import { isPlanChangeChargedNow, planConfig, type PlanId } from "@/lib/planConfig";
+import { isPlanChangeChargedNow, isScheduledPlanChange, planConfig, type PlanId } from "@/lib/planConfig";
 import { planChangeNotice, planChangeStrings, type PlanChangeMode } from "./planChangeStrings";
 import { cancelStrings, formatEndDate } from "./cancelStrings";
+import { billingSubtitle, renewsOnText } from "./renewalStrings";
 
 // Account fields once a subscription is running (again): the number-release clock is off.
 const REACTIVATED = { subscriptionStatus: "active", subscriptionEndsAt: null, subscriptionEndedAt: null, numbersReleaseAt: null, numbersReleasedAt: null } as const;
@@ -267,8 +268,8 @@ export function AccountView({
   const [tempCycle, setTempCycle] = useState<"monthly" | "yearly">(account.billingCycle || "monthly");
   const [selectedLineToKeep, setSelectedLineToKeep] = useState<string>("");
 
-  // Plan and billing-cycle changes go through /api/creem/change-plan, which
-  // switches the real Creem subscription. The new plan is only adopted locally
+  // Plan and billing-cycle changes go through /api/billing/change-plan, which
+  // switches the real Stripe subscription. The new plan is only adopted locally
   // once that succeeds.
   const pcs = planChangeStrings(lang);
   const planUpdatedMsg = lang === "es" ? "Plan actualizado correctamente"
@@ -286,8 +287,12 @@ export function AccountView({
   const [planChangePending, setPlanChangePending] = useState(false);
   const [planChangeError, setPlanChangeError] = useState("");
   useEffect(() => { setPlanChangeError(""); }, [planModalOpen, tempPlan, tempCycle]);
+  // When an annual plan's paid year ends: the date a switch to monthly billing
+  // would take effect. Known once /api/billing/change-plan has answered.
+  const [planPeriodEnd, setPlanPeriodEnd] = useState<string | null>(null);
+  const [pendingCancelBusy, setPendingCancelBusy] = useState(false);
 
-  // Cancelling (and undoing it) goes through /api/creem/cancel-subscription.
+  // Cancelling (and undoing it) goes through /api/billing/cancel-subscription.
   // The subscription always runs to the end of the period already paid for.
   const cs = cancelStrings(lang);
   const [cancelConfirmOpen, setCancelConfirmOpen] = useState(false);
@@ -305,14 +310,15 @@ export function AccountView({
     setCancelPending(true);
     setCancelError("");
     try {
-      const res = await fetch("/api/creem/cancel-subscription", {
+      const res = await fetch("/api/billing/cancel-subscription", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action }),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok || !data.success) throw new Error(lang === "en" && data.error ? data.error : cs.failed);
-      set({ subscriptionStatus: data.subscriptionStatus, subscriptionEndsAt: data.subscriptionEndsAt ?? null });
+      // Cancelling drops a plan change that was waiting for the end of the period.
+      set({ subscriptionStatus: data.subscriptionStatus, subscriptionEndsAt: data.subscriptionEndsAt ?? null, ...(action === "cancel" ? { pendingPlanChange: null } : {}) });
       setCancelConfirmOpen(false);
       showToast(action === "cancel" ? cs.cancelledToast : cs.resumedToast);
     } catch (err) {
@@ -331,11 +337,35 @@ export function AccountView({
       setPlanChangeMode("simulated");
       return;
     }
-    fetch("/api/creem/change-plan")
+    fetch("/api/billing/change-plan")
       .then((res) => (res.ok ? res.json() : null))
-      .then((data) => { if (data?.mode) setPlanChangeMode(data.mode); })
+      .then((data) => {
+        if (data?.mode) setPlanChangeMode(data.mode);
+        if (typeof data?.periodEnd === "string") setPlanPeriodEnd(data.periodEnd);
+      })
       .catch(() => {});
   }, [viewerRole]);
+
+  /** Takes back a plan change that was waiting for the end of the paid period. */
+  const cancelPendingChange = async () => {
+    if (localStorage.getItem("impersonatingUser")) return;
+    setPendingCancelBusy(true);
+    try {
+      const res = await fetch("/api/billing/change-plan", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ cancelScheduled: true }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.success) throw new Error(lang === "en" && data.error ? data.error : pcs.failed);
+      set({ pendingPlanChange: null });
+      showToast(pcs.pendingCancelled);
+    } catch (err) {
+      showToast(err instanceof Error && err.message && err.message !== "Failed to fetch" ? err.message : pcs.failed);
+    } finally {
+      setPendingCancelBusy(false);
+    }
+  };
 
   /** Resolves true once the subscription has been switched and the new plan may be applied. */
   const changePlan = async (plan: PlanId, billingCycle: "monthly" | "yearly"): Promise<boolean> => {
@@ -343,7 +373,7 @@ export function AccountView({
     setPlanChangePending(true);
     setPlanChangeError("");
     try {
-      const res = await fetch("/api/creem/change-plan", {
+      const res = await fetch("/api/billing/change-plan", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ plan, billing: billingCycle }),
@@ -353,7 +383,18 @@ export function AccountView({
         window.location.href = data.checkoutUrl;
         return false;
       }
-      if (res.ok && data.success) return true;
+      // Annual → monthly waits for the end of the paid year: the plan stays as
+      // it is, and the change is shown as pending.
+      if (res.ok && data.success && data.scheduled && data.pending) {
+        set({ pendingPlanChange: data.pending });
+        setPlanModalOpen(false);
+        showToast(pcs.scheduledToast.replace("{date}", formatEndDate(data.pending.effectiveAt, lang)));
+        return false;
+      }
+      if (res.ok && data.success) {
+        set({ pendingPlanChange: null });
+        return true;
+      }
       throw new Error(lang === "en" && data.error ? data.error : pcs.failed);
     } catch (err) {
       const msg = err instanceof Error && err.message && err.message !== "Failed to fetch" ? err.message : pcs.failed;
@@ -371,14 +412,14 @@ export function AccountView({
   useEffect(() => {
     if (checkoutReturnHandled.current) return;
     const params = new URLSearchParams(window.location.search);
-    const checkoutId = params.get("checkout_id");
+    const checkoutId = params.get("session_id");
     if (params.get("plan_change") !== "success" || !checkoutId) return;
     checkoutReturnHandled.current = true;
     window.history.replaceState({}, "", "/dashboard?view=account");
 
     (async () => {
       try {
-        const res = await fetch("/api/creem/change-plan", {
+        const res = await fetch("/api/billing/change-plan", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ checkoutId }),
@@ -607,22 +648,22 @@ export function AccountView({
       const pending = addonPendingAction.current;
       addonPendingAction.current = null;
       pending();
-      localStorage.removeItem("creem_addon_success");
+      localStorage.removeItem("stripe_addon_success");
     };
 
     // Primary: BroadcastChannel (reliable same-origin cross-window)
     let bc: BroadcastChannel | null = null;
     try {
-      bc = new BroadcastChannel("creem_addon");
+      bc = new BroadcastChannel("stripe_addon");
       bc.onmessage = (e) => {
-        if (e.data?.type === "CREEM_ADDON_SUCCESS") fireAddon();
+        if (e.data?.type === "STRIPE_ADDON_SUCCESS") fireAddon();
       };
     } catch {}
 
     // Secondary: postMessage from opener
     const handleMsg = (e: MessageEvent) => {
       if (e.origin !== window.location.origin) return;
-      if (e.data?.type === "CREEM_ADDON_SUCCESS") fireAddon();
+      if (e.data?.type === "STRIPE_ADDON_SUCCESS") fireAddon();
     };
     window.addEventListener("message", handleMsg);
 
@@ -702,11 +743,19 @@ export function AccountView({
     (!subscriptionEnded && tempPlan === account.plan && tempCycle === account.billingCycle) ||
     (isUpgradingToPro && !upgradeSelectedNumber);
 
-  const planChangeBillingNotice = planChangeNotice(
-    lang,
-    planChangeMode,
-    isPlanChangeChargedNow({ plan: account.plan, billingCycle: account.billingCycle }, { plan: tempPlan, billingCycle: tempCycle }),
-  );
+  const planChangeFrom = { plan: account.plan, billingCycle: account.billingCycle };
+  const planChangeTo = { plan: tempPlan, billingCycle: tempCycle };
+  const planChangeWaits = planChangeMode === "subscription" && !subscriptionEnded && isScheduledPlanChange(planChangeFrom, planChangeTo);
+  // A change that waits for the paid year to end says so, with the date; until
+  // the date is known there is nothing accurate to say.
+  const planChangeBillingNotice = planChangeWaits && !planPeriodEnd
+    ? ""
+    : planChangeNotice(
+        lang,
+        planChangeMode,
+        isPlanChangeChargedNow(planChangeFrom, planChangeTo),
+        planChangeWaits && planPeriodEnd ? formatEndDate(planPeriodEnd, lang) : undefined,
+      );
 
   // The annual confirmation serves both the plan modal (which may also be
   // switching tiers) and the billing card's cycle toggle (current tier).
@@ -1708,7 +1757,7 @@ export function AccountView({
                         return;
                       }
 
-                      // One Creem checkout buys one product. With both numbers and
+                      // One Stripe checkout buys one product. With both numbers and
                       // minutes selected the first is paid now; the dialog then stays
                       // open so the second is its own click (and its own popup).
                       const first = checkouts[0];
@@ -1718,17 +1767,17 @@ export function AccountView({
                       const w = 520, h = 720;
                       const left = Math.round(window.screenX + (window.outerWidth - w) / 2);
                       const top  = Math.round(window.screenY + (window.outerHeight - h) / 2);
-                      const popup = window.open("about:blank", "creem_addon_checkout", `width=${w},height=${h},left=${left},top=${top},resizable=yes,scrollbars=yes`);
+                      const popup = window.open("about:blank", "stripe_addon_checkout", `width=${w},height=${h},left=${left},top=${top},resizable=yes,scrollbars=yes`);
 
                       addonPopupRef.current = popup;
 
                       // Clear any stale success flag before starting
-                      localStorage.removeItem("creem_addon_success");
+                      localStorage.removeItem("stripe_addon_success");
 
                       setAddonCheckoutLoading(true);
 
                       try {
-                        const res = await fetch("/api/creem/checkout", {
+                        const res = await fetch("/api/billing/checkout", {
                           method: "POST",
                           headers: { "Content-Type": "application/json" },
                           body: JSON.stringify({ addon: first.addon, quantity: first.quantity }),
@@ -1737,11 +1786,11 @@ export function AccountView({
                         const { checkoutUrl, checkoutId } = await res.json();
 
                         // The checkout window reporting success is only the cue: the
-                        // server asks Creem whether this checkout was really paid, and
+                        // server asks Stripe whether this checkout was really paid, and
                         // nothing is added unless it says so. Runs once per checkout.
                         addonPendingAction.current = async () => {
                           try {
-                            const confirmRes = await fetch("/api/creem/confirm-addon", {
+                            const confirmRes = await fetch("/api/billing/confirm-addon", {
                               method: "POST",
                               headers: { "Content-Type": "application/json" },
                               body: JSON.stringify({ checkoutId, addon: first.addon, quantity: first.quantity }),
@@ -1783,13 +1832,13 @@ export function AccountView({
 
                         // Poll localStorage for success flag (focus events are unreliable after cross-origin popup nav)
                         const poll = setInterval(() => {
-                          const raw = localStorage.getItem("creem_addon_success");
+                          const raw = localStorage.getItem("stripe_addon_success");
                           if (raw) {
                             try {
                               const { ts } = JSON.parse(raw);
                               if (Date.now() - ts < 60000) {
                                 clearInterval(poll);
-                                localStorage.removeItem("creem_addon_success");
+                                localStorage.removeItem("stripe_addon_success");
                                 try { popup?.close(); } catch {}
                                 if (addonPopupRef.current === popup) {
                                   addonPopupRef.current = null;
@@ -2315,19 +2364,7 @@ export function AccountView({
               <div>
                 <h2>{d.account.billing}</h2>
                 <p>
-                  {account.billingCycle === "yearly"
-                    ? (lang === "es" ? "Facturado anualmente · renueva el 1 de junio de 2026"
-                     : lang === "fr" ? "Facturé annuellement · se renouvelle le 1er juin 2026"
-                     : lang === "ja" ? "年次請求 · 2026年6月1日に更新"
-                     : lang === "zh" ? "按年计费 · 于 2026年6月1日续期"
-                     : lang === "ar" ? "مفوتر سنوياً · يتجدد في 1 يونيو 2026"
-                     : lang === "hi" ? "सालाना बिलिंग · 1 जून, 2026 को नवीनीकृत होगा"
-                     : lang === "pt" ? "Cobrado anualmente · renova em 1 de junho de 2026"
-                     : lang === "de" ? "Jährliche Abrechnung · verlängert sich am 1. Juni 2026"
-                     : lang === "it" ? "Fatturato annualmente · si rinnova il 1 giugno 2026"
-                     : lang === "ko" ? "연간 결제 · 2026년 6월 1일에 갱신 예정"
-                     : "Billed annually · renews June 1, 2026")
-                    : d.account.renewDateSub}
+                  {billingSubtitle(lang, account.billingCycle, account.billingRenewsAt)}
                 </p>
               </div>
               <Badge kind={account.plan === "essential" ? "amber" : "blue"}>
@@ -2541,7 +2578,7 @@ export function AccountView({
                            : `Switched to annual billing — $${yr}/yr`));
                       };
 
-                      // Already annual: re-submitting would ask Creem to switch to the same product.
+                      // Already annual: re-submitting would ask Stripe to switch to the same price.
                       if (account.billingCycle === "monthly") {
                         annualBillingConfirmCallback.current = proceedWithYearlySwitch;
                         setAnnualBillingConfirmOpen(true);
@@ -2582,6 +2619,21 @@ export function AccountView({
                   <Icon name="spark" /> {ext.changePlan}
                 </button>
               </div>
+              {account.pendingPlanChange && (
+                <div
+                  role="status"
+                  style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 12, marginTop: 16, padding: "12px 14px", background: "var(--tint)", border: "1px solid var(--line)", borderRadius: "var(--r-md)" }}
+                >
+                  <span style={{ flex: "1 1 260px", fontSize: "0.92rem", lineHeight: 1.5, color: "var(--ink)" }}>
+                    {pcs.pendingBanner
+                      .replace("{plan}", planDisplayName(account.pendingPlanChange.plan, lang))
+                      .replace("{date}", formatEndDate(account.pendingPlanChange.effectiveAt, lang))}
+                  </span>
+                  <button className="btn btn-ghost" disabled={pendingCancelBusy} onClick={cancelPendingChange}>
+                    {pendingCancelBusy ? pcs.updating : pcs.pendingCancel}
+                  </button>
+                </div>
+              )}
             </div>
           </div>
 
@@ -2790,7 +2842,7 @@ export function AccountView({
                           <span> {ext.minRemaining}</span>
                         </div>
                         <div className="mb-meta">
-                          {used} {lang === "es" ? "de" : lang === "fr" ? "sur" : lang === "ja" ? "の" : lang === "zh" ? "共" : lang === "ar" ? "من" : lang === "hi" ? "कुल" : lang === "pt" ? "de" : lang === "de" ? "von" : lang === "it" ? "di" : lang === "ko" ? "중" : "of"} {total} {ext.addonMinUsed} &middot; {lang === "es" ? "renueva el 1 de junio de 2026" : lang === "fr" ? "renouvellement le 1er juin 2026" : lang === "ja" ? "2026年6月1日に更新" : lang === "zh" ? "于 2026年6月1日续期" : lang === "ar" ? "يتجدد في 1 يونيو 2026" : lang === "hi" ? "1 जून, 2026 को नवीनीकृत होगा" : lang === "pt" ? "renova em 1 de junho de 2026" : lang === "de" ? "verlängert sich am 1. Juni 2026" : lang === "it" ? "si rinnova il 1 giugno 2026" : lang === "ko" ? "2026년 6월 1일에 갱신 예정" : "renews June 1, 2026"}
+                          {used} {lang === "es" ? "de" : lang === "fr" ? "sur" : lang === "ja" ? "の" : lang === "zh" ? "共" : lang === "ar" ? "من" : lang === "hi" ? "कुल" : lang === "pt" ? "de" : lang === "de" ? "von" : lang === "it" ? "di" : lang === "ko" ? "중" : "of"} {total} {ext.addonMinUsed} {account.minutesResetsAt && <>&middot; {renewsOnText(lang, account.minutesResetsAt)}</>}
                         </div>
                       </div>
                       <div className="usage-bar bigbar" style={{ marginTop: 14 }}>
@@ -2972,7 +3024,7 @@ export function AccountView({
                       : lang === "ko" ? "결제 포털을 여는 중…"
                       : "Opening billing portal…");
                     try {
-                      const res = await fetch("/api/creem/portal", { method: "POST" });
+                      const res = await fetch("/api/billing/portal", { method: "POST" });
                       if (!res.ok) {
                         const err = await res.json();
                         showToast(err.error || (lang === "es" ? "No se pudo abrir el portal de facturación."
@@ -2992,7 +3044,7 @@ export function AccountView({
                       const w = 560, h = 700;
                       const left = Math.round(window.screenX + (window.outerWidth - w) / 2);
                       const top  = Math.round(window.screenY + (window.outerHeight - h) / 2);
-                      window.open(portalUrl, "creem_portal", `width=${w},height=${h},left=${left},top=${top},resizable=yes,scrollbars=yes`);
+                      window.open(portalUrl, "stripe_portal", `width=${w},height=${h},left=${left},top=${top},resizable=yes,scrollbars=yes`);
                     } catch {
                       showToast(lang === "es" ? "No se pudo abrir el portal de facturación."
                         : lang === "fr" ? "Impossible d'ouvrir le portail de facturation."

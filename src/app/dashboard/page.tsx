@@ -93,6 +93,7 @@ interface ProfileSettings {
   billingCycle?: Account["billingCycle"];
   subscriptionStatus?: string;
   subscriptionEndsAt?: string | null;
+  pendingPlanChange?: Account["pendingPlanChange"];
   subscriptionEndedAt?: string | null;
   numbersReleaseAt?: string | null;
   numbersReleasedAt?: string | null;
@@ -297,6 +298,7 @@ export default function DashboardApp() {
       billingCycle: settings.billingCycle || "monthly",
       subscriptionStatus: settings.subscriptionStatus || undefined,
       subscriptionEndsAt: settings.subscriptionEndsAt || null,
+      pendingPlanChange: settings.pendingPlanChange || null,
       subscriptionEndedAt: settings.subscriptionEndedAt || null,
       numbersReleaseAt: settings.numbersReleaseAt || null,
       numbersReleasedAt: settings.numbersReleasedAt || null,
@@ -397,7 +399,13 @@ export default function DashboardApp() {
         if (!linesRes.ok) throw new Error("lines_fetch_failed");
         const linesData = await linesRes.json();
 
-        const currentAccount = profileData.profile ? mapProfileToAccount(profileData.profile) : null;
+        const currentAccount = profileData.profile
+          ? {
+              ...mapProfileToAccount(profileData.profile),
+              billingRenewsAt: profileData.renewal?.billingRenewsAt ?? null,
+              minutesResetsAt: profileData.renewal?.minutesResetsAt ?? null,
+            }
+          : null;
         if (currentAccount) {
           setAccount(currentAccount);
           localStorage.setItem("isLoggedIn", "true");

@@ -6,7 +6,7 @@ import { Button, Field, Input, buttonClass } from "@/components/ui";
 import "./signups-paused.css";
 
 // Shown in place of the signup wizard while new signups are paused (see
-// signupsPaused() in src/lib/creem.ts). Visitors leave an email on the
+// signupsPaused() in src/lib/stripe.ts). Visitors leave an email on the
 // Coming Soon waitlist so they hear when they can create an account.
 export default function SignupsPaused() {
   const [email, setEmail] = useState("");

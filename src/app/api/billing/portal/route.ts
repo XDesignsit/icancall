@@ -2,9 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { verifySession } from "@/lib/session";
 import { supabase } from "@/lib/supabase";
-import { CREEM_API, creemHeaders } from "@/lib/creem";
+import { isSimulatedBilling, stripe } from "@/lib/stripe";
 
-export async function POST(_req: NextRequest) {
+export async function POST(req: NextRequest) {
   // Verify the logged-in user
   const cookieStore = await cookies();
   const sessionToken = cookieStore.get("session")?.value;
@@ -16,31 +16,33 @@ export async function POST(_req: NextRequest) {
   if (!payload?.userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+  if (isSimulatedBilling(payload.email)) {
+    return NextResponse.json({ error: "Billing is simulated in this environment, so there is no billing portal." }, { status: 404 });
+  }
 
-  // Look up their Creem customer ID
+  // Look up their Stripe customer ID
   const { data: profile } = await supabase
     .from("profiles")
     .select("settings")
     .eq("id", payload.userId)
     .single();
 
-  const customerId = profile?.settings?.creem_customer_id;
+  const customerId = profile?.settings?.stripe_customer_id;
   if (!customerId) {
     return NextResponse.json({ error: "No billing account found. Please complete a purchase first." }, { status: 404 });
   }
 
-  // Request a Creem billing portal session
-  const res = await fetch(`${CREEM_API}/customers/${customerId}/billing-portal`, {
-    method: "POST",
-    headers: creemHeaders(),
-  });
-
-  if (!res.ok) {
-    const err = await res.text();
-    console.error("Creem portal error:", err);
+  // Request a Stripe billing portal session
+  try {
+    const host = req.headers.get("host") || "localhost:3000";
+    const proto = host.startsWith("localhost") ? "http" : "https";
+    const session = await stripe().billingPortal.sessions.create({
+      customer: customerId,
+      return_url: `${proto}://${host}/dashboard?view=account`,
+    });
+    return NextResponse.json({ portalUrl: session.url });
+  } catch (err) {
+    console.error("Stripe portal error:", err);
     return NextResponse.json({ error: "Failed to open billing portal" }, { status: 502 });
   }
-
-  const data = await res.json();
-  return NextResponse.json({ portalUrl: data.url ?? data.portal_url });
 }

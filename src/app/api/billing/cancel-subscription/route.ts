@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
 import { authorizeOwner, loadSettings, type Settings } from "@/lib/billingOwner";
-import { CREEM_API, creemHeaders, isSimulatedBilling } from "@/lib/creem";
+import { appSubscriptionStatus, isSimulatedBilling, stripe, subscriptionPeriod } from "@/lib/stripe";
 import { followPlanSubscription } from "@/lib/addons";
+import { releaseSchedule } from "@/lib/planSchedule";
 
 async function saveStatus(userId: string, settings: Settings, patch: Settings): Promise<void> {
   const { error } = await supabase
@@ -16,8 +17,8 @@ async function saveStatus(userId: string, settings: Settings, patch: Settings): 
 // paid for — the plan and its numbers stay active until then and nothing more
 // is charged — or takes that cancellation back while it is still pending.
 //
-//   { action: "cancel" }  → Creem cancel, mode "scheduled"
-//   { action: "resume" }  → Creem resume (only from scheduled_cancel)
+//   { action: "cancel" }  → cancel_at_period_end on the Stripe subscription
+//   { action: "resume" }  → cancel_at_period_end off again (only while pending)
 //
 // The dashboard only shows the new state when this responds with success.
 export async function POST(req: NextRequest) {
@@ -35,15 +36,15 @@ export async function POST(req: NextRequest) {
 
     // Demo accounts and unconfigured environments never reach the gateway.
     if (isSimulatedBilling(owner.email)) {
-      console.warn(`[MOCK] Simulating Creem subscription ${action} — no subscription was modified.`);
+      console.warn(`[MOCK] Simulating Stripe subscription ${action} — no subscription was modified.`);
       const patch = action === "cancel"
-        ? { subscriptionStatus: "scheduled_cancel", subscriptionEndsAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString() }
+        ? { subscriptionStatus: "scheduled_cancel", subscriptionEndsAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), pendingPlanChange: null }
         : { subscriptionStatus: "active", subscriptionEndsAt: null };
       await saveStatus(userId, settings, patch);
       return NextResponse.json({ success: true, ...patch, simulated: true });
     }
 
-    const subscriptionId = typeof settings.creem_subscription_id === "string" ? settings.creem_subscription_id : "";
+    const subscriptionId = typeof settings.stripe_subscription_id === "string" ? settings.stripe_subscription_id : "";
     if (!subscriptionId) {
       return NextResponse.json(
         { error: "We couldn't find an active subscription on this account. Please contact support and we'll sort it out." },
@@ -51,19 +52,17 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const res = await fetch(`${CREEM_API}/subscriptions/${encodeURIComponent(subscriptionId)}/${action}`, {
-      method: "POST",
-      headers: creemHeaders(),
-      // "scheduled": the subscription runs to the end of the paid period and
-      // then ends, rather than stopping (and cutting off the numbers) today.
-      body: action === "cancel" ? JSON.stringify({ mode: "scheduled", onExecute: "cancel" }) : undefined,
-    });
-
-    if (!res.ok) {
-      console.error(`Creem subscription ${action} error (${res.status}) for ${subscriptionId}:`, await res.text());
-      if (res.status === 401 || res.status === 403) {
-        console.error("CREEM_API_KEY cannot modify subscriptions — it needs the subscriptions write scope.");
-      }
+    // cancel_at_period_end: the subscription runs to the end of the paid period
+    // and then ends, rather than stopping (and cutting off the numbers) today.
+    let subscription;
+    try {
+      // A plan change scheduled for the end of the period is dropped: Stripe
+      // will not edit the cancellation of a subscription a schedule manages,
+      // and the plan is ending anyway.
+      if (action === "cancel") await releaseSchedule(await stripe().subscriptions.retrieve(subscriptionId));
+      subscription = await stripe().subscriptions.update(subscriptionId, { cancel_at_period_end: action === "cancel" });
+    } catch (err) {
+      console.error(`Stripe subscription ${action} error for ${subscriptionId}:`, err);
       return NextResponse.json(
         {
           error: action === "cancel"
@@ -74,25 +73,25 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const subscription = await res.json();
+    const status = appSubscriptionStatus(subscription);
     const expected = action === "cancel" ? "scheduled_cancel" : "active";
-    if (subscription.status !== expected && !(action === "cancel" && subscription.status === "canceled")) {
-      console.error(`Creem subscription ${action} returned unexpected status for ${subscriptionId}:`, subscription.status);
+    if (status !== expected && !(action === "cancel" && status === "canceled")) {
+      console.error(`Stripe subscription ${action} returned unexpected status for ${subscriptionId}:`, status);
       return NextResponse.json({ error: "We couldn't confirm the change with our payment provider. Nothing was changed." }, { status: 502 });
     }
 
     const patch = action === "cancel"
-      ? { subscriptionStatus: subscription.status as string, subscriptionEndsAt: (subscription.current_period_end_date as string) || null }
+      ? { subscriptionStatus: status, subscriptionEndsAt: subscriptionPeriod(subscription).end || null, pendingPlanChange: null }
       : { subscriptionStatus: "active", subscriptionEndsAt: null };
     // Extra-number add-ons bill on subscriptions of their own. They follow the
     // plan: no further charges once it is set to end, back on if it is resumed.
     const addonPatch = await followPlanSubscription(settings, action === "cancel" ? "scheduled" : "resume");
-    // If this write fails, the subscription.scheduled_cancel / subscription.active
+    // If this write fails, the customer.subscription.updated
     // webhook records the same state moments later.
     await saveStatus(userId, settings, { ...patch, ...addonPatch });
     return NextResponse.json({ success: true, ...patch });
   } catch (err) {
-    console.error("Creem cancel-subscription exception:", err);
+    console.error("Stripe cancel-subscription exception:", err);
     return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
 }

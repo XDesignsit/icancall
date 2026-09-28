@@ -7,15 +7,15 @@ function AddonSuccessContent() {
   const searchParams = useSearchParams();
   const addon = searchParams.get("addon") ?? "";
   const qty = parseInt(searchParams.get("qty") ?? "1", 10);
-  // Creem appends checkout_id to the return URL.
-  const checkoutId = searchParams.get("checkout_id") ?? "";
+  // Stripe appends session_id to the return URL.
+  const checkoutId = searchParams.get("session_id") ?? "";
 
   useEffect(() => {
     // Popup blocked: the checkout ran in the dashboard's own tab, so there is
     // no dashboard left open to confirm the purchase. Confirm it here (the
-    // server verifies it with Creem) and go back to the account page.
+    // server verifies it with Stripe) and go back to the account page.
     if (!window.opener) {
-      fetch("/api/creem/confirm-addon", {
+      fetch("/api/billing/confirm-addon", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ checkoutId, addon, quantity: qty }),
@@ -31,20 +31,20 @@ function AddonSuccessContent() {
 
     // 1. BroadcastChannel — most reliable for same-origin cross-window messaging
     try {
-      const bc = new BroadcastChannel("creem_addon");
-      bc.postMessage({ type: "CREEM_ADDON_SUCCESS", addon, qty });
+      const bc = new BroadcastChannel("stripe_addon");
+      bc.postMessage({ type: "STRIPE_ADDON_SUCCESS", addon, qty });
       bc.close();
     } catch {}
 
     // 2. localStorage — fallback for browsers without BroadcastChannel
     try {
-      localStorage.setItem("creem_addon_success", payload);
+      localStorage.setItem("stripe_addon_success", payload);
     } catch {}
 
     // 3. postMessage to opener — fallback if opener still exists
     try {
       if (window.opener) {
-        window.opener.postMessage({ type: "CREEM_ADDON_SUCCESS", addon, qty }, window.location.origin);
+        window.opener.postMessage({ type: "STRIPE_ADDON_SUCCESS", addon, qty }, window.location.origin);
       }
     } catch {}
 

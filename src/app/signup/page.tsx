@@ -434,7 +434,7 @@ const PAYMENT_BANNER_SUB: Record<string, string> = {
   ko: "몇 분 만에 설정 완료 · 대시보드에서 언제든지 취소 가능."
 };
 
-// Shown when the server could not confirm the checkout with Creem, so no account was created.
+// Shown when the server could not confirm the checkout with Stripe, so no account was created.
 const PAYMENT_UNVERIFIED: Record<string, string> = {
   en: "We couldn't confirm your payment, so your account has not been created yet. Please complete checkout to continue. If you were charged, contact support@icancall.co and we'll sort it out.",
   es: "No pudimos confirmar su pago, por lo que su cuenta aún no se ha creado. Complete el pago para continuar. Si se le cobró, escriba a support@icancall.co y lo resolveremos.",
@@ -1276,7 +1276,7 @@ function NumberStep({ data, set, onNext, onBack, t, lang }: { data: OnboardingDa
 }
 
 /* ============ SECURE CHECKOUT MODAL OVERLAY ============ */
-const CHECKOUT_WINDOW_NAME = "creem_checkout";
+const CHECKOUT_WINDOW_NAME = "stripe_checkout";
 // How long the spinner runs before the manual "Open secure checkout" fallback appears
 const CHECKOUT_FALLBACK_DELAY_MS = 4000;
 
@@ -1359,7 +1359,7 @@ function PaymentStep({ data, onNext, onBack, t, lang }: { data: OnboardingData; 
   const [popupBlocked, setPopupBlocked] = useState(false);
   const [signupError, setSignupError] = useState("");
   const checkoutPopupRef = useRef<Window | null>(null);
-  // The checkout this attempt is paying for; the server verifies it with Creem.
+  // The checkout this attempt is paying for; the server verifies it with Stripe.
   const checkoutIdRef = useRef<string>("");
   const signupInFlight = useRef(false);
 
@@ -1372,7 +1372,7 @@ function PaymentStep({ data, onNext, onBack, t, lang }: { data: OnboardingData; 
     setSignupError("");
     setCheckoutLoading(true);
     try {
-      const res = await fetch("/api/creem/checkout", {
+      const res = await fetch("/api/billing/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ plan: data.plan, billing: data.billing, email: data.account.email }),
@@ -1392,7 +1392,7 @@ function PaymentStep({ data, onNext, onBack, t, lang }: { data: OnboardingData; 
       }
       setModalOpen(true);
     } catch {
-      console.error("Failed to create Creem checkout session");
+      console.error("Failed to create Stripe checkout session");
       try { popup?.close(); } catch {}
       if (checkoutPopupRef.current === popup) {
         checkoutPopupRef.current = null;
@@ -1406,7 +1406,7 @@ function PaymentStep({ data, onNext, onBack, t, lang }: { data: OnboardingData; 
   useEffect(() => {
     const handleMsg = async (e: MessageEvent) => {
       if (e.origin !== window.location.origin) return;
-      if (!e.data || e.data.type !== "CREEM_PAYMENT_SUCCESS" || signupInFlight.current) return;
+      if (!e.data || e.data.type !== "STRIPE_PAYMENT_SUCCESS" || signupInFlight.current) return;
       signupInFlight.current = true;
 
       if (checkoutPopupRef.current) {
@@ -1415,7 +1415,7 @@ function PaymentStep({ data, onNext, onBack, t, lang }: { data: OnboardingData; 
       }
 
       // This message only says the checkout window came back. The server asks
-      // Creem whether the checkout was really paid before it creates the
+      // Stripe whether the checkout was really paid before it creates the
       // account, so the wizard moves on only when signup itself succeeds.
       let failure = "";
       try {
@@ -1432,7 +1432,7 @@ function PaymentStep({ data, onNext, onBack, t, lang }: { data: OnboardingData; 
             smsPhone: data.account.smsPhone,
             plan: data.plan,
             billing: data.billing,
-            // Creem appends checkout_id to the return URL; prefer what it reports.
+            // Stripe appends session_id to the return URL; prefer what it reports.
             checkoutId: (typeof e.data.checkoutId === "string" && e.data.checkoutId) || checkoutIdRef.current || undefined,
           }),
         });

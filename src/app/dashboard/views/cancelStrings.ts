@@ -1,5 +1,5 @@
 // Copy for the cancel-subscription flow in AccountView. Cancelling is always
-// "at the end of the period already paid for" (see api/creem/cancel-subscription).
+// "at the end of the period already paid for" (see api/billing/cancel-subscription).
 
 interface CancelStrings {
   confirmTitle: string;

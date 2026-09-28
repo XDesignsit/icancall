@@ -6,9 +6,9 @@ import { currentMinutesCycleStart, resetMinutesPool } from "@/lib/minutesCycle";
 type Settings = Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
 
 // Daily job (vercel.json → crons). Annual subscriptions pay once a year, so
-// Creem's renewal webhook would only reset their minutes yearly. This gives
+// Stripe's renewal webhook would only reset their minutes yearly. This gives
 // them the monthly reset every plan promises, on the monthly anniversary of
-// the day their billing period started (settings.creem_period_start).
+// the day their billing period started (settings.stripe_period_start).
 //
 //   - monthly subscribers are left to the webhook
 //   - an ended subscription gets no new minutes
@@ -41,14 +41,14 @@ export async function GET(req: NextRequest) {
     if (s.billingCycle !== "yearly" || isEndedStatus(s.subscriptionStatus)) continue;
     summary.checked++;
 
-    const periodStart = new Date(s.creem_period_start || "");
+    const periodStart = new Date(s.stripe_period_start || "");
     if (Number.isNaN(periodStart.getTime()) || periodStart.getTime() > now.getTime()) {
       summary.skipped++;
       continue;
     }
 
     const cycleStart = currentMinutesCycleStart(periodStart, now);
-    const handled = new Date(s.minutes_cycle_start || s.creem_period_start).getTime();
+    const handled = new Date(s.minutes_cycle_start || s.stripe_period_start).getTime();
     if (cycleStart.getTime() <= handled) continue;
 
     const { error: updateError } = await supabase

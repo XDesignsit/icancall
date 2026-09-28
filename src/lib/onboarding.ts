@@ -12,7 +12,7 @@ export const RESUME_SIGNUP_PATH = "/signup?resume=1";
  * `onboarding` and only the wizard is reachable.
  *
  * "Finished" means any of: a demo login, an invited Care Team member acting on
- * an owner's account, a Creem customer/subscription recorded by the webhook,
+ * an owner's account, a Stripe customer/subscription recorded by the webhook,
  * or at least one phone line (the wizard seeds them right after checkout).
  *
  * Fails open on lookup errors: a paying customer must never be bounced into a
@@ -33,7 +33,7 @@ export async function isOnboarded(userId: string | null | undefined, email: stri
       .eq("id", userId)
       .maybeSingle();
     const settings = (profile?.settings || {}) as Record<string, unknown>;
-    if (settings.creem_subscription_id || settings.creem_customer_id) return true;
+    if (settings.stripe_subscription_id || settings.stripe_customer_id) return true;
 
     const { data: lines, error } = await supabase
       .from("phone_lines")

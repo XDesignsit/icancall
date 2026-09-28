@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { isMock, supabase } from "@/lib/supabase";
-import { subscriptionLiveness } from "@/lib/creem";
+import { subscriptionLiveness } from "@/lib/stripe";
 import {
   REACTIVATED_PATCH,
   REMINDER_DAYS_BEFORE,
@@ -16,9 +16,9 @@ import {
 //
 // Releasing a number is irreversible, so this fails closed at every step:
 //   - no CRON_SECRET, or a caller without it      → refuses to run
-//   - no Creem credentials to double-check with   → releases nothing
-//   - Creem cannot be reached, or answers oddly   → releases nothing
-//   - Creem says the subscription is not over after all (a missed webhook)
+//   - no Stripe credentials to double-check with   → releases nothing
+//   - Stripe cannot be reached, or answers oddly   → releases nothing
+//   - Stripe says the subscription is not over after all (a missed webhook)
 //                                                  → reactivates instead
 export async function GET(req: NextRequest) {
   const secret = process.env.CRON_SECRET;
@@ -57,20 +57,20 @@ export async function GET(req: NextRequest) {
       continue;
     }
 
-    // Due. Ask Creem before doing anything that cannot be undone.
-    if (!process.env.CREEM_API_KEY || typeof s.creem_subscription_id !== "string" || !s.creem_subscription_id) {
-      console.error(`release-ended-numbers: cannot verify ${profile.id} with Creem — leaving its numbers alone.`);
+    // Due. Ask Stripe before doing anything that cannot be undone.
+    if (!process.env.STRIPE_SECRET_KEY || typeof s.stripe_subscription_id !== "string" || !s.stripe_subscription_id) {
+      console.error(`release-ended-numbers: cannot verify ${profile.id} with Stripe — leaving its numbers alone.`);
       summary.skipped++;
       continue;
     }
-    const liveness = await subscriptionLiveness(s.creem_subscription_id);
+    const liveness = await subscriptionLiveness(s.stripe_subscription_id);
     if (liveness.state === "unknown") {
-      console.error(`release-ended-numbers: Creem could not confirm ${profile.id} has ended — leaving its numbers alone.`);
+      console.error(`release-ended-numbers: Stripe could not confirm ${profile.id} has ended — leaving its numbers alone.`);
       summary.skipped++;
       continue;
     }
     if (liveness.state === "live") {
-      console.warn(`release-ended-numbers: ${profile.id} is not ended at Creem after all — reactivating instead of releasing.`);
+      console.warn(`release-ended-numbers: ${profile.id} is not ended at Stripe after all — reactivating instead of releasing.`);
       await supabase
         .from("profiles")
         .update({

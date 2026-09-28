@@ -26,7 +26,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 ## CAPTCHA & Turnstile Implementation Guidelines
 - **Stable CAPTCHA Callbacks in React**: Always store CAPTCHA callback props (`onVerify`, `onError`, `onExpire`) in mutable refs (`useRef`) and invoke them via the ref. Do NOT pass callbacks directly into the `useEffect` dependency array. This prevents the widget from constantly re-rendering and losing its token when parent states update on keystrokes.
-- **Paid Flow CAPTCHA Redundancy**: Avoid forcing blocking CAPTCHA verifications on signup/onboarding forms that require a successful paid checkout (e.g., Stripe, Creem, PayPal). Paid checkouts are naturally bot-proof, so CAPTCHA adds redundant friction.
+- **Paid Flow CAPTCHA Redundancy**: Avoid forcing blocking CAPTCHA verifications on signup/onboarding forms that require a successful paid checkout (e.g., Stripe, PayPal). Paid checkouts are naturally bot-proof, so CAPTCHA adds redundant friction.
 - **Fail-Open Fallback**: If a CAPTCHA is required, always implement a fail-open loading fallback (e.g., a 4.5-second mount timeout) and catch rendering/error callbacks to automatically trigger a bypass token (`blocked_bypass`). This ensures real users with adblockers, strict privacy firewalls, or testing on non-whitelisted staging/preview domains are never blocked.
 
 ## Mocking Database Clients in Local Development
@@ -44,7 +44,7 @@ When credentials for external messaging providers (SMTP or Twilio) are missing o
 ### 1. Plan-Included Quotas vs. Add-ons
 - When implementing additions (e.g., adding phone numbers, extra voice minutes):
   1. Always verify if the user has unused plan-included quotas (e.g., the Pro plan includes up to 2 active lines at no extra cost, while the Essential plan includes 1).
-  2. If the resource is within the plan's quota, bypass payment portals (e.g., Creem, Stripe) and save the resource immediately to the local state/DB for free.
+  2. If the resource is within the plan's quota, bypass payment portals (e.g., Stripe) and save the resource immediately to the local state/DB for free.
   3. Ensure the billing subtext, checkout modal buttons (e.g., "Confirm & Save" instead of "Approve & Pay"), and billing notices dynamically adjust based on whether the action is chargeable or free.
 
 ### 2. Premium Typography-First Styling (No Emojis)

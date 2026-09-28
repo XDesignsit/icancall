@@ -76,9 +76,14 @@ export interface Account {
   billingAddr: string;
   plan: PlanId;
   billingCycle: "monthly" | "yearly";
-  /** Creem subscription state, written server-side only. "scheduled_cancel" = cancelled but active until subscriptionEndsAt. */
+  /** Stripe subscription state, written server-side only. "scheduled_cancel" = cancelled but active until subscriptionEndsAt. */
   subscriptionStatus?: string;
   subscriptionEndsAt?: string | null;
+  /** Next charge, and next voice-minute reset (ISO). Derived server-side from Stripe's billing period; null when there is no honest date to show. */
+  billingRenewsAt?: string | null;
+  minutesResetsAt?: string | null;
+  /** A plan change waiting for the end of the paid period (annual → monthly). Written server-side only. */
+  pendingPlanChange?: { plan: PlanId; billingCycle: "monthly" | "yearly"; effectiveAt: string } | null;
   /** Set once the subscription has really ended: numbers are held until numbersReleaseAt, then released. */
   subscriptionEndedAt?: string | null;
   numbersReleaseAt?: string | null;

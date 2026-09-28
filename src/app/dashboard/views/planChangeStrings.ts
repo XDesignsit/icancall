@@ -1,5 +1,5 @@
 // Copy for the plan-change flow in AccountView. Which billing notice applies is
-// decided by how the change will be billed (see api/creem/change-plan).
+// decided by how the change will be billed (see api/billing/change-plan).
 
 export type PlanChangeMode = "subscription" | "checkout" | "simulated";
 
@@ -11,6 +11,13 @@ interface PlanChangeStrings {
   failed: string;
   updating: string;
   annualConfirm: string;
+  /** Shown before an annual → monthly change that waits for the end of the paid year. {date} = when it starts. */
+  scheduledNotice: string;
+  scheduledToast: string;
+  /** {plan} = the plan it changes to, {date} = when. */
+  pendingBanner: string;
+  pendingCancel: string;
+  pendingCancelled: string;
 }
 
 const STRINGS: Record<string, PlanChangeStrings> = {
@@ -22,6 +29,11 @@ const STRINGS: Record<string, PlanChangeStrings> = {
     failed: "We couldn't update your subscription, so your plan was not changed. Please try again.",
     updating: "Updating…",
     annualConfirm: "Are you sure you want to switch to annual billing?",
+    scheduledNotice: "No charge today. Your current plan stays as it is until {date}, then switches to monthly billing.",
+    scheduledToast: "Scheduled: monthly billing starts on {date}.",
+    pendingBanner: "Scheduled change: {plan} with monthly billing starts on {date}. Until then your current plan stays as it is.",
+    pendingCancel: "Cancel scheduled change",
+    pendingCancelled: "Scheduled change cancelled.",
   },
   es: {
     chargedNow: "Hoy se cobrará la diferencia prorrateada a su método de pago registrado.",
@@ -31,6 +43,11 @@ const STRINGS: Record<string, PlanChangeStrings> = {
     failed: "No pudimos actualizar su suscripción, por lo que su plan no ha cambiado. Inténtelo de nuevo.",
     updating: "Actualizando…",
     annualConfirm: "¿Está seguro de que desea cambiar a la facturación anual?",
+    scheduledNotice: "Sin cargo hoy. Su plan actual se mantiene hasta el {date} y después pasa a facturación mensual.",
+    scheduledToast: "Programado: la facturación mensual comienza el {date}.",
+    pendingBanner: "Cambio programado: {plan} con facturación mensual a partir del {date}. Hasta entonces, su plan actual no cambia.",
+    pendingCancel: "Cancelar el cambio programado",
+    pendingCancelled: "Cambio programado cancelado.",
   },
   fr: {
     chargedNow: "Votre mode de paiement enregistré sera débité aujourd'hui de la différence au prorata.",
@@ -40,6 +57,11 @@ const STRINGS: Record<string, PlanChangeStrings> = {
     failed: "Nous n'avons pas pu mettre à jour votre abonnement ; votre forfait n'a pas changé. Veuillez réessayer.",
     updating: "Mise à jour…",
     annualConfirm: "Êtes-vous sûr de vouloir passer à la facturation annuelle ?",
+    scheduledNotice: "Aucun débit aujourd'hui. Votre forfait actuel reste inchangé jusqu'au {date}, puis passe à la facturation mensuelle.",
+    scheduledToast: "Programmé : la facturation mensuelle commence le {date}.",
+    pendingBanner: "Changement programmé : {plan} avec facturation mensuelle à partir du {date}. D'ici là, votre forfait actuel reste inchangé.",
+    pendingCancel: "Annuler le changement programmé",
+    pendingCancelled: "Changement programmé annulé.",
   },
   ja: {
     chargedNow: "登録済みのお支払い方法に、日割りの差額が本日請求されます。",
@@ -49,6 +71,11 @@ const STRINGS: Record<string, PlanChangeStrings> = {
     failed: "サブスクリプションを更新できなかったため、プランは変更されていません。もう一度お試しください。",
     updating: "更新中…",
     annualConfirm: "年間請求に切り替えてもよろしいですか？",
+    scheduledNotice: "本日の請求はありません。現在のプランは{date}まで変わらず、その後は月額請求に切り替わります。",
+    scheduledToast: "予約しました：月額請求は{date}に開始します。",
+    pendingBanner: "変更予約：{date}より{plan}（月額請求）に変更されます。それまでは現在のプランのままです。",
+    pendingCancel: "予約した変更を取り消す",
+    pendingCancelled: "予約した変更を取り消しました。",
   },
   zh: {
     chargedNow: "今天将从您登记的付款方式中扣除按比例计算的差额。",
@@ -58,6 +85,11 @@ const STRINGS: Record<string, PlanChangeStrings> = {
     failed: "我们无法更新您的订阅，因此您的方案未更改。请重试。",
     updating: "正在更新…",
     annualConfirm: "确定要切换为按年计费吗？",
+    scheduledNotice: "今天不会扣款。您当前的方案将保持到 {date}，之后转为按月计费。",
+    scheduledToast: "已预约：按月计费将于 {date} 开始。",
+    pendingBanner: "已预约的变更：自 {date} 起改为{plan}（按月计费）。在此之前，您当前的方案保持不变。",
+    pendingCancel: "取消已预约的变更",
+    pendingCancelled: "已取消预约的变更。",
   },
   ar: {
     chargedNow: "سيتم اليوم خصم الفرق التناسبي من وسيلة الدفع المسجلة.",
@@ -67,6 +99,11 @@ const STRINGS: Record<string, PlanChangeStrings> = {
     failed: "تعذر تحديث اشتراكك، لذلك لم تتغير باقتك. يرجى المحاولة مرة أخرى.",
     updating: "جارٍ التحديث…",
     annualConfirm: "هل أنت متأكد أنك تريد التحول إلى الفوترة السنوية؟",
+    scheduledNotice: "لا توجد رسوم اليوم. تبقى باقتك الحالية كما هي حتى {date}، ثم تتحول إلى الفوترة الشهرية.",
+    scheduledToast: "تمت الجدولة: تبدأ الفوترة الشهرية في {date}.",
+    pendingBanner: "تغيير مجدول: {plan} بفوترة شهرية اعتباراً من {date}. حتى ذلك الحين تبقى باقتك الحالية كما هي.",
+    pendingCancel: "إلغاء التغيير المجدول",
+    pendingCancelled: "تم إلغاء التغيير المجدول.",
   },
   hi: {
     chargedNow: "आपकी दर्ज भुगतान विधि से आज आनुपातिक अंतर का शुल्क लिया जाएगा।",
@@ -76,6 +113,11 @@ const STRINGS: Record<string, PlanChangeStrings> = {
     failed: "हम आपकी सदस्यता अपडेट नहीं कर सके, इसलिए आपका प्लान नहीं बदला गया। कृपया पुनः प्रयास करें।",
     updating: "अपडेट हो रहा है…",
     annualConfirm: "क्या आप वाकई वार्षिक बिलिंग पर स्विच करना चाहते हैं?",
+    scheduledNotice: "आज कोई शुल्क नहीं। आपका वर्तमान प्लान {date} तक जैसा है वैसा ही रहेगा, फिर मासिक बिलिंग पर स्विच हो जाएगा।",
+    scheduledToast: "निर्धारित: मासिक बिलिंग {date} से शुरू होगी।",
+    pendingBanner: "निर्धारित बदलाव: {date} से {plan} मासिक बिलिंग के साथ। तब तक आपका वर्तमान प्लान वैसा ही रहेगा।",
+    pendingCancel: "निर्धारित बदलाव रद्द करें",
+    pendingCancelled: "निर्धारित बदलाव रद्द कर दिया गया।",
   },
   pt: {
     chargedNow: "A diferença proporcional será cobrada hoje no seu método de pagamento cadastrado.",
@@ -85,6 +127,11 @@ const STRINGS: Record<string, PlanChangeStrings> = {
     failed: "Não foi possível atualizar sua assinatura, portanto seu plano não foi alterado. Tente novamente.",
     updating: "Atualizando…",
     annualConfirm: "Tem certeza de que deseja mudar para a cobrança anual?",
+    scheduledNotice: "Nenhuma cobrança hoje. Seu plano atual continua como está até {date} e depois passa para a cobrança mensal.",
+    scheduledToast: "Agendado: a cobrança mensal começa em {date}.",
+    pendingBanner: "Alteração agendada: {plan} com cobrança mensal a partir de {date}. Até lá, seu plano atual continua como está.",
+    pendingCancel: "Cancelar a alteração agendada",
+    pendingCancelled: "Alteração agendada cancelada.",
   },
   de: {
     chargedNow: "Ihre hinterlegte Zahlungsmethode wird heute mit der anteiligen Differenz belastet.",
@@ -94,6 +141,11 @@ const STRINGS: Record<string, PlanChangeStrings> = {
     failed: "Wir konnten Ihr Abonnement nicht aktualisieren; Ihr Tarif wurde nicht geändert. Bitte versuchen Sie es erneut.",
     updating: "Wird aktualisiert…",
     annualConfirm: "Möchten Sie wirklich zur jährlichen Abrechnung wechseln?",
+    scheduledNotice: "Heute erfolgt keine Belastung. Ihr aktueller Tarif bleibt bis zum {date} unverändert und wechselt dann zur monatlichen Abrechnung.",
+    scheduledToast: "Geplant: Die monatliche Abrechnung beginnt am {date}.",
+    pendingBanner: "Geplante Änderung: {plan} mit monatlicher Abrechnung ab dem {date}. Bis dahin bleibt Ihr aktueller Tarif unverändert.",
+    pendingCancel: "Geplante Änderung abbrechen",
+    pendingCancelled: "Geplante Änderung abgebrochen.",
   },
   it: {
     chargedNow: "Oggi verrà addebitata la differenza proporzionale sul tuo metodo di pagamento registrato.",
@@ -103,6 +155,11 @@ const STRINGS: Record<string, PlanChangeStrings> = {
     failed: "Non siamo riusciti ad aggiornare il tuo abbonamento, quindi il piano non è cambiato. Riprova.",
     updating: "Aggiornamento…",
     annualConfirm: "Sei sicuro di voler passare alla fatturazione annuale?",
+    scheduledNotice: "Nessun addebito oggi. Il tuo piano attuale resta invariato fino al {date}, poi passa alla fatturazione mensile.",
+    scheduledToast: "Programmato: la fatturazione mensile inizia il {date}.",
+    pendingBanner: "Modifica programmata: {plan} con fatturazione mensile dal {date}. Fino ad allora il tuo piano attuale resta invariato.",
+    pendingCancel: "Annulla la modifica programmata",
+    pendingCancelled: "Modifica programmata annullata.",
   },
   ko: {
     chargedNow: "등록된 결제 수단으로 일할 계산된 차액이 오늘 청구됩니다.",
@@ -112,6 +169,11 @@ const STRINGS: Record<string, PlanChangeStrings> = {
     failed: "구독을 업데이트하지 못해 플랜이 변경되지 않았습니다. 다시 시도해 주세요.",
     updating: "업데이트 중…",
     annualConfirm: "연간 결제로 전환하시겠습니까?",
+    scheduledNotice: "오늘은 청구되지 않습니다. 현재 플랜은 {date}까지 그대로 유지되며, 이후 월간 결제로 전환됩니다.",
+    scheduledToast: "예약되었습니다: 월간 결제는 {date}에 시작됩니다.",
+    pendingBanner: "예약된 변경: {date}부터 {plan}(월간 결제)로 변경됩니다. 그때까지 현재 플랜은 그대로 유지됩니다.",
+    pendingCancel: "예약된 변경 취소",
+    pendingCancelled: "예약된 변경이 취소되었습니다.",
   },
 };
 
@@ -120,10 +182,10 @@ export function planChangeStrings(lang: string): PlanChangeStrings {
 }
 
 /** The billing notice for a pending change, or "" while the billing mode is still loading. */
-export function planChangeNotice(lang: string, mode: PlanChangeMode | null, chargedNow: boolean): string {
+export function planChangeNotice(lang: string, mode: PlanChangeMode | null, chargedNow: boolean, scheduledOn?: string): string {
   const s = planChangeStrings(lang);
   if (mode === "simulated") return s.simulated;
   if (mode === "checkout") return s.viaCheckout;
-  if (mode === "subscription") return chargedNow ? s.chargedNow : s.noChargeNow;
+  if (mode === "subscription") return scheduledOn ? s.scheduledNotice.replace("{date}", scheduledOn) : chargedNow ? s.chargedNow : s.noChargeNow;
   return "";
 }

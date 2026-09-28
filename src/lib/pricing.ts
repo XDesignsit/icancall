@@ -32,7 +32,7 @@ export const PLAN_PRICING = {
 } as const;
 
 // Add-on prices quoted on the homepage (pricing footnote and FAQ). They must
-// match what checkout actually charges: the Creem add-on products and the
+// match what checkout actually charges: the Stripe add-on prices and the
 // dashboard's add-on stepper (src/app/dashboard/views/AccountView.tsx).
 // The comparison chart spells the number price out per language
 // (nAddonPrice in src/app/comparison-chart/page.tsx and the standalone
