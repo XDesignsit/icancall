@@ -94,7 +94,7 @@ export async function POST(req: NextRequest) {
           ? NextResponse.json({ error: "We couldn't verify your payment. If you were charged, your plan will update shortly." }, { status: 502 })
           : NextResponse.json({ error: "This checkout has not been paid." }, { status: 402 });
       }
-      const { customerId, subscriptionId: paidSubscriptionId, ...paidFor } = check.purchase;
+      const { customerId, subscriptionId: paidSubscriptionId, periodStart: paidPeriodStart, ...paidFor } = check.purchase;
 
       // Resubscribing after the old subscription ended: the checkout must have
       // opened a new subscription that is running now. Replaying the ended
@@ -116,6 +116,8 @@ export async function POST(req: NextRequest) {
         ...paidFor,
         stripe_customer_id: customerId ?? settings.stripe_customer_id,
         stripe_subscription_id: paidSubscriptionId ?? settings.stripe_subscription_id,
+        // The new subscription's period, so its first renewal resets the minutes.
+        ...(paidPeriodStart ? { stripe_period_start: paidPeriodStart } : {}),
       });
       if (!saved) return NextResponse.json({ error: "Payment received, but we couldn't update your plan. Please contact support." }, { status: 500 });
       return NextResponse.json({ success: true, ...paidFor, charged: true });
@@ -165,6 +167,7 @@ export async function POST(req: NextRequest) {
       try {
         const session = await stripe().checkout.sessions.create({
           mode: "subscription",
+          managed_payments: { enabled: false },
           line_items: [{ price: priceId, quantity: 1 }],
           success_url: `${proto}://${host}/dashboard?view=account&plan_change=success&session_id={CHECKOUT_SESSION_ID}`,
           cancel_url: `${proto}://${host}/dashboard?view=account`,

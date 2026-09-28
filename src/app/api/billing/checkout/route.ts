@@ -92,6 +92,10 @@ export async function POST(req: NextRequest) {
     const oneTime = addon === "voice_minutes";
     const session = await stripe().checkout.sessions.create({
       mode: oneTime ? "payment" : "subscription",
+      // Opt out of Managed Payments (Stripe as merchant of record, digital goods
+      // only): new Stripe accounts have it on by default and it rejects
+      // products without a tax code. Explicit so live behaves like the sandbox.
+      managed_payments: { enabled: false },
       line_items: [{ price: priceId, quantity: addon ? units : 1 }],
       success_url: successUrl,
       cancel_url: cancelUrl,

@@ -116,6 +116,12 @@ export async function POST(request: Request) {
         }
       : {};
 
+    // The webhooks for this payment usually arrive before the account exists
+    // and find nobody to update, so the billing period it started in is
+    // recorded here. Without it the first renewal looks like a first payment
+    // and the minute pool would not reset.
+    const periodIds = purchase?.periodStart ? { stripe_period_start: purchase.periodStart } : {};
+
     if (userId) {
       // Already authenticated (Google, or a PIN login that landed on an
       // unfinished account) and now completing the wizard. Merge onto the
@@ -137,6 +143,7 @@ export async function POST(request: Request) {
           name,
           preferred_name: preferredName || (name ?? "").split(" ")[0],
           settings: {
+            ...periodIds,
             ...existingSettings,
             notifyEmail: email,
             smsConsent,
@@ -211,6 +218,7 @@ export async function POST(request: Request) {
           name,
           preferred_name: preferredName || (name ?? "").split(" ")[0],
           settings: {
+            ...periodIds,
             notifyEmail: email,
             smsConsent,
             smsPhone: normalizedSmsPhone,

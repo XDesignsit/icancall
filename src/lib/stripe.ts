@@ -128,6 +128,8 @@ export interface VerifiedPlanPurchase {
   billingCycle: BillingCycle;
   customerId?: string;
   subscriptionId?: string;
+  /** Start of the paid period the purchase is in, ISO. Seeds settings.stripe_period_start. */
+  periodStart?: string;
 }
 
 export type PurchaseCheck =
@@ -199,7 +201,12 @@ export async function verifyPlanCheckout(
 
   return {
     ok: true,
-    purchase: { ...bought, customerId: entityId(session.customer), subscriptionId: subscription.id },
+    purchase: {
+      ...bought,
+      customerId: entityId(session.customer),
+      subscriptionId: subscription.id,
+      periodStart: subscriptionPeriod(subscription).start,
+    },
   };
 }
 
@@ -209,7 +216,7 @@ export async function activePlanForSubscription(subscriptionId: string): Promise
     const sub = await stripe().subscriptions.retrieve(subscriptionId);
     if (sub.status !== "active" && sub.status !== "trialing") return null;
     const plan = planForPriceId(subscriptionItem(sub).priceId);
-    return plan ? { ...plan, subscriptionId, customerId: entityId(sub.customer) } : null;
+    return plan ? { ...plan, subscriptionId, customerId: entityId(sub.customer), periodStart: subscriptionPeriod(sub).start } : null;
   } catch (err) {
     console.error("Stripe subscription lookup failed:", err);
     return null;
