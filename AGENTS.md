@@ -6,18 +6,16 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 # iCanCall Project Rules
 
+Next.js app (Vercel, Supabase, Stripe billing, Twilio/Telnyx voice) plus standalone HTML copies of the marketing pages. More rules for widgets, cookie consent, serverless DB and dropdowns are in [.agents/AGENTS.md](.agents/AGENTS.md).
+
+## Commands
+`npm run dev` · `npm run lint` · `npx tsc --noEmit` · `npm run build` (CI runs lint, tsc and build).
+
 ## Standalone HTML Pages & Syncing
-- This project serves standalone HTML copies of its main marketing landing pages (Seniors, Parents, Caregivers, Main Landing) and signup wizard.
-- Standalone HTML files are mirrored in three active sync directories:
-  - Repository Root: `./`
-  - pCloud Sync Directory: `/Users/admin/pCloud Drive/G Drive/KSC/Website FIles/Pages/`
-  - Google Drive Sync Directory: `/Users/admin/Library/CloudStorage/GoogleDrive-aj@digitalrepandreviews.com/My Drive/pCloud Hellion/Clients/KSC/Website FIles/Pages/`
-- When renaming routes, editing links, or altering page copywriting:
-  1. Update the Next.js source code (e.g. `src/app/` and `src/lib/translations.ts`).
-  2. For path/slug changes, rename the corresponding standalone HTML files in all three locations.
-  3. Run a link-patching script to parse and update links/routes in both raw HTML and script-embedded template JSON strings (`<script type="__bundler/template">`) inside the standalone pages.
-  4. If modifying compiled React stepper flows (like the Signup page), run the compression/repacking script to compress and inject the updated base64 JS assets back into the manifest blocks of the standalone HTML pages.
-- The Main Landing standalone (`iCanCall Landing Page (standalone).html`) is generated from the homepage source, not hand-edited: after any homepage change run `npm run build && node scripts/build-standalone-home.mjs`, then copy the file to the pCloud and Google Drive directories.
+- This project serves standalone HTML copies of its main marketing landing pages (Seniors, Parents, Caregivers, Main Landing) and signup wizard. They are mirrored in three sync directories (repo root, pCloud, Google Drive).
+- When renaming routes, editing links, or altering page copywriting: update the Next.js source (`src/app/`, `src/lib/translations.ts`) **and** the standalone HTML in all three locations, and repack any compiled React flows.
+- The Main Landing standalone is generated, not hand-edited: after any homepage change run `npm run build && node scripts/build-standalone-home.mjs`, then copy the file to the pCloud and Google Drive directories.
+- Directory paths, link-patching and repack steps: [docs/guides/standalone-html-sync.md](docs/guides/standalone-html-sync.md).
 
 ## Security Headers & Browser APIs
 - When configuring or modifying security headers in `vercel.json` (such as `Permissions-Policy` or `Content-Security-Policy`):
@@ -29,15 +27,10 @@ This version has breaking changes — APIs, conventions, and file structure may 
 - **Paid Flow CAPTCHA Redundancy**: Avoid forcing blocking CAPTCHA verifications on signup/onboarding forms that require a successful paid checkout (e.g., Stripe, PayPal). Paid checkouts are naturally bot-proof, so CAPTCHA adds redundant friction.
 - **Fail-Open Fallback**: If a CAPTCHA is required, always implement a fail-open loading fallback (e.g., a 4.5-second mount timeout) and catch rendering/error callbacks to automatically trigger a bypass token (`blocked_bypass`). This ensures real users with adblockers, strict privacy firewalls, or testing on non-whitelisted staging/preview domains are never blocked.
 
-## Mocking Database Clients in Local Development
-When creating local mock shims for database clients (such as Supabase) to support unconfigured or offline local development:
-- **Deferred Chain Execution**: Emulate the synchronous/asynchronous mechanics of the target library's builder chain. Chained action and filter methods (e.g., `select`, `eq`, `not`, `insert`, `update`, `upsert`, `delete`) must return the query builder object synchronously. Defer actual execution (such as reading/writing local JSON files) to the builder's `then()` method (which acts as the awaitable Promise hook). This prevents subsequent chained methods from throwing `TypeError: ... is not a function`.
-- **Immediate Cache Invalidation**: Ensure that any endpoint or controller modifying settings or lines explicitly invalidates the associated cache key to prevent webhooks or background processes from reading stale cache values.
-
-## Mocking External Services in Local Development
-When credentials for external messaging providers (SMTP or Twilio) are missing or unconfigured in the local environment:
-- **Fail-Open SMTP Fallback**: The email dispatch system (`sendEmail` in `src/lib/mail.ts`) must gracefully mock transmission, log the simulated message details to the console, and return `{ success: true, messageId: ... }` rather than letting connection failures throw exceptions.
-- **Graceful Twilio SMS Fallback**: The SMS dispatch system (`sendSms` in `src/lib/twilio.ts`) must check for client initialization, log a warning if absent, and return gracefully. Webhooks calling it must handle uninitialized states to prevent returning 500 errors to caller gateways during testing.
+## Local mocks (fail-open)
+- Mock DB clients (Supabase shims) must return the builder synchronously from chained methods and defer execution to `then()`; endpoints that modify settings or lines must invalidate the associated cache key.
+- `sendEmail` (`src/lib/mail.ts`) and `sendSms` (`src/lib/twilio.ts`) must fail open when SMTP/Twilio credentials are missing: log, return gracefully, never throw or 500 a webhook.
+- Full rules: [docs/guides/local-mocks.md](docs/guides/local-mocks.md).
 
 ## Billing, Branding & Layout Guardrails
 
@@ -56,9 +49,14 @@ When credentials for external messaging providers (SMTP or Twilio) are missing o
 - Keep footers on these waiting pages to a bare minimum (e.g., brand logo, description blurb, and inline Privacy Policy and Terms of Service links placed in the bottom row).
 
 ### 4. ElevenLabs Voice & Environment Configurations
-- **Vercel Environment Keys**: Dynamic audio features require `ELEVENLABS_API_KEY`. If setting up a new deployment or environment, verify that this key is propagated using Vercel CLI (`vercel env add ELEVENLABS_API_KEY`) to prevent server-side TTS generation failures.
-- **Accents & Genders Mapping**: When listing voice models in the settings dropdown, group options using `<optgroup>` corresponding to each of the application's supported selector languages (EN, ES, FR, JA, ZH, AR, HI, PT, DE, IT, KO). Ensure each language group contains both a **Female** and a **Male** voice choice.
-- **Robust Voice IDs**: Rely on standard premade voice IDs that exist on all ElevenLabs account tiers (e.g., Rachel `21m00Tcm4TlvDq8ikWAM`, Drew `29vD33N1CtxCmqQRPOHJ`, Clyde `2EiwWnXF2V4j29thjbwy`, Paul `5Q0t7uMcgp8Aagzh1ZQQ`, Adam `pNInz6obpgmx5142qiA7`, Jessica `cgSgspJ2msm6clMCxT41`, Brian `nPczCjzI2devA2R17O2Y`, Sarah `EXAVITQu4vr4xnSDxMaL`). Avoid custom/private voice IDs that require the API key to have `voices_read` scopes, as production keys are often restricted to write-only text-to-speech access.
+- `ELEVENLABS_API_KEY` must be set in every deployment (`vercel env add ELEVENLABS_API_KEY`); voice dropdowns group by language with a Female and a Male voice each; use only premade voice IDs available on all account tiers. Details and IDs: [docs/guides/elevenlabs-voice.md](docs/guides/elevenlabs-voice.md).
 
+## Project map
+Before opening files, read the router for the task, then only the files it points to:
+- [docs/map/PRODUCT.md](docs/map/PRODUCT.md): where the code for each area lives
+- [docs/map/OPERATIONS.md](docs/map/OPERATIONS.md): setup, checks, CI, deploy, config, data
+- [docs/map/DOCS.md](docs/map/DOCS.md): which document answers which question
 
+The map guides what to read first. It never replaces the rules above.
 
+**Keep the map true.** A change that adds, moves or removes a file a router names updates that router in the same change. Each code area keeps its own short README router, linked from PRODUCT.md, except folders that ship to users (`public/`), which are routed from docs/map/. Routers stay about 15–35 lines, link only to files that exist, and never hold secrets. Reference material goes in docs/, not here.

@@ -29,10 +29,7 @@ When building serverless endpoints (Next.js API routes or Server Actions) that q
 
 ## Standalone HTML Mockup Synchronization
 
-When modifying core React components that also exist in the standalone HTML mockups (e.g., `iCanCall Dashboard (standalone).html`, `iCanCall Parents Landing (standalone).html`, etc.):
-1. **Locate the Extracted Asset**: Find the matching component source file within the `extracted_designs/` subdirectories.
-2. **Apply Identical Changes**: Modify the component code in the extracted JS file.
-3. **Repack the HTML Bundle**: Run the corresponding python script in `scratch/` (such as `python3 scratch/repack_dashboard.py` or `python3 scratch/repack_all.py`) to re-compress, base64-encode, and update the manifest within the standalone HTML file.
+Moved to [docs/guides/standalone-html-sync.md](../docs/guides/standalone-html-sync.md).
 
 ## Cross-Device UI Interactions
 

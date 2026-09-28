@@ -4,7 +4,7 @@
 //
 // When prices change, also update:
 // - PLANS in src/app/signup/page.tsx (checkout amounts; compiled into the
-//   standalone signup HTML, so follow the repack/sync steps in AGENTS.md)
+//   standalone signup HTML, so follow the repack/sync steps in docs/guides/standalone-html-sync.md)
 // - ui.justPriceAnnualEssential / ui.justPriceAnnualPro copy strings in
 //   src/lib/translations.ts (all languages)
 export const PLAN_PRICING = {
