@@ -34,6 +34,7 @@ import { type DashboardTranslations } from "@/lib/dashboardTranslations";
 import { isPlanChangeChargedNow, isScheduledPlanChange, planConfig, type PlanId } from "@/lib/planConfig";
 import { planChangeNotice, planChangeStrings, type PlanChangeMode } from "./planChangeStrings";
 import { cancelStrings, formatEndDate } from "./cancelStrings";
+import { billingSubtitle, renewsOnText } from "./renewalStrings";
 
 // Account fields once a subscription is running (again): the number-release clock is off.
 const REACTIVATED = { subscriptionStatus: "active", subscriptionEndsAt: null, subscriptionEndedAt: null, numbersReleaseAt: null, numbersReleasedAt: null } as const;
@@ -2363,19 +2364,7 @@ export function AccountView({
               <div>
                 <h2>{d.account.billing}</h2>
                 <p>
-                  {account.billingCycle === "yearly"
-                    ? (lang === "es" ? "Facturado anualmente · renueva el 1 de junio de 2026"
-                     : lang === "fr" ? "Facturé annuellement · se renouvelle le 1er juin 2026"
-                     : lang === "ja" ? "年次請求 · 2026年6月1日に更新"
-                     : lang === "zh" ? "按年计费 · 于 2026年6月1日续期"
-                     : lang === "ar" ? "مفوتر سنوياً · يتجدد في 1 يونيو 2026"
-                     : lang === "hi" ? "सालाना बिलिंग · 1 जून, 2026 को नवीनीकृत होगा"
-                     : lang === "pt" ? "Cobrado anualmente · renova em 1 de junho de 2026"
-                     : lang === "de" ? "Jährliche Abrechnung · verlängert sich am 1. Juni 2026"
-                     : lang === "it" ? "Fatturato annualmente · si rinnova il 1 giugno 2026"
-                     : lang === "ko" ? "연간 결제 · 2026년 6월 1일에 갱신 예정"
-                     : "Billed annually · renews June 1, 2026")
-                    : d.account.renewDateSub}
+                  {billingSubtitle(lang, account.billingCycle, account.billingRenewsAt)}
                 </p>
               </div>
               <Badge kind={account.plan === "essential" ? "amber" : "blue"}>
@@ -2853,7 +2842,7 @@ export function AccountView({
                           <span> {ext.minRemaining}</span>
                         </div>
                         <div className="mb-meta">
-                          {used} {lang === "es" ? "de" : lang === "fr" ? "sur" : lang === "ja" ? "の" : lang === "zh" ? "共" : lang === "ar" ? "من" : lang === "hi" ? "कुल" : lang === "pt" ? "de" : lang === "de" ? "von" : lang === "it" ? "di" : lang === "ko" ? "중" : "of"} {total} {ext.addonMinUsed} &middot; {lang === "es" ? "renueva el 1 de junio de 2026" : lang === "fr" ? "renouvellement le 1er juin 2026" : lang === "ja" ? "2026年6月1日に更新" : lang === "zh" ? "于 2026年6月1日续期" : lang === "ar" ? "يتجدد في 1 يونيو 2026" : lang === "hi" ? "1 जून, 2026 को नवीनीकृत होगा" : lang === "pt" ? "renova em 1 de junho de 2026" : lang === "de" ? "verlängert sich am 1. Juni 2026" : lang === "it" ? "si rinnova il 1 giugno 2026" : lang === "ko" ? "2026년 6월 1일에 갱신 예정" : "renews June 1, 2026"}
+                          {used} {lang === "es" ? "de" : lang === "fr" ? "sur" : lang === "ja" ? "の" : lang === "zh" ? "共" : lang === "ar" ? "من" : lang === "hi" ? "कुल" : lang === "pt" ? "de" : lang === "de" ? "von" : lang === "it" ? "di" : lang === "ko" ? "중" : "of"} {total} {ext.addonMinUsed} {account.minutesResetsAt && <>&middot; {renewsOnText(lang, account.minutesResetsAt)}</>}
                         </div>
                       </div>
                       <div className="usage-bar bigbar" style={{ marginTop: 14 }}>

@@ -7,6 +7,7 @@ import { resolveAccount } from "@/lib/account";
 import { isOnboarded } from "@/lib/onboarding";
 import { isSessionLive } from "@/lib/userSessions";
 import { isSimulatedBilling, sessionIdentity } from "@/lib/stripe";
+import { renewalDates } from "@/lib/minutesCycle";
 
 async function getAuthenticatedUserId() {
   const cookieStore = await cookies();
@@ -50,7 +51,7 @@ export async function GET() {
       if (ownerErr || !ownerProfile) {
         return NextResponse.json({ error: "Failed to fetch account data" }, { status: 500 });
       }
-      return NextResponse.json({ success: true, profile: ownerProfile, role: "member", liveBilling: !isSimulatedBilling(ownerProfile.email) });
+      return NextResponse.json({ success: true, profile: ownerProfile, role: "member", liveBilling: !isSimulatedBilling(ownerProfile.email), renewal: renewalDates(ownerProfile.settings || {}) });
     }
 
     // 1. Fetch profile from Supabase
@@ -104,7 +105,7 @@ export async function GET() {
 
     // liveBilling: add-on counts are server-owned (see POST) — the dashboard
     // must show them as stored instead of recomputing them from the line count.
-    return NextResponse.json({ success: true, profile, role: "owner", liveBilling: !isSimulatedBilling(sessionEmail) });
+    return NextResponse.json({ success: true, profile, role: "owner", liveBilling: !isSimulatedBilling(sessionEmail), renewal: renewalDates(profile.settings || {}) });
   } catch (err) {
     console.error("Caregiver Profile GET Error:", err);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });

@@ -399,7 +399,13 @@ export default function DashboardApp() {
         if (!linesRes.ok) throw new Error("lines_fetch_failed");
         const linesData = await linesRes.json();
 
-        const currentAccount = profileData.profile ? mapProfileToAccount(profileData.profile) : null;
+        const currentAccount = profileData.profile
+          ? {
+              ...mapProfileToAccount(profileData.profile),
+              billingRenewsAt: profileData.renewal?.billingRenewsAt ?? null,
+              minutesResetsAt: profileData.renewal?.minutesResetsAt ?? null,
+            }
+          : null;
         if (currentAccount) {
           setAccount(currentAccount);
           localStorage.setItem("isLoggedIn", "true");

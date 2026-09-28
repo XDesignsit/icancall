@@ -151,7 +151,6 @@ export interface DashboardTranslations {
     strongPasswordSub: string;
     activeSessionsSub: string;
     contactReachSub: string;
-    renewDateSub: string;
     addonsPlansSub: string;
     addonNumbersTitle: string;
     addonNumbersDesc: string;
@@ -329,7 +328,6 @@ export const dashboardTranslations: Record<
       strongPasswordSub: "Choose a strong password you don’t use elsewhere",
       activeSessionsSub: "Devices currently signed in to your account",
       contactReachSub: "Where we reach you with call alerts and account notices",
-      renewDateSub: "Billed monthly · renews June 1, 2026",
       addonsPlansSub: "Available on every plan",
       addonNumbersTitle: "Additional phone number",
       addonNumbersDesc: "Add another dedicated iCanCall number for another loved one, each with its own contacts and routing.",
@@ -509,7 +507,6 @@ export const dashboardTranslations: Record<
       strongPasswordSub: "Elija una contraseña segura que no use en otros sitios",
       activeSessionsSub: "Dispositivos que han iniciado sesión en su cuenta",
       contactReachSub: "Dónde nos comunicamos con usted para alertas de llamadas",
-      renewDateSub: "Facturado mensualmente · renueva el 1 de junio de 2026",
       addonsPlansSub: "Disponible en todos los planes",
       addonNumbersTitle: "Número de teléfono adicional",
       addonNumbersDesc: "Añada otro número iCanCall dedicado para otro ser querido, cada uno con sus propios contactos y enrutamiento.",
@@ -689,7 +686,6 @@ export const dashboardTranslations: Record<
       strongPasswordSub: "Choisissez un mot de passe fort que vous n'utilisez pas ailleurs",
       activeSessionsSub: "Appareils actuellement connectés à votre compte",
       contactReachSub: "Où vous joindre pour les alertes d'appels",
-      renewDateSub: "Facturé mensuellement · se renouvelle le 1er juin 2026",
       addonsPlansSub: "Disponible sur tous les forfaits",
       addonNumbersTitle: "Numéro de téléphone supplémentaire",
       addonNumbersDesc: "Ajoutez un autre numéro iCanCall dédié pour un autre proche, chacun avec ses propres contacts et son routage.",
@@ -869,7 +865,6 @@ export const dashboardTranslations: Record<
       strongPasswordSub: "他の場所で使用していない強力なパスワードを選択してください",
       activeSessionsSub: "現在アカウントにサインインしているデバイス",
       contactReachSub: "通話アラートおよびアカウント通知の連絡先",
-      renewDateSub: "月額課金 · 2026年6月1日に更新",
       addonsPlansSub: "すべてのプランでご利用いただけます",
       addonNumbersTitle: "追加の電話番号",
       addonNumbersDesc: "ご家族のためにもう一つのiCanCall専用番号を追加できます。それぞれに個別の連絡先と転送ルールが設定可能です。",
@@ -1049,7 +1044,6 @@ export const dashboardTranslations: Record<
       strongPasswordSub: "选择一个您不在其他地方使用的强密码",
       activeSessionsSub: "当前登录您账户的的设备",
       contactReachSub: "我们向您发送通话提醒和账户通知的联系方式",
-      renewDateSub: "按月计费 · 于 2026年6月1日续期",
       addonsPlansSub: "适用于所有方案",
       addonNumbersTitle: "额外电话号码",
       addonNumbersDesc: "为另一位亲人添加另一个专用的 iCanCall 号码，每个号码拥有独立的联系人和转接规则。",
@@ -1229,7 +1223,6 @@ export const dashboardTranslations: Record<
       strongPasswordSub: "اختر كلمة مرور قوية لا تستخدمها في مكان آخر",
       activeSessionsSub: "الأجهزة المسجلة دخولها حالياً إلى حسابك",
       contactReachSub: "حيث نصل إليك لتنبيهات المكالمات وإشعارات الحساب",
-      renewDateSub: "فوترة شهرية · يتجدد في 1 يونيو 2026",
       addonsPlansSub: "متاح في جميع الباقات",
       addonNumbersTitle: "رقم هاتف إضافي",
       addonNumbersDesc: "أضف رقماً مخصصاً آخر من iCanCall لشخص عزيز آخر، ولكل رقم جهات اتصال وتوجيه خاص به.",
@@ -1409,7 +1402,6 @@ export const dashboardTranslations: Record<
       strongPasswordSub: "एक मजबूत पासवर्ड चुनें जिसे आप कहीं और उपयोग नहीं करते हैं",
       activeSessionsSub: "आपके खाते में वर्तमान में साइन इन किए गए डिवाइस",
       contactReachSub: "जहाँ हम कॉल अलर्ट और खाता सूचनाओं के साथ आप तक पहुँचते हैं",
-      renewDateSub: "मासिक बिल भेजा जाता है · 1 जून, 2026 को नवीनीकरण होगा",
       addonsPlansSub: "सभी प्लान पर उपलब्ध है",
       addonNumbersTitle: "अतिरिक्त फ़ोन नंबर",
       addonNumbersDesc: "अपने किसी अन्य प्रियजन के लिए दूसरा समर्पित iCanCall नंबर जोड़ें, प्रत्येक के पास अपने स्वयं के संपर्क और रूटिंग होंगे।",
@@ -1589,7 +1581,6 @@ export const dashboardTranslations: Record<
       strongPasswordSub: "Escolha uma senha forte que não use em outro lugar",
       activeSessionsSub: "Dispositivos conectados atualmente à sua conta",
       contactReachSub: "Onde entramos em contato para alertas de chamadas",
-      renewDateSub: "Cobrado mensalmente · renova em 1 de junho de 2026",
       addonsPlansSub: "Disponível em todos os planos",
       addonNumbersTitle: "Número de telefone adicional",
       addonNumbersDesc: "Adicione outro número iCanCall dedicado para outro ente querido, cada um com seus próprios contatos e encaminhamento.",
@@ -1769,7 +1760,6 @@ export const dashboardTranslations: Record<
       strongPasswordSub: "Wählen Sie ein starkes Passwort, das Sie nirgendwo anders verwenden",
       activeSessionsSub: "Geräte, die derzeit bei Ihrem Konto angemeldet sind",
       contactReachSub: "Hier erreichen wir Sie mit Anrufalarmen und Kontobenachrichtigungen",
-      renewDateSub: "Monatlich abgerechnet · verlängert sich am 1. Juni 2026",
       addonsPlansSub: "In allen Tarifen verfügbar",
       addonNumbersTitle: "Zusätzliche Telefonnummer",
       addonNumbersDesc: "Fügen Sie eine weitere dedizierte iCanCall-Nummer für ein anderes Familienmitglied hinzu, jeweils mit eigenen Kontakten und Weiterleitungen.",
@@ -1949,7 +1939,6 @@ export const dashboardTranslations: Record<
       strongPasswordSub: "Scegli una password forte che non usi altrove",
       activeSessionsSub: "Dispositivi attualmente connessi al tuo account",
       contactReachSub: "Dove ti raggiungiamo con gli avvisi di chiamata e le notifiche",
-      renewDateSub: "Fatturato mensilmente · si rinnova il 1 giugno 2026",
       addonsPlansSub: "Disponibile in tutti i piani",
       addonNumbersTitle: "Numero di telefono aggiuntivo",
       addonNumbersDesc: "Aggiungi un altro numero iCanCall dedicato per un altro familiare, ciascuno con i propri contatti e instradamento.",
@@ -2129,7 +2118,6 @@ export const dashboardTranslations: Record<
       strongPasswordSub: "다른 서비스에서 사용하지 않는 강력한 비밀번호를 선택하세요",
       activeSessionsSub: "현재 계정에 로그인된 기기 목록",
       contactReachSub: "통화 알림 및 계정 공지사항을 수신할 연락처",
-      renewDateSub: "매월 결제됨 · 2026년 6 1일 갱신 예정",
       addonsPlansSub: "모든 플랜에서 이용 가능",
       addonNumbersTitle: "추가 전화번호",
       addonNumbersDesc: "가족을 위해 또 다른 iCanCall 전용 번호를 추가할 수 있습니다. 각 번호는 개별 연락처와 연결 정책을 가집니다.",
