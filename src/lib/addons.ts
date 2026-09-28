@@ -9,7 +9,7 @@
 // subscription from billing.
 
 import { supabase } from "@/lib/supabase";
-import { planConfig } from "@/lib/planConfig";
+import { planConfig, readPendingPlanChange } from "@/lib/planConfig";
 import { entityId, retrieveCheckoutSession, stripe, subscriptionItem, subscriptionLiveness } from "@/lib/stripe";
 
 type Settings = Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -51,9 +51,15 @@ export function paidExtraNumbers(settings: Settings): number {
   return Math.max(0, Number(settings.addons?.extraNumbers) || 0);
 }
 
-/** How many phone numbers the account may hold: the plan's, plus paid extras. */
+/**
+ * How many phone numbers the account may hold: the plan's, plus paid extras.
+ * A plan change waiting for the end of the paid period counts too, so numbers
+ * that plan would not cover cannot be added in the meantime.
+ */
 export function lineAllowance(settings: Settings): number {
-  return planConfig(settings.plan).includedLines + paidExtraNumbers(settings);
+  const pending = readPendingPlanChange(settings);
+  const included = Math.min(planConfig(settings.plan).includedLines, pending ? planConfig(pending.plan).includedLines : Infinity);
+  return included + paidExtraNumbers(settings);
 }
 
 // ── Verifying an add-on purchase ──

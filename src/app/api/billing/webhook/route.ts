@@ -3,6 +3,8 @@ import type Stripe from "stripe";
 import { supabase } from "@/lib/supabase";
 import { appSubscriptionStatus, entityId, planForPriceId, retrieveCheckoutSession, stripe, subscriptionItem, subscriptionPeriod } from "@/lib/stripe";
 import { resetMinutesPool } from "@/lib/minutesCycle";
+import { readPendingPlanChange } from "@/lib/planConfig";
+import { releaseSchedule } from "@/lib/planSchedule";
 import { REACTIVATED_PATCH, endedPatch, isEndedStatus, sendSubscriptionEndedEmail } from "@/lib/subscriptionEnd";
 import { MAX_ADDON_UNITS, addonForPriceId, addonSubscriptions, creditAddonPurchase, followPlanSubscription, paidExtraNumbers } from "@/lib/addons";
 
@@ -111,6 +113,23 @@ async function onSubscriptionChanged(eventType: string, sub: Stripe.Subscription
 
   // Add-on subscriptions have their own lifecycle; only the plan's counts here.
   const isPlanSub = !!s.stripe_subscription_id && s.stripe_subscription_id === sub.id;
+
+  // A plan change waiting for the end of the paid period (api/billing/change-plan)
+  // is finished once the subscription is on that plan, and off if the schedule
+  // that carried it is gone (released in the Stripe Dashboard, or cancelled).
+  // The grace window keeps this from racing the request that just created it.
+  const pending = isPlanSub ? readPendingPlanChange(s) : null;
+  if (pending) {
+    const reached = !!subPlan && subPlan.plan === pending.plan && subPlan.billingCycle === pending.billingCycle;
+    const scheduleGone = !entityId(sub.schedule) && Date.now() - new Date(pending.scheduledAt || 0).getTime() > 60_000;
+    if (reached || scheduleGone || isEndedStatus(status)) {
+      console.log(`Stripe ${eventType} — ${profile.id} scheduled change to ${pending.plan}/${pending.billingCycle} is over (${reached ? "took effect" : "schedule gone"})`);
+      // What is left of the schedule after the switch would block cancelling.
+      if (reached) await releaseSchedule(sub).catch((err) => console.error("Stripe schedule release failed:", err));
+      await supabase.from("profiles").update({ settings: { ...s, pendingPlanChange: null } }).eq("id", profile.id);
+      s.pendingPlanChange = null;
+    }
+  }
 
   // An extra-number add-on that ended on its own (customer portal, failed
   // renewal): it is no longer paid for, so it no longer raises the allowance.

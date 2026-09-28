@@ -148,6 +148,7 @@ export async function POST(request: Request) {
       delete newSettings.billingCycle;
       delete newSettings.subscriptionStatus;
       delete newSettings.subscriptionEndsAt;
+      delete newSettings.pendingPlanChange;
       delete newSettings.subscriptionEndedAt;
       delete newSettings.numbersReleaseAt;
       delete newSettings.numbersReleasedAt;

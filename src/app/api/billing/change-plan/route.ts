@@ -3,7 +3,8 @@ import Stripe from "stripe";
 import { supabase } from "@/lib/supabase";
 import { authorizeOwner, loadSettings, type Settings } from "@/lib/billingOwner";
 import { REACTIVATED_PATCH, isEndedStatus } from "@/lib/subscriptionEnd";
-import { isPlanChangeChargedNow, planConfig, type PlanId } from "@/lib/planConfig";
+import { isPlanChangeChargedNow, isScheduledPlanChange, planConfig, readPendingPlanChange, type PlanId } from "@/lib/planConfig";
+import { releaseSchedule, scheduleSwitchAtPeriodEnd } from "@/lib/planSchedule";
 import { paidExtraNumbers } from "@/lib/addons";
 import {
   PLAN_PRICE_IDS,
@@ -13,6 +14,7 @@ import {
   stripe,
   subscriptionItem,
   subscriptionLiveness,
+  subscriptionPeriod,
   verifyPlanCheckout,
   type BillingCycle,
 } from "@/lib/stripe";
@@ -43,9 +45,21 @@ export async function GET() {
   try {
     const owner = await authorizeOwner();
     if (owner instanceof NextResponse) return owner;
-    if (isSimulatedBilling(owner.email)) return NextResponse.json({ mode: "simulated" });
     const settings = await loadSettings(owner.userId);
-    return NextResponse.json({ mode: liveSubscriptionId(settings) ? "subscription" : "checkout" });
+    const pending = readPendingPlanChange(settings);
+    if (isSimulatedBilling(owner.email)) return NextResponse.json({ mode: "simulated", pending });
+    const subscriptionId = liveSubscriptionId(settings);
+    // Annual accounts are told when a switch to monthly would take effect,
+    // before they confirm it: the end of the year already paid for.
+    let periodEnd: string | undefined;
+    if (subscriptionId && settings.billingCycle === "yearly") {
+      try {
+        periodEnd = subscriptionPeriod(await stripe().subscriptions.retrieve(subscriptionId)).end;
+      } catch (err) {
+        console.error(`Stripe period lookup failed for subscription ${subscriptionId}:`, err);
+      }
+    }
+    return NextResponse.json({ mode: subscriptionId ? "subscription" : "checkout", pending, ...(periodEnd ? { periodEnd } : {}) });
   } catch (err) {
     console.error("Stripe change-plan exception:", err);
     return NextResponse.json({ error: "Internal error" }, { status: 500 });
@@ -57,6 +71,10 @@ export async function GET() {
 //   { plan, billing }  → switches the existing Stripe subscription to the matching
 //                        price. Accounts with no subscription on record get a
 //                        `checkoutUrl` for a normal checkout instead.
+//                        Annual → monthly (not an upgrade) does not switch now: it is
+//                        scheduled for the end of the year already paid for, and
+//                        answers `scheduled: true` with the pending change.
+//   { cancelScheduled: true } → drops a change scheduled that way.
 //   { checkoutId }     → called when that checkout returns to the dashboard:
 //                        verifies the payment with Stripe and applies the plan
 //                        without waiting for the webhook.
@@ -72,6 +90,27 @@ export async function POST(req: NextRequest) {
 
     const settings = await loadSettings(userId);
     const simulated = isSimulatedBilling(owner.email);
+
+    // ── Take back a change scheduled for the end of the period ──
+    if (body.cancelScheduled === true) {
+      if (!simulated) {
+        const subscriptionId = liveSubscriptionId(settings);
+        if (subscriptionId) {
+          try {
+            await releaseSchedule(await stripe().subscriptions.retrieve(subscriptionId));
+          } catch (err) {
+            console.error(`Stripe schedule release error for subscription ${subscriptionId}:`, err);
+            return NextResponse.json(
+              { error: "We couldn't cancel the scheduled change, so nothing was changed. Please try again later or contact support." },
+              { status: 502 }
+            );
+          }
+        }
+      }
+      const saved = await savePlan(userId, settings, { pendingPlanChange: null });
+      if (!saved) return NextResponse.json({ error: "We couldn't save the change. Please try again." }, { status: 500 });
+      return NextResponse.json({ success: true, cancelledScheduled: true });
+    }
 
     // ── Return leg of a checkout started below ──
     if (body.checkoutId) {
@@ -133,7 +172,7 @@ export async function POST(req: NextRequest) {
     // Demo accounts and unconfigured environments never reach the gateway.
     if (simulated) {
       console.warn(`[MOCK] Simulating Stripe plan change to ${plan}/${billing} — no subscription was modified.`);
-      await savePlan(userId, settings, isEndedStatus(settings.subscriptionStatus) ? { ...REACTIVATED_PATCH, ...target } : target);
+      await savePlan(userId, settings, { ...(isEndedStatus(settings.subscriptionStatus) ? REACTIVATED_PATCH : {}), ...target, pendingPlanChange: null });
       return NextResponse.json({ success: true, ...target, charged: false, simulated: true });
     }
 
@@ -191,9 +230,41 @@ export async function POST(req: NextRequest) {
       billingCycle: (isBillingCycle(settings.billingCycle) ? settings.billingCycle : "monthly") as BillingCycle,
     };
     const charged = isPlanChangeChargedNow(current, target);
+    const sameAsCurrent = current.plan === target.plan && current.billingCycle === target.billingCycle;
 
     try {
-      const item = subscriptionItem(await stripe().subscriptions.retrieve(subscriptionId));
+      const sub = await stripe().subscriptions.retrieve(subscriptionId);
+
+      // Choosing what the account already has takes back a scheduled change.
+      if (sameAsCurrent) {
+        await releaseSchedule(sub);
+        await savePlan(userId, settings, { pendingPlanChange: null });
+        return NextResponse.json({ success: true, ...target, charged: false, cancelledScheduled: true });
+      }
+
+      // Annual → monthly waits for the end of the year already paid for.
+      if (isScheduledPlanChange(current, target)) {
+        if (settings.subscriptionStatus === "scheduled_cancel") {
+          return NextResponse.json(
+            { error: "Your subscription is set to end. Resume it before scheduling a plan change." },
+            { status: 409 }
+          );
+        }
+        const effectiveAt = await scheduleSwitchAtPeriodEnd(sub, priceId);
+        const pending = { ...target, effectiveAt, scheduledAt: new Date().toISOString() };
+        const saved = await savePlan(userId, settings, { pendingPlanChange: pending });
+        if (!saved) {
+          await releaseSchedule(await stripe().subscriptions.retrieve(subscriptionId)).catch(() => {});
+          return NextResponse.json({ error: "We couldn't save the change. Nothing was changed. Please try again." }, { status: 500 });
+        }
+        return NextResponse.json({ success: true, scheduled: true, ...current, pending, charged: false });
+      }
+
+      // Any other change replaces a scheduled one, and Stripe will not edit a
+      // subscription that a schedule still manages.
+      await releaseSchedule(sub);
+
+      const item = subscriptionItem(sub);
       if (!item.itemId) throw new Error("subscription has no items");
       // Upgrades charge the prorated difference right away, and the change is
       // refused (error_if_incomplete) if that payment fails. Downgrades take
@@ -229,7 +300,7 @@ export async function POST(req: NextRequest) {
 
     // Stripe has switched the subscription. If this write fails, the
     // customer.subscription.updated webhook applies the same plan moments later.
-    await savePlan(userId, settings, target);
+    await savePlan(userId, settings, { ...target, pendingPlanChange: null });
     return NextResponse.json({ success: true, ...target, charged });
   } catch (err) {
     console.error("Stripe change-plan exception:", err);

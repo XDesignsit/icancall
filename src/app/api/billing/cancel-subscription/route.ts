@@ -3,6 +3,7 @@ import { supabase } from "@/lib/supabase";
 import { authorizeOwner, loadSettings, type Settings } from "@/lib/billingOwner";
 import { appSubscriptionStatus, isSimulatedBilling, stripe, subscriptionPeriod } from "@/lib/stripe";
 import { followPlanSubscription } from "@/lib/addons";
+import { releaseSchedule } from "@/lib/planSchedule";
 
 async function saveStatus(userId: string, settings: Settings, patch: Settings): Promise<void> {
   const { error } = await supabase
@@ -37,7 +38,7 @@ export async function POST(req: NextRequest) {
     if (isSimulatedBilling(owner.email)) {
       console.warn(`[MOCK] Simulating Stripe subscription ${action} — no subscription was modified.`);
       const patch = action === "cancel"
-        ? { subscriptionStatus: "scheduled_cancel", subscriptionEndsAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString() }
+        ? { subscriptionStatus: "scheduled_cancel", subscriptionEndsAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), pendingPlanChange: null }
         : { subscriptionStatus: "active", subscriptionEndsAt: null };
       await saveStatus(userId, settings, patch);
       return NextResponse.json({ success: true, ...patch, simulated: true });
@@ -55,6 +56,10 @@ export async function POST(req: NextRequest) {
     // and then ends, rather than stopping (and cutting off the numbers) today.
     let subscription;
     try {
+      // A plan change scheduled for the end of the period is dropped: Stripe
+      // will not edit the cancellation of a subscription a schedule manages,
+      // and the plan is ending anyway.
+      if (action === "cancel") await releaseSchedule(await stripe().subscriptions.retrieve(subscriptionId));
       subscription = await stripe().subscriptions.update(subscriptionId, { cancel_at_period_end: action === "cancel" });
     } catch (err) {
       console.error(`Stripe subscription ${action} error for ${subscriptionId}:`, err);
@@ -76,7 +81,7 @@ export async function POST(req: NextRequest) {
     }
 
     const patch = action === "cancel"
-      ? { subscriptionStatus: status, subscriptionEndsAt: subscriptionPeriod(subscription).end || null }
+      ? { subscriptionStatus: status, subscriptionEndsAt: subscriptionPeriod(subscription).end || null, pendingPlanChange: null }
       : { subscriptionStatus: "active", subscriptionEndsAt: null };
     // Extra-number add-ons bill on subscriptions of their own. They follow the
     // plan: no further charges once it is set to end, back on if it is resumed.

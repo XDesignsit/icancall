@@ -31,7 +31,7 @@ function relativeTime(iso: string, lang: string, activeNow: string): string {
 
 import { dashboardExtraTranslations } from "@/lib/dashboardExtraTranslations";
 import { type DashboardTranslations } from "@/lib/dashboardTranslations";
-import { isPlanChangeChargedNow, planConfig, type PlanId } from "@/lib/planConfig";
+import { isPlanChangeChargedNow, isScheduledPlanChange, planConfig, type PlanId } from "@/lib/planConfig";
 import { planChangeNotice, planChangeStrings, type PlanChangeMode } from "./planChangeStrings";
 import { cancelStrings, formatEndDate } from "./cancelStrings";
 
@@ -286,6 +286,10 @@ export function AccountView({
   const [planChangePending, setPlanChangePending] = useState(false);
   const [planChangeError, setPlanChangeError] = useState("");
   useEffect(() => { setPlanChangeError(""); }, [planModalOpen, tempPlan, tempCycle]);
+  // When an annual plan's paid year ends: the date a switch to monthly billing
+  // would take effect. Known once /api/billing/change-plan has answered.
+  const [planPeriodEnd, setPlanPeriodEnd] = useState<string | null>(null);
+  const [pendingCancelBusy, setPendingCancelBusy] = useState(false);
 
   // Cancelling (and undoing it) goes through /api/billing/cancel-subscription.
   // The subscription always runs to the end of the period already paid for.
@@ -312,7 +316,8 @@ export function AccountView({
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok || !data.success) throw new Error(lang === "en" && data.error ? data.error : cs.failed);
-      set({ subscriptionStatus: data.subscriptionStatus, subscriptionEndsAt: data.subscriptionEndsAt ?? null });
+      // Cancelling drops a plan change that was waiting for the end of the period.
+      set({ subscriptionStatus: data.subscriptionStatus, subscriptionEndsAt: data.subscriptionEndsAt ?? null, ...(action === "cancel" ? { pendingPlanChange: null } : {}) });
       setCancelConfirmOpen(false);
       showToast(action === "cancel" ? cs.cancelledToast : cs.resumedToast);
     } catch (err) {
@@ -333,9 +338,33 @@ export function AccountView({
     }
     fetch("/api/billing/change-plan")
       .then((res) => (res.ok ? res.json() : null))
-      .then((data) => { if (data?.mode) setPlanChangeMode(data.mode); })
+      .then((data) => {
+        if (data?.mode) setPlanChangeMode(data.mode);
+        if (typeof data?.periodEnd === "string") setPlanPeriodEnd(data.periodEnd);
+      })
       .catch(() => {});
   }, [viewerRole]);
+
+  /** Takes back a plan change that was waiting for the end of the paid period. */
+  const cancelPendingChange = async () => {
+    if (localStorage.getItem("impersonatingUser")) return;
+    setPendingCancelBusy(true);
+    try {
+      const res = await fetch("/api/billing/change-plan", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ cancelScheduled: true }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.success) throw new Error(lang === "en" && data.error ? data.error : pcs.failed);
+      set({ pendingPlanChange: null });
+      showToast(pcs.pendingCancelled);
+    } catch (err) {
+      showToast(err instanceof Error && err.message && err.message !== "Failed to fetch" ? err.message : pcs.failed);
+    } finally {
+      setPendingCancelBusy(false);
+    }
+  };
 
   /** Resolves true once the subscription has been switched and the new plan may be applied. */
   const changePlan = async (plan: PlanId, billingCycle: "monthly" | "yearly"): Promise<boolean> => {
@@ -353,7 +382,18 @@ export function AccountView({
         window.location.href = data.checkoutUrl;
         return false;
       }
-      if (res.ok && data.success) return true;
+      // Annual → monthly waits for the end of the paid year: the plan stays as
+      // it is, and the change is shown as pending.
+      if (res.ok && data.success && data.scheduled && data.pending) {
+        set({ pendingPlanChange: data.pending });
+        setPlanModalOpen(false);
+        showToast(pcs.scheduledToast.replace("{date}", formatEndDate(data.pending.effectiveAt, lang)));
+        return false;
+      }
+      if (res.ok && data.success) {
+        set({ pendingPlanChange: null });
+        return true;
+      }
       throw new Error(lang === "en" && data.error ? data.error : pcs.failed);
     } catch (err) {
       const msg = err instanceof Error && err.message && err.message !== "Failed to fetch" ? err.message : pcs.failed;
@@ -702,11 +742,19 @@ export function AccountView({
     (!subscriptionEnded && tempPlan === account.plan && tempCycle === account.billingCycle) ||
     (isUpgradingToPro && !upgradeSelectedNumber);
 
-  const planChangeBillingNotice = planChangeNotice(
-    lang,
-    planChangeMode,
-    isPlanChangeChargedNow({ plan: account.plan, billingCycle: account.billingCycle }, { plan: tempPlan, billingCycle: tempCycle }),
-  );
+  const planChangeFrom = { plan: account.plan, billingCycle: account.billingCycle };
+  const planChangeTo = { plan: tempPlan, billingCycle: tempCycle };
+  const planChangeWaits = planChangeMode === "subscription" && !subscriptionEnded && isScheduledPlanChange(planChangeFrom, planChangeTo);
+  // A change that waits for the paid year to end says so, with the date; until
+  // the date is known there is nothing accurate to say.
+  const planChangeBillingNotice = planChangeWaits && !planPeriodEnd
+    ? ""
+    : planChangeNotice(
+        lang,
+        planChangeMode,
+        isPlanChangeChargedNow(planChangeFrom, planChangeTo),
+        planChangeWaits && planPeriodEnd ? formatEndDate(planPeriodEnd, lang) : undefined,
+      );
 
   // The annual confirmation serves both the plan modal (which may also be
   // switching tiers) and the billing card's cycle toggle (current tier).
@@ -2582,6 +2630,21 @@ export function AccountView({
                   <Icon name="spark" /> {ext.changePlan}
                 </button>
               </div>
+              {account.pendingPlanChange && (
+                <div
+                  role="status"
+                  style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 12, marginTop: 16, padding: "12px 14px", background: "var(--tint)", border: "1px solid var(--line)", borderRadius: "var(--r-md)" }}
+                >
+                  <span style={{ flex: "1 1 260px", fontSize: "0.92rem", lineHeight: 1.5, color: "var(--ink)" }}>
+                    {pcs.pendingBanner
+                      .replace("{plan}", planDisplayName(account.pendingPlanChange.plan, lang))
+                      .replace("{date}", formatEndDate(account.pendingPlanChange.effectiveAt, lang))}
+                  </span>
+                  <button className="btn btn-ghost" disabled={pendingCancelBusy} onClick={cancelPendingChange}>
+                    {pendingCancelBusy ? pcs.updating : pcs.pendingCancel}
+                  </button>
+                </div>
+              )}
             </div>
           </div>
 

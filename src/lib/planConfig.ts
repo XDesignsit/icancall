@@ -84,3 +84,35 @@ export function isPlanChangeChargedNow(
   if (PLAN_RANK[to.plan] !== PLAN_RANK[from.plan]) return PLAN_RANK[to.plan] > PLAN_RANK[from.plan];
   return from.billingCycle === "monthly" && to.billingCycle === "yearly";
 }
+
+/**
+ * A move from annual to monthly billing that is not an upgrade. Stripe would
+ * restart the billing cycle and only bill the difference on the next invoice,
+ * so instead it waits for the end of the year already paid for: nothing is
+ * charged or credited, and the customer keeps their plan until then.
+ */
+export function isScheduledPlanChange(
+  from: { plan: PlanId; billingCycle: "monthly" | "yearly" },
+  to: { plan: PlanId; billingCycle: "monthly" | "yearly" },
+): boolean {
+  return from.billingCycle === "yearly" && to.billingCycle === "monthly" && !isPlanChangeChargedNow(from, to);
+}
+
+/** A plan change that will take effect at the end of the paid period (settings.pendingPlanChange). */
+export interface PendingPlanChange {
+  plan: PlanId;
+  billingCycle: "monthly" | "yearly";
+  /** When it takes effect: the end of the current paid period. ISO. */
+  effectiveAt: string;
+  /** When it was scheduled. ISO. */
+  scheduledAt: string;
+}
+
+/** The pending plan change stored on an account's settings, or null when there is none (or it is malformed). */
+export function readPendingPlanChange(settings: Record<string, unknown> | null | undefined): PendingPlanChange | null {
+  const p = settings?.pendingPlanChange as Partial<PendingPlanChange> | null | undefined;
+  if (!p || typeof p !== "object") return null;
+  if (!(p.plan && p.plan in PLAN_RANK) || (p.billingCycle !== "monthly" && p.billingCycle !== "yearly")) return null;
+  if (typeof p.effectiveAt !== "string" || !p.effectiveAt) return null;
+  return { plan: p.plan, billingCycle: p.billingCycle, effectiveAt: p.effectiveAt, scheduledAt: typeof p.scheduledAt === "string" ? p.scheduledAt : "" };
+}
