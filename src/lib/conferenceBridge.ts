@@ -149,7 +149,13 @@ export async function stopPlacedLegs(client: Twilio, room: string): Promise<void
  * once can report before they get there -- that is just the caller.
  */
 async function callerRoom(client: Twilio, room: string, callerCallSid: string): Promise<string[] | null> {
-  const rooms = await client.conferences.list({ friendlyName: room, limit: 20 });
+  // Twilio's list defaults to in-progress only (since 2026-09-30), so ask for
+  // finished rooms too: a room that already ended must read as "caller left".
+  const [live, finished] = await Promise.all([
+    client.conferences.list({ friendlyName: room, status: 'in-progress', limit: 20 }),
+    client.conferences.list({ friendlyName: room, status: 'completed', limit: 20 }),
+  ]);
+  const rooms = [...live, ...finished];
   const open = rooms.find((c) => c.status !== 'completed');
   if (open) {
     const present = await participantCallSids(client, open.sid);
