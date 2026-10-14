@@ -1,10 +1,16 @@
-import { NextResponse } from 'next/server';
+import { after, NextResponse } from 'next/server';
 import { ttsPlayTag, verifyTelephonyWebhook } from '@/lib/twilioWebhook';
 import { findAccountByTwilioNumber } from '@/lib/db';
-import { claimCallAlert, recordTranscript, recordVoicemail, type CallRow } from '@/lib/callRecords';
+import { claimCallAlert, getCall, recordTranscript, recordVoicemail, type CallRow } from '@/lib/callRecords';
 import { sendCallAlert } from '@/lib/callAlerts';
 
 export const preferredRegion = 'iad1';
+// The fallback alert below waits in the background after the response.
+export const maxDuration = 60;
+
+// How long the transcript callback gets to arrive before the voicemail alert
+// goes out without a transcript. Twilio normally calls back within seconds.
+const TRANSCRIPT_WAIT_MS = 40_000;
 
 // The voicemail <Record> reports here twice (voice webhook):
 //  - kind=recording, its action, as soon as the caller finishes. The call log
@@ -12,7 +18,10 @@ export const preferredRegion = 'iad1';
 //    TwiML they are still on the line for.
 //  - kind=transcript, its transcribeCallback, when the transcript is ready
 //    (or transcription failed). The caregiver's voicemail alert goes out
-//    then, once, transcript included.
+//    then, once, transcript included. If that callback never arrives, the
+//    recording step sends the alert itself after TRANSCRIPT_WAIT_MS; the
+//    alert is claimed per call, so whichever comes first sends it and the
+//    other does nothing.
 // Records made before the kind parameter tell the two apart by whether
 // Twilio sent a TranscriptionStatus.
 export async function POST(request: Request) {
@@ -35,7 +44,23 @@ export async function POST(request: Request) {
       const seconds = Number(form.get('RecordingDuration') || 0);
       // A recording with nothing in it is a caller who hung up at the beep:
       // the call stays a missed call.
-      if (callSid && recordingUrl && seconds > 0) await recordVoicemail(callSid, recordingUrl, seconds);
+      if (callSid && recordingUrl && seconds > 0) {
+        await recordVoicemail(callSid, recordingUrl, seconds);
+        if (account) {
+          after(async () => {
+            await new Promise((resolve) => setTimeout(resolve, TRANSCRIPT_WAIT_MS));
+            try {
+              const row = await getCall(callSid);
+              if (row && !row.alerted_at && (await claimCallAlert(callSid))) {
+                console.log(`Voicemail alert for ${callSid} sent without a transcript: the callback did not arrive`);
+                await sendCallAlert(account, row);
+              }
+            } catch (err) {
+              console.error('Voicemail fallback alert failed:', err);
+            }
+          });
+        }
+      }
 
       const voiceId = account?.line?.settings?.voiceId || '21m00Tcm4TlvDq8ikWAM';
       return new NextResponse(
