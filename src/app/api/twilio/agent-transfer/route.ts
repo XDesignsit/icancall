@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { ttsPlayTag, verifyTelephonyWebhook } from '@/lib/twilioWebhook';
 import { findAccountByTwilioNumber } from '@/lib/db';
 import { parseConferenceRoom } from '@/lib/conferenceRoom';
+import { callerStillThere } from '@/lib/conferenceBridge';
 
 export const preferredRegion = 'iad1';
 
@@ -43,6 +44,18 @@ export async function POST(request: Request) {
     const baseUrl = `${requestUrl.protocol}//${requestUrl.host}`;
     const getTtsPlayTag = (text: string) => ttsPlayTag(baseUrl, text, voiceId);
 
+    // The caregiver's conference leg also ends when the caller hangs up, which
+    // lands here exactly like a * press. Offering the transfer menu (or
+    // rejoining an empty room) to someone with nobody left to talk to leaves
+    // them on the line, so let them go.
+    const twilioClient = (await import('@/lib/twilio')).default;
+    if (twilioClient && !(await callerStillThere(twilioClient, room))) {
+      return new NextResponse(
+        `<?xml version="1.0" encoding="UTF-8"?>\n<Response>\n  ${getTtsPlayTag("The caller has hung up. Goodbye.")}\n  <Hangup />\n</Response>`,
+        { headers: { 'Content-Type': 'application/xml' } }
+      );
+    }
+
     let twiml = '<?xml version="1.0" encoding="UTF-8"?>\n<Response>';
 
     if (!digits) {
@@ -73,7 +86,6 @@ export async function POST(request: Request) {
         // new leg reports to agent-completed, which lets the caller go once
         // nobody is left.
         let placed = false;
-        const twilioClient = (await import('@/lib/twilio')).default;
         if (twilioClient) {
           try {
             await twilioClient.calls.create({
