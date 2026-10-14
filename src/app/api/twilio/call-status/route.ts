@@ -3,6 +3,8 @@ import { verifyTelephonyWebhook } from '@/lib/twilioWebhook';
 import { findAccountByTwilioNumber } from '@/lib/db';
 import { claimCallAlert, getCall, recordCallEnded } from '@/lib/callRecords';
 import { sendCallAlert } from '@/lib/callAlerts';
+import { buildConferenceRoom } from '@/lib/conferenceRoom';
+import { stopPlacedLegs } from '@/lib/conferenceBridge';
 
 export const preferredRegion = 'iad1';
 
@@ -24,6 +26,13 @@ export async function POST(request: Request) {
     const lineNumber = form.get('To')?.toString() || '';
     const duration = Number(form.get('CallDuration') ?? Number.NaN);
     if (!callSid || !FINAL_STATUSES.has(callStatus)) return new NextResponse('OK');
+
+    // A caller who hangs up while All Ring is still ringing the family: stop
+    // those phones, or whoever picks up next would find nobody there.
+    const twilioClient = (await import('@/lib/twilio')).default;
+    if (twilioClient && lineNumber) {
+      await stopPlacedLegs(twilioClient, buildConferenceRoom(lineNumber, callSid));
+    }
 
     // Not a call the voice webhook logged, or a retry of this webhook.
     const call = await getCall(callSid);
