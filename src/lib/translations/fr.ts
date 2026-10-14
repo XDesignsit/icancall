@@ -38,7 +38,9 @@ const t: HomepageTranslations = {
   "faq": "FAQ",
   "login": "Connexion",
   "howWorksBtn": "Voir le fonctionnement",
-  "selectPlanBtn": "Choisir un forfait"
+  "selectPlanBtn": "Choisir un forfait",
+  "menu": "Menu",
+  "language": "Langue"
 },
 "hero": {
   "eyebrow": "La sécurité en pilote automatique",
