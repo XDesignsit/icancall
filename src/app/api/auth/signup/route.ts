@@ -309,8 +309,7 @@ export async function POST(request: Request) {
           const { sendSms } = await import("@/lib/twilio");
           await sendSms(
             normalizedSmsPhone,
-            // No link: carriers filter links from the A2P number (see lib/callAlerts).
-            `Welcome to iCanCall, ${firstName}! Your ${details.name} is active. Manage your lines and trusted contacts in your iCanCall dashboard. Reply STOP to opt out.`
+            `Welcome to iCanCall, ${firstName}! Your ${details.name} is active. Manage your lines and trusted contacts: https://app.icancall.co/dashboard Reply STOP to opt out.`
           );
         } catch (smsErr) {
           console.error("Failed to send signup confirmation SMS:", smsErr);
