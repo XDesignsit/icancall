@@ -3,6 +3,7 @@ import { ttsPlayTag, verifyTelephonyWebhook } from '@/lib/twilioWebhook';
 import { findAccountByTwilioNumber } from '@/lib/db';
 import { claimCallAlert, getCall, recordTranscript, recordVoicemail, type CallRow } from '@/lib/callRecords';
 import { sendCallAlert } from '@/lib/callAlerts';
+import { callPrompt, parseCallLang } from '@/lib/callPrompts';
 
 export const preferredRegion = 'iad1';
 // The fallback alert below waits in the background after the response.
@@ -14,8 +15,9 @@ const TRANSCRIPT_WAIT_MS = 40_000;
 
 // The voicemail <Record> reports here twice (voice webhook):
 //  - kind=recording, its action, as soon as the caller finishes. The call log
-//    gets the recording, and the caller hears a goodbye -- this answer is
-//    TwiML they are still on the line for.
+//    gets the recording, and the caller hears a goodbye in their language
+//    (`lang`, lib/callPrompts) -- this answer is TwiML they are still on the
+//    line for.
 //  - kind=transcript, its transcribeCallback, when the transcript is ready
 //    (or transcription failed). The caregiver's voicemail alert goes out
 //    then, once, transcript included. If that callback never arrives, the
@@ -66,7 +68,7 @@ export async function POST(request: Request) {
       return new NextResponse(
         `<?xml version="1.0" encoding="UTF-8"?>
 <Response>
-  ${ttsPlayTag(baseUrl, 'Thank you. Your message has been sent. Goodbye.', voiceId)}
+  ${ttsPlayTag(baseUrl, callPrompt(parseCallLang(url.searchParams.get('lang')), 'messageSent'), voiceId)}
   <Hangup/>
 </Response>`,
         { headers: { 'Content-Type': 'application/xml' } }

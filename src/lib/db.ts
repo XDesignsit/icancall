@@ -16,6 +16,12 @@ export interface LineSettings {
   voiceId?: string;
   greeting?: string;
   greetingAudioPath?: string;
+  /** Bilingual Support (lib/callPrompts): off unless true. */
+  bilingual?: boolean;
+  /** The second language's code; older lines hold its name ("Spanish"). */
+  language2?: string;
+  /** Custom greeting for callers who switch to the second language. */
+  greeting2?: string;
   /** See lib/cascadeAnnounce. */
   directConnect?: boolean;
   [key: string]: unknown;

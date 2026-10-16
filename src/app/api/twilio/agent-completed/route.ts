@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { verifyTelephonyWebhook } from '@/lib/twilioWebhook';
 import { buildConferenceRoom } from '@/lib/conferenceRoom';
 import { firstAcceptedLeg, releaseCallerIfAlone } from '@/lib/conferenceBridge';
+import { parseCallLang } from '@/lib/callPrompts';
 
 export const preferredRegion = 'iad1';
 
@@ -21,6 +22,7 @@ export async function POST(request: Request) {
     // Legs placed before the room was passed here carry only the caller's CallSid.
     const parentCallSid = requestUrl.searchParams.get('parentCallSid');
     const screened = requestUrl.searchParams.get('missed') === '1';
+    const lang = parseCallLang(requestUrl.searchParams.get('lang'));
     let callSid = requestUrl.searchParams.get('CallSid');
     let from = requestUrl.searchParams.get('From');
 
@@ -46,7 +48,7 @@ export async function POST(request: Request) {
     if (twilioClient && room) {
       const baseUrl = `${requestUrl.protocol}//${requestUrl.host}`;
       const missed = screened && !(await firstAcceptedLeg(room));
-      await releaseCallerIfAlone(twilioClient, { room, endedCallSid: callSid, baseUrl, missed });
+      await releaseCallerIfAlone(twilioClient, { room, endedCallSid: callSid, baseUrl, missed, lang });
     }
 
     return new NextResponse('OK');

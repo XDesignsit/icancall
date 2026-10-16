@@ -1,5 +1,6 @@
 import type { Twilio } from 'twilio';
 import { parseConferenceRoom } from '@/lib/conferenceRoom';
+import { langParam, type CallLang } from '@/lib/callPrompts';
 import { supabase } from '@/lib/supabase';
 
 /**
@@ -209,12 +210,14 @@ export async function callerWaitingAlone(client: Twilio, room: string): Promise<
 
 export async function releaseCallerIfAlone(
   client: Twilio,
-  { room, endedCallSid, baseUrl, missed = false }: {
+  { room, endedCallSid, baseUrl, missed = false, lang = 'en' }: {
     room: string;
     endedCallSid?: string | null;
     baseUrl: string;
     /** The leg that ended never reached the caller (see wasLegAccepted). */
     missed?: boolean;
+    /** The caller's language, for the voicemail prompt (lib/callPrompts). */
+    lang?: CallLang;
   }
 ): Promise<CallerOutcome> {
   const conference = parseConferenceRoom(room);
@@ -250,7 +253,7 @@ export async function releaseCallerIfAlone(
   //    the conversation is over.
   if (missed) {
     await client.calls(callerCallSid).update({
-      url: `${baseUrl}/api/twilio/voice?Digits=no-answer&To=${encodeURIComponent(lineNumber)}`,
+      url: `${baseUrl}/api/twilio/voice?Digits=no-answer&To=${encodeURIComponent(lineNumber)}${langParam(lang)}`,
       method: 'POST',
     });
     return 'voicemail';

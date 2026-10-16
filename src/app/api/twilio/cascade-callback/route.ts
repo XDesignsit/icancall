@@ -4,6 +4,7 @@ import { findAccountByTwilioNumber } from '@/lib/db';
 import { parseConferenceRoom } from '@/lib/conferenceRoom';
 import { callerWaitingAlone, recordPlacedLegs, releaseCallerIfAlone, wasLegAccepted } from '@/lib/conferenceBridge';
 import { cascadeOrder, parseLeadIndex } from '@/lib/coverageSchedule';
+import { langParam, parseCallLang } from '@/lib/callPrompts';
 
 export const preferredRegion = 'iad1';
 
@@ -18,6 +19,8 @@ export async function POST(request: Request) {
     let callSid = requestUrl.searchParams.get('CallSid');
     // Schedule-mode calls pin the on-duty contact they rang first (voice route).
     const leadIndex = parseLeadIndex(requestUrl.searchParams.get('lead'));
+    // The caller's language (lib/callPrompts), passed on to the next leg and to voicemail.
+    const lang = parseCallLang(requestUrl.searchParams.get('lang'));
 
     if (request.method === 'POST') {
       try {
@@ -68,7 +71,7 @@ export async function POST(request: Request) {
             to: nextContact.phone,
             from: activeNumber,
             url: `${baseUrl}/api/twilio/agent-join?room=${encodeURIComponent(room)}&screen=1`,
-            statusCallback: `${baseUrl}/api/twilio/cascade-callback?room=${encodeURIComponent(room)}&contactIndex=${nextIdx + 1}${leadIndex === null ? '' : `&lead=${leadIndex}`}`,
+            statusCallback: `${baseUrl}/api/twilio/cascade-callback?room=${encodeURIComponent(room)}&contactIndex=${nextIdx + 1}${leadIndex === null ? '' : `&lead=${leadIndex}`}${langParam(lang)}`,
             statusCallbackEvent: ['completed', 'busy', 'no-answer', 'failed'],
             timeout: 15
           });
@@ -84,7 +87,7 @@ export async function POST(request: Request) {
     // The conversation is over (the caregiver hung up, or pressed * and handed
     // the caller on), or there is nobody left to ring and the caller leaves a
     // message. Either way they stay on while anyone else is there for them.
-    await releaseCallerIfAlone(twilioClient, { room, endedCallSid: callSid, baseUrl, missed: !accepted });
+    await releaseCallerIfAlone(twilioClient, { room, endedCallSid: callSid, baseUrl, missed: !accepted, lang });
 
     return new NextResponse('OK');
   } catch (error) {
