@@ -8,7 +8,7 @@ import { type DashboardTranslations } from "@/lib/dashboardTranslations";
 import { type PlanId } from "@/lib/planConfig";
 import { getLocalizedLineLabel, getLocalizedPersonName, getLocalizedRelationship } from "../_data";
 import { Icon } from "../_icons";
-import { Badge, initials } from "../_primitives";
+import { Badge, Toggle, initials } from "../_primitives";
 import { type Contact, type CoverageSlot, type Line } from "../_types";
 
 
@@ -595,6 +595,11 @@ export function RoutingView({
     setModeChangedOn(line.id);
   };
 
+  const setDirectConnect = (directConnect: boolean) => {
+    setLine((prev) => prev.map((l) => (l.id === line.id ? { ...l, settings: { ...l.settings, directConnect } } : l)));
+    setModeChangedOn(line.id);
+  };
+
   const modeCheck = (
     <span className="check" aria-hidden="true">
       <Icon name="check" />
@@ -754,6 +759,22 @@ export function RoutingView({
               </p>
             </div>
           </div>
+          {line.mode !== "menu" && (
+            <div className="set-row" style={{ marginTop: 20, paddingBottom: 0 }}>
+              <div className="txt">
+                <b>{d.routing.directConnect}</b>
+                <p>{d.routing.directConnectDesc}</p>
+              </div>
+              <Toggle
+                on={line.settings?.directConnect === true}
+                onChange={setDirectConnect}
+                labels={[
+                  lang === "es" ? "Apagado" : lang === "fr" ? "Désactivé" : lang === "ja" ? "オフ" : lang === "zh" ? "关闭" : lang === "ar" ? "إيقاف" : lang === "hi" ? "बंद" : lang === "pt" ? "Desativado" : lang === "de" ? "Aus" : lang === "it" ? "Spento" : lang === "ko" ? "꺼짐" : "Off",
+                  lang === "es" ? "Encendido" : lang === "fr" ? "Activé" : lang === "ja" ? "オン" : lang === "zh" ? "开启" : lang === "ar" ? "تشغيل" : lang === "hi" ? "चालू" : lang === "pt" ? "Ativado" : lang === "de" ? "An" : lang === "it" ? "Acceso" : lang === "ko" ? "켜짐" : "On"
+                ]}
+              />
+            </div>
+          )}
         </div>
       </div>
 

@@ -15,6 +15,8 @@ export interface LineSettings {
   voiceId?: string;
   greeting?: string;
   greetingAudioPath?: string;
+  /** See lib/cascadeAnnounce. */
+  directConnect?: boolean;
   [key: string]: unknown;
 }
 
