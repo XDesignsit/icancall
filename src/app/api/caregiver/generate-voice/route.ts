@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { verifySession } from '@/lib/session';
 import { supabase } from '@/lib/supabase';
+import { resolveAccount } from '@/lib/account';
+import { customVoiceOf, effectiveVoiceId } from '@/lib/voices';
 
 async function getAuthenticatedUserId() {
   const cookieStore = await cookies();
@@ -18,7 +20,12 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { text, contactId, voiceId = '21m00Tcm4TlvDq8ikWAM' } = await request.json();
+    const { text, contactId, voiceId: requestedVoice } = await request.json();
+
+    // A stock voice, or the account owner's own clone (lib/voices).
+    const account = await resolveAccount(userId);
+    const { data: owner } = await supabase.from('profiles').select('settings').eq('id', account.accountId).maybeSingle();
+    const voiceId = effectiveVoiceId(requestedVoice, customVoiceOf(owner?.settings), owner?.settings?.plan);
 
     if (!text || !contactId) {
       return NextResponse.json({ error: 'Missing text or contactId' }, { status: 400 });

@@ -3,11 +3,14 @@
 import React, { useState } from "react";
 
 import { dashboardExtraTranslations } from "@/lib/dashboardExtraTranslations";
+import { voiceCloneTranslations } from "@/lib/voiceCloneTranslations";
+import { type CustomVoice } from "@/lib/voices";
 import { type DashboardTranslations } from "@/lib/dashboardTranslations";
 import { ELEVENLABS_VOICE_GROUPS, getLocalizedLineLabel, getLocalizedPersonName } from "../_data";
 import { Icon } from "../_icons";
 import { Toggle } from "../_primitives";
 import { type Line } from "../_types";
+import { VoiceCloneCard } from "./VoiceCloneCard";
 
 
 /* Greetings & alerts */
@@ -18,6 +21,11 @@ export function SettingsView({
   d,
   lang,
   preferredName,
+  plan,
+  customVoice,
+  setCustomVoice,
+  isOwner,
+  onUpgrade,
 }: {
   line: Line;
   setLine: React.Dispatch<React.SetStateAction<Line[]>>;
@@ -25,8 +33,14 @@ export function SettingsView({
   d: DashboardTranslations;
   lang: string;
   preferredName: string;
+  plan: string;
+  customVoice: CustomVoice | null;
+  setCustomVoice: (voice: CustomVoice | null) => void;
+  isOwner: boolean;
+  onUpgrade: () => void;
 }) {
   const ext = dashboardExtraTranslations[lang as keyof typeof dashboardExtraTranslations] || dashboardExtraTranslations.en;
+  const vt = voiceCloneTranslations[lang as keyof typeof voiceCloneTranslations] || voiceCloneTranslations.en;
   const [isGenerating, setIsGenerating] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const s = line.settings || {};
@@ -146,6 +160,11 @@ export function SettingsView({
                 color: 'var(--ink)'
               }}
             >
+              {customVoice && plan !== "essential" && (
+                <optgroup label={vt.myVoiceGroup}>
+                  <option value={customVoice.id}>{vt.myVoice}</option>
+                </optgroup>
+              )}
               {ELEVENLABS_VOICE_GROUPS.map((g) => (
                 <optgroup key={g.langKey} label={ext[g.langKey]}>
                   {g.voices.map((v) => (
@@ -198,6 +217,18 @@ export function SettingsView({
           )}
         </div>
       </div>
+
+      <VoiceCloneCard
+        line={line}
+        setLine={setLine}
+        lang={lang}
+        plan={plan}
+        customVoice={customVoice}
+        setCustomVoice={setCustomVoice}
+        isOwner={isOwner}
+        showToast={showToast}
+        onUpgrade={onUpgrade}
+      />
 
       <div className="card">
         <div className="card-head">
