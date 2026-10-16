@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { verifySession } from '@/lib/session';
 import { supabase } from '@/lib/supabase';
+import { resolveAccount } from '@/lib/account';
 
 const PLAYABLE_TYPES: Record<string, string> = {
   'audio/wav': 'wav',
@@ -44,7 +45,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Recording must be WAV or MP3' }, { status: 415 });
     }
 
-    const filePath = `${userId}/${contactId}.${extension}`;
+    // Filed under the account owner (a Care Team caregiver records for the
+    // owner's lines), which is where the call flow looks for them (lib/promptRecordings).
+    const { accountId } = await resolveAccount(userId);
+    const filePath = `${accountId}/${contactId.replace(/[^\w-]/g, '_')}.${extension}`;
 
     // Upload to Supabase storage 'voice-prompts' bucket
     const { error } = await supabase.storage

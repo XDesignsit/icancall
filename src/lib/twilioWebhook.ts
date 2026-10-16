@@ -2,6 +2,8 @@ import crypto from 'crypto';
 import { NextResponse } from 'next/server';
 import twilio from 'twilio';
 import { providerForNumber } from '@/lib/twilio';
+import { recordingFor } from '@/lib/promptRecordings';
+import type { CallLang } from '@/lib/callPrompts';
 
 /**
  * Proof that a request to one of the /api/twilio webhooks came from the carrier.
@@ -170,6 +172,49 @@ export function isSignedTtsUrl(url: URL): boolean {
   if (!expected) return true; // Unconfigured, as in verifyTelephonyWebhook.
   const given = Buffer.from(url.searchParams.get('sig') || '');
   return given.length === expected.length && crypto.timingSafeEqual(given, Buffer.from(expected));
+}
+
+/**
+ * TwiML <Play> tag for a stored prompt recording (lib/promptRecordings), served
+ * by /api/twilio/prompt-audio. Like ttsPlayTag, the URL is signed so it only
+ * serves files a call asked for.
+ */
+export function recordingPlayTag(baseUrl: string, path: string): string {
+  const query = [`path=${encodeURIComponent(path)}`];
+  const signature = recordingSignature(path);
+  if (signature) query.push(`sig=${signature}`);
+  return `<Play>${baseUrl}/api/twilio/prompt-audio?${query.join('&amp;')}</Play>`;
+}
+
+/**
+ * Looks up the line's own recording of a sentence (lib/promptRecordings) and
+ * returns its <Play> tag, or null when the voice should say it instead.
+ */
+export function recordedPromptTag(
+  baseUrl: string,
+  settings: Parameters<typeof recordingFor>[0],
+  plan: string | null | undefined,
+  lang: CallLang,
+  ownerId: string | null | undefined
+): (text: string) => string | null {
+  return (text) => {
+    const path = recordingFor(settings, plan, lang, text, ownerId);
+    return path ? recordingPlayTag(baseUrl, path) : null;
+  };
+}
+
+/** Whether a /api/twilio/prompt-audio URL is one recordingPlayTag produced. */
+export function isSignedRecordingUrl(url: URL): boolean {
+  const expected = recordingSignature(url.searchParams.get('path') || '');
+  if (!expected) return true; // Unconfigured, as in verifyTelephonyWebhook.
+  const given = Buffer.from(url.searchParams.get('sig') || '');
+  return given.length === expected.length && crypto.timingSafeEqual(given, Buffer.from(expected));
+}
+
+function recordingSignature(path: string): string | null {
+  const key = process.env.TWILIO_AUTH_TOKEN;
+  if (!key) return null;
+  return crypto.createHmac('sha256', key).update(JSON.stringify(['prompt-audio', path])).digest('base64url');
 }
 
 function ttsSignature(text: string, voiceId: string): string | null {

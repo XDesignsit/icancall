@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { verifyTelephonyWebhook } from '@/lib/twilioWebhook';
+import { recordedPromptTag, verifyTelephonyWebhook } from '@/lib/twilioWebhook';
 import { findAccountByTwilioNumber } from '@/lib/db';
 import { parseConferenceRoom } from '@/lib/conferenceRoom';
 import { latestPlacedLeg } from '@/lib/conferenceBridge';
@@ -55,7 +55,7 @@ export async function POST(request: Request) {
       if (LIVE_LEG_STATUSES.has(call.status) && idx >= 0) {
         const voiceId = account?.line?.settings?.voiceId || '21m00Tcm4TlvDq8ikWAM';
         const missed = who === null || who === idx ? null : contacts[who] || null;
-        announcement = await announceContact(baseUrl, voiceId, contacts[idx], missed, lang);
+        announcement = await announceContact(baseUrl, voiceId, contacts[idx], missed, lang, recordedPromptTag(baseUrl, account?.line?.settings, account?.plan, lang, account?.id));
         who = idx;
       }
     }

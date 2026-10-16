@@ -57,9 +57,11 @@ export async function announceContact(
   voiceId: string,
   calling: AnnouncedContact,
   missed: AnnouncedContact | null = null,
-  lang: CallLang = 'en'
+  lang: CallLang = 'en',
+  /** The line's own recording of a whole sentence (lib/promptRecordings), played instead of the voice. */
+  recorded: (text: string) => string | null = () => null
 ): Promise<string> {
-  const say = (text: string) => (text ? ttsPlayTag(baseUrl, text, voiceId) : '');
+  const say = (text: string) => (text ? recorded(text) || ttsPlayTag(baseUrl, text, voiceId) : '');
   const sayAround = (key: 'calling' | 'didntAnswer', recording: string) => {
     const [before, after] = promptAroundName(lang, key);
     return `${say(before)}${recording}${say(after)}`;
@@ -69,16 +71,18 @@ export async function announceContact(
     recordedName(calling),
   ]);
 
+  // A whole sentence the owner recorded comes first, then the contact's
+  // recorded name inside the voice's sentence, then the voice alone.
+  const line = (key: 'calling' | 'didntAnswer', contact: AnnouncedContact, nameRecording: string | null, fallback: 'callingNext' | 'noAnswer') => {
+    const name = typedName(contact);
+    const sentence = name ? callPrompt(lang, key, { name }) : callPrompt(lang, fallback);
+    const whole = recorded(sentence);
+    if (whole) return whole;
+    return nameRecording ? sayAround(key, nameRecording) : say(sentence);
+  };
+
   const parts: string[] = [];
-  if (missed) {
-    const name = typedName(missed);
-    parts.push(missedRecording
-      ? sayAround('didntAnswer', missedRecording)
-      : say(name ? callPrompt(lang, 'didntAnswer', { name }) : callPrompt(lang, 'noAnswer')));
-  }
-  const name = typedName(calling);
-  parts.push(callingRecording
-    ? sayAround('calling', callingRecording)
-    : say(name ? callPrompt(lang, 'calling', { name }) : callPrompt(lang, 'callingNext')));
+  if (missed) parts.push(line('didntAnswer', missed, missedRecording, 'noAnswer'));
+  parts.push(line('calling', calling, callingRecording, 'callingNext'));
   return parts.join('\n  ');
 }
