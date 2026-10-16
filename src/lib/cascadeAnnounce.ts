@@ -1,6 +1,7 @@
 import { supabase } from '@/lib/supabase';
 import { ttsPlayTag } from '@/lib/twilioWebhook';
 import { callPrompt, promptAroundName, type CallLang } from '@/lib/callPrompts';
+import { isOwnRecording } from '@/lib/voices';
 
 /**
  * Direct connect, a line setting for every mode but the caller menu: callers
@@ -29,10 +30,10 @@ function escapeXml(text: string): string {
 
 /** The contact's recorded name as a <Play> tag; null when there is none to play. */
 async function recordedName(contact: AnnouncedContact): Promise<string | null> {
-  // Older dashboard recordings were saved as WebM/MP4, which <Play> cannot play;
-  // those read the typed name instead.
+  // Only a name someone recorded; a generated one (or an older WebM/MP4
+  // recording <Play> cannot play) reads the typed name in the line's voice.
   const path = contact.voicePath;
-  if (typeof path !== 'string' || !/\.(mp3|wav)$/i.test(path)) return null;
+  if (!isOwnRecording(path)) return null;
   try {
     const { data } = await supabase.storage.from('voice-prompts').createSignedUrl(path, 60);
     return data?.signedUrl ? `<Play>${escapeXml(data.signedUrl)}</Play>` : null;
