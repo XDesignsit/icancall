@@ -4,6 +4,7 @@ import React, { useState, useRef } from "react";
 
 import { type DashboardTranslations } from "@/lib/dashboardTranslations";
 import { planConfig, type PlanId } from "@/lib/planConfig";
+import { toPhoneWav } from "@/lib/wavEncoder";
 import { AVATAR_COLORS, getLocalizedPersonName, getLocalizedRelationship } from "../_data";
 import { Icon } from "../_icons";
 import { Avatar, Modal, Toggle } from "../_primitives";
@@ -36,6 +37,7 @@ function ContactModal({
 
   // Web Audio recording states
   const [recording, setRecording] = useState(false);
+  const [converting, setConverting] = useState(false);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
   const [voicePath, setVoicePath] = useState<string | null>(initial?.voicePath || null);
@@ -123,7 +125,7 @@ function ContactModal({
         }
       };
 
-      mediaRecorder.onstop = () => {
+      mediaRecorder.onstop = async () => {
         const mimeType = mediaRecorder?.mimeType || 'audio/webm';
         const blob = new Blob(chunksRef.current, { type: mimeType });
         
@@ -143,9 +145,28 @@ function ContactModal({
           return;
         }
 
-        setAudioBlob(blob);
-        const url = URL.createObjectURL(blob);
-        setAudioUrl(url);
+        // Twilio cannot play the browser's WebM/MP4, so save (and preview) a WAV instead.
+        setConverting(true);
+        try {
+          const wav = await toPhoneWav(blob);
+          setAudioBlob(wav);
+          setAudioUrl(URL.createObjectURL(wav));
+        } catch (err) {
+          console.error('Failed to convert recording to WAV:', err);
+          alert(lang === "es" ? "No se pudo procesar la grabación. Inténtelo de nuevo o use la voz de IA."
+            : lang === "fr" ? "Impossible de traiter l'enregistrement. Réessayez ou utilisez la voix d'IA."
+            : lang === "ja" ? "録音を処理できませんでした。もう一度お試しいただくか、AI音声をご利用ください。"
+            : lang === "zh" ? "无法处理录音。请重试或使用 AI 语音。"
+            : lang === "ar" ? "تعذرت معالجة التسجيل. يرجى المحاولة مرة أخرى أو استخدام صوت الذكاء الاصطناعي."
+            : lang === "hi" ? "रिकॉर्डिंग संसाधित नहीं की जा सकी। कृपया पुनः प्रयास करें या एआई आवाज़ का उपयोग करें।"
+            : lang === "pt" ? "Não foi possível processar a gravação. Tente novamente ou use a voz de IA."
+            : lang === "de" ? "Die Aufnahme konnte nicht verarbeitet werden. Bitte erneut versuchen oder die KI-Stimme verwenden."
+            : lang === "it" ? "Impossibile elaborare la registrazione. Riprova o usa la voce IA."
+            : lang === "ko" ? "녹음을 처리할 수 없습니다. 다시 시도하거나 AI 음성을 사용해 주세요."
+            : "Could not process the recording. Please try again or use the AI voice.");
+        } finally {
+          setConverting(false);
+        }
       };
 
       // Start recording with 100ms timeslices to force continuous dataavailable events (vital for Safari)
@@ -193,7 +214,7 @@ function ContactModal({
     if (audioBlob) {
       try {
         const formData = new FormData();
-        formData.append('audio', audioBlob, 'name.webm');
+        formData.append('audio', audioBlob, 'name.wav');
         formData.append('contactId', contactId);
 
         const res = await fetch('/api/caregiver/upload-recording', {
@@ -233,7 +254,7 @@ function ContactModal({
           <button className="btn btn-ghost" onClick={onClose} disabled={isUploading}>
             {d.contacts.cancel}
           </button>
-          <button className="btn btn-primary" onClick={save} disabled={isUploading || recording}>
+          <button className="btn btn-primary" onClick={save} disabled={isUploading || recording || converting}>
             {isUploading ? (
               lang === "es" ? "Subiendo..."
               : lang === "fr" ? "Téléchargement..."
@@ -336,7 +357,7 @@ function ContactModal({
                : "🛑 Stop Recording"}
             </button>
           ) : (
-            <button className="btn btn-ghost btn-sm" onClick={startRecording} type="button" disabled={isUploading || isGeneratingVoice} style={{ padding: '6px 12px', borderRadius: 4, cursor: 'pointer' }}>
+            <button className="btn btn-ghost btn-sm" onClick={startRecording} type="button" disabled={isUploading || isGeneratingVoice || converting} style={{ padding: '6px 12px', borderRadius: 4, cursor: 'pointer' }}>
               {lang === "es" ? "🎙️ Grabar nombre"
                : lang === "fr" ? "🎙️ Enregistrer le nom"
                : lang === "ja" ? "🎙️ 名前を録音"
