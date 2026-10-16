@@ -23,6 +23,8 @@ export interface PlanConfig {
   voiceMinutes: number;
   /** Caregiver logins (account owner counts as one seat) */
   seats: number;
+  /** The owner can clone their own voice for the line's prompts (lib/voices) */
+  voiceClone: boolean;
 }
 
 export const PLAN_CONFIG: Record<PlanId, PlanConfig> = {
@@ -37,6 +39,7 @@ export const PLAN_CONFIG: Record<PlanId, PlanConfig> = {
     contactsPerLine: 3,
     voiceMinutes: 30,
     seats: 1,
+    voiceClone: false,
   },
   pro: {
     id: "pro",
@@ -49,6 +52,7 @@ export const PLAN_CONFIG: Record<PlanId, PlanConfig> = {
     contactsPerLine: 6,
     voiceMinutes: 60,
     seats: 1,
+    voiceClone: true,
   },
   careteam: {
     id: "careteam",
@@ -61,6 +65,7 @@ export const PLAN_CONFIG: Record<PlanId, PlanConfig> = {
     contactsPerLine: 15,
     voiceMinutes: 150,
     seats: 2,
+    voiceClone: true,
   },
 };
 

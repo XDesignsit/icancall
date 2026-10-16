@@ -785,55 +785,7 @@ export const getLocalizedRelationship = (rel: string, lang: string): string => {
   return rel;
 };
 
-export const ELEVENLABS_VOICE_GROUPS: {
-  langKey: string;
-  voices: { id: string; name: string; gender: "voiceFemale" | "voiceMale"; desc: string }[];
-}[] = [
-  { langKey: "langEnglish", voices: [
-    { id: "21m00Tcm4TlvDq8ikWAM", name: "Rachel", gender: "voiceFemale", desc: "voiceDescWarm" },
-    { id: "29vD33N1CtxCmqQRPOHJ", name: "Drew", gender: "voiceMale", desc: "voiceDescProfessional" },
-  ] },
-  { langKey: "langSpanish", voices: [
-    { id: "EXAVITQu4vr4xnSDxMaL", name: "Sarah", gender: "voiceFemale", desc: "voiceDescWarmAccent" },
-    { id: "2EiwWnXF2V4j29thjbwy", name: "Clyde", gender: "voiceMale", desc: "voiceDescFriendly" },
-  ] },
-  { langKey: "langFrench", voices: [
-    { id: "21m00Tcm4TlvDq8ikWAM", name: "Rachel", gender: "voiceFemale", desc: "voiceDescSoftAccent" },
-    { id: "5Q0t7uMcgp8Aagzh1ZQQ", name: "Paul", gender: "voiceMale", desc: "voiceDescDeep" },
-  ] },
-  { langKey: "langJapanese", voices: [
-    { id: "cgSgspJ2msm6clMCxT41", name: "Jessica", gender: "voiceFemale", desc: "voiceDescWarmAccent" },
-    { id: "29vD33N1CtxCmqQRPOHJ", name: "Drew", gender: "voiceMale", desc: "voiceDescFriendly" },
-  ] },
-  { langKey: "langChinese", voices: [
-    { id: "21m00Tcm4TlvDq8ikWAM", name: "Rachel", gender: "voiceFemale", desc: "voiceDescCleanAccent" },
-    { id: "pNInz6obpgmx5142qiA7", name: "Adam", gender: "voiceMale", desc: "voiceDescNarrator" },
-  ] },
-  { langKey: "langArabic", voices: [
-    { id: "cgSgspJ2msm6clMCxT41", name: "Jessica", gender: "voiceFemale", desc: "voiceDescWarmAccent" },
-    { id: "5Q0t7uMcgp8Aagzh1ZQQ", name: "Paul", gender: "voiceMale", desc: "voiceDescDeepAccent" },
-  ] },
-  { langKey: "langHindi", voices: [
-    { id: "EXAVITQu4vr4xnSDxMaL", name: "Sarah", gender: "voiceFemale", desc: "voiceDescSoftAccent" },
-    { id: "2EiwWnXF2V4j29thjbwy", name: "Clyde", gender: "voiceMale", desc: "voiceDescFriendlyAccent" },
-  ] },
-  { langKey: "langPortuguese", voices: [
-    { id: "21m00Tcm4TlvDq8ikWAM", name: "Rachel", gender: "voiceFemale", desc: "voiceDescFriendlyAccent" },
-    { id: "nPczCjzI2devA2R17O2Y", name: "Brian", gender: "voiceMale", desc: "voiceDescDeepAccent" },
-  ] },
-  { langKey: "langGerman", voices: [
-    { id: "EXAVITQu4vr4xnSDxMaL", name: "Sarah", gender: "voiceFemale", desc: "voiceDescCleanAccent" },
-    { id: "pNInz6obpgmx5142qiA7", name: "Adam", gender: "voiceMale", desc: "voiceDescProfessional" },
-  ] },
-  { langKey: "langItalian", voices: [
-    { id: "cgSgspJ2msm6clMCxT41", name: "Jessica", gender: "voiceFemale", desc: "voiceDescWarmAccent" },
-    { id: "nPczCjzI2devA2R17O2Y", name: "Brian", gender: "voiceMale", desc: "voiceDescDeep" },
-  ] },
-  { langKey: "langKorean", voices: [
-    { id: "21m00Tcm4TlvDq8ikWAM", name: "Rachel", gender: "voiceFemale", desc: "voiceDescFriendlyAccent" },
-    { id: "29vD33N1CtxCmqQRPOHJ", name: "Drew", gender: "voiceMale", desc: "voiceDescProfessionalAccent" },
-  ] },
-];
+export { ELEVENLABS_VOICE_GROUPS } from "@/lib/voices";
 
 export const getLocalizedLineLabel = (label: string, lang: string): string => {
   if (!label) return label;

@@ -1,6 +1,7 @@
 import { supabase } from "@/lib/supabase";
 import { sendEmail } from "@/lib/mail";
 import { releaseProvisionedNumber, type TelephonyRecord } from "@/lib/numbers";
+import { removeOwnerVoiceClone } from "@/lib/voiceClone";
 
 // What happens when a subscription really ends (Stripe: canceled / incomplete_expired).
 //
@@ -129,5 +130,7 @@ export async function releaseAccountNumbers(profile: { id: string; settings: Set
   if ((lines || []).length > 0) {
     await supabase.from("phone_lines").delete().eq("user_id", profile.id);
   }
+  // A cloned voice holds one of the ElevenLabs workspace's voice slots.
+  await removeOwnerVoiceClone(profile);
   return released;
 }

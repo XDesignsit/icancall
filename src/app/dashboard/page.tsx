@@ -34,6 +34,7 @@ import { OverviewView } from "./views/OverviewView";
 import { RoutingView } from "./views/RoutingView";
 import { SettingsView } from "./views/SettingsView";
 import { TeamAdminView } from "./views/TeamAdminView";
+import { customVoiceOf } from "@/lib/voices";
 
 /* ============ MAIN APPLICATION SHELL ============ */
 // NAV and TITLES are built inside the component from translated strings; the
@@ -79,6 +80,7 @@ interface StoredAccountData {
 
 interface ProfileSettings {
   role?: string;
+  customVoice?: unknown;
   notifyEmail?: string;
   phone?: string;
   smsPhone?: string;
@@ -304,6 +306,7 @@ export default function DashboardApp() {
       numbersReleasedAt: settings.numbersReleasedAt || null,
       addons: settings.addons || { extraNumbers: 0, minuteBlocks: 0, usedMin: 0, rolloverMin: 0 },
       avatarUrl: settings.avatarUrl || "",
+      customVoice: customVoiceOf(settings),
     };
   };
 
@@ -1211,6 +1214,14 @@ export default function DashboardApp() {
               d={d}
               lang={lang}
               preferredName={account.preferred}
+              plan={account.plan}
+              customVoice={account.customVoice ?? null}
+              setCustomVoice={(customVoice) => setAccount((prev) => ({ ...prev, customVoice }))}
+              isOwner={viewerRole === "owner"}
+              onUpgrade={() => {
+                setAcctTab("billing");
+                go("account");
+              }}
             />
           )}
           {view === "account" && (

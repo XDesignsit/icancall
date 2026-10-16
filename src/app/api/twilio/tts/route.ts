@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import { isSignedTtsUrl } from '@/lib/twilioWebhook';
+import { DEFAULT_VOICE_ID } from '@/lib/voices';
 
 export async function GET(request: Request) {
   try {
@@ -12,7 +13,7 @@ export async function GET(request: Request) {
 
     const { searchParams } = url;
     const text = searchParams.get('text');
-    const voiceId = searchParams.get('voiceId') || '21m00Tcm4TlvDq8ikWAM'; // Rachel is default
+    const voiceId = searchParams.get('voiceId') || DEFAULT_VOICE_ID;
 
     if (!text) {
       return NextResponse.json({ error: 'Missing text parameter' }, { status: 400 });
@@ -50,26 +51,22 @@ export async function GET(request: Request) {
 
     // 3. Cache miss: Call ElevenLabs Text-to-Speech API
     console.log(`🎙️ TTS Cache Miss. Requesting ElevenLabs generation for text: "${text.substring(0, 40)}..." using voice: ${voiceId}`);
-    const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
-      method: 'POST',
-      headers: {
-        'xi-api-key': elevenLabsApiKey,
-        'Content-Type': 'application/json',
-        'accept': 'audio/mpeg'
-      },
-      body: JSON.stringify({
-        text: text.trim(),
-        model_id: 'eleven_multilingual_v2', // Multilingual supports different language accents correctly
-        voice_settings: {
-          stability: 0.5,
-          similarity_boost: 0.75
-        }
-      })
-    });
+    const response = await synthesize(elevenLabsApiKey, voiceId, text);
 
     if (!response.ok) {
       const errText = await response.text();
       console.error('❌ ElevenLabs API error response:', errText);
+      // A cloned voice can stop working (deleted, or the ElevenLabs plan no
+      // longer covers it). The caller still hears the prompt, in the default
+      // voice, and that audio is not cached under the clone's key.
+      if (voiceId !== DEFAULT_VOICE_ID) {
+        const fallback = await synthesize(elevenLabsApiKey, DEFAULT_VOICE_ID, text);
+        if (fallback.ok) {
+          return new NextResponse(Buffer.from(await fallback.arrayBuffer()), {
+            headers: { 'Content-Type': 'audio/mpeg', 'Cache-Control': 'no-store' },
+          });
+        }
+      }
       return NextResponse.json({ error: 'Failed to generate voice from ElevenLabs' }, { status: response.status });
     }
 
@@ -105,6 +102,25 @@ export async function GET(request: Request) {
     console.error('❌ TTS API route failure:', err);
     return NextResponse.json({ error: err instanceof Error ? err.message : 'Internal Server Error' }, { status: 500 });
   }
+}
+
+function synthesize(apiKey: string, voiceId: string, text: string): Promise<Response> {
+  return fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
+    method: 'POST',
+    headers: {
+      'xi-api-key': apiKey,
+      'Content-Type': 'application/json',
+      'accept': 'audio/mpeg'
+    },
+    body: JSON.stringify({
+      text: text.trim(),
+      model_id: 'eleven_multilingual_v2', // Multilingual supports different language accents correctly
+      voice_settings: {
+        stability: 0.5,
+        similarity_boost: 0.75
+      }
+    })
+  });
 }
 
 // Fallback POST support

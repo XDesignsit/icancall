@@ -2,6 +2,7 @@ import { supabase } from './supabase';
 import { planConfig } from './planConfig';
 import { toE164 } from './phone';
 import { scheduleTimeZone } from './coverageSchedule';
+import { customVoiceOf, effectiveVoiceId } from './voices';
 
 export interface LineContact {
   name?: string;
@@ -139,6 +140,7 @@ export async function findAccountByTwilioNumber(phoneNumber: string): Promise<Ac
     const used = Number(addons.usedMin || 0);
 
     const lineSettings = line.settings || {};
+    const extraSettings: LineSettings = lineSettings.extraSettings || {};
 
     const account: Account = {
       id: profile.id,
@@ -157,7 +159,8 @@ export async function findAccountByTwilioNumber(phoneNumber: string): Promise<Ac
         contacts: line.contacts || [],
         mode: lineSettings.mode || 'menu',
         schedule: Array.isArray(lineSettings.schedule) ? lineSettings.schedule : [],
-        settings: lineSettings.extraSettings || {},
+        // Only a stock voice or the owner's own clone (lib/voices).
+        settings: { ...extraSettings, voiceId: effectiveVoiceId(extraSettings.voiceId, customVoiceOf(settings), plan) },
         telephony: lineSettings.telephony,
       }
     };

@@ -139,6 +139,8 @@ export async function POST(request: Request) {
       delete newSettings.smsPhone;
       delete newSettings.smsConsentAt;
       delete newSettings.smsConsentSource;
+      // The cloned voice is created and removed by api/caregiver/voice-clone only.
+      delete newSettings.customVoice;
     }
 
     // With live billing the plan is whatever the Stripe subscription says: it is

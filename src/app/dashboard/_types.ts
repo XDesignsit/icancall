@@ -97,6 +97,8 @@ export interface Account {
     rolloverMin: number;
   };
   avatarUrl?: string;
+  /** The owner's cloned voice (api/caregiver/voice-clone); set server-side only. */
+  customVoice?: { id: string; createdAt: string } | null;
 }
 
 export type PickerNumber = { id: string; number: string; area: string; memorable: string | null };

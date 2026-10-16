@@ -5,10 +5,10 @@
 // Phone audio is 8 kHz, so a higher rate only makes the file bigger.
 const PHONE_SAMPLE_RATE = 8000;
 
-async function renderMono(source: AudioBuffer): Promise<AudioBuffer> {
+async function renderMono(source: AudioBuffer, sampleRate: number): Promise<AudioBuffer> {
   let offline: OfflineAudioContext;
   try {
-    offline = new OfflineAudioContext(1, Math.ceil(source.duration * PHONE_SAMPLE_RATE), PHONE_SAMPLE_RATE);
+    offline = new OfflineAudioContext(1, Math.ceil(source.duration * sampleRate), sampleRate);
   } catch {
     // Some browsers refuse rates this low; keep the original rate (still a valid WAV).
     offline = new OfflineAudioContext(1, source.length, source.sampleRate);
@@ -49,13 +49,18 @@ function encodeWav(buffer: AudioBuffer): Blob {
   return new Blob([view], { type: "audio/wav" });
 }
 
-/** Converts a recorded clip (any format the browser can decode) to 16-bit mono PCM WAV. */
-export async function toPhoneWav(recording: Blob): Promise<Blob> {
+/** Converts a recorded clip (any format the browser can decode) to 16-bit mono PCM WAV at the given rate. */
+export async function toWav(recording: Blob, sampleRate: number): Promise<Blob> {
   const context = new AudioContext();
   try {
     const decoded = await context.decodeAudioData(await recording.arrayBuffer());
-    return encodeWav(await renderMono(decoded));
+    return encodeWav(await renderMono(decoded, sampleRate));
   } finally {
     void context.close();
   }
+}
+
+/** A recorded clip as a WAV at phone quality, for Twilio to <Play>. */
+export function toPhoneWav(recording: Blob): Promise<Blob> {
+  return toWav(recording, PHONE_SAMPLE_RATE);
 }
