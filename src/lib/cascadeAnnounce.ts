@@ -1,5 +1,6 @@
 import { supabase } from '@/lib/supabase';
 import { ttsPlayTag } from '@/lib/twilioWebhook';
+import { callPrompt, promptAroundName, type CallLang } from '@/lib/callPrompts';
 
 /**
  * Direct connect, a line setting for every mode but the caller menu: callers
@@ -54,9 +55,14 @@ export async function announceContact(
   baseUrl: string,
   voiceId: string,
   calling: AnnouncedContact,
-  missed: AnnouncedContact | null = null
+  missed: AnnouncedContact | null = null,
+  lang: CallLang = 'en'
 ): Promise<string> {
-  const say = (text: string) => ttsPlayTag(baseUrl, text, voiceId);
+  const say = (text: string) => (text ? ttsPlayTag(baseUrl, text, voiceId) : '');
+  const sayAround = (key: 'calling' | 'didntAnswer', recording: string) => {
+    const [before, after] = promptAroundName(lang, key);
+    return `${say(before)}${recording}${say(after)}`;
+  };
   const [missedRecording, callingRecording] = await Promise.all([
     missed ? recordedName(missed) : Promise.resolve(null),
     recordedName(calling),
@@ -66,12 +72,12 @@ export async function announceContact(
   if (missed) {
     const name = typedName(missed);
     parts.push(missedRecording
-      ? `${missedRecording}${say("didn't answer.")}`
-      : say(name ? `${name} didn't answer.` : 'No answer.'));
+      ? sayAround('didntAnswer', missedRecording)
+      : say(name ? callPrompt(lang, 'didntAnswer', { name }) : callPrompt(lang, 'noAnswer')));
   }
   const name = typedName(calling);
   parts.push(callingRecording
-    ? `${say('Calling')}${callingRecording}`
-    : say(name ? `Calling ${name}.` : 'Calling the next contact.'));
+    ? sayAround('calling', callingRecording)
+    : say(name ? callPrompt(lang, 'calling', { name }) : callPrompt(lang, 'callingNext')));
   return parts.join('\n  ');
 }

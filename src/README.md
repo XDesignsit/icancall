@@ -13,7 +13,7 @@ Runs on Vercel (App Router). Server code talks to Supabase, Stripe, Twilio and T
 | `app/coming-soon/`, `contact/`, `privacy-policy/`, `terms-of-service/` | Prelaunch, contact and legal pages | AGENTS.md waiting-page rule |
 | `app/api/auth/` | OTP, login, signup, Google OAuth, sessions | `lib/otpStore.ts`, `lib/oauth.ts`, `lib/userSessions.ts` |
 | `app/api/billing/` | Checkout, add-on confirm, change-plan, cancel, portal, Stripe webhook | `lib/stripe.ts`, `lib/planSchedule.ts`, `lib/billingOwner.ts` |
-| `app/api/twilio/` | Voice, agent join/transfer, cascade (and its direct-connect hold loop), call/SMS status, transcription, numbers | `lib/twilioWebhook.ts` (signature check), `lib/conferenceBridge.ts`, `lib/cascadeAnnounce.ts` |
+| `app/api/twilio/` | Voice, agent join/transfer, cascade (and its direct-connect hold loop), call/SMS status, transcription, numbers | `lib/twilioWebhook.ts` (signature check), `lib/conferenceBridge.ts`, `lib/cascadeAnnounce.ts`, `lib/callPrompts.ts` (caller-facing sentences per language, Bilingual Support) |
 | `app/api/caregiver/` | Lines, profile, seats, recordings, receipts, SMS alerts, voice generation, the owner's cloned voice | `lib/account.ts`, `lib/voices.ts` (which voice a line may use), `lib/voiceClone.ts` |
 | `app/api/cron/` | Number release and annual-minute reset (scheduled in `vercel.json`) | `lib/subscriptionEnd.ts`, `lib/minutesCycle.ts` |
 | `app/api/{admin,contact,waitlist,send-*}/` | Admin, contact form, waitlist, system and voicemail alerts | `lib/mail.ts`, `lib/rateLimit.ts` |

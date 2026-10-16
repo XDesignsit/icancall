@@ -6,6 +6,7 @@ import { latestPlacedLeg } from '@/lib/conferenceBridge';
 import { announceContact, ringbackUrl } from '@/lib/cascadeAnnounce';
 import { parseLeadIndex } from '@/lib/coverageSchedule';
 import { toE164 } from '@/lib/phone';
+import { langParamXml, parseCallLang } from '@/lib/callPrompts';
 
 export const preferredRegion = 'iad1';
 
@@ -20,7 +21,8 @@ const LIVE_LEG_STATUSES = new Set(['queued', 'ringing', 'in-progress']);
  * the caller first hears who it is ringing. `said` is the leg already
  * announced and `who` that contact's place in the line's contacts, for "Mom
  * didn't answer." The loop ends when a contact joins the room, or when the
- * caller is moved on to voicemail.
+ * caller is moved on to voicemail. `lang` is the caller's language
+ * (lib/callPrompts), carried from the waitUrl through every pass.
  *
  * Twilio drops the caller from the room if this fails, so every error still
  * answers with the ring and the loop.
@@ -34,6 +36,7 @@ export async function POST(request: Request) {
   const room = requestUrl.searchParams.get('room') || '';
   let said = requestUrl.searchParams.get('said') || '';
   let who = parseLeadIndex(requestUrl.searchParams.get('who'));
+  const lang = parseCallLang(requestUrl.searchParams.get('lang'));
   let announcement = '';
 
   const conference = parseConferenceRoom(room);
@@ -52,7 +55,7 @@ export async function POST(request: Request) {
       if (LIVE_LEG_STATUSES.has(call.status) && idx >= 0) {
         const voiceId = account?.line?.settings?.voiceId || '21m00Tcm4TlvDq8ikWAM';
         const missed = who === null || who === idx ? null : contacts[who] || null;
-        announcement = await announceContact(baseUrl, voiceId, contacts[idx], missed);
+        announcement = await announceContact(baseUrl, voiceId, contacts[idx], missed, lang);
         who = idx;
       }
     }
@@ -60,7 +63,7 @@ export async function POST(request: Request) {
     console.warn('Cascade hold loop: could not tell the caller who is being rung:', err);
   }
 
-  const next = `/api/twilio/cascade-wait?room=${encodeURIComponent(room)}&amp;said=${encodeURIComponent(said)}${who === null ? '' : `&amp;who=${who}`}`;
+  const next = `/api/twilio/cascade-wait?room=${encodeURIComponent(room)}&amp;said=${encodeURIComponent(said)}${who === null ? '' : `&amp;who=${who}`}${langParamXml(lang)}`;
   return new NextResponse(`<?xml version="1.0" encoding="UTF-8"?>
 <Response>
   ${announcement}

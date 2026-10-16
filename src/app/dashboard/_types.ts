@@ -33,8 +33,12 @@ export interface Line {
   schedule?: CoverageSlot[];
   settings?: {
     greeting?: string;
+    /** Bilingual Support (lib/callPrompts): off unless true. */
     bilingual?: boolean;
+    /** The second language's code ("es"); older lines hold its name ("Spanish"). */
     language2?: string;
+    /** Custom greeting for callers who switch to the second language; empty uses the standard one, translated. */
+    greeting2?: string;
     notifSMS?: boolean;
     notifEmail?: boolean;
     notifMissed?: boolean;

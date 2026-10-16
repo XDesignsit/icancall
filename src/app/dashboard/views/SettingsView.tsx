@@ -5,6 +5,7 @@ import React, { useState } from "react";
 import { dashboardExtraTranslations } from "@/lib/dashboardExtraTranslations";
 import { voiceCloneTranslations } from "@/lib/voiceCloneTranslations";
 import { type CustomVoice } from "@/lib/voices";
+import { bilingualOn, lineSecondLanguage } from "@/lib/callPrompts";
 import { type DashboardTranslations } from "@/lib/dashboardTranslations";
 import { ELEVENLABS_VOICE_GROUPS, getLocalizedLineLabel, getLocalizedPersonName } from "../_data";
 import { Icon } from "../_icons";
@@ -93,8 +94,9 @@ export function SettingsView({
         ? "Please choose who you'd like to reach."
         : "Hold on while we connect you."
     }`;
-  const bilingual = s.bilingual ?? true;
-  const language2 = s.language2 ?? "Spanish";
+  // Off unless the owner turns it on; older lines stored the language's name (lib/callPrompts).
+  const bilingual = bilingualOn(s);
+  const language2 = lineSecondLanguage(s);
   const notifSMS = s.notifSMS ?? true;
   const notifEmail = s.notifEmail ?? true;
   const notifMissed = s.notifMissed ?? true;
@@ -193,26 +195,38 @@ export function SettingsView({
             />
           </div>
           {bilingual && (
-            <div className="field" style={{ marginTop: 16, marginBottom: 0, maxWidth: 260 }}>
+            <div className="field" style={{ marginTop: 16, marginBottom: 0 }}>
               <label>{d.settings.secondLang}</label>
-              <select value={language2} onChange={(e) => set({ language2: e.target.value })}>
+              <select value={language2} onChange={(e) => set({ language2: e.target.value })} style={{ maxWidth: 260 }}>
                 {[
-                  { id: "Spanish", label: lang === "es" ? "Español" : lang === "fr" ? "Espagnol" : lang === "ja" ? "スペイン語" : lang === "zh" ? "西班牙语" : lang === "ar" ? "الإspania" : lang === "hi" ? "स्पैनिश" : lang === "pt" ? "Espanhol" : lang === "de" ? "Spanisch" : lang === "it" ? "Spagnolo" : lang === "ko" ? "스페인어" : "Spanish" },
-                  { id: "Mandarin", label: lang === "es" ? "Mandarín" : lang === "fr" ? "Mandarin" : lang === "ja" ? "中国語" : lang === "zh" ? "中文（普通话）" : lang === "ar" ? "الماندرين" : lang === "hi" ? "मंदारिन" : lang === "pt" ? "Mandarim" : lang === "de" ? "Mandarin" : lang === "it" ? "Mandarino" : lang === "ko" ? "중국어" : "Mandarin" },
-                  { id: "Tagalog", label: lang === "es" ? "Tagalo" : lang === "fr" ? "Tagalog" : lang === "ja" ? "タガログ語" : lang === "zh" ? "塔加路语" : lang === "ar" ? "التاغالوغية" : lang === "hi" ? "तागालोग" : lang === "pt" ? "Tagalo" : lang === "de" ? "Tagalog" : lang === "it" ? "Tagalog" : lang === "ko" ? "타갈로그어" : "Tagalog" },
-                  { id: "Vietnamese", label: lang === "es" ? "Vietnamita" : lang === "fr" ? "Vietnamien" : lang === "ja" ? "ベトナム語" : lang === "zh" ? "越南语" : lang === "ar" ? "الفيتنامية" : lang === "hi" ? "वियतनामी" : lang === "pt" ? "Vietnamita" : lang === "de" ? "Vietnamesisch" : lang === "it" ? "Vietnamita" : lang === "ko" ? "베트남어" : "Vietnamese" },
-                  { id: "French", label: lang === "es" ? "Francés" : lang === "fr" ? "Français" : lang === "ja" ? "フランス語" : lang === "zh" ? "法语" : lang === "ar" ? "الفرنسية" : lang === "hi" ? "फ़्रेंच" : lang === "pt" ? "Francês" : lang === "de" ? "Französisch" : lang === "it" ? "Francese" : lang === "ko" ? "프랑스어" : "French" },
-                  { id: "Korean", label: lang === "es" ? "Coreano" : lang === "fr" ? "Coréen" : lang === "ja" ? "韓国語" : lang === "zh" ? "韩语" : lang === "ar" ? "الكورية" : lang === "hi" ? "कोरियाई" : lang === "pt" ? "Coreano" : lang === "de" ? "Koreanisch" : lang === "it" ? "Coreano" : lang === "ko" ? "한국어" : "Korean" },
-                  { id: "Japanese", label: lang === "es" ? "Japonés" : lang === "fr" ? "Japonais" : lang === "ja" ? "日本語" : lang === "zh" ? "日语" : lang === "ar" ? "اليابانية" : lang === "hi" ? "जापानी" : lang === "pt" ? "Japonês" : lang === "de" ? "Japanisch" : lang === "it" ? "Giapponese" : lang === "ko" ? "일본어" : "Japanese" },
-                  { id: "Arabic", label: lang === "es" ? "Árabe" : lang === "fr" ? "Arabe" : lang === "ja" ? "アラビア語" : lang === "zh" ? "阿拉伯语" : lang === "ar" ? "العربية" : lang === "hi" ? "अरबी" : lang === "pt" ? "Árabe" : lang === "de" ? "Arabisch" : lang === "it" ? "Arabo" : lang === "ko" ? "아랍어" : "Arabic" },
-                  { id: "Hindi", label: lang === "es" ? "Hindi" : lang === "fr" ? "Hindi" : lang === "ja" ? "ヒンディー語" : lang === "zh" ? "印地语" : lang === "ar" ? "الهندية" : lang === "hi" ? "हिन्दी" : lang === "pt" ? "Hindi" : lang === "de" ? "Hindi" : lang === "it" ? "Hindi" : lang === "ko" ? "힌디어" : "Hindi" },
-                  { id: "Portuguese", label: lang === "es" ? "Portugués" : lang === "fr" ? "Portugais" : lang === "ja" ? "ポルトガル語" : lang === "zh" ? "葡萄牙语" : lang === "ar" ? "البرتغالية" : lang === "hi" ? "पुर्तगाली" : lang === "pt" ? "Português" : lang === "de" ? "Portugiesisch" : lang === "it" ? "Portoghese" : lang === "ko" ? "포르투갈어" : "Portuguese" },
-                  { id: "German", label: lang === "es" ? "Alemán" : lang === "fr" ? "Allemand" : lang === "ja" ? "ドイツ語" : lang === "zh" ? "德语" : lang === "ar" ? "الألمانية" : lang === "hi" ? "जर्मन" : lang === "pt" ? "Alemão" : lang === "de" ? "Deutsch" : lang === "it" ? "Tedesco" : lang === "ko" ? "독일어" : "German" },
-                  { id: "Italian", label: lang === "es" ? "Italiano" : lang === "fr" ? "Italien" : lang === "ja" ? "イタリア語" : lang === "zh" ? "意大利语" : lang === "ar" ? "الإيطالية" : lang === "hi" ? "इतालवी" : lang === "pt" ? "Italiano" : lang === "de" ? "Italienisch" : lang === "it" ? "Italiano" : lang === "ko" ? "이탈리아어" : "Italian" }
+                  { id: "es", label: lang === "es" ? "Español" : lang === "fr" ? "Espagnol" : lang === "ja" ? "スペイン語" : lang === "zh" ? "西班牙语" : lang === "ar" ? "الإسبانية" : lang === "hi" ? "स्पैनिश" : lang === "pt" ? "Espanhol" : lang === "de" ? "Spanisch" : lang === "it" ? "Spagnolo" : lang === "ko" ? "스페인어" : "Spanish" },
+                  { id: "zh", label: lang === "es" ? "Mandarín" : lang === "fr" ? "Mandarin" : lang === "ja" ? "中国語" : lang === "zh" ? "中文（普通话）" : lang === "ar" ? "الماندرين" : lang === "hi" ? "मंदारिन" : lang === "pt" ? "Mandarim" : lang === "de" ? "Mandarin" : lang === "it" ? "Mandarino" : lang === "ko" ? "중국어" : "Mandarin" },
+                  { id: "tl", label: lang === "es" ? "Tagalo" : lang === "fr" ? "Tagalog" : lang === "ja" ? "タガログ語" : lang === "zh" ? "塔加路语" : lang === "ar" ? "التاغالوغية" : lang === "hi" ? "तागालोग" : lang === "pt" ? "Tagalo" : lang === "de" ? "Tagalog" : lang === "it" ? "Tagalog" : lang === "ko" ? "타갈로그어" : "Tagalog" },
+                  { id: "fr", label: lang === "es" ? "Francés" : lang === "fr" ? "Français" : lang === "ja" ? "フランス語" : lang === "zh" ? "法语" : lang === "ar" ? "الفرنسية" : lang === "hi" ? "फ़्रेंच" : lang === "pt" ? "Francês" : lang === "de" ? "Französisch" : lang === "it" ? "Francese" : lang === "ko" ? "프랑스어" : "French" },
+                  { id: "ko", label: lang === "es" ? "Coreano" : lang === "fr" ? "Coréen" : lang === "ja" ? "韓国語" : lang === "zh" ? "韩语" : lang === "ar" ? "الكورية" : lang === "hi" ? "कोरियाई" : lang === "pt" ? "Coreano" : lang === "de" ? "Koreanisch" : lang === "it" ? "Coreano" : lang === "ko" ? "한국어" : "Korean" },
+                  { id: "ja", label: lang === "es" ? "Japonés" : lang === "fr" ? "Japonais" : lang === "ja" ? "日本語" : lang === "zh" ? "日语" : lang === "ar" ? "اليابانية" : lang === "hi" ? "जापानी" : lang === "pt" ? "Japonês" : lang === "de" ? "Japanisch" : lang === "it" ? "Giapponese" : lang === "ko" ? "일본어" : "Japanese" },
+                  { id: "ar", label: lang === "es" ? "Árabe" : lang === "fr" ? "Arabe" : lang === "ja" ? "アラビア語" : lang === "zh" ? "阿拉伯语" : lang === "ar" ? "العربية" : lang === "hi" ? "अरबी" : lang === "pt" ? "Árabe" : lang === "de" ? "Arabisch" : lang === "it" ? "Arabo" : lang === "ko" ? "아랍어" : "Arabic" },
+                  { id: "hi", label: lang === "es" ? "Hindi" : lang === "fr" ? "Hindi" : lang === "ja" ? "ヒンディー語" : lang === "zh" ? "印地语" : lang === "ar" ? "الهندية" : lang === "hi" ? "हिन्दी" : lang === "pt" ? "Hindi" : lang === "de" ? "Hindi" : lang === "it" ? "Hindi" : lang === "ko" ? "힌디어" : "Hindi" },
+                  { id: "pt", label: lang === "es" ? "Portugués" : lang === "fr" ? "Portugais" : lang === "ja" ? "ポルトガル語" : lang === "zh" ? "葡萄牙语" : lang === "ar" ? "البرتغالية" : lang === "hi" ? "पुर्तगाली" : lang === "pt" ? "Português" : lang === "de" ? "Portugiesisch" : lang === "it" ? "Portoghese" : lang === "ko" ? "포르투갈어" : "Portuguese" },
+                  { id: "de", label: lang === "es" ? "Alemán" : lang === "fr" ? "Allemand" : lang === "ja" ? "ドイツ語" : lang === "zh" ? "德语" : lang === "ar" ? "الألمانية" : lang === "hi" ? "जर्मन" : lang === "pt" ? "Alemão" : lang === "de" ? "Deutsch" : lang === "it" ? "Tedesco" : lang === "ko" ? "독일어" : "German" },
+                  { id: "it", label: lang === "es" ? "Italiano" : lang === "fr" ? "Italien" : lang === "ja" ? "イタリア語" : lang === "zh" ? "意大利语" : lang === "ar" ? "الإيطالية" : lang === "hi" ? "इतालवी" : lang === "pt" ? "Italiano" : lang === "de" ? "Italienisch" : lang === "it" ? "Italiano" : lang === "ko" ? "이탈리아어" : "Italian" }
                 ].map((l) => (
                   <option key={l.id} value={l.id}>{getLocalizedLineLabel(l.label, lang)}</option>
                 ))}
               </select>
+              <p style={{ fontSize: '0.82rem', color: 'var(--ink-faint)', marginTop: 6 }}>{d.settings.secondLangSub}</p>
+            </div>
+          )}
+          {bilingual && (
+            <div className="field" style={{ marginTop: 16, marginBottom: 0 }}>
+              <label>{ext.greeting2Label}</label>
+              <textarea
+                rows={2}
+                value={s.greeting2 ?? ""}
+                onChange={(e) => set({ greeting2: e.target.value })}
+                className="w-full p-3 rounded-lg border border-line focus:outline-none focus:border-accent bg-surface"
+              />
+              <p style={{ fontSize: '0.82rem', color: 'var(--ink-faint)', marginTop: 6 }}>{ext.greeting2Hint}</p>
             </div>
           )}
         </div>
