@@ -17,6 +17,13 @@ const client = accountSid && authToken ? twilio(accountSid, authToken) : null;
  */
 export const A2P_APPROVED_SENDERS = ['+18542262250'] as const;
 
+/**
+ * The Messaging Service that holds the A2P 10DLC campaign (links allowed) and
+ * the number above. Texts with links only delivered when sent through it: the
+ * same links sent from the bare number came back 30007/30034 (2026-10-14/15).
+ */
+export const A2P_MESSAGING_SERVICE_SID = 'MG3243b68adee4095d729e1559b40efe8b';
+
 /** Resolve the sending number, refusing to send from an unregistered one. */
 export function a2pSender(): string {
   const configured = process.env.TWILIO_PHONE_NUMBER?.trim();
@@ -173,6 +180,8 @@ export async function sendSms(to: string, body: string) {
   try {
     const message = await client.messages.create({
       to,
+      // The service ties the text to the campaign; from keeps it on the A2P number.
+      messagingServiceSid: A2P_MESSAGING_SERVICE_SID,
       from: fromNumber,
       body,
       statusCallback,
