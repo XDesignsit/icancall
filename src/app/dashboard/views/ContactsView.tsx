@@ -341,7 +341,7 @@ function ContactModal({
            : lang === "ko" ? "음성 이름 녹음 (발신자 메뉴 라우팅용)"
            : "Voice Name Recording (for Caller Menu Routing)"}
         </label>
-        <div style={{ display: 'flex', gap: 10, alignItems: 'center', marginTop: 8 }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, alignItems: 'center', marginTop: 8 }}>
           {recording ? (
             <button className="btn btn-rose btn-sm" onClick={stopRecording} type="button" style={{ background: 'var(--rose)', color: '#fff', border: 'none', padding: '6px 12px', borderRadius: 4, cursor: 'pointer' }}>
               {lang === "es" ? "🛑 Detener grabación"
@@ -407,8 +407,9 @@ function ContactModal({
           </button>
           
           {audioUrl && (
-            <div style={{ display: 'flex', alignItems: 'center' }}>
-              <audio src={audioUrl} controls style={{ width: 220, height: 32, borderRadius: 4 }} />
+            // Wraps under the buttons in a narrow modal instead of overflowing it.
+            <div style={{ display: 'flex', alignItems: 'center', flex: '1 1 220px', minWidth: 0 }}>
+              <audio src={audioUrl} controls style={{ width: '100%', height: 32, borderRadius: 4 }} />
             </div>
           )}
 
