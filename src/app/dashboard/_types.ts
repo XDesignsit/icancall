@@ -41,6 +41,8 @@ export interface Line {
     notifWeekly?: boolean;
     greetingAudioPath?: string;
     voiceId?: string;
+    /** Skip the "Press 1" prompt and name each contact as it is rung (lib/cascadeAnnounce). Not for the caller menu. */
+    directConnect?: boolean;
   };
 }
 

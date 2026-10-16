@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { verifyTelephonyWebhook } from '@/lib/twilioWebhook';
 import { findAccountByTwilioNumber } from '@/lib/db';
 import { parseConferenceRoom } from '@/lib/conferenceRoom';
-import { callerWaitingAlone, releaseCallerIfAlone, wasLegAccepted } from '@/lib/conferenceBridge';
+import { callerWaitingAlone, recordPlacedLegs, releaseCallerIfAlone, wasLegAccepted } from '@/lib/conferenceBridge';
 import { cascadeOrder, parseLeadIndex } from '@/lib/coverageSchedule';
 
 export const preferredRegion = 'iad1';
@@ -64,7 +64,7 @@ export async function POST(request: Request) {
       if (nextIdx < availableContacts.length) {
         const nextContact = availableContacts[nextIdx];
         try {
-          await twilioClient.calls.create({
+          const leg = await twilioClient.calls.create({
             to: nextContact.phone,
             from: activeNumber,
             url: `${baseUrl}/api/twilio/agent-join?room=${encodeURIComponent(room)}&screen=1`,
@@ -72,6 +72,8 @@ export async function POST(request: Request) {
             statusCallbackEvent: ['completed', 'busy', 'no-answer', 'failed'],
             timeout: 15
           });
+          // Lets a caller hanging up stop it, and the hold loop name who it rings.
+          await recordPlacedLegs(room, [leg.sid]);
           return new NextResponse('OK');
         } catch (err) {
           console.error('Failed to call next contact in cascade:', err);

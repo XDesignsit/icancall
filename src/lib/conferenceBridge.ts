@@ -101,11 +101,28 @@ export async function firstAcceptedLeg(room: string): Promise<string | null> {
 
 const PLACED_LEGS = 'placed_call_legs';
 
-/** Records the caregiver legs just placed for this room, so stopPlacedLegs can find them. */
+/**
+ * Records the caregiver legs just placed for this room, so stopPlacedLegs can
+ * find them. Cascade legs are recorded one at a time as they are placed, which
+ * also tells the caller's hold loop (latestPlacedLeg) who is being rung.
+ */
 export async function recordPlacedLegs(room: string, callSids: string[]): Promise<void> {
   if (callSids.length === 0) return;
   const { error } = await supabase.from(PLACED_LEGS).upsert(callSids.map((call_sid) => ({ call_sid, room })));
   if (error) console.error('Could not record the placed caregiver legs; they will ring out on their own:', error);
+}
+
+/** The leg placed last for this room: in a cascade, the contact being rung now. Null when unknown. */
+export async function latestPlacedLeg(room: string): Promise<string | null> {
+  const { data, error } = await supabase
+    .from(PLACED_LEGS)
+    .select('call_sid')
+    .eq('room', room)
+    .order('placed_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (error) console.error('Could not look up the caregiver leg being rung:', error);
+  return (data?.call_sid as string | undefined) ?? null;
 }
 
 /**

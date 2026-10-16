@@ -3,6 +3,7 @@ import { ttsPlayTag, verifyTelephonyWebhook } from '@/lib/twilioWebhook';
 import { findAccountByTwilioNumber, getAvailableMinutes, deductMinutes } from '@/lib/db';
 import { buildConferenceRoom } from '@/lib/conferenceRoom';
 import { recordPlacedLegs } from '@/lib/conferenceBridge';
+import { announceContact, directConnectOn } from '@/lib/cascadeAnnounce';
 import { cascadeOrder, hourInTimeZone, onDutyContactIndex, parseLeadIndex } from '@/lib/coverageSchedule';
 import { supabase } from '@/lib/supabase';
 import twilioClient, { providerForNumber } from '@/lib/twilio';
@@ -87,6 +88,8 @@ export async function POST(request: Request) {
     const greetingText = customGreeting || "Thank you for calling the iCanCall priority line.";
     const greetingAudioPath = account?.line?.settings?.greetingAudioPath;
     const contacts = account?.line?.contacts || [];
+    // Callers skip the "Press 1" prompt and hear who is being rung (lib/cascadeAnnounce).
+    const directConnect = directConnectOn(account?.line?.settings, lineMode);
 
     if (!digits) {
       // A new call (or the menu again after a bad key; recording is a no-op then).
@@ -148,6 +151,9 @@ export async function POST(request: Request) {
         twiml += menuPrompts.join('');
         twiml += `\n      ${getTtsPlayTag("Or press 9 to leave a voice message.")}\n  </Gather>`;
         twiml += `\n  <!-- Default fallback to leaving a voicemail if they wait and enter nothing -->\n  <Redirect method="POST">/api/twilio/voice?Digits=9&amp;To=${encodeURIComponent(activeNumber)}</Redirect>`;
+      } else if (directConnect) {
+        // Straight through to the contacts, as if the caller had pressed 1.
+        twiml += `\n  <Redirect method="POST">/api/twilio/voice?Digits=1&amp;To=${encodeURIComponent(activeNumber)}</Redirect>`;
       } else {
         // Cascade or Simultaneous mode prompt
         twiml += `
@@ -178,8 +184,11 @@ export async function POST(request: Request) {
         if (nextIdx < availableContacts.length) {
           const nextContact = availableContacts[nextIdx];
           const timeLimitSeconds = Math.floor(availableMinutes * 60);
+          const prompt = directConnect
+            ? await announceContact(baseUrl, voiceId, nextContact, availableContacts[nextIdx - 1] || null)
+            : getTtsPlayTag("Trying the next contact. Please stand by.");
           twiml += `
-            ${getTtsPlayTag("Trying the next contact. Please stand by.")}
+            ${prompt}
             <Dial 
               timeout="15" 
               action="/api/twilio/voice?Digits=cascade-next&amp;contactIndex=${nextIdx + 1}${leadFromQuery === null ? '' : `&amp;lead=${leadFromQuery}`}&amp;To=${encodeURIComponent(activeNumber)}" 
@@ -303,11 +312,17 @@ export async function POST(request: Request) {
           if (useTwilioConference) {
             // PRODUCTION mode: Twilio Conference call-bridging with * transfer capability.
             // The room closes when the caller leaves it, so a caregiver is not
-            // left on a silent line after the caller hangs up.
+            // left on a silent line after the caller hangs up. A direct-connect
+            // cascade waits in a hold loop that names each contact as it is
+            // rung (api/twilio/cascade-wait); everyone else hears hold music.
+            const announceLegs = directConnect && lineMode !== 'simultaneous';
+            const waitUrl = announceLegs
+              ? `${baseUrl}/api/twilio/cascade-wait?room=${encodeURIComponent(roomName)}`
+              : 'http://twimlets.com/holdmusic?Bucket=com.twilio.music.classical';
             twiml += `
-              ${getTtsPlayTag("Connecting you to your primary trusted contacts. Please stand by.")}
+              ${announceLegs ? '' : getTtsPlayTag("Connecting you to your primary trusted contacts. Please stand by.")}
               <Dial timeLimit="${timeLimitSeconds}">
-                <Conference beep="false" endConferenceOnExit="true" waitUrl="http://twimlets.com/holdmusic?Bucket=com.twilio.music.classical">${roomName}</Conference>
+                <Conference beep="false" endConferenceOnExit="true" waitUrl="${waitUrl}">${roomName}</Conference>
               </Dial>
             `;
 
@@ -336,7 +351,7 @@ export async function POST(request: Request) {
               // Cascade and Schedule modes (sequential) - Call the first caregiver
               const firstContact = availableContacts[0];
               try {
-                await twilioClient!.calls.create({
+                const leg = await twilioClient!.calls.create({
                   to: firstContact.phone,
                   from: activeNumber,
                   url: `${baseUrl}/api/twilio/agent-join?room=${encodeURIComponent(roomName)}&screen=1`,
@@ -344,6 +359,7 @@ export async function POST(request: Request) {
                   statusCallbackEvent: ['completed', 'busy', 'no-answer', 'failed'],
                   timeout: 15
                 });
+                await recordPlacedLegs(roomName, [leg.sid]);
               } catch (err) {
                 console.error(`Failed to call first caregiver ${firstContact.name}:`, err);
               }
@@ -366,8 +382,11 @@ export async function POST(request: Request) {
             } else {
               // Cascade and Schedule modes (sequential)
               const firstContact = availableContacts[0];
+              const prompt = directConnect
+                ? await announceContact(baseUrl, voiceId, firstContact)
+                : getTtsPlayTag("Connecting you to your primary trusted contacts. Please stand by.");
               twiml += `
-                ${getTtsPlayTag("Connecting you to your primary trusted contacts. Please stand by.")}
+                ${prompt}
                 <Dial 
                   timeout="15" 
                   action="/api/twilio/voice?Digits=cascade-next&amp;contactIndex=1${leadIndex === null ? '' : `&amp;lead=${leadIndex}`}&amp;To=${encodeURIComponent(activeNumber)}" 
