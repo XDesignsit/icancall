@@ -10,6 +10,7 @@ import twilioClient, { providerForNumber } from '@/lib/twilio';
 import { recordCallAnswered, recordCallStarted, recordVoicemailOffered } from '@/lib/callRecords';
 import { ensureCallStatusWebhook } from '@/lib/numbers';
 import { callPrompt, langParam, langParamXml, languageOffer, parseCallLang, promptAroundName, type CallPromptKey } from '@/lib/callPrompts';
+import { isOwnRecording } from '@/lib/voices';
 
 export const preferredRegion = 'iad1';
 
@@ -114,7 +115,8 @@ export async function POST(request: Request) {
     // standard one translated; the generated English greeting audio is English only.
     const customGreeting = lang === 'en' ? settings?.greeting : settings?.greeting2;
     const greetingText = customGreeting || callPrompt(lang, 'greeting');
-    const greetingAudioPath = lang === 'en' ? settings?.greetingAudioPath : undefined;
+    // Only a recorded greeting is played; a generated one is spoken live in the line's voice (lib/voices).
+    const greetingAudioPath = lang === 'en' && isOwnRecording(settings?.greetingAudioPath) ? settings?.greetingAudioPath : undefined;
     const offerTag = offer && lang === 'en' ? getTtsPlayTag(callPrompt(offer.lang, 'languageOffer', { digit: offer.digit })) : '';
 
     if (!digits) {
@@ -152,9 +154,9 @@ export async function POST(request: Request) {
           contacts.map(async (c, index) => {
             const digit = index + 1;
             let voiceUrl = null;
-            // Older dashboard recordings were saved as WebM/MP4, which <Play> cannot play;
-            // those read the typed name instead of leaving the caller in silence.
-            if (c.voicePath && /\.(mp3|wav)$/i.test(c.voicePath)) {
+            // A name the contact recorded is played; a generated one, or an older
+            // WebM/MP4 recording <Play> cannot play, is spoken in the line's voice.
+            if (isOwnRecording(c.voicePath)) {
               try {
                 const { data } = await supabase.storage
                   .from('voice-prompts')

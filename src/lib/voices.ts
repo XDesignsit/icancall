@@ -98,3 +98,15 @@ export function effectiveVoiceId(
   if (customVoice && requested === customVoice.id && planAllowsVoiceClone(plan)) return requested;
   return DEFAULT_VOICE_ID;
 }
+
+/**
+ * Whether a stored prompt file is a person's own recording, to be played as
+ * recorded. Dashboard microphone recordings are saved as WAV (lib/wavEncoder).
+ * The MP3s "Generate AI voice" saves (api/caregiver/generate-voice) only render
+ * the typed text in whatever voice the line had at the time, so calls speak
+ * that text live in the line's current voice instead; otherwise a new or
+ * cloned voice would be mixed with the old one.
+ */
+export function isOwnRecording(path: unknown): path is string {
+  return typeof path === "string" && /\.wav$/i.test(path);
+}
