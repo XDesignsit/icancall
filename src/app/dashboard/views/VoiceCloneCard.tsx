@@ -7,6 +7,7 @@ import { type CustomVoice } from "@/lib/voices";
 import { toWav } from "@/lib/wavEncoder";
 import { Badge } from "../_primitives";
 import { type Line } from "../_types";
+import { PromptRecorder } from "./PromptRecorder";
 
 /* "Your own voice": the account owner reads a script once and ElevenLabs
    clones their voice (api/caregiver/voice-clone). Every prompt on a line that
@@ -77,6 +78,9 @@ export function VoiceCloneCard({
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const script = buildScript(line);
+  const ownVoice = line.settings?.ownVoice === "recorded" ? "recorded" : "clone";
+  const setOwnVoice = (mode: "clone" | "recorded") =>
+    setLine((prev) => prev.map((l) => (l.id === line.id ? { ...l, settings: { ...l.settings, ownVoice: mode } } : l)));
   const usingOnLine = !!customVoice && line.settings?.voiceId === customVoice.id;
 
   // Stop the microphone and timer if the card goes away mid-recording.
@@ -234,7 +238,7 @@ export function VoiceCloneCard({
     }
   };
 
-  const showRecorder = isOwner && allowed && (!customVoice || rerecord);
+  const showRecorder = isOwner && allowed && ownVoice === "clone" && (!customVoice || rerecord);
   const enoughAudio = !!take && take.seconds >= MIN_SECONDS;
 
   return (
@@ -242,7 +246,7 @@ export function VoiceCloneCard({
       <div className="card-head">
         <div>
           <h2>{t.title}</h2>
-          <p>{t.sub}</p>
+          <p>{t.cardSub}</p>
         </div>
         {!allowed && <Badge kind="blue">PRO</Badge>}
       </div>
@@ -254,9 +258,42 @@ export function VoiceCloneCard({
           </div>
         )}
 
-        {allowed && !isOwner && <p style={{ margin: 0, color: "var(--ink-soft)" }}>{t.ownerOnly}</p>}
+        {allowed && (
+          <div role="radiogroup" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 12 }}>
+            {([
+              { id: "clone", title: t.optionClone, desc: t.optionCloneDesc },
+              { id: "recorded", title: t.optionRecord, desc: t.optionRecordDesc },
+            ] as const).map((o) => (
+              <button
+                key={o.id}
+                type="button"
+                role="radio"
+                aria-checked={ownVoice === o.id}
+                onClick={() => setOwnVoice(o.id)}
+                style={{
+                  textAlign: "left",
+                  padding: "14px 16px",
+                  borderRadius: "var(--r-md)",
+                  border: ownVoice === o.id ? "2px solid var(--accent)" : "1px solid var(--line)",
+                  background: ownVoice === o.id ? "var(--bg)" : "transparent",
+                  color: "var(--ink)",
+                  cursor: "pointer",
+                }}
+              >
+                <b style={{ display: "block" }}>{o.title}</b>
+                <span style={{ display: "block", marginTop: 4, fontSize: "0.86rem", color: "var(--ink-soft)" }}>{o.desc}</span>
+              </button>
+            ))}
+          </div>
+        )}
 
-        {allowed && customVoice && !rerecord && (
+        {allowed && ownVoice === "recorded" && (
+          <PromptRecorder line={line} setLine={setLine} t={t} hasClone={usingOnLine} showToast={showToast} />
+        )}
+
+        {allowed && ownVoice === "clone" && !isOwner && <p style={{ margin: 0, color: "var(--ink-soft)" }}>{t.ownerOnly}</p>}
+
+        {allowed && ownVoice === "clone" && customVoice && !rerecord && (
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, flexWrap: "wrap" }}>
               <div>

@@ -1,5 +1,5 @@
 import { after, NextResponse } from 'next/server';
-import { ttsPlayTag, verifyTelephonyWebhook } from '@/lib/twilioWebhook';
+import { recordedPromptTag, ttsPlayTag, verifyTelephonyWebhook } from '@/lib/twilioWebhook';
 import { findAccountByTwilioNumber } from '@/lib/db';
 import { claimCallAlert, getCall, recordTranscript, recordVoicemail, type CallRow } from '@/lib/callRecords';
 import { sendCallAlert } from '@/lib/callAlerts';
@@ -65,10 +65,13 @@ export async function POST(request: Request) {
       }
 
       const voiceId = account?.line?.settings?.voiceId || '21m00Tcm4TlvDq8ikWAM';
+      const lang = parseCallLang(url.searchParams.get('lang'));
+      const thanks = callPrompt(lang, 'messageSent');
+      const thanksTag = recordedPromptTag(baseUrl, account?.line?.settings, account?.plan, lang, account?.id)(thanks) || ttsPlayTag(baseUrl, thanks, voiceId);
       return new NextResponse(
         `<?xml version="1.0" encoding="UTF-8"?>
 <Response>
-  ${ttsPlayTag(baseUrl, callPrompt(parseCallLang(url.searchParams.get('lang')), 'messageSent'), voiceId)}
+  ${thanksTag}
   <Hangup/>
 </Response>`,
         { headers: { 'Content-Type': 'application/xml' } }

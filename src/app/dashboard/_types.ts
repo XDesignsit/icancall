@@ -47,6 +47,10 @@ export interface Line {
     voiceId?: string;
     /** Skip the "Press 1" prompt and name each contact as it is rung (lib/cascadeAnnounce). Not for the caller menu. */
     directConnect?: boolean;
+    /** Which own voice the line uses: an ElevenLabs clone, or the prompts recorded one by one (lib/promptRecordings). */
+    ownVoice?: "clone" | "recorded";
+    /** Prompt recordings by the exact English sentence they say (lib/promptRecordings). */
+    promptRecordings?: Record<string, { path: string; recordedAt: string }>;
   };
 }
 

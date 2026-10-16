@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { ttsPlayTag, verifyTelephonyWebhook } from '@/lib/twilioWebhook';
+import { recordedPromptTag, ttsPlayTag, verifyTelephonyWebhook } from '@/lib/twilioWebhook';
 import { findAccountByTwilioNumber, getAvailableMinutes, deductMinutes } from '@/lib/db';
 import { buildConferenceRoom } from '@/lib/conferenceRoom';
 import { recordPlacedLegs } from '@/lib/conferenceBridge';
@@ -11,6 +11,7 @@ import { recordCallAnswered, recordCallStarted, recordVoicemailOffered } from '@
 import { ensureCallStatusWebhook } from '@/lib/numbers';
 import { callPrompt, langParam, langParamXml, languageOffer, parseCallLang, promptAroundName, type CallPromptKey } from '@/lib/callPrompts';
 import { isOwnRecording } from '@/lib/voices';
+import { greetingText as promptGreetingText } from '@/lib/promptRecordings';
 
 export const preferredRegion = 'iad1';
 
@@ -66,9 +67,13 @@ export async function POST(request: Request) {
     
     // Helper to generate dynamic ElevenLabs TTS play tags
     const getTtsPlayTag = (text: string) => ttsPlayTag(baseUrl, text, voiceId);
+    // The owner's own recording of a sentence, when the line plays recordings (lib/promptRecordings).
+    const recorded = recordedPromptTag(baseUrl, account?.line?.settings, account?.plan, lang, account?.id);
     // A caller-facing sentence in the call's language, as a <Play> tag.
-    const say = (key: CallPromptKey, vars?: { digit?: number | string; name?: string }) =>
-      getTtsPlayTag(callPrompt(lang, key, vars));
+    const say = (key: CallPromptKey, vars?: { digit?: number | string; name?: string }) => {
+      const text = callPrompt(lang, key, vars);
+      return recorded(text) || getTtsPlayTag(text);
+    };
 
     if (account) {
       availableMinutes = getAvailableMinutes(account);
@@ -141,7 +146,10 @@ export async function POST(request: Request) {
         }
       }
 
-      if (greetingVoiceUrl) {
+      const greetingRecording = recorded(lang === 'en' ? promptGreetingText(settings) : '');
+      if (greetingRecording) {
+        twiml += `\n  ${greetingRecording}`;
+      } else if (greetingVoiceUrl) {
         twiml += `\n  <Play>${greetingVoiceUrl}</Play>`;
       } else {
         twiml += `\n  ${getTtsPlayTag(greetingText)}`;
@@ -153,6 +161,10 @@ export async function POST(request: Request) {
         const menuPrompts = await Promise.all(
           contacts.map(async (c, index) => {
             const digit = index + 1;
+            // A whole "Press 1 for Mom" the owner recorded comes before the contact's recorded name.
+            if (recorded(callPrompt(lang, 'menuOption', { digit, name: c.name }))) {
+              return `\n      ${say('menuOption', { digit, name: c.name })}`;
+            }
             let voiceUrl = null;
             // A name the contact recorded is played; a generated one, or an older
             // WebM/MP4 recording <Play> cannot play, is spoken in the line's voice.
@@ -220,7 +232,7 @@ export async function POST(request: Request) {
           const nextContact = availableContacts[nextIdx];
           const timeLimitSeconds = Math.floor(availableMinutes * 60);
           const prompt = directConnect
-            ? await announceContact(baseUrl, voiceId, nextContact, availableContacts[nextIdx - 1] || null, lang)
+            ? await announceContact(baseUrl, voiceId, nextContact, availableContacts[nextIdx - 1] || null, lang, recorded)
             : say('tryingNext');
           twiml += `
             ${prompt}
@@ -418,7 +430,7 @@ export async function POST(request: Request) {
               // Cascade and Schedule modes (sequential)
               const firstContact = availableContacts[0];
               const prompt = directConnect
-                ? await announceContact(baseUrl, voiceId, firstContact, null, lang)
+                ? await announceContact(baseUrl, voiceId, firstContact, null, lang, recorded)
                 : say('connectingAll');
               twiml += `
                 ${prompt}
