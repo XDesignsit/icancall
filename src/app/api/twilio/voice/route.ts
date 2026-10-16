@@ -123,7 +123,9 @@ export async function POST(request: Request) {
           contacts.map(async (c, index) => {
             const digit = index + 1;
             let voiceUrl = null;
-            if (c.voicePath) {
+            // Older dashboard recordings were saved as WebM/MP4, which <Play> cannot play;
+            // those read the typed name instead of leaving the caller in silence.
+            if (c.voicePath && /\.(mp3|wav)$/i.test(c.voicePath)) {
               try {
                 const { data } = await supabase.storage
                   .from('voice-prompts')

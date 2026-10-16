@@ -3,6 +3,13 @@ import { cookies } from 'next/headers';
 import { verifySession } from '@/lib/session';
 import { supabase } from '@/lib/supabase';
 
+const PLAYABLE_TYPES: Record<string, string> = {
+  'audio/wav': 'wav',
+  'audio/wave': 'wav',
+  'audio/x-wav': 'wav',
+  'audio/mpeg': 'mp3',
+};
+
 async function getAuthenticatedUserId() {
   const cookieStore = await cookies();
   const sessionToken = cookieStore.get('session')?.value;
@@ -29,14 +36,14 @@ export async function POST(request: Request) {
     // Convert file to array buffer for upload
     const buffer = Buffer.from(await file.arrayBuffer());
     
-    // File type detection
-    const contentType = file.type || 'audio/webm';
-    const baseType = contentType.split(';')[0]; // Strip codecs like ;codecs=opus
-    let extension = baseType.split('/')[1] || 'webm';
-    if (extension === 'x-caf') {
-      extension = 'caf';
+    // The menu <Play>s this file, so only formats Twilio can play are stored
+    // (the dashboard converts browser recordings to WAV before uploading).
+    const contentType = (file.type || '').split(';')[0];
+    const extension = PLAYABLE_TYPES[contentType];
+    if (!extension) {
+      return NextResponse.json({ error: 'Recording must be WAV or MP3' }, { status: 415 });
     }
-    
+
     const filePath = `${userId}/${contactId}.${extension}`;
 
     // Upload to Supabase storage 'voice-prompts' bucket
