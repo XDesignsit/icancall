@@ -17,6 +17,7 @@ Runs on Vercel (App Router). Server code talks to Supabase, Stripe, Twilio and T
 | `app/api/caregiver/` | Lines, profile, seats, recordings, receipts, SMS alerts, voice generation | `lib/account.ts` |
 | `app/api/cron/` | Number release and annual-minute reset (scheduled in `vercel.json`) | `lib/subscriptionEnd.ts`, `lib/minutesCycle.ts` |
 | `app/api/{admin,contact,waitlist,send-*}/` | Admin, contact form, waitlist, system and voicemail alerts | `lib/mail.ts`, `lib/rateLimit.ts` |
+| `app/opengraph-image.tsx`, `app/api/og/` | Link preview cards: the site-wide default and one per kind of link sent by text (`/dashboard?n=<kind>`) | `lib/linkPreviews.tsx`, `lib/linkKinds.ts` |
 | `lib/` | Server and shared logic: plans (`planConfig.ts`), display prices (`pricing.ts`), DB (`db.ts`, `supabase.ts`), phone, mail, carriers | file header comments |
 | `lib/translations/` | Per-language dictionaries (`home/` for the homepage); English is `en.ts` | AGENTS.md sync rule |
 | `components/ui/`, `components/domain/` | Design-system primitives and domain components; `index.ts` re-exports both | design-system sync |

@@ -7,6 +7,7 @@ import { startSession } from "@/lib/userSessions";
 import { toE164 } from "@/lib/phone";
 import { resolveSessionRole } from "@/lib/roles";
 import { isOnboarded } from "@/lib/onboarding";
+import { dashboardLink } from "@/lib/linkKinds";
 import { provisionNumber } from "@/lib/numbers";
 import { planConfig } from "@/lib/planConfig";
 import { activePlanForSubscription, isSimulatedBilling, verifyPlanCheckout, type VerifiedPlanPurchase } from "@/lib/stripe";
@@ -309,7 +310,7 @@ export async function POST(request: Request) {
           const { sendSms } = await import("@/lib/twilio");
           await sendSms(
             normalizedSmsPhone,
-            `Welcome to iCanCall, ${firstName}! Your ${details.name} is active. Manage your lines and trusted contacts: https://app.icancall.co/dashboard Reply STOP to opt out.`
+            `Welcome to iCanCall, ${firstName}! Your ${details.name} is active. Manage your lines and trusted contacts: ${dashboardLink("welcome")} Reply STOP to opt out.`
           );
         } catch (smsErr) {
           console.error("Failed to send signup confirmation SMS:", smsErr);
