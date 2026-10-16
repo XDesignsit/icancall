@@ -35,20 +35,24 @@ function clip(text: string, max: number): string {
   return t.length > max ? `${t.slice(0, max - 1)}…` : t;
 }
 
-// No links: carriers filter links in texts from the A2P 10DLC number unless
-// its campaign declares them, and the missed/voicemail alerts that carried a
-// dashboard link never arrived (2026-09-27) while link-free texts did.
+// Texts from the A2P 10DLC number may carry links to app.icancall.co, the
+// domain declared on its campaign. Links were carrier-filtered (30007) until the
+// number was re-attached to the campaign's Messaging Service (2026-10-15), then
+// /dashboard and /signup both delivered. The URL is fixed rather than read from
+// NEXT_PUBLIC_APP_URL so a preview or local host never ends up in a text.
+const DASHBOARD_LINK = 'https://app.icancall.co/dashboard';
+
 export function alertText(account: Account, call: CallRow): string {
   const caller = callerLabel(account, call.from_number);
   const line = account.line?.name?.trim() || 'your iCanCall line';
   if (call.status === 'connected') {
-    return `iCanCall: ${caller} called ${line} and was connected to ${call.answered_by || 'a trusted contact'} (${spoken(call.talk_seconds)}).`;
+    return `iCanCall: ${caller} called ${line} and was connected to ${call.answered_by || 'a trusted contact'} (${spoken(call.talk_seconds)}). Details: ${DASHBOARD_LINK}`;
   }
   if (call.status === 'voicemail') {
     const heard = call.transcript ? ` "${clip(call.transcript, 120)}"` : '';
-    return `iCanCall: Voicemail from ${caller} on ${line} (${spoken(call.recording_seconds)}).${heard} Listen in your iCanCall call log.`;
+    return `iCanCall: Voicemail from ${caller} on ${line} (${spoken(call.recording_seconds)}).${heard} Listen in your call log: ${DASHBOARD_LINK}`;
   }
-  return `iCanCall: Missed call from ${caller} on ${line}. Nobody answered and no message was left.`;
+  return `iCanCall: Missed call from ${caller} on ${line}. Nobody answered and no message was left. ${DASHBOARD_LINK}`;
 }
 
 export async function sendCallAlert(account: Account, call: CallRow): Promise<void> {
