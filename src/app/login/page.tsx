@@ -6,7 +6,11 @@ import LoginPage from "./LoginPage";
 // Links sent by text go to /dashboard?n=<kind>. A preview fetcher has no
 // session, so the proxy redirects it here with n kept, and the preview shows
 // the card for that kind instead of the site-wide one.
-export async function generateMetadata({ searchParams }: PageProps<"/login">): Promise<Metadata> {
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}): Promise<Metadata> {
   const { n } = await searchParams;
   if (!isLinkKind(n)) return {};
   const { title, tagline } = LINK_PREVIEWS[n];

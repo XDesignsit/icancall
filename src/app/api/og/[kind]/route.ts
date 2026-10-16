@@ -9,8 +9,8 @@ export function generateStaticParams() {
   return LINK_KINDS.map((kind) => ({ kind }));
 }
 
-export async function GET(_req: Request, ctx: RouteContext<"/api/og/[kind]">) {
-  const { kind } = await ctx.params;
+export async function GET(_req: Request, { params }: { params: Promise<{ kind: string }> }) {
+  const { kind } = await params;
   if (!isLinkKind(kind)) return new Response("Not found", { status: 404 });
   return previewImage(LINK_PREVIEWS[kind]);
 }
