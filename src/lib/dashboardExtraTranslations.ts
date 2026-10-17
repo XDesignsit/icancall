@@ -154,6 +154,8 @@ export const dashboardExtraTranslations: Record<
     saveFailed: "Couldn't save",
     saveRetry: "Try again",
     simSubtitle: "Walk through what {name}'s callers will hear, step by step. No real call is placed.",
+    simSampleHours: "Sample hours for this preview. Add time slots above to set real ones.",
+    simAllDay: "All day",
   },
   es: {
     accessOwner: "Titular de la cuenta",
@@ -307,6 +309,8 @@ export const dashboardExtraTranslations: Record<
     saveFailed: "No se pudo guardar",
     saveRetry: "Reintentar",
     simSubtitle: "Recorra paso a paso lo que oirán quienes llamen a {name}. No se realiza ninguna llamada real.",
+    simSampleHours: "Horario de ejemplo para esta vista previa. Agregue franjas horarias arriba para definir las reales.",
+    simAllDay: "Todo el día",
   },
   fr: {
     accessOwner: "Titulaire du compte",
@@ -460,6 +464,8 @@ export const dashboardExtraTranslations: Record<
     saveFailed: "Échec de l'enregistrement",
     saveRetry: "Réessayer",
     simSubtitle: "Découvrez étape par étape ce qu'entendront les personnes qui appellent {name}. Aucun appel réel n'est passé.",
+    simSampleHours: "Horaires d'exemple pour cet aperçu. Ajoutez des créneaux ci-dessus pour définir les vrais.",
+    simAllDay: "Toute la journée",
   },
   ja: {
     accessOwner: "アカウント所有者",
@@ -613,6 +619,8 @@ export const dashboardExtraTranslations: Record<
     saveFailed: "保存できませんでした",
     saveRetry: "再試行",
     simSubtitle: "{name}に電話をかけた人が聞く内容を順を追って確認できます。実際の通話は発信されません。",
+    simSampleHours: "このプレビュー用のサンプル時間です。実際の時間は上で時間帯を追加して設定してください。",
+    simAllDay: "終日",
   },
   zh: {
     accessOwner: "账户拥有者",
@@ -766,6 +774,8 @@ export const dashboardExtraTranslations: Record<
     saveFailed: "保存失败",
     saveRetry: "重试",
     simSubtitle: "逐步查看拨打给 {name} 的来电者将听到的内容。不会拨打真实电话。",
+    simSampleHours: "此预览使用示例时段。请在上方添加时段以设置实际安排。",
+    simAllDay: "全天",
   },
   ar: {
     accessOwner: "صاحب الحساب",
@@ -919,6 +929,8 @@ export const dashboardExtraTranslations: Record<
     saveFailed: "تعذّر الحفظ",
     saveRetry: "إعادة المحاولة",
     simSubtitle: "تعرّف خطوة بخطوة على ما سيسمعه المتصلون بـ {name}. لن يتم إجراء أي مكالمة حقيقية.",
+    simSampleHours: "ساعات تجريبية لهذه المعاينة. أضف فترات زمنية أعلاه لتعيين الساعات الفعلية.",
+    simAllDay: "طوال اليوم",
   },
   hi: {
     accessOwner: "खाता स्वामी",
@@ -1072,6 +1084,8 @@ export const dashboardExtraTranslations: Record<
     saveFailed: "सहेजा नहीं जा सका",
     saveRetry: "फिर से कोशिश करें",
     simSubtitle: "चरण-दर-चरण देखें कि {name} को कॉल करने वाले क्या सुनेंगे। कोई असली कॉल नहीं की जाती।",
+    simSampleHours: "इस पूर्वावलोकन के लिए नमूना समय। असली समय तय करने के लिए ऊपर टाइम स्लॉट जोड़ें।",
+    simAllDay: "पूरे दिन",
   },
   pt: {
     accessOwner: "Titular da conta",
@@ -1225,6 +1239,8 @@ export const dashboardExtraTranslations: Record<
     saveFailed: "Não foi possível salvar",
     saveRetry: "Tentar novamente",
     simSubtitle: "Veja passo a passo o que as pessoas que ligam para {name} vão ouvir. Nenhuma chamada real é feita.",
+    simSampleHours: "Horários de exemplo para esta prévia. Adicione faixas de horário acima para definir os reais.",
+    simAllDay: "O dia todo",
   },
   de: {
     accessOwner: "Kontoinhaber",
@@ -1378,6 +1394,8 @@ export const dashboardExtraTranslations: Record<
     saveFailed: "Speichern fehlgeschlagen",
     saveRetry: "Erneut versuchen",
     simSubtitle: "Sehen Sie Schritt für Schritt, was Anrufer von {name} hören werden. Es wird kein echter Anruf getätigt.",
+    simSampleHours: "Beispielzeiten für diese Vorschau. Fügen Sie oben Zeitfenster hinzu, um echte festzulegen.",
+    simAllDay: "Ganztägig",
   },
   it: {
     accessOwner: "Titolare dell'account",
@@ -1531,6 +1549,8 @@ export const dashboardExtraTranslations: Record<
     saveFailed: "Impossibile salvare",
     saveRetry: "Riprova",
     simSubtitle: "Scopri passo dopo passo cosa sentiranno le persone che chiamano {name}. Non viene effettuata alcuna chiamata reale.",
+    simSampleHours: "Orari di esempio per questa anteprima. Aggiungi fasce orarie sopra per impostare quelli reali.",
+    simAllDay: "Tutto il giorno",
   },
   ko: {
     accessOwner: "계정 소유자",
@@ -1684,5 +1704,7 @@ export const dashboardExtraTranslations: Record<
     saveFailed: "저장하지 못했습니다",
     saveRetry: "다시 시도",
     simSubtitle: "{name}에게 전화하는 사람이 듣게 될 내용을 단계별로 확인하세요. 실제 전화는 걸리지 않습니다.",
+    simSampleHours: "이 미리보기용 예시 시간입니다. 실제 시간은 위에서 시간대를 추가해 설정하세요.",
+    simAllDay: "하루 종일",
   },
 };
