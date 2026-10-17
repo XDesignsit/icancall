@@ -161,8 +161,11 @@ const runtimeMin = (await minify(runtime, { compress: true, mangle: true, format
 /* ── 5. stylesheets from the last build, and the script ── */
 const indexHtml = fs.readFileSync(path.join(ROOT, ".next/server/app/index.html"), "utf8");
 const cssIds = [...indexHtml.matchAll(/<link rel="stylesheet" href="\/_next\/static\/chunks\/([^"]+\.css)"/g)].map(([, f]) => {
-  // Drop the Geist @font-face rules: the homepage never uses those fonts and their URLs point into .next.
-  const css = fs.readFileSync(path.join(ROOT, ".next/static/chunks", f), "utf8").replace(/@font-face\{[^}]*\}/g, "");
+  // The site font's @font-face URLs point into .next/static/media: inline them as data: URIs.
+  const css = fs.readFileSync(path.join(ROOT, ".next/static/chunks", f), "utf8").replace(
+    /url\(([^)]*\/media\/([^)/]+\.woff2))\)/g,
+    (_, url, file) => `url(data:font/woff2;base64,${fs.readFileSync(path.join(ROOT, ".next/static/media", file)).toString("base64")})`,
+  );
   return asset("text/css", Buffer.from(css), true);
 });
 if (!cssIds.length) throw new Error("No stylesheets found in .next/server/app/index.html — run `npm run build` first.");

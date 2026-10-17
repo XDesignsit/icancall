@@ -38,7 +38,7 @@
   --maxw: 1180px;
   --pad: clamp(20px, 5vw, 56px);
 
-  --font: "Helvetica Neue", Helvetica, Arial, "Segoe UI", sans-serif;
+  --font: var(--font-atkinson), "Helvetica Neue", Helvetica, Arial, "Segoe UI", sans-serif;
   --mono: ui-monospace, "SF Mono", "Roboto Mono", Menlo, monospace;
 }
 
@@ -922,7 +922,7 @@ h3 { font-size: clamp(1.25rem, 2vw, 1.6rem); }
 
   --r-sm: 9px; --r-md: 13px; --r-lg: 18px; --r-xl: 26px;
   --sidebar-w: 264px;
-  --font: "Helvetica Neue", Helvetica, Arial, "Segoe UI", sans-serif;
+  --font: var(--font-atkinson), "Helvetica Neue", Helvetica, Arial, "Segoe UI", sans-serif;
   --mono: ui-monospace, "SF Mono", "Roboto Mono", Menlo, monospace;
 }
 
