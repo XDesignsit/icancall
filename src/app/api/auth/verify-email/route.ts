@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { randomInt } from "crypto";
-import { sendEmail } from "@/lib/mail";
+import { EMAIL_FONT, sendEmail } from "@/lib/mail";
 import { checkOtp, saveOtp } from "@/lib/otpStore";
 import { ACCOUNT_EXISTS_RESPONSE, isEmailTakenForSignup } from "@/lib/accountLookup";
 import { EMAIL_PROOF_COOKIE, EMAIL_PROOF_MAX_AGE_SECONDS, issueEmailProof, sessionCookieOptions } from "@/lib/session";
@@ -38,7 +38,7 @@ export async function POST(request: Request) {
         subject: "Your iCanCall verification code",
         text: `Your iCanCall verification code is: ${otp}\n\nThis code expires in 10 minutes. If you did not request this, you can safely ignore this email.`,
         html: `
-          <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;max-width:480px;margin:0 auto;padding:32px 24px;background:#fff;border:1px solid #f1f5f9;border-radius:12px;">
+          <div style="font-family:${EMAIL_FONT};max-width:480px;margin:0 auto;padding:32px 24px;background:#fff;border:1px solid #f1f5f9;border-radius:12px;">
             <div style="margin-bottom:20px;"><span style="font-size:1.1rem;font-weight:700;color:#1e3a8a;">iCanCall</span></div>
             <h2 style="color:#0f172a;font-size:1.3rem;font-weight:700;margin:0 0 12px;">Verify your email address</h2>
             <p style="color:#475569;font-size:0.95rem;line-height:1.6;margin:0 0 24px;">Use the code below to verify your email. It expires in <strong>10 minutes</strong>.</p>

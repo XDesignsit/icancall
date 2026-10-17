@@ -12,6 +12,33 @@ const transporter = nodemailer.createTransport({
   },
 });
 
+// The site font, loaded from production so it works wherever the email is opened.
+// Clients that support web fonts (Apple Mail, iOS Mail, Outlook for Mac) use it;
+// Gmail and others fall back to the system stack. Templates set EMAIL_FONT inline.
+export const EMAIL_FONT_URL = 'https://www.icancall.co/fonts/AtkinsonHyperlegibleNext-latin.woff2';
+export const EMAIL_FONT = `'Atkinson Hyperlegible Next', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif`;
+
+// Wraps a template fragment in a document whose <head> declares the font.
+// Outlook on Windows can't load web fonts and would fall back to Times New Roman,
+// so it is pinned to Arial instead.
+export function emailDocument(body: string) {
+  if (/<html[\s>]/i.test(body)) return body;
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+@font-face { font-family: 'Atkinson Hyperlegible Next'; font-style: normal; font-weight: 200 800; font-display: swap; src: url('${EMAIL_FONT_URL}') format('woff2'); }
+</style>
+<!--[if mso]><style>body, table, td, div, p, a, span, h1, h2, h3 { font-family: Arial, sans-serif !important; }</style><![endif]-->
+</head>
+<body style="margin: 0; padding: 0; font-family: ${EMAIL_FONT};">
+${body}
+</body>
+</html>`;
+}
+
 interface SendEmailArgs {
   to: string;
   subject: string;
@@ -37,7 +64,7 @@ export async function sendEmail({ to, subject, text, html }: SendEmailArgs) {
       to,
       subject,
       text,
-      html: html || text.replace(/\n/g, '<br>'),
+      html: emailDocument(html || text.replace(/\n/g, '<br>')),
     });
 
     console.log('✉️ Email sent successfully:', info.messageId);
@@ -56,7 +83,7 @@ export async function sendPasswordResetEmail(to: string, name: string, resetLink
   const text = `Hi ${name},\n\nWe received a request to reset your password. Click the link below to set a new password:\n\n${resetLink}\n\nThis link will expire in 1 hour. If you did not make this request, you can safely ignore this email.\n\nBest,\nThe iCanCall Team`;
 
   const html = `
-    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 580px; margin: 0 auto; padding: 32px 24px; background: #ffffff; border: 1px solid #f1f5f9; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
+    <div style="font-family: ${EMAIL_FONT}; max-width: 580px; margin: 0 auto; padding: 32px 24px; background: #ffffff; border: 1px solid #f1f5f9; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
       <div style="margin-bottom: 24px;">
         <span style="font-size: 1.25rem; font-weight: 700; color: #1e3a8a; letter-spacing: -0.025em;">iCanCall</span>
       </div>
@@ -93,7 +120,7 @@ export async function sendSystemAlertEmail(to: string, alertTitle: string, sever
   const scheme = colorMap[severity] || colorMap.info;
 
   const html = `
-    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 580px; margin: 0 auto; padding: 32px 24px; background: #ffffff; border: 1px solid #f1f5f9; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
+    <div style="font-family: ${EMAIL_FONT}; max-width: 580px; margin: 0 auto; padding: 32px 24px; background: #ffffff; border: 1px solid #f1f5f9; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
       <div style="margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between;">
         <span style="font-size: 1.25rem; font-weight: 700; color: #1e3a8a; letter-spacing: -0.025em;">iCanCall</span>
         <span style="display: inline-block; padding: 4px 10px; background-color: ${scheme.bg}; border: 1px solid ${scheme.border}; color: ${scheme.text}; font-size: 0.75rem; font-weight: 700; border-radius: 6px; letter-spacing: 0.05em;">${scheme.label}</span>
@@ -129,7 +156,7 @@ export async function sendVoicemailAlertEmail(
   const text = `You received a new voicemail from ${callerName}!\n\nDuration: ${duration}\nListen in Dashboard: ${dashboardLink}\n\nTranscript:\n"${transcription || 'No transcription available.'}"`;
 
   const html = `
-    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 580px; margin: 0 auto; padding: 32px 24px; background: #ffffff; border: 1px solid #f1f5f9; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
+    <div style="font-family: ${EMAIL_FONT}; max-width: 580px; margin: 0 auto; padding: 32px 24px; background: #ffffff; border: 1px solid #f1f5f9; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
       <div style="margin-bottom: 24px;">
         <span style="font-size: 1.25rem; font-weight: 700; color: #1e3a8a; letter-spacing: -0.025em;">iCanCall Voicemail</span>
       </div>
@@ -176,7 +203,7 @@ export async function sendSeatInviteEmail(
   const text = `Hi,\n\n${inviterName} has invited you as a caregiver on their iCanCall Care Team account. As a caregiver you can help manage phone lines, trusted contacts, routing, and greetings.\n\nAccept the invitation and sign in here:\n\n${acceptLink}\n\nIf you weren't expecting this, you can safely ignore this email.\n\nBest,\nThe iCanCall Team`;
 
   const html = `
-    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 580px; margin: 0 auto; padding: 32px 24px; background: #ffffff; border: 1px solid #f1f5f9; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
+    <div style="font-family: ${EMAIL_FONT}; max-width: 580px; margin: 0 auto; padding: 32px 24px; background: #ffffff; border: 1px solid #f1f5f9; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
       <div style="margin-bottom: 24px;">
         <span style="font-size: 1.25rem; font-weight: 700; color: #1e3a8a; letter-spacing: -0.025em;">iCanCall</span>
       </div>
@@ -212,7 +239,7 @@ export async function sendWelcomeBillingEmail(
   const text = `Hi ${name},\n\nWelcome to iCanCall! Thank you for signing up. Here are your subscription details:\n\nPlan: ${planName}\nPrice: ${price}/${interval}\nStatus: ${paymentStatus}\nVirtual Lines: ${phoneNumbersIncluded}\n\nLogin to your dashboard to configure your trusted-contact circles.\n\nBest,\nThe iCanCall Team`;
 
   const html = `
-    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 580px; margin: 0 auto; padding: 32px 24px; background: #ffffff; border: 1px solid #f1f5f9; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
+    <div style="font-family: ${EMAIL_FONT}; max-width: 580px; margin: 0 auto; padding: 32px 24px; background: #ffffff; border: 1px solid #f1f5f9; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
       <div style="margin-bottom: 24px;">
         <span style="font-size: 1.25rem; font-weight: 700; color: #1e3a8a; letter-spacing: -0.025em;">iCanCall</span>
       </div>
@@ -288,7 +315,7 @@ export function minutesAlertEmail(
   const usedPct = minutes.pool > 0 ? Math.min(100, Math.round((minutes.used / minutes.pool) * 100)) : 100;
 
   const html = `
-    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 580px; margin: 0 auto; padding: 32px 24px; background: #ffffff; border: 1px solid #f1f5f9; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
+    <div style="font-family: ${EMAIL_FONT}; max-width: 580px; margin: 0 auto; padding: 32px 24px; background: #ffffff; border: 1px solid #f1f5f9; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
       <div style="margin-bottom: 24px;">
         <span style="font-size: 1.25rem; font-weight: 700; color: #1e3a8a; letter-spacing: -0.025em;">iCanCall</span>
       </div>

@@ -14,7 +14,7 @@ Moved verbatim from AGENTS.md and .agents/AGENTS.md. The rule that binds every t
   3. Run a link-patching script to parse and update links/routes in both raw HTML and script-embedded template JSON strings (`<script type="__bundler/template">`) inside the standalone pages.
   4. If modifying compiled React stepper flows (like the Signup page), run the compression/repacking script to compress and inject the updated base64 JS assets back into the manifest blocks of the standalone HTML pages.
 - The Main Landing standalone (`iCanCall Landing Page (standalone).html`) is generated from the homepage source, not hand-edited: after any homepage change run `npm run build && node scripts/build-standalone-home.mjs`, then copy the file to the pCloud and Google Drive directories.
-- The site font is Atkinson Hyperlegible Next (`src/app/fonts`). A re-exported Concord landing page (Seniors, Parents, Caregivers) comes back on the system font: run `node scripts/embed-standalone-font.mjs` on `public/<page>.html` and its standalone copy, then sync.
+- The site font is Atkinson Hyperlegible Next (`public/fonts`). A re-exported Concord landing page (Seniors, Parents, Caregivers) comes back on the system font: run `node scripts/embed-standalone-font.mjs` on `public/<page>.html` and its standalone copy, then sync.
 
 ## Standalone HTML Mockup Synchronization
 

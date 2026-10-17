@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Embeds the site font (Atkinson Hyperlegible Next, src/app/fonts) into Concord
+// Embeds the site font (Atkinson Hyperlegible Next, public/fonts) into Concord
 // standalone exports, so they match the Next.js app:
 //
 //   node scripts/embed-standalone-font.mjs public/seniors.html "iCanCall Seniors Landing (standalone).html" ...
@@ -15,7 +15,7 @@ import { fileURLToPath } from "node:url";
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const FAMILY = "Atkinson Hyperlegible Next";
 
-const data = fs.readFileSync(path.join(ROOT, "src/app/fonts/AtkinsonHyperlegibleNext-latin.woff2")).toString("base64");
+const data = fs.readFileSync(path.join(ROOT, "public/fonts/AtkinsonHyperlegibleNext-latin.woff2")).toString("base64");
 const STYLE = `<style id="site-font">@font-face{font-family:"${FAMILY}";font-style:normal;font-weight:200 800;font-display:swap;src:url(data:font/woff2;base64,${data}) format("woff2")}</style>`;
 
 const TEMPLATE_RE = /(<script type="__bundler\/template">)([\s\S]*?)(<\/script>)/;

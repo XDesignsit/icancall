@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { sendEmail } from '@/lib/mail';
+import { EMAIL_FONT, sendEmail } from '@/lib/mail';
 import { rateLimit } from '@/lib/rateLimit';
 
 const contactSchema = z.object({
@@ -55,7 +55,7 @@ export async function POST(request: Request) {
       `Message:\n${message}\n`;
 
     const html = `
-      <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 580px; margin: 0 auto; padding: 32px 24px; background: #ffffff; border: 1px solid #f1f5f9; border-radius: 12px;">
+      <div style="font-family: ${EMAIL_FONT}; max-width: 580px; margin: 0 auto; padding: 32px 24px; background: #ffffff; border: 1px solid #f1f5f9; border-radius: 12px;">
         <div style="margin-bottom: 24px;">
           <span style="font-size: 1.25rem; font-weight: 700; color: #1e3a8a; letter-spacing: -0.025em;">iCanCall</span>
         </div>

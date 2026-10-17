@@ -1,5 +1,5 @@
 import { supabase } from "@/lib/supabase";
-import { sendEmail } from "@/lib/mail";
+import { EMAIL_FONT, sendEmail } from "@/lib/mail";
 import { releaseProvisionedNumber, type TelephonyRecord } from "@/lib/numbers";
 import { removeOwnerVoiceClone } from "@/lib/voiceClone";
 
@@ -52,7 +52,7 @@ const appUrl = () => (process.env.NEXT_PUBLIC_APP_URL || "https://app.icancall.c
 
 function emailShell(heading: string, paragraphs: string[]): string {
   return `
-    <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;max-width:520px;margin:0 auto;padding:32px 24px;background:#fff;border:1px solid #f1f5f9;border-radius:12px;">
+    <div style="font-family:${EMAIL_FONT};max-width:520px;margin:0 auto;padding:32px 24px;background:#fff;border:1px solid #f1f5f9;border-radius:12px;">
       <div style="margin-bottom:20px;"><span style="font-size:1.1rem;font-weight:700;color:#1e3a8a;">iCanCall</span></div>
       <h2 style="color:#0f172a;font-size:1.3rem;font-weight:700;margin:0 0 12px;">${heading}</h2>
       ${paragraphs.map((p) => `<p style="color:#475569;font-size:0.95rem;line-height:1.6;margin:0 0 16px;">${p}</p>`).join("")}

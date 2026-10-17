@@ -3,11 +3,12 @@ import localFont from "next/font/local";
 import Script from "next/script";
 import "./globals.css";
 
-// Atkinson Hyperlegible Next (Braille Institute, SIL OFL: fonts/OFL.txt), the
-// variable Latin subset from Google Fonts. One file covers weights 200-800.
-// scripts/embed-standalone-font.mjs embeds the same file in the landing exports.
+// Atkinson Hyperlegible Next (Braille Institute, SIL OFL: public/fonts/OFL.txt),
+// the variable Latin subset from Google Fonts. One file covers weights 200-800.
+// It lives in public/ so emails can load it from a stable URL (EMAIL_FONT_URL in
+// src/lib/mail.ts); scripts/embed-standalone-font.mjs embeds it in the landing exports.
 const atkinson = localFont({
-  src: "./fonts/AtkinsonHyperlegibleNext-latin.woff2",
+  src: "../../public/fonts/AtkinsonHyperlegibleNext-latin.woff2",
   weight: "200 800",
   style: "normal",
   variable: "--font-atkinson",
