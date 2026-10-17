@@ -31,6 +31,7 @@ export interface CallRow {
   started_at: string;
   ended_at: string | null;
   alerted_at: string | null;
+  metered_minutes: number | null;
 }
 
 function logFailure(what: string, callSid: string, error: unknown) {

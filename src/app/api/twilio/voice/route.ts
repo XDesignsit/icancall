@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { recordedPromptTag, ttsPlayTag, verifyTelephonyWebhook } from '@/lib/twilioWebhook';
-import { findAccountByTwilioNumber, getAvailableMinutes, deductMinutes } from '@/lib/db';
+import { findAccountByTwilioNumber, getAvailableMinutes, chargeCallMinutes } from '@/lib/db';
 import { buildConferenceRoom } from '@/lib/conferenceRoom';
 import { recordPlacedLegs } from '@/lib/conferenceBridge';
 import { announceContact, directConnectOn } from '@/lib/cascadeAnnounce';
@@ -220,10 +220,8 @@ export async function POST(request: Request) {
           const answered = cascadeOrder(contacts, leadFromQuery, fromNumber)[answeredIdx] || null;
           await recordCallAnswered(callSid, answered, durationSeconds);
         }
-        if (durationSeconds > 0 && activeNumber) {
-          const minutesUsed = Math.ceil(durationSeconds / 60);
-          await deductMinutes(activeNumber, minutesUsed);
-        }
+        // Charged here as well as by call-status, which Telnyx lines never get; once per call either way.
+        if (callSid) await chargeCallMinutes(callSid, activeNumber, durationSeconds);
         twiml += '\n  <Hangup />';
       } else {
         const availableContacts = cascadeOrder(contacts, leadFromQuery, fromNumber);
@@ -258,10 +256,8 @@ export async function POST(request: Request) {
         const durationSeconds = dialCallDuration ? parseInt(dialCallDuration.toString(), 10) : 0;
         // <Dial> to several numbers does not say which of them picked up.
         if (callSid) await recordCallAnswered(callSid, null, durationSeconds);
-        if (durationSeconds > 0 && activeNumber) {
-          const minutesUsed = Math.ceil(durationSeconds / 60);
-          await deductMinutes(activeNumber, minutesUsed);
-        }
+        // Charged here as well as by call-status, which Telnyx lines never get; once per call either way.
+        if (callSid) await chargeCallMinutes(callSid, activeNumber, durationSeconds);
         twiml += '\n  <Hangup />';
       } else {
         twiml += `
@@ -277,10 +273,8 @@ export async function POST(request: Request) {
           const picked = parseLeadIndex(requestUrl.searchParams.get('contact'));
           await recordCallAnswered(callSid, picked === null ? null : contacts[picked] || null, durationSeconds);
         }
-        if (durationSeconds > 0 && activeNumber) {
-          const minutesUsed = Math.ceil(durationSeconds / 60);
-          await deductMinutes(activeNumber, minutesUsed);
-        }
+        // Charged here as well as by call-status, which Telnyx lines never get; once per call either way.
+        if (callSid) await chargeCallMinutes(callSid, activeNumber, durationSeconds);
         twiml += '\n  <Hangup />';
       } else {
         twiml += `
