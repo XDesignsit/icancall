@@ -585,22 +585,26 @@ function HomeV2({ t, base, lang, onLang, root }: Props) {
               <article className="hp-s3 rv" style={vars({ "--i": 1 })}>
                 <span className="hp-s3-node" aria-hidden="true">02</span>
                 <div className="hp-s3-ill" aria-hidden="true">
-                  <div className="cp-slots">
-                    <div className="cp-slot filled">
-                      <span className="ava">M</span>
-                      <span className="cp-who"><b>Maria</b><span>{t.rel.daughter}</span></span>
-                      <span className="cp-order">{t.setup.first}</span>
+                  {/* The circle around the number: Maria and Joseph on top (names above), the
+                      open seat at the bottom, so no label crosses the ring. */}
+                  <div className="hp-s3-ring">
+                    <span className="ring" />
+                    <span className="hub"><Icon id="i-phone" /></span>
+                    <div className="seat up start" style={vars({ "--x": "26.9%", "--y": "27.3%" })}>
+                      <span className="ava">M<i>{t.setup.first}</i></span>
+                      <b>Maria</b>
+                      <span>{t.rel.daughter}</span>
                     </div>
-                    <div className="cp-slot filled">
-                      <span className="ava">J</span>
-                      <span className="cp-who"><b>Joseph</b><span>{t.rel.son}</span></span>
-                      <span className="cp-order">{t.setup.second}</span>
+                    <div className="seat up end" style={vars({ "--x": "73.1%", "--y": "27.3%" })}>
+                      <span className="ava">J<i>{t.setup.second}</i></span>
+                      <b>Joseph</b>
+                      <span>{t.rel.son}</span>
                     </div>
-                    <div className="cp-slot">
-                      <span className="ava empty">
+                    <div className="seat add" style={vars({ "--x": "50%", "--y": "71%" })}>
+                      <span className="ava">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M12 5v14M5 12h14" /></svg>
                       </span>
-                      {fill(t.setup.add, { name: "Rosa" })}
+                      <b>{fill(t.setup.add, { name: "Rosa" })}</b>
                     </div>
                   </div>
                 </div>
