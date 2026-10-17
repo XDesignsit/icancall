@@ -142,7 +142,7 @@ export default function TermsOfServicePage() {
       style={{
         minHeight: "100vh",
         background: "oklch(0.985 0.005 220)",
-        fontFamily: '"Outfit", "Helvetica Neue", Arial, sans-serif',
+        fontFamily: "var(--font)",
         padding: "48px 24px",
         color: "oklch(0.25 0.02 240)",
       }}

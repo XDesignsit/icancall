@@ -405,7 +405,7 @@ export default function LoginPage() {
         justifyContent: "center",
         minHeight: "100vh",
         background: "oklch(0.975 0.008 220)",
-        fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif',
+        fontFamily: "var(--font)",
         padding: 20,
       }}
     >

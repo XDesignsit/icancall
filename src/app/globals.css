@@ -890,7 +890,7 @@ h3 { font-size: clamp(1.25rem, 2vw, 1.6rem); }
 
 /* ===========================================================
    iCanCall — Dashboard & Admin styles
-   Reuses the landing-page system: warm blue/teal, Helvetica
+   Reuses the landing-page system: warm blue/teal, Atkinson Hyperlegible Next
    =========================================================== */
 
 .dash, .admin, .admin-shell {
