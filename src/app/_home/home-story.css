@@ -159,12 +159,12 @@
 :where(.hp-page) .hp-s3-nums{display:flex;flex-direction:column;gap:10px;width:100%}
 :where(.hp-page) .hp-s3-nums .num-opt:not(.sel){opacity:.72}
 :where(.hp-page) .hp-s3-ill:has(.hp-s3-ring){padding-block:11px}
-:where(.hp-page) .hp-s3-ring{position:relative;width:min(100%,210px);aspect-ratio:210/190}
-:where(.hp-page) .hp-s3-ring .ring{position:absolute;inset-inline-start:23.33%;top:12.1%;width:53.33%;aspect-ratio:1;border-radius:50%;border:2px dashed color-mix(in oklch,var(--blue) 45%,transparent)}
-:where(.hp-page) .hp-s3-ring .hub{position:absolute;inset-inline-start:50%;top:41.6%;width:48px;height:48px;margin-top:-24px;margin-inline-start:-24px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,var(--teal),var(--blue));color:#fff;box-shadow:0 0 0 6px color-mix(in oklch,var(--blue) 14%,transparent),var(--shadow-md)}
+:where(.hp-page) .hp-s3-ring{position:relative;flex:none;width:210px;height:190px}
+:where(.hp-page) .hp-s3-ring .ring{position:absolute;inset-inline-start:51px;top:34px;width:108px;height:108px;border-radius:50%;border:2px dashed color-mix(in oklch,var(--blue) 45%,transparent)}
+:where(.hp-page) .hp-s3-ring .hub{position:absolute;inset-inline-start:105px;top:88px;width:48px;height:48px;margin-top:-24px;margin-inline-start:-24px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,var(--teal),var(--blue));color:#fff;box-shadow:0 0 0 6px color-mix(in oklch,var(--blue) 14%,transparent),var(--shadow-md)}
 :where(.hp-page) .hp-s3-ring .hub svg{width:22px;height:22px}
 :where(.hp-page) .hp-s3-ring .seat{position:absolute;inset-inline-start:var(--x);top:var(--y);width:88px;margin-top:-21px;margin-inline-start:-44px;display:flex;flex-direction:column;align-items:center;gap:2px;text-align:center;line-height:1.2}
-:where(.hp-page) .hp-s3-ring .seat.up{top:auto;bottom:calc(100% - var(--y));margin:0 0 -21px;margin-inline-start:-44px;flex-direction:column-reverse}
+:where(.hp-page) .hp-s3-ring .seat.up{top:auto;bottom:calc(190px - var(--y));margin:0 0 -21px;margin-inline-start:-44px;flex-direction:column-reverse}
 :where(.hp-page) .hp-s3-ring .ava{position:relative;width:42px;height:42px;margin-top:4px;border-radius:50%;display:grid;place-items:center;background:var(--blue);color:#fff;font-weight:700;font-size:.92rem;border:3px solid var(--tint);box-shadow:var(--shadow-sm)}
 :where(.hp-page) .hp-s3-ring .up .ava{margin:4px 0 0}
 :where(.hp-page) .hp-s3-ring .up b{order:2}

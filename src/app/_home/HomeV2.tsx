@@ -590,17 +590,17 @@ function HomeV2({ t, base, lang, onLang, root }: Props) {
                   <div className="hp-s3-ring">
                     <span className="ring" />
                     <span className="hub"><Icon id="i-phone" /></span>
-                    <div className="seat up start" style={vars({ "--x": "26.9%", "--y": "27.3%" })}>
+                    <div className="seat up start" style={vars({ "--x": "58px", "--y": "62px" })}>
                       <span className="ava">M<i>{t.setup.first}</i></span>
                       <b>Maria</b>
                       <span>{t.rel.daughter}</span>
                     </div>
-                    <div className="seat up end" style={vars({ "--x": "73.1%", "--y": "27.3%" })}>
+                    <div className="seat up end" style={vars({ "--x": "152px", "--y": "62px" })}>
                       <span className="ava">J<i>{t.setup.second}</i></span>
                       <b>Joseph</b>
                       <span>{t.rel.son}</span>
                     </div>
-                    <div className="seat add" style={vars({ "--x": "50%", "--y": "71%" })}>
+                    <div className="seat add" style={vars({ "--x": "105px", "--y": "142px" })}>
                       <span className="ava">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M12 5v14M5 12h14" /></svg>
                       </span>
