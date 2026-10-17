@@ -1,4 +1,5 @@
 import nodemailer from 'nodemailer';
+import { fillCopy, type MinuteAlertCopy, type MinuteAlertLevel } from './minuteAlertTranslations';
 
 // Configure the SMTP transporter using Maileroo
 const transporter = nodemailer.createTransport({
@@ -258,3 +259,60 @@ export async function sendWelcomeBillingEmail(
   return sendEmail({ to, subject, text, html });
 }
 
+
+/**
+ * Sends a low-minute or out-of-minutes alert to the account owner
+ * (lib/minuteAlerts), in their language (lib/minuteAlertTranslations).
+ */
+export async function sendMinutesAlertEmail(
+  to: string,
+  level: MinuteAlertLevel,
+  copy: MinuteAlertCopy,
+  minutes: { used: number; pool: number; left: number },
+  topUpLink: string
+) {
+  const c = copy[level];
+  const summary = fillCopy(c.summary, minutes);
+  const text = `${c.heading}\n\n${summary}\n\n${c.advice}\n\n${copy.cta}: ${topUpLink}\n\n${copy.footer}`;
+  const accent = level === "out" ? { bar: "#dc2626", tint: "#fef2f2", border: "#fecaca", ink: "#7f1d1d" } : { bar: "#d97706", tint: "#fffbeb", border: "#fde68a", ink: "#78350f" };
+  const usedPct = minutes.pool > 0 ? Math.min(100, Math.round((minutes.used / minutes.pool) * 100)) : 100;
+
+  const html = `
+    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 580px; margin: 0 auto; padding: 32px 24px; background: #ffffff; border: 1px solid #f1f5f9; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
+      <div style="margin-bottom: 24px;">
+        <span style="font-size: 1.25rem; font-weight: 700; color: #1e3a8a; letter-spacing: -0.025em;">iCanCall</span>
+      </div>
+      <h2 style="color: #0f172a; font-size: 1.45rem; font-weight: 700; margin: 0 0 12px 0; letter-spacing: -0.025em;">${c.heading}</h2>
+      <p style="color: #475569; font-size: 1rem; line-height: 1.6; margin: 0 0 20px 0;">${summary}</p>
+
+      <div style="background-color: ${accent.tint}; border: 1px solid ${accent.border}; border-radius: 8px; padding: 18px 20px; margin-bottom: 24px;">
+        <table style="width: 100%; border-collapse: collapse; font-size: 0.95rem; line-height: 1.5; color: ${accent.ink};">
+          <tr>
+            <td style="padding: 0 0 10px 0; font-weight: 500;">${copy.usedLabel}</td>
+            <td style="padding: 0 0 10px 0; text-align: right; font-weight: 700;">${minutes.used} / ${minutes.pool} min</td>
+          </tr>
+          <tr>
+            <td colspan="2" style="padding: 0 0 10px 0;">
+              <div style="height: 8px; background: #ffffff; border-radius: 4px; overflow: hidden;">
+                <div style="height: 8px; width: ${usedPct}%; background: ${accent.bar}; border-radius: 4px;"></div>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td style="font-weight: 500;">${copy.leftLabel}</td>
+            <td style="text-align: right; font-weight: 700;">${minutes.left} min</td>
+          </tr>
+        </table>
+      </div>
+
+      <p style="color: #475569; font-size: 0.95rem; line-height: 1.6; margin: 0 0 28px 0;">${c.advice}</p>
+      <div style="margin-bottom: 28px; text-align: center;">
+        <a href="${topUpLink}" style="display: inline-block; padding: 12px 28px; background-color: #2563eb; color: #ffffff; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 0.95rem; box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);">${copy.cta}</a>
+      </div>
+      <hr style="border: 0; border-top: 1px solid #f1f5f9; margin: 32px 0 20px 0;" />
+      <p style="color: #94a3b8; font-size: 0.775rem; line-height: 1.5; margin: 0; text-align: center;">${copy.footer}</p>
+    </div>
+  `;
+
+  return sendEmail({ to, subject: c.subject, text, html });
+}

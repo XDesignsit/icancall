@@ -10,6 +10,7 @@
 
 import { supabase } from "@/lib/supabase";
 import { planConfig, readPendingPlanChange } from "@/lib/planConfig";
+import { rearmMinuteAlerts } from "@/lib/minutesCycle";
 import { entityId, retrieveCheckoutSession, stripe, subscriptionItem, subscriptionLiveness } from "@/lib/stripe";
 
 type Settings = Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -122,7 +123,9 @@ export async function creditAddonPurchase(
   if (applied.includes(checkoutId)) return settings.addons || {};
 
   const { addon, units, subscriptionId, customerId } = purchase;
-  const next = creditedAddons(settings.addons, addon, units);
+  // More minutes can move the account back below an alert it was sent this cycle.
+  const credited = creditedAddons(settings.addons, addon, units);
+  const next = addon === "phone_number" ? credited : rearmMinuteAlerts(settings.plan || "essential", credited);
   const saved = await saveSettingsPatch(userId, settings, {
     addons: next,
     addonCheckouts: [...applied, checkoutId],

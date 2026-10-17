@@ -47,6 +47,8 @@ export interface Account {
    */
   smsPhone?: string;
   plan: string;
+  /** The owner's language by name ("English", "Spanish"; Account → Contact info), for owner alerts. */
+  language: string;
   used_minutes: number;
   allotted_minutes: number;
   /** IANA zone the line's coverage schedule runs on (see lib/coverageSchedule). */
@@ -155,6 +157,7 @@ export async function findAccountByTwilioNumber(phoneNumber: string): Promise<Ac
       notifyEmail: settings.notifyEmail || profile.email,
       smsPhone: settings.smsConsent === true ? toE164(settings.smsPhone) : '',
       plan,
+      language: settings.language || 'English',
       used_minutes: used,
       allotted_minutes: allotted,
       timeZone: scheduleTimeZone(settings.timezone, normalizedSearch),
@@ -206,6 +209,12 @@ export async function chargeCallMinutes(callSid: string, lineNumber: string, tal
     if (used !== null && used !== undefined) {
       invalidateCachedAccount(lineNumber);
       console.log(`Charged ${minutes} min for ${callSid} on ${toE164(lineNumber)}; ${used} min used this cycle.`);
+      // The owner hears about it once the minutes run low or out.
+      const account = await findAccountByTwilioNumber(lineNumber);
+      if (account) {
+        const { alertIfMinutesLow } = await import('./minuteAlerts');
+        await alertIfMinutesLow(account);
+      }
     }
   } catch (err) {
     console.error(`Could not charge minutes for ${callSid}:`, err);
