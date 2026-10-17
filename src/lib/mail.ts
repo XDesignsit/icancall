@@ -271,6 +271,16 @@ export async function sendMinutesAlertEmail(
   minutes: { used: number; pool: number; left: number },
   topUpLink: string
 ) {
+  return sendEmail({ to, ...minutesAlertEmail(level, copy, minutes, topUpLink) });
+}
+
+/** The minutes alert's subject, text and HTML, apart from sending it. */
+export function minutesAlertEmail(
+  level: MinuteAlertLevel,
+  copy: MinuteAlertCopy,
+  minutes: { used: number; pool: number; left: number },
+  topUpLink: string
+) {
   const c = copy[level];
   const summary = fillCopy(c.summary, minutes);
   const text = `${c.heading}\n\n${summary}\n\n${c.advice}\n\n${copy.cta}: ${topUpLink}\n\n${copy.footer}`;
@@ -314,5 +324,5 @@ export async function sendMinutesAlertEmail(
     </div>
   `;
 
-  return sendEmail({ to, subject: c.subject, text, html });
+  return { subject: c.subject, text, html };
 }
