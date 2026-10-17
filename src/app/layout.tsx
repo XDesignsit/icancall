@@ -1,16 +1,17 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import localFont from "next/font/local";
 import Script from "next/script";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+// Atkinson Hyperlegible Next (Braille Institute, SIL OFL: fonts/OFL.txt), the
+// variable Latin subset from Google Fonts. One file covers weights 200-800.
+// scripts/embed-standalone-font.mjs embeds the same file in the landing exports.
+const atkinson = localFont({
+  src: "./fonts/AtkinsonHyperlegibleNext-latin.woff2",
+  weight: "200 800",
+  style: "normal",
+  variable: "--font-atkinson",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -34,7 +35,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${atkinson.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
         {/* React hoists this into <head>; the Metadata API has no rel="describedby" support */}

@@ -14,6 +14,7 @@ Names only. Never put secret values or hosts here, and never open `.env*` files 
 | Ad-hoc SQL | `scripts/supabase-sql.sh` | Uses the Supabase CLI token; prints only JSON results |
 | Stripe products and prices | `scripts/stripe-setup.mjs` | Safe to re-run; mirrors `src/lib/pricing.ts`; prices are immutable |
 | Standalone homepage | `scripts/build-standalone-home.mjs` | After `npm run build`; then copy to the sync folders |
+| Site font in landing exports | `scripts/embed-standalone-font.mjs <file.html> ...` | Embeds Atkinson Hyperlegible Next (`src/app/fonts`) into Concord exports; safe to re-run |
 | Sentry | `next.config.ts`, `sentry.*.config.ts` | DSN via `NEXT_PUBLIC_SENTRY_DSN` |
 | Data | `supabase/schema.sql`, `supabase/migrations/` | Migrations are dated `YYYYMMDDHHMMSS_name.sql` |
 
