@@ -43,7 +43,7 @@ export async function POST(request: Request) {
             <h2 style="color:#0f172a;font-size:1.3rem;font-weight:700;margin:0 0 12px;">Verify your email address</h2>
             <p style="color:#475569;font-size:0.95rem;line-height:1.6;margin:0 0 24px;">Use the code below to verify your email. It expires in <strong>10 minutes</strong>.</p>
             <div style="background:#f0f9ff;border:1px solid #bae6fd;border-radius:8px;padding:20px;text-align:center;margin-bottom:24px;">
-              <span style="font-size:2rem;font-weight:700;letter-spacing:0.25em;color:#0c4a6e;">${otp}</span>
+              <span style="font-size:2rem;font-weight:700;letter-spacing:0.25em;font-variant-numeric:tabular-nums;color:#0c4a6e;">${otp}</span>
             </div>
             <p style="color:#94a3b8;font-size:0.8rem;margin:0;">If you didn't request this code, you can safely ignore this email.</p>
           </div>

@@ -31,7 +31,7 @@
 :where(.hp-page) .dk-pill .mono{font-size:inherit}
 :where(.hp-page) .dk-wave{display:flex;align-items:center;gap:3px;height:34px}
 :where(.hp-page) .dk-wave i{width:3px;height:100%;border-radius:2px;background:var(--teal);transform:scaleY(var(--h,.3));transform-origin:center}
-:where(.hp-page) .dk-key{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;font-family:var(--mono);font-weight:700;font-size:1.1rem;color:var(--blue-ink);background:#fff;box-shadow:0 3px 0 color-mix(in oklab,var(--teal) 60%,var(--blue-ink))}
+:where(.hp-page) .dk-key{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;font-family:var(--mono);font-variant-numeric:tabular-nums;font-weight:700;font-size:1.1rem;color:var(--blue-ink);background:#fff;box-shadow:0 3px 0 color-mix(in oklab,var(--teal) 60%,var(--blue-ink))}
 :where(.hp-page) .dk-tx{background:var(--surface);color:var(--ink);border-radius:18px;padding:14px 16px;box-shadow:0 18px 44px #00000059;text-align:start}
 :where(.hp-page) .dk-tx-h{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:.78rem;font-weight:700;color:var(--ink-soft);margin-bottom:6px}
 :where(.hp-page) .dk-tx-h .mono{font-size:.78rem}
@@ -62,7 +62,7 @@
 :where(.hp-page) .hp-story.is-pin .hp-rail{display:flex;flex-direction:column;align-items:center;position:relative;margin-top:44px;gap:14px;padding-block:2px}
 :where(.hp-page) .hp-rail::before,:where(.hp-page) .hp-rail i{content:"";position:absolute;inset-inline-start:50%;top:22px;bottom:22px;width:2px;margin-inline-start:-1px;background:var(--on-ink-line);border-radius:2px}
 :where(.hp-page) .hp-rail i{background:var(--teal);transform-origin:top;transform:scaleY(var(--rp,0))}
-:where(.hp-page) .hp-rail button{position:relative;z-index:1;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font-family:var(--mono);font-size:.85rem;font-weight:700;color:var(--on-ink-soft);background:var(--blue-ink);border:1.5px solid var(--on-ink-line);cursor:pointer;transition:color .3s,border-color .3s,background .3s}
+:where(.hp-page) .hp-rail button{position:relative;z-index:1;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:.85rem;font-weight:700;color:var(--on-ink-soft);background:var(--blue-ink);border:1.5px solid var(--on-ink-line);cursor:pointer;transition:color .3s,border-color .3s,background .3s}
 :where(.hp-page) .hp-rail button:hover{color:#fff;border-color:var(--on-ink-soft)}
 :where(.hp-page) .hp-rail button.done{color:var(--teal);border-color:var(--teal)}
 :where(.hp-page) .hp-rail button[aria-current=step]{color:var(--blue-ink);background:var(--teal);border-color:var(--teal)}
@@ -147,13 +147,13 @@
 :where(.hp-page) .hp-s3-line{position:absolute;top:28px;inset-inline:16.66%;height:2px;margin-top:-1px;background:linear-gradient(90deg,var(--teal),var(--blue));border-radius:2px;z-index:1;transform-origin:left center}
 [dir=rtl] :where(.hp-page) .hp-s3-line{transform-origin:right center;background:linear-gradient(-90deg,var(--teal),var(--blue))}
 :where(.hp-page) .hp-s3{position:relative;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-xl);box-shadow:var(--shadow-sm);padding:44px 14px 30px}
-:where(.hp-page) .hp-s3-node{position:absolute;top:-28px;left:50%;margin-left:-28px;width:56px;height:56px;border-radius:50%;display:grid;place-items:center;background:var(--surface);border:1.5px solid var(--line);box-shadow:var(--shadow-md);font-family:var(--mono);font-weight:700;font-size:.95rem;color:var(--blue-deep);z-index:2}
+:where(.hp-page) .hp-s3-node{position:absolute;top:-28px;left:50%;margin-left:-28px;width:56px;height:56px;border-radius:50%;display:grid;place-items:center;background:var(--surface);border:1.5px solid var(--line);box-shadow:var(--shadow-md);font-family:var(--mono);font-variant-numeric:tabular-nums;font-weight:700;font-size:.95rem;color:var(--blue-deep);z-index:2}
 :where(.hp-page) .hp-s3-ill{height:auto;min-height:212px;border-radius:calc(var(--r-xl) - 10px);background:var(--tint);display:grid;place-items:center;padding:18px;overflow:hidden;position:relative}
 :where(.hp-page) .hp-s3-txt{padding:26px 14px 0}
 :where(.hp-page) .hp-s3 h3{font-size:1.45rem;letter-spacing:-.02em;margin-bottom:8px}
 :where(.hp-page) .hp-s3 p{color:var(--ink-soft)}
 :where(.hp-page) .hp-s3 .num-opt{width:100%;cursor:default}
-:where(.hp-page) .hp-s3 .num-opt .nnum{font-family:var(--mono);font-size:.94rem;white-space:nowrap}
+:where(.hp-page) .hp-s3 .num-opt .nnum{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:.94rem;white-space:nowrap}
 :where(.hp-page) .hp-s3 .num-opt{padding:12px 14px}
 :where(.hp-page) .hp-s3 .num-opt .nmeta{color:var(--ink-soft)}
 :where(.hp-page) .hp-s3-nums{display:flex;flex-direction:column;gap:10px;width:100%}
@@ -181,7 +181,7 @@
 :where(.hp-page) .hp-s3-share .hp-mm-card{width:176px;padding:16px 14px}
 :where(.hp-page) .hp-s3-share .hp-mm-card b{font-size:1rem}
 :where(.hp-page) .hp-s3-key{display:flex;flex-direction:column;align-items:center;gap:8px;font-size:.8rem;font-weight:700;color:var(--ink-soft)}
-:where(.hp-page) .hp-s3-key i{width:52px;height:52px;border-radius:14px;background:var(--surface);border:1px solid var(--line);box-shadow:0 3px 0 var(--line),var(--shadow-sm);display:grid;place-items:center;font-style:normal;font-family:var(--mono);font-size:1.3rem;font-weight:700;color:var(--blue-deep)}
+:where(.hp-page) .hp-s3-key i{width:52px;height:52px;border-radius:14px;background:var(--surface);border:1px solid var(--line);box-shadow:0 3px 0 var(--line),var(--shadow-sm);display:grid;place-items:center;font-style:normal;font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:1.3rem;font-weight:700;color:var(--blue-deep)}
 :where(.hp-page).m .hp-s3-line{transform:scaleX(0)}
 @supports (animation-timeline:view()){:where(.hp-page).m .hp-s3-line{animation:hp-draw linear both;animation-timeline:view();animation-range:entry 90% cover 55%}}
 :where(.hp-page).m.no-sda .hp-s3-line{transition:transform 1.2s var(--ease-io) .1s}

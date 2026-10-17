@@ -206,7 +206,7 @@ export function TeamAdminView({
                       <Avatar name={getLocalizedPersonName(line.person, lang)} color={line.color} size={34} radius="10px" fontSize={13} />
                       <div style={{ minWidth: 0 }}>
                         <b style={{ display: "block", color: "var(--ink)" }}>{getLocalizedLineLabel(line.label, lang)}</b>
-                        <span style={{ fontFamily: "var(--mono)", fontSize: "0.78rem", color: "var(--ink-faint)" }}>{line.number}</span>
+                        <span style={{ fontFamily: "var(--mono)", fontVariantNumeric: "tabular-nums", fontSize: "0.78rem", color: "var(--ink-faint)" }}>{line.number}</span>
                       </div>
                     </div>
                   </td>

@@ -326,7 +326,7 @@ export function minutesAlertEmail(
         <table style="width: 100%; border-collapse: collapse; font-size: 0.95rem; line-height: 1.5; color: ${accent.ink};">
           <tr>
             <td style="padding: 0 0 10px 0; font-weight: 500;">${copy.usedLabel}</td>
-            <td style="padding: 0 0 10px 0; text-align: right; font-weight: 700;">${minutes.used} / ${minutes.pool} min</td>
+            <td style="padding: 0 0 10px 0; text-align: right; font-weight: 700; font-variant-numeric: tabular-nums;">${minutes.used} / ${minutes.pool} min</td>
           </tr>
           <tr>
             <td colspan="2" style="padding: 0 0 10px 0;">
@@ -337,7 +337,7 @@ export function minutesAlertEmail(
           </tr>
           <tr>
             <td style="font-weight: 500;">${copy.leftLabel}</td>
-            <td style="text-align: right; font-weight: 700;">${minutes.left} min</td>
+            <td style="text-align: right; font-weight: 700; font-variant-numeric: tabular-nums;">${minutes.left} min</td>
           </tr>
         </table>
       </div>

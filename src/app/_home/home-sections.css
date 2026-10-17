@@ -65,7 +65,7 @@
 :where(.hp-page) .hp-kp-bub{background:var(--surface);border:1px solid var(--line);border-radius:18px 18px 18px 6px;box-shadow:var(--shadow-sm);padding:12px 14px;font-size:.95rem;font-weight:600;max-width:150px;line-height:1.35}
 :where(.hp-page) .hp-kp-bub span{display:block;font-size:.74rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:4px}
 :where(.hp-page) .hp-kp-keys{display:grid;grid-template-columns:repeat(3,44px);gap:8px}
-:where(.hp-page) .hp-kp-keys b{height:38px;border-radius:12px;background:var(--surface);border:1px solid var(--line);box-shadow:0 2px 0 var(--line);display:grid;place-items:center;font-family:var(--mono);font-size:1rem;color:var(--ink)}
+:where(.hp-page) .hp-kp-keys b{height:38px;border-radius:12px;background:var(--surface);border:1px solid var(--line);box-shadow:0 2px 0 var(--line);display:grid;place-items:center;font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:1rem;color:var(--ink)}
 :where(.hp-page) .hp-kp-keys b.k1{background:var(--blue);border-color:var(--blue);color:#fff;box-shadow:0 0 0 5px color-mix(in oklab,var(--blue) 18%,transparent)}
 :where(.hp-page).m .t-menu.play .hp-kp-keys b.k1{animation:hp-press 1.4s var(--ease-out) .5s backwards}
 @keyframes hp-press{0%{background:var(--surface);border-color:var(--line);color:var(--ink);box-shadow:0 2px 0 var(--line);transform:none}40%{background:var(--surface);color:var(--ink);transform:none}48%{transform:translateY(2px) scale(.9);background:var(--blue);color:#fff;border-color:var(--blue)}70%{transform:none}}

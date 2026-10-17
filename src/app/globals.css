@@ -39,7 +39,7 @@
   --pad: clamp(20px, 5vw, 56px);
 
   --font: var(--font-atkinson), "Helvetica Neue", Helvetica, Arial, "Segoe UI", sans-serif;
-  --mono: ui-monospace, "SF Mono", "Roboto Mono", Menlo, monospace;
+  --mono: var(--font); /* numerals: Atkinson with tabular figures, set per rule */
 }
 
 input, button, select, textarea {
@@ -368,7 +368,7 @@ h3 { font-size: clamp(1.25rem, 2vw, 1.6rem); }
 .builder-panel { padding: 24px 24px 26px; }
 .builder-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
 .builder-head h3 { font-size: 1.15rem; }
-.builder-head .count { font-family: var(--mono); font-size: 0.82rem; color: var(--ink-faint); background: var(--tint); padding: 4px 10px; border-radius: 999px; }
+.builder-head .count { font-family: var(--mono); font-variant-numeric: tabular-nums; font-size: 0.82rem; color: var(--ink-faint); background: var(--tint); padding: 4px 10px; border-radius: 999px; }
 
 .circle-list { display: flex; flex-direction: column; gap: 9px; min-height: 60px; }
 .circle-row {
@@ -472,7 +472,7 @@ h3 { font-size: clamp(1.25rem, 2vw, 1.6rem); }
   overflow: hidden;
 }
 .usecase .ph img { width: 100%; height: 100%; object-fit: cover; }
-.usecase .ph span { font-family: var(--mono); font-size: 0.74rem; color: var(--ink-faint); background: oklch(1 0 0 / 0.7); padding: 5px 10px; border-radius: 6px; }
+.usecase .ph span { font-family: var(--mono); font-variant-numeric: tabular-nums; font-size: 0.74rem; color: var(--ink-faint); background: oklch(1 0 0 / 0.7); padding: 5px 10px; border-radius: 6px; }
 .usecase .body { padding: 24px 24px 28px; }
 .usecase h3 { font-size: 1.22rem; margin-bottom: 9px; }
 .usecase h3 a { transition: color .15s; }
@@ -923,7 +923,7 @@ h3 { font-size: clamp(1.25rem, 2vw, 1.6rem); }
   --r-sm: 9px; --r-md: 13px; --r-lg: 18px; --r-xl: 26px;
   --sidebar-w: 264px;
   --font: var(--font-atkinson), "Helvetica Neue", Helvetica, Arial, "Segoe UI", sans-serif;
-  --mono: ui-monospace, "SF Mono", "Roboto Mono", Menlo, monospace;
+  --mono: var(--font); /* numerals: Atkinson with tabular figures, set per rule */
 }
 
 .dash { display: grid; grid-template-columns: var(--sidebar-w) 1fr; height: 100vh; }
@@ -995,7 +995,7 @@ h3 { font-size: clamp(1.25rem, 2vw, 1.6rem); }
 .numswitch-btn .ava { width: 34px; height: 34px; border-radius: 9px; flex: none; display: grid; place-items: center; color: #fff; font-weight: 700; font-size: 0.85rem; }
 .numswitch-btn .meta { text-align: left; min-width: 0; flex: 1; }
 .numswitch-btn .meta b { font-size: 0.9rem; font-weight: 600; display: block; line-height: 1.15; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.numswitch-btn .meta span { font-size: 0.78rem; color: var(--ink-faint); font-family: var(--mono); white-space: nowrap; }
+.numswitch-btn .meta span { font-size: 0.78rem; color: var(--ink-faint); font-family: var(--mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
 .numswitch-btn .chev { color: var(--ink-faint); transition: transform .2s; }
 .numswitch.open .numswitch-btn .chev { transform: rotate(180deg); }
 .numswitch-menu {
@@ -1009,7 +1009,7 @@ h3 { font-size: clamp(1.25rem, 2vw, 1.6rem); }
 .numswitch-opt.sel { background: var(--tint); }
 .numswitch-opt .ava { width: 32px; height: 32px; border-radius: 9px; flex: none; display: grid; place-items: center; color: #fff; font-weight: 700; font-size: 0.8rem; }
 .numswitch-opt .meta b { font-size: 0.88rem; font-weight: 600; display: block; }
-.numswitch-opt .meta span { font-size: 0.76rem; color: var(--ink-faint); font-family: var(--mono); }
+.numswitch-opt .meta span { font-size: 0.76rem; color: var(--ink-faint); font-family: var(--mono); font-variant-numeric: tabular-nums; }
 .numswitch-opt .tick { margin-left: auto; color: var(--blue); }
 .numswitch-menu .add-num { display: flex; align-items: center; gap: 9px; width: 100%; padding: 10px; border: none; background: none; border-top: 1px solid var(--line); margin-top: 4px; color: var(--blue-deep); font-weight: 600; font-size: 0.85rem; cursor: pointer; border-radius: 0 0 var(--r-sm) var(--r-sm); }
 .numswitch-menu .add-num:hover { background: var(--tint); }
@@ -1064,7 +1064,7 @@ h3 { font-size: clamp(1.25rem, 2vw, 1.6rem); }
 /* ---------- Contact list ---------- */
 .contacts-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; margin-bottom: 18px; flex-wrap: wrap; }
 .contacts-head .hint { font-size: 0.86rem; color: var(--ink-faint); }
-.cap-pill { font-family: var(--mono); font-size: 0.8rem; color: var(--ink-soft); background: var(--surface); border: 1px solid var(--line); padding: 5px 11px; border-radius: 99px; }
+.cap-pill { font-family: var(--mono); font-variant-numeric: tabular-nums; font-size: 0.8rem; color: var(--ink-soft); background: var(--surface); border: 1px solid var(--line); padding: 5px 11px; border-radius: 99px; }
 
 .clist { display: flex; flex-direction: column; gap: 10px; }
 .crow { display: flex; align-items: center; gap: 15px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); padding: 14px 16px; box-shadow: var(--shadow-sm); transition: border-color .18s, box-shadow .18s, transform .18s; }
@@ -1081,7 +1081,7 @@ h3 { font-size: clamp(1.25rem, 2vw, 1.6rem); }
 .crow .info { flex: 1; min-width: 0; }
 .crow .info b { font-size: 0.98rem; font-weight: 600; }
 .crow .info .rel { font-size: 0.82rem; color: var(--ink-soft); }
-.crow .info .tel { font-family: var(--mono); font-size: 0.82rem; color: var(--ink-faint); margin-top: 1px; }
+.crow .info .tel { font-family: var(--mono); font-variant-numeric: tabular-nums; font-size: 0.82rem; color: var(--ink-faint); margin-top: 1px; }
 .crow .acts { display: flex; align-items: center; gap: 8px; }
 .crow .mini { width: 34px; height: 34px; border-radius: 9px; border: 1px solid var(--line); background: var(--surface); color: var(--ink-soft); display: grid; place-items: center; cursor: pointer; transition: all .15s; }
 .crow .mini:hover { background: var(--tint); color: var(--blue-deep); border-color: var(--blue); }
@@ -1154,7 +1154,7 @@ h3 { font-size: clamp(1.25rem, 2vw, 1.6rem); }
 @media (max-width: 880px) { .simwrap { grid-template-columns: 1fr; } }
 .sim-phone { background: linear-gradient(165deg, var(--blue-ink), var(--blue-deep)); border-radius: var(--r-xl); padding: 26px 22px; color: #fff; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 13px; min-height: 320px; justify-content: center; position: relative; overflow: hidden; }
 .sim-phone.menu { justify-content: flex-start; align-items: stretch; text-align: left; }
-.sim-phone .numline { font-size: 0.78rem; color: oklch(0.88 0.03 220); font-family: var(--mono); }
+.sim-phone .numline { font-size: 0.78rem; color: oklch(0.88 0.03 220); font-family: var(--mono); font-variant-numeric: tabular-nums; }
 .sim-ava { width: 84px; height: 84px; border-radius: 50%; display: grid; place-items: center; font-weight: 700; font-size: 1.6rem; color: #fff; background: oklch(1 0 0 / 0.16); position: relative; }
 .sim-ava.ring::after { content: ""; position: absolute; inset: 0; border-radius: 50%; animation: simpulse 1.4s ease-out infinite; }
 @keyframes simpulse { 0% { box-shadow: 0 0 0 0 oklch(1 0 0 / 0.35); } 70% { box-shadow: 0 0 0 22px oklch(1 0 0 / 0); } 100% { box-shadow: 0 0 0 0 oklch(1 0 0 / 0); } }
@@ -1195,7 +1195,7 @@ h3 { font-size: clamp(1.25rem, 2vw, 1.6rem); }
 .logrow .who span { font-size: 0.8rem; color: var(--ink-faint); display: block; }
 .logrow .routed { font-size: 0.85rem; color: var(--ink-soft); }
 .logrow .routed b { font-weight: 600; color: var(--ink); display: block; font-size: 0.85rem; }
-.logrow .dur { font-family: var(--mono); font-size: 0.84rem; color: var(--ink-soft); }
+.logrow .dur { font-family: var(--mono); font-variant-numeric: tabular-nums; font-size: 0.84rem; color: var(--ink-soft); }
 .logrow .when { font-size: 0.82rem; color: var(--ink-faint); text-align: right; }
 @media (max-width: 820px) { .logrow { grid-template-columns: 40px 1fr auto; } .logrow .routed, .logrow .dur { display: none; } }
 
@@ -1251,7 +1251,7 @@ h3 { font-size: clamp(1.25rem, 2vw, 1.6rem); }
 
 .card-on-file { display: flex; align-items: center; gap: 14px; padding: 16px 18px; border: 1px solid var(--line); border-radius: var(--r-lg); background: var(--surface-2); }
 .card-brand { width: 50px; height: 34px; border-radius: 8px; background: linear-gradient(135deg, var(--blue-ink), var(--blue)); display: grid; place-items: center; color: #fff; font-weight: 700; font-size: 0.72rem; letter-spacing: 0.04em; flex: none; }
-.card-on-file .cnum { font-family: var(--mono); font-size: 0.95rem; font-weight: 600; }
+.card-on-file .cnum { font-family: var(--mono); font-variant-numeric: tabular-nums; font-size: 0.95rem; font-weight: 600; }
 .card-on-file .cexp { font-size: 0.8rem; color: var(--ink-faint); }
 
 /* ---------- Billing add-ons ---------- */

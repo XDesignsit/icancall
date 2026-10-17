@@ -665,7 +665,7 @@ export default function SuperAdminApp() {
                     <tbody>
                       {filteredAccounts.map((acc) => (
                         <tr key={acc.id} style={{ borderBottom: "1px solid var(--line-soft)" }}>
-                          <td style={{ padding: "14px 20px", fontFamily: "var(--mono)", fontSize: "0.84rem" }}>{acc.id}</td>
+                          <td style={{ padding: "14px 20px", fontFamily: "var(--mono)", fontVariantNumeric: "tabular-nums", fontSize: "0.84rem" }}>{acc.id}</td>
                           <td style={{ padding: "14px 20px" }}>
                             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                               <span style={{ width: 28, height: 28, borderRadius: "50%", background: acc.color, color: "#fff", display: "grid", placeItems: "center", fontWeight: 700, fontSize: "0.75rem" }}>
