@@ -18,6 +18,33 @@ export function minutePool(plan: string, addons: Settings = {}): number {
   return planConfig(plan).voiceMinutes + Number(addons.minuteBlocks || 0) * 30 + Number(addons.rolloverMin || 0);
 }
 
+/**
+ * The owner is alerted once a cycle when this share of the pool is used, and
+ * again when it is all used (lib/minuteAlerts). 85% matches the dashboard's
+ * "Running low" badge, which shows at 15% left.
+ */
+export const LOW_MINUTES_SHARE = 0.85;
+
+/** Minutes used at which each alert goes out, for a pool of `pool` minutes. */
+export function minuteAlertThresholds(pool: number): { low: number; out: number } {
+  return { low: Math.ceil(pool * LOW_MINUTES_SHARE), out: pool };
+}
+
+/**
+ * Drops the alert markers (set by the claim_minute_alert database function)
+ * that no longer hold once the pool has grown, so a top-up re-arms the alert
+ * it moved the account back below, and only that one. Returns the `addons`
+ * value to store.
+ */
+export function rearmMinuteAlerts(plan: string, addons: Settings): Settings {
+  const next = { ...addons };
+  const used = Number(next.usedMin || 0);
+  const { low, out } = minuteAlertThresholds(minutePool(plan, next));
+  if (used < out) delete next.outMinAlertedAt;
+  if (used < low) delete next.lowMinAlertedAt;
+  return next;
+}
+
 /** Minutes a call is charged: its talk time, rounded up to the minute as carriers bill it. */
 export function billedMinutes(talkSeconds: number | null | undefined): number {
   return talkSeconds && talkSeconds > 0 ? Math.ceil(talkSeconds / 60) : 0;
@@ -35,7 +62,9 @@ export function resetMinutesPool(settings: Settings): Settings {
   const creditMinutes = (addons.minuteBlocks || 0) * 30 + (addons.rolloverMin || 0);
   const usedMin = Math.min(addons.usedMin || 0, planBaseMinutes + creditMinutes);
   const rolloverMin = Math.max(0, creditMinutes - Math.max(0, usedMin - planBaseMinutes));
-  return { ...addons, usedMin: 0, minuteBlocks: 0, rolloverMin };
+  // A new cycle re-arms both minute alerts.
+  const { lowMinAlertedAt: _low, outMinAlertedAt: _out, ...rest } = addons;
+  return { ...rest, usedMin: 0, minuteBlocks: 0, rolloverMin };
 }
 
 /** `months` calendar months after `from` (UTC), keeping the day of month where the month has it (Jan 31 → Feb 28). */

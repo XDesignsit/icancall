@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { after, NextResponse } from 'next/server';
 import { recordedPromptTag, ttsPlayTag, verifyTelephonyWebhook } from '@/lib/twilioWebhook';
 import { findAccountByTwilioNumber, getAvailableMinutes, chargeCallMinutes } from '@/lib/db';
 import { buildConferenceRoom } from '@/lib/conferenceRoom';
@@ -12,6 +12,7 @@ import { ensureCallStatusWebhook } from '@/lib/numbers';
 import { callPrompt, langParam, langParamXml, languageOffer, parseCallLang, promptAroundName, type CallPromptKey } from '@/lib/callPrompts';
 import { isOwnRecording } from '@/lib/voices';
 import { greetingText as promptGreetingText } from '@/lib/promptRecordings';
+import { alertIfMinutesLow } from '@/lib/minuteAlerts';
 
 export const preferredRegion = 'iad1';
 
@@ -78,6 +79,8 @@ export async function POST(request: Request) {
     if (account) {
       availableMinutes = getAvailableMinutes(account);
       if (availableMinutes <= 0) {
+        // Tell the owner, once a cycle, after the caller has their answer.
+        after(() => alertIfMinutesLow(account));
         return new NextResponse(
           `<?xml version="1.0" encoding="UTF-8"?>
 <Response>

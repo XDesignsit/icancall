@@ -56,6 +56,12 @@ export const LINK_PREVIEWS = {
     tagline: "Add trusted contacts and manage your lines from your dashboard.",
     badge: { label: "Welcome", icon: "i-check", color: "#1c989c" },
   },
+  minutes: {
+    title: "Voice minutes",
+    headline: ["Keep your line ", "connected."],
+    tagline: "See how many minutes are left and add more from your dashboard.",
+    badge: { label: "Minutes", icon: "i-clock", color: "#d4880f" },
+  },
 } satisfies Record<LinkKind, Preview>;
 
 // A sprite symbol as a standalone SVG data URL: the renderer resolves neither
