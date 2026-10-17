@@ -347,7 +347,7 @@ export const dashboardTranslations: Record<
       ],
     },
     sim: {
-      runTest: "Run a test call",
+      runTest: "Preview call flow",
       connecting: "Connecting…",
       ringing: "Ringing…",
       connected: "✓ Connected",
@@ -528,7 +528,7 @@ export const dashboardTranslations: Record<
       ],
     },
     sim: {
-      runTest: "Hacer llamada de prueba",
+      runTest: "Ver flujo de llamada",
       connecting: "Conectando…",
       ringing: "Llamando…",
       connected: "✓ Conectado",
@@ -709,7 +709,7 @@ export const dashboardTranslations: Record<
       ],
     },
     sim: {
-      runTest: "Lancer un appel de test",
+      runTest: "Aperçu du parcours d'appel",
       connecting: "Connexion…",
       ringing: "Sonnerie…",
       connected: "✓ Connecté",
@@ -890,7 +890,7 @@ export const dashboardTranslations: Record<
       ],
     },
     sim: {
-      runTest: "テスト発信",
+      runTest: "通話の流れをプレビュー",
       connecting: "接続中…",
       ringing: "呼び出し中…",
       connected: "✓ 接続完了",
@@ -1071,7 +1071,7 @@ export const dashboardTranslations: Record<
       ],
     },
     sim: {
-      runTest: "测试呼叫",
+      runTest: "预览通话流程",
       connecting: "呼叫连接中…",
       ringing: "呼叫响铃中…",
       connected: "✓ 已接通",
@@ -1252,7 +1252,7 @@ export const dashboardTranslations: Record<
       ],
     },
     sim: {
-      runTest: "إجراء مكالمة اختبارية",
+      runTest: "معاينة مسار المكالمة",
       connecting: "جاري الاتصال…",
       ringing: "جاري الرنين…",
       connected: "✓ متصل",
@@ -1433,7 +1433,7 @@ export const dashboardTranslations: Record<
       ],
     },
     sim: {
-      runTest: "परीक्षण कॉल करें",
+      runTest: "कॉल फ़्लो का पूर्वावलोकन",
       connecting: "कनेक्ट हो रहा है…",
       ringing: "घंटी बज रही है…",
       connected: "✓ कनेक्टेड",
@@ -1614,7 +1614,7 @@ export const dashboardTranslations: Record<
       ],
     },
     sim: {
-      runTest: "Fazer chamada de teste",
+      runTest: "Visualizar fluxo da chamada",
       connecting: "Conectando…",
       ringing: "Chamando…",
       connected: "✓ Conectado",
@@ -1795,7 +1795,7 @@ export const dashboardTranslations: Record<
       ],
     },
     sim: {
-      runTest: "Testanruf starten",
+      runTest: "Anrufablauf ansehen",
       connecting: "Verbinde…",
       ringing: "Klingelt…",
       connected: "✓ Verbunden",
@@ -1976,7 +1976,7 @@ export const dashboardTranslations: Record<
       ],
     },
     sim: {
-      runTest: "Fai chiamata di prova",
+      runTest: "Anteprima del flusso di chiamata",
       connecting: "Connessione in corso…",
       ringing: "Squillo in corso…",
       connected: "✓ Connesso",
@@ -2157,7 +2157,7 @@ export const dashboardTranslations: Record<
       ],
     },
     sim: {
-      runTest: "테스트 전화 걸기",
+      runTest: "통화 흐름 미리보기",
       connecting: "연결 중…",
       ringing: "신호 가는 중…",
       connected: "✓ 연결됨",
