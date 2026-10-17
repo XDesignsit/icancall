@@ -153,7 +153,7 @@ export const dashboardExtraTranslations: Record<
     saveSaved: "Saved",
     saveFailed: "Couldn't save",
     saveRetry: "Try again",
-    simSubtitle: "Place a simulated call to see exactly what {name}'s callers will experience.",
+    simSubtitle: "Walk through what {name}'s callers will hear, step by step. No real call is placed.",
   },
   es: {
     accessOwner: "Titular de la cuenta",
@@ -306,7 +306,7 @@ export const dashboardExtraTranslations: Record<
     saveSaved: "Guardado",
     saveFailed: "No se pudo guardar",
     saveRetry: "Reintentar",
-    simSubtitle: "Realice una llamada simulada para ver exactamente lo que experimentarán las personas que llamen a {name}.",
+    simSubtitle: "Recorra paso a paso lo que oirán quienes llamen a {name}. No se realiza ninguna llamada real.",
   },
   fr: {
     accessOwner: "Titulaire du compte",
@@ -459,7 +459,7 @@ export const dashboardExtraTranslations: Record<
     saveSaved: "Enregistré",
     saveFailed: "Échec de l'enregistrement",
     saveRetry: "Réessayer",
-    simSubtitle: "Passez un appel simulé pour voir exactement ce que vivront les personnes qui appellent {name}.",
+    simSubtitle: "Découvrez étape par étape ce qu'entendront les personnes qui appellent {name}. Aucun appel réel n'est passé.",
   },
   ja: {
     accessOwner: "アカウント所有者",
@@ -612,7 +612,7 @@ export const dashboardExtraTranslations: Record<
     saveSaved: "保存しました",
     saveFailed: "保存できませんでした",
     saveRetry: "再試行",
-    simSubtitle: "{name}に電話をかけた人が体験する内容を、シミュレーション通話で確認できます。",
+    simSubtitle: "{name}に電話をかけた人が聞く内容を順を追って確認できます。実際の通話は発信されません。",
   },
   zh: {
     accessOwner: "账户拥有者",
@@ -765,7 +765,7 @@ export const dashboardExtraTranslations: Record<
     saveSaved: "已保存",
     saveFailed: "保存失败",
     saveRetry: "重试",
-    simSubtitle: "拨打模拟电话，准确了解拨打给 {name} 的来电者将体验到的内容。",
+    simSubtitle: "逐步查看拨打给 {name} 的来电者将听到的内容。不会拨打真实电话。",
   },
   ar: {
     accessOwner: "صاحب الحساب",
@@ -918,7 +918,7 @@ export const dashboardExtraTranslations: Record<
     saveSaved: "تم الحفظ",
     saveFailed: "تعذّر الحفظ",
     saveRetry: "إعادة المحاولة",
-    simSubtitle: "أجرِ مكالمة تجريبية لترى بالضبط ما سيختبره المتصلون بـ {name}.",
+    simSubtitle: "تعرّف خطوة بخطوة على ما سيسمعه المتصلون بـ {name}. لن يتم إجراء أي مكالمة حقيقية.",
   },
   hi: {
     accessOwner: "खाता स्वामी",
@@ -1071,7 +1071,7 @@ export const dashboardExtraTranslations: Record<
     saveSaved: "सहेजा गया",
     saveFailed: "सहेजा नहीं जा सका",
     saveRetry: "फिर से कोशिश करें",
-    simSubtitle: "एक सिम्युलेटेड कॉल करें ताकि आप ठीक-ठीक देख सकें कि {name} को कॉल करने वालों को क्या अनुभव होगा।",
+    simSubtitle: "चरण-दर-चरण देखें कि {name} को कॉल करने वाले क्या सुनेंगे। कोई असली कॉल नहीं की जाती।",
   },
   pt: {
     accessOwner: "Titular da conta",
@@ -1224,7 +1224,7 @@ export const dashboardExtraTranslations: Record<
     saveSaved: "Salvo",
     saveFailed: "Não foi possível salvar",
     saveRetry: "Tentar novamente",
-    simSubtitle: "Faça uma chamada simulada para ver exatamente o que as pessoas que ligam para {name} vão experimentar.",
+    simSubtitle: "Veja passo a passo o que as pessoas que ligam para {name} vão ouvir. Nenhuma chamada real é feita.",
   },
   de: {
     accessOwner: "Kontoinhaber",
@@ -1377,7 +1377,7 @@ export const dashboardExtraTranslations: Record<
     saveSaved: "Gespeichert",
     saveFailed: "Speichern fehlgeschlagen",
     saveRetry: "Erneut versuchen",
-    simSubtitle: "Führen Sie einen simulierten Anruf durch, um genau zu sehen, was Anrufer von {name} erleben werden.",
+    simSubtitle: "Sehen Sie Schritt für Schritt, was Anrufer von {name} hören werden. Es wird kein echter Anruf getätigt.",
   },
   it: {
     accessOwner: "Titolare dell'account",
@@ -1530,7 +1530,7 @@ export const dashboardExtraTranslations: Record<
     saveSaved: "Salvato",
     saveFailed: "Impossibile salvare",
     saveRetry: "Riprova",
-    simSubtitle: "Effettua una chiamata simulata per vedere esattamente cosa sperimenteranno le persone che chiamano {name}.",
+    simSubtitle: "Scopri passo dopo passo cosa sentiranno le persone che chiamano {name}. Non viene effettuata alcuna chiamata reale.",
   },
   ko: {
     accessOwner: "계정 소유자",
@@ -1683,6 +1683,6 @@ export const dashboardExtraTranslations: Record<
     saveSaved: "저장됨",
     saveFailed: "저장하지 못했습니다",
     saveRetry: "다시 시도",
-    simSubtitle: "모의 통화를 걸어 {name}에게 전화하는 사람이 겪게 될 상황을 정확히 확인하세요.",
+    simSubtitle: "{name}에게 전화하는 사람이 듣게 될 내용을 단계별로 확인하세요. 실제 전화는 걸리지 않습니다.",
   },
 };

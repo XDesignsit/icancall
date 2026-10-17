@@ -7,7 +7,7 @@ import { dashboardExtraTranslations } from "@/lib/dashboardExtraTranslations";
 import { type DashboardTranslations } from "@/lib/dashboardTranslations";
 import { type PlanId } from "@/lib/planConfig";
 import { getLocalizedLineLabel, getLocalizedPersonName, getLocalizedRelationship } from "../_data";
-import { Icon } from "../_icons";
+import { Icon, ICONS } from "../_icons";
 import { Badge, Toggle, initials } from "../_primitives";
 import { type Contact, type CoverageSlot, type Line } from "../_types";
 
@@ -51,11 +51,22 @@ function seedSchedule(line: Line): CoverageSlot[] {
 }
 
 /* Call Simulator */
+type SimScreen = {
+  cls: string;
+  av: string;
+  /** Drawn in place of `av` when set (no emoji glyphs on the phone face). */
+  icon?: keyof typeof ICONS;
+  avColor: string | null;
+  name: string;
+  state: string;
+  ring: boolean;
+};
+
 function TestCall({ line, d, lang, timeZone }: { line: Line; d: DashboardTranslations; lang: string; timeZone: string }) {
-  const [screen, setScreen] = useState({
+  const [screen, setScreen] = useState<SimScreen>({
     cls: "",
     av: "—",
-    avColor: null as string | null,
+    avColor: null,
     name: d.sim.ready,
     state: d.sim.runTest,
     ring: false,
@@ -91,7 +102,8 @@ function TestCall({ line, d, lang, timeZone }: { line: Line; d: DashboardTransla
     setRunning(false);
     setScreen({
       cls: "",
-      av: line.mode === "schedule" ? "🕒" : line.mode === "menu" ? "☰" : "—",
+      av: "—",
+      icon: line.mode === "schedule" ? "clock" : line.mode === "menu" ? "menu" : undefined,
       avColor: null,
       name: line.mode === "schedule" ? d.overview.timeSchedule : line.mode === "menu" ? d.overview.callerMenu : line.mode === "simultaneous" ? d.routing.simultaneous : d.sim.ready,
       state:
@@ -161,7 +173,8 @@ function TestCall({ line, d, lang, timeZone }: { line: Line; d: DashboardTransla
     if (!done && !cancelled.current) {
       setScreen({
         cls: "voicemail",
-        av: "✉",
+        av: "",
+        icon: "voicemail",
         avColor: null,
         name: d.sim.voicemail,
         state: d.sim.vmSent,
@@ -203,7 +216,8 @@ function TestCall({ line, d, lang, timeZone }: { line: Line; d: DashboardTransla
       setActiveDots(Object.fromEntries(contacts.map((_, i) => [i, "done"])));
       setScreen({
         cls: "voicemail",
-        av: "✉",
+        av: "",
+        icon: "voicemail",
         avColor: null,
         name: d.sim.voicemail,
         state: d.sim.vmSent,
@@ -221,7 +235,7 @@ function TestCall({ line, d, lang, timeZone }: { line: Line; d: DashboardTransla
   async function runMenu() {
     setDots(0);
     setActiveDots({});
-    setScreen({ cls: "", av: "☎", avColor: null, name: "Welcome", state: "Listen for the menu…", ring: false });
+    setScreen({ cls: "", av: "", icon: "phone", avColor: null, name: "Welcome", state: "Listen for the menu…", ring: false });
     await sleep(900);
     if (cancelled.current) return;
     setMenu(contacts);
@@ -252,7 +266,8 @@ function TestCall({ line, d, lang, timeZone }: { line: Line; d: DashboardTransla
     } else {
       setScreen({
         cls: "voicemail",
-        av: "✉",
+        av: "",
+        icon: "voicemail",
         avColor: null,
         name: `${c.name} (${d.contacts.busy})`,
         state: d.sim.vmSent,
@@ -321,7 +336,7 @@ function TestCall({ line, d, lang, timeZone }: { line: Line; d: DashboardTransla
               className={`sim-ava ${screen.ring ? "ring" : ""}`}
               style={{ background: screen.avColor || undefined }}
             >
-              {screen.av}
+              {screen.icon ? <Icon name={screen.icon} style={{ width: 34, height: 34 }} /> : screen.av}
             </div>
             <div className="sim-name">{screen.name}</div>
             <div className="sim-state">{screen.state}</div>
