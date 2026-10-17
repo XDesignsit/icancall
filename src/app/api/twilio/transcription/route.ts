@@ -106,6 +106,7 @@ export async function POST(request: Request) {
         started_at: new Date().toISOString(),
         ended_at: null,
         alerted_at: null,
+        metered_minutes: null,
       };
       await sendCallAlert(account, unlogged);
     }

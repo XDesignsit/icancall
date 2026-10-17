@@ -9,6 +9,21 @@ import { planConfig } from "@/lib/planConfig";
 type Settings = Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
 
 /**
+ * The cycle's whole minute pool, in talk minutes, the unit `addons.usedMin`
+ * counts: the plan's minutes, the 30-minute blocks bought this cycle and the
+ * minutes rolled over. The dashboard shows usedMin against this, and the voice
+ * webhook stops connecting calls once it is used up.
+ */
+export function minutePool(plan: string, addons: Settings = {}): number {
+  return planConfig(plan).voiceMinutes + Number(addons.minuteBlocks || 0) * 30 + Number(addons.rolloverMin || 0);
+}
+
+/** Minutes a call is charged: its talk time, rounded up to the minute as carriers bill it. */
+export function billedMinutes(talkSeconds: number | null | undefined): number {
+  return talkSeconds && talkSeconds > 0 ? Math.ceil(talkSeconds / 60) : 0;
+}
+
+/**
  * Starts a new minutes cycle. Add-on minutes are one-time credits: blocks
  * bought this cycle plus whatever was carried over. Plan minutes are used
  * first; the credits that are left roll over, and the purchase itself does

@@ -1,5 +1,5 @@
-import { supabase } from './supabase';
-import { planConfig } from './planConfig';
+import { isMock, supabase } from './supabase';
+import { billedMinutes, minutePool } from './minutesCycle';
 import { toE164 } from './phone';
 import { scheduleTimeZone } from './coverageSchedule';
 import { customVoiceOf, effectiveVoiceId } from './voices';
@@ -141,8 +141,8 @@ export async function findAccountByTwilioNumber(phoneNumber: string): Promise<Ac
     const settings = profile.settings || {};
     const addons = settings.addons || {};
     const plan = settings.plan || 'pro';
-    // Telephony allotment is 2x the marketed minutes (both call legs count).
-    const allotted = planConfig(plan).voiceMinutes * 2 + (Number(addons.minuteBlocks || 0) * 60) + (Number(addons.rolloverMin || 0) * 2);
+    // Both in talk minutes, as the dashboard shows them (lib/minutesCycle).
+    const allotted = minutePool(plan, addons);
     const used = Number(addons.usedMin || 0);
 
     const lineSettings = line.settings || {};
@@ -179,56 +179,59 @@ export async function findAccountByTwilioNumber(phoneNumber: string): Promise<Ac
   }
 }
 
-// Deduct minutes consumed by a call
-export async function deductMinutes(twilioPhoneNumber: string, minutes: number): Promise<Account | null> {
-  const normalizedSearch = toE164(twilioPhoneNumber);
-  // Invalidate any existing cache entry before performing database updates to prevent stale reads
-  invalidateCachedAccount(normalizedSearch);
-
+/**
+ * Charges a call's talk time to its account's minute pool, once per call: a
+ * call that was already charged (a retried webhook, or the second of the two
+ * webhooks that report on a menu-mode call) charges nothing. Called when the
+ * call ends, from the number's call-status webhook and, for the <Dial action>
+ * paths (Telnyx lines, local dev, menu mode), from the voice webhook. Never
+ * throws: a failed charge costs a log line, never the call.
+ *
+ * Production runs it as one database function (migration
+ * 20261017120000_call_minute_metering) so the claim and the add are atomic and
+ * concurrent calls cannot overwrite each other's usage.
+ */
+export async function chargeCallMinutes(callSid: string, lineNumber: string, talkSeconds: number | null): Promise<void> {
+  const minutes = billedMinutes(talkSeconds);
+  if (!callSid || minutes <= 0) return;
   try {
-    const account = await findAccountByTwilioNumber(twilioPhoneNumber);
-    if (!account) return null;
-
-    const newUsed = account.used_minutes + minutes;
-
-    // Fetch current profile settings to update them safely
-    const { data: profile, error: fetchError } = await supabase
-      .from('profiles')
-      .select('settings')
-      .eq('id', account.id)
-      .single();
-
-    if (fetchError) {
-      console.error('Failed to fetch profile settings before updating:', fetchError);
-      return null;
+    let used: unknown;
+    if (isMock) {
+      used = await chargeCallMinutesLocally(callSid, minutes);
+    } else {
+      const { data, error } = await supabase.rpc('charge_call_minutes', { p_call_sid: callSid, p_minutes: minutes });
+      if (error) throw error;
+      used = data;
     }
-
-    const settings = profile?.settings || {};
-    if (!settings.addons) settings.addons = {};
-    settings.addons.usedMin = newUsed;
-
-    const { error: updateError } = await supabase
-      .from('profiles')
-      .update({ settings })
-      .eq('id', account.id);
-
-    if (updateError) {
-      console.error('Failed to update used minutes in profiles:', updateError);
-      return null;
+    if (used !== null && used !== undefined) {
+      invalidateCachedAccount(lineNumber);
+      console.log(`Charged ${minutes} min for ${callSid} on ${toE164(lineNumber)}; ${used} min used this cycle.`);
     }
-
-    const updatedAccount: Account = {
-      ...account,
-      used_minutes: newUsed,
-    };
-
-    // Cache the updated account state immediately
-    setCachedAccount(normalizedSearch, updatedAccount);
-    return updatedAccount;
   } catch (err) {
-    console.error('deductMinutes error:', err);
-    return null;
+    console.error(`Could not charge minutes for ${callSid}:`, err);
   }
+}
+
+/** The local mock database has no functions: the same claim, then the add. */
+async function chargeCallMinutesLocally(callSid: string, minutes: number): Promise<number | null> {
+  const { data: claimed } = await supabase
+    .from('calls')
+    .update({ metered_minutes: minutes })
+    .eq('call_sid', callSid)
+    .is('metered_minutes', null)
+    .select('line_id');
+  const lineId = Array.isArray(claimed) ? claimed[0]?.line_id : null;
+  if (!lineId) return null;
+  const { data: line } = await supabase.from('phone_lines').select('user_id').eq('id', lineId).maybeSingle();
+  if (!line) return null;
+  const { data: profile } = await supabase.from('profiles').select('settings').eq('id', line.user_id).maybeSingle();
+  const settings = profile?.settings || {};
+  const used = Number(settings.addons?.usedMin || 0) + minutes;
+  await supabase
+    .from('profiles')
+    .update({ settings: { ...settings, addons: { ...(settings.addons || {}), usedMin: used } } })
+    .eq('id', line.user_id);
+  return used;
 }
 
 // Check available minutes

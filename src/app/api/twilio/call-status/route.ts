@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { verifyTelephonyWebhook } from '@/lib/twilioWebhook';
-import { findAccountByTwilioNumber } from '@/lib/db';
+import { chargeCallMinutes, findAccountByTwilioNumber } from '@/lib/db';
 import { claimCallAlert, getCall, recordCallEnded } from '@/lib/callRecords';
 import { sendCallAlert } from '@/lib/callAlerts';
 import { buildConferenceRoom } from '@/lib/conferenceRoom';
@@ -12,9 +12,10 @@ const FINAL_STATUSES = new Set(['completed', 'busy', 'no-answer', 'failed', 'can
 
 // The numbers' own call-status webhook (set when a number is bought, or by
 // ensureCallStatusWebhook): Twilio calls it once the caller's call is over,
-// however it ended. It closes the call log row and sends the caregiver's alert
-// for a call that was answered or missed. A voicemail alerts from the
-// transcription webhook instead, once the transcript is in.
+// however it ended. It closes the call log row, charges the call's talk time to
+// the account's minutes, and sends the caregiver's alert for a call that was
+// answered or missed. A voicemail alerts from the transcription webhook
+// instead, once the transcript is in.
 export async function POST(request: Request) {
   const denied = await verifyTelephonyWebhook(request);
   if (denied) return denied;
@@ -49,6 +50,9 @@ export async function POST(request: Request) {
       status,
       durationSeconds: Number.isFinite(duration) ? duration : null,
     });
+    // The plan's minutes are talk minutes: the time a contact was on the
+    // line, not the greeting, the hold music or a voicemail.
+    await chargeCallMinutes(callSid, lineNumber, closed.talk_seconds);
 
     if (closed.status !== 'voicemail') {
       const account = await findAccountByTwilioNumber(lineNumber);
