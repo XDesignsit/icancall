@@ -80,6 +80,11 @@ function TestCall({ line, d, lang, timeZone }: { line: Line; d: DashboardTransla
 
   const contacts = line.contacts;
   const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+  /** A random available contact's index, or -1 when nobody is available. */
+  const randomAnswerer = (list: Contact[]) => {
+    const open = list.flatMap((c, i) => (c.available ? [i] : []));
+    return open.length ? open[Math.floor(Math.random() * open.length)] : -1;
+  };
 
   useEffect(() => {
     return () => {
@@ -118,7 +123,7 @@ function TestCall({ line, d, lang, timeZone }: { line: Line; d: DashboardTransla
     });
   }
 
-  async function ringConnect(c: Contact, _idx: number) {
+  async function ringConnect(c: Contact, answers: boolean) {
     setScreen({
       cls: "ring-state",
       av: initials(c.name),
@@ -129,7 +134,7 @@ function TestCall({ line, d, lang, timeZone }: { line: Line; d: DashboardTransla
     });
     await sleep(1500);
     if (cancelled.current) return false;
-    if (c.available) {
+    if (answers) {
       setScreen({
         cls: "connected",
         av: initials(c.name),
@@ -143,7 +148,9 @@ function TestCall({ line, d, lang, timeZone }: { line: Line; d: DashboardTransla
     return false;
   }
 
-  async function runCascade(order: Contact[] = contacts) {
+  // `answerAt` is the position in `order` that picks up; by default the first
+  // available contact, as on a real call.
+  async function runCascade(order: Contact[] = contacts, answerAt = order.findIndex((c) => c.available)) {
     setDots(order.length);
     setActiveDots({});
     setScreen({ cls: "", av: "•", avColor: null, name: d.sim.connecting, state: d.sim.connecting, ring: false });
@@ -153,7 +160,7 @@ function TestCall({ line, d, lang, timeZone }: { line: Line; d: DashboardTransla
       if (cancelled.current) return;
       setActiveDots((d) => ({ ...d, [i]: "active" }));
       const c = order[i];
-      const ok = await ringConnect(c, i);
+      const ok = await ringConnect(c, i === answerAt);
       if (cancelled.current) return;
       if (ok) {
         done = true;
@@ -197,12 +204,12 @@ function TestCall({ line, d, lang, timeZone }: { line: Line; d: DashboardTransla
     });
     await sleep(1600);
     if (cancelled.current) return;
-    // The first available contact answers.
-    const firstAvailable = contacts.findIndex((c) => c.available);
-    if (firstAvailable !== -1) {
-      const c = contacts[firstAvailable];
+    // A random available contact answers, so each preview can play out differently.
+    const answerer = randomAnswerer(contacts);
+    if (answerer !== -1) {
+      const c = contacts[answerer];
       setActiveDots(
-        Object.fromEntries(contacts.map((_, i) => [i, i === firstAvailable ? "active" : "done"]))
+        Object.fromEntries(contacts.map((_, i) => [i, i === answerer ? "active" : "done"]))
       );
       setScreen({
         cls: "connected",
@@ -292,7 +299,7 @@ function TestCall({ line, d, lang, timeZone }: { line: Line; d: DashboardTransla
     if (line.mode === "menu") await runMenu();
     else if (line.mode === "schedule") await runSchedule();
     else if (line.mode === "simultaneous") await runSimultaneous();
-    else await runCascade();
+    else await runCascade(contacts, randomAnswerer(contacts));
     if (!cancelled.current) {
       await sleep(2200);
     }
