@@ -15,6 +15,7 @@ Names only. Never put secret values or hosts here, and never open `.env*` files 
 | Stripe products and prices | `scripts/stripe-setup.mjs` | Safe to re-run; mirrors `src/lib/pricing.ts`; prices are immutable |
 | Standalone homepage | `scripts/build-standalone-home.mjs` | After `npm run build`; then copy to the sync folders |
 | Site font in landing exports | `scripts/embed-standalone-font.mjs <file.html> ...` | Embeds Atkinson Hyperlegible Next (`public/fonts`) into Concord exports; safe to re-run |
+| Supabase PIN email templates | `scripts/supabase-auth-templates.sh <project-ref>` | Pushes `supabase/templates/*.html` (Confirm signup, Magic link) to that project; run for production and staging |
 | Sentry | `next.config.ts`, `sentry.*.config.ts` | DSN via `NEXT_PUBLIC_SENTRY_DSN` |
 | Data | `supabase/schema.sql`, `supabase/migrations/` | Migrations are dated `YYYYMMDDHHMMSS_name.sql` |
 
