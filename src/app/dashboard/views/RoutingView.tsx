@@ -50,6 +50,41 @@ function seedSchedule(line: Line): CoverageSlot[] {
   ];
 }
 
+const formatHour = (h: number) => {
+  if (h === 0 || h === 24) return "12 AM";
+  if (h === 12) return "12 PM";
+  return h > 12 ? `${h - 12} PM` : `${h} AM`;
+};
+
+const sameContactName = (a: string, b: string) => a.trim() !== "" && a.trim().toLowerCase() === b.trim().toLowerCase();
+
+/*
+ * Hours the call flow preview runs on: the saved schedule when any slot names
+ * someone in the circle, otherwise sample shifts that split the day evenly
+ * across the contacts in circle order, the first starting at 6 AM.
+ */
+function previewSchedule(line: Line): { slots: CoverageSlot[]; sample: boolean } {
+  const saved = line.schedule || seedSchedule(line);
+  const contacts = line.contacts;
+  if (!contacts.length || saved.some((s) => contacts.some((c) => sameContactName(c.name, s.name)))) {
+    return { slots: saved, sample: false };
+  }
+  const n = contacts.length;
+  const at = (i: number) => (6 + Math.round((i * 24) / n)) % 24;
+  return {
+    sample: true,
+    slots: contacts.map((c, i) => ({
+      id: `sample-${c.id}`,
+      name: c.name,
+      description: "",
+      // A single contact covers the whole day (a 6 AM to 6 AM slot would cover nothing).
+      startHour: n === 1 ? 0 : at(i),
+      endHour: n === 1 ? 24 : at(i + 1),
+      color: c.color,
+    })),
+  };
+}
+
 /* Call Simulator */
 type SimScreen = {
   cls: string;
@@ -79,6 +114,15 @@ function TestCall({ line, d, lang, timeZone }: { line: Line; d: DashboardTransla
   const resolveMenu = useRef<((idx: number | null) => void) | null>(null);
 
   const contacts = line.contacts;
+  const ext = dashboardExtraTranslations[lang as keyof typeof dashboardExtraTranslations] || dashboardExtraTranslations.en;
+  const schedule = previewSchedule(line);
+  const zone = scheduleTimeZone(timeZone, line.number);
+  const [now, setNow] = useState(() => new Date());
+  useEffect(() => {
+    const timer = setInterval(() => setNow(new Date()), 60000);
+    return () => clearInterval(timer);
+  }, []);
+  const onDutyNow = line.mode === "schedule" ? onDutyContactIndex(schedule.slots, contacts, hourInTimeZone(now, zone)) : null;
   const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
   /** A random available contact's index, or -1 when nobody is available. */
   const randomAnswerer = (list: Contact[]) => {
@@ -287,8 +331,10 @@ function TestCall({ line, d, lang, timeZone }: { line: Line; d: DashboardTransla
     // Same rule as a real call (api/twilio/voice): whoever the schedule has on
     // duty now rings first, then the rest of the circle cascades as usual. An
     // uncovered hour, or a slot for someone outside the circle, is a plain cascade.
-    const hour = hourInTimeZone(new Date(), scheduleTimeZone(timeZone, line.number));
-    const lead = onDutyContactIndex(line.schedule || seedSchedule(line), contacts, hour);
+    // The hour is read at the click, so the preview connects whoever covers it right now.
+    const hour = hourInTimeZone(new Date(), zone);
+    setNow(new Date());
+    const lead = onDutyContactIndex(schedule.slots, contacts, hour);
     await runCascade(lead === null ? contacts : [contacts[lead], ...contacts.filter((_, i) => i !== lead)]);
   }
 
@@ -376,6 +422,9 @@ function TestCall({ line, d, lang, timeZone }: { line: Line; d: DashboardTransla
               ? d.routing.simultaneous
               : d.overview.cascade}
           </div>
+          {line.mode === "schedule" && schedule.sample && (
+            <div style={{ fontSize: "0.74rem", color: "var(--ink-faint)", marginBottom: 6 }}>{ext.simSampleHours}</div>
+          )}
           {contacts.map((c, i) => (
             <div className="preview-row" key={c.id}>
               <span className="dg">{i + 1}</span>
@@ -383,6 +432,23 @@ function TestCall({ line, d, lang, timeZone }: { line: Line; d: DashboardTransla
                 <b style={{ fontSize: "0.86rem", display: "block" }}>{c.name}</b>
                 <span style={{ fontSize: "0.76rem", color: "var(--ink-faint)" }}>{getLocalizedRelationship(c.rel, lang)}</span>
               </div>
+              {line.mode === "schedule" && (
+                <span
+                  style={{
+                    fontSize: "0.76rem",
+                    whiteSpace: "nowrap",
+                    fontWeight: onDutyNow === i ? 700 : 500,
+                    color: onDutyNow === i ? "var(--blue-deep)" : "var(--ink-faint)",
+                  }}
+                >
+                  {schedule.slots
+                    .filter((s) => sameContactName(c.name, s.name))
+                    .map((s) =>
+                      s.endHour - s.startHour === 24 ? ext.simAllDay : `${formatHour(s.startHour)} – ${formatHour(s.endHour)}`
+                    )
+                    .join(", ")}
+                </span>
+              )}
               {!c.available && (
                 <span className="badge badge-gray">
                   <span className="d"></span>{d.contacts.busy}
@@ -577,12 +643,6 @@ export function RoutingView({
       gapsList.push({ start: sortedSlots[sortedSlots.length - 1].endHour, end: 24 });
     }
   }
-
-  const formatHour = (h: number) => {
-    if (h === 0 || h === 24) return "12 AM";
-    if (h === 12) return "12 PM";
-    return h > 12 ? `${h - 12} PM` : `${h} AM`;
-  };
 
   const PRESET_COLORS = [
     { value: "oklch(0.58 0.115 232)", name: "Amber" },
