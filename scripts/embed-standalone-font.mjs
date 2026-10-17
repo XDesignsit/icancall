@@ -6,8 +6,9 @@
 //
 // The font goes in as a data: URI inside the page template (the exports are
 // single files, and CSP font-src allows data:), and the template's --font
-// variable gets it in front of its system stack. Safe to re-run: an earlier
-// embed is replaced, not duplicated.
+// variable gets it in front of its system stack; --mono (numerals) points at
+// --font with tabular figures. Safe to re-run: an earlier embed is replaced,
+// not duplicated.
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -36,6 +37,13 @@ for (const file of files) {
   t = t.replace(/<style id="site-font">[\s\S]*?<\/style>/, "");
   t = t.replace("<head>", () => `<head>${STYLE}`);
   t = t.replace(/--font:\s*(?:"Atkinson Hyperlegible Next",\s*)?/g, `--font: "${FAMILY}", `);
+  // Numerals use the site font too, with tabular figures so they still line up.
+  t = t.replace(/--mono:[^;]*;/g, "--mono: var(--font);");
+  t = t.replace(/\{[^{}]*\}/g, (rule) =>
+    rule.includes("var(--mono)") && !rule.includes("tabular-nums")
+      ? rule.replace(/font-family:(\s*)var\(--mono\)/, "font-family:$1var(--mono);$1font-variant-numeric:$1tabular-nums")
+      : rule,
+  );
   fs.writeFileSync(file, html.replace(TEMPLATE_RE, (_, open, __, close) => open + scriptJson(t) + close));
   console.log(`${path.basename(file)}: ${FAMILY} embedded`);
 }
