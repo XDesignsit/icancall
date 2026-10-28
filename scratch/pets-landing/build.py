@@ -45,6 +45,18 @@ tpl = swap(tpl, contacts_old, '''window.IC_DEFAULT_CONTACTS = [
     { name: 'Alex', rel: 'Partner', available: true },
     { name: 'Mrs. Chen', rel: 'Neighbor', available: true },
   ];''')
+# Pets copy translations, merged into the page's DICT_MAP (Pets entries win, e.g. "Annual" as a plan name)
+tr = json.loads((here / 'translations.json').read_text(encoding='utf8'))
+keys = set(next(iter(tr.values()))['text'])
+assert all(set(v['text']) == keys for v in tr.values()), 'translation keys differ between languages'
+merge_js = ('     const PETS_DICT = ' + json.dumps(tr, ensure_ascii=False) + ';\n'
+            '     for (const [l, d] of Object.entries(PETS_DICT)) {\n'
+            '       const t = DICT_MAP[l]; if (!t) continue;\n'
+            '       Object.assign(t.text, d.text);\n'
+            '       Object.assign(t.attrs, d.attrs);\n'
+            '     }\n\n')
+tpl = swap(tpl, '     function translateDOM', merge_js + '     function translateDOM')
+
 css_end = tpl.index('</style>\n</head>')
 tpl = tpl[:css_end] + (here / 'pets.css').read_text(encoding='utf8') + tpl[css_end:]
 
