@@ -397,7 +397,7 @@ const t: HomeTranslations = {
       },
       {
         q: "¿Cuál es la política de reembolso?",
-        a: "Todos los planes tienen una garantía de servicio de 14 días. Si iCanCall no funciona, contacta con soporte en los 14 días siguientes a tu compra. Si no podemos solucionarlo, te devolvemos el importe completo. Si cambias de opinión con un plan mensual, contacta con soporte en los 14 días siguientes y te devolvemos la mitad de tu primer mes. Puedes cancelar cuando quieras desde tu panel y el servicio sigue activo hasta el final de tu periodo de facturación.",
+        a: "Todos los planes tienen una garantía de servicio de 14 días. Si iCanCall no funciona, contacta con soporte en los 14 días siguientes a tu compra. Si no podemos solucionarlo, te devolvemos el importe completo. Si cambias de opinión con un plan mensual, contacta con soporte en los 14 días siguientes y te devolvemos la mitad de tu primer mes. La mitad que conservamos cubre los costos que pagamos desde el primer día: tu número de teléfono dedicado, tus llamadas y el procesamiento del pago. Puedes cancelar cuando quieras desde tu panel y el servicio sigue activo hasta el final de tu periodo de facturación.",
       },
       {
         q: "¿La garantía cubre los planes anuales?",

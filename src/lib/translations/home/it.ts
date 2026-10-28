@@ -396,7 +396,7 @@ const t: HomeTranslations = {
       },
       {
         q: "Qual è la vostra politica di rimborso?",
-        a: "Ogni piano ha una garanzia di servizio di 14 giorni. Se iCanCall non funziona, contatta l'assistenza entro 14 giorni dall'acquisto. Se non riusciamo a risolvere il problema, ricevi un rimborso completo. Se cambi idea su un piano mensile, contatta l'assistenza entro 14 giorni e ti rimborsiamo metà del primo mese. Puoi disdire quando vuoi dalla dashboard e il servizio resta attivo fino alla fine del periodo di fatturazione.",
+        a: "Ogni piano ha una garanzia di servizio di 14 giorni. Se iCanCall non funziona, contatta l'assistenza entro 14 giorni dall'acquisto. Se non riusciamo a risolvere il problema, ricevi un rimborso completo. Se cambi idea su un piano mensile, contatta l'assistenza entro 14 giorni e ti rimborsiamo metà del primo mese. La metà che tratteniamo copre i costi che sosteniamo fin dal primo giorno: il tuo numero di telefono dedicato, le tue chiamate e l'elaborazione del pagamento. Puoi disdire quando vuoi dalla dashboard e il servizio resta attivo fino alla fine del periodo di fatturazione.",
       },
       {
         q: "La garanzia vale anche per i piani annuali?",
