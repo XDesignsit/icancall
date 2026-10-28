@@ -69,9 +69,13 @@ const PLAN_ICONS: Record<MarketingPlanId, string> = { essential: "i-phone", pro:
 /** The sign-in code typed into the trust section's two-step card (not the demo PIN). */
 const OTP_DIGITS = "482916";
 
-/** When each of the guarantee dial's 30 ticks lights: in step with its 1.5s ease-out
+/** Length of the service guarantee: one tick per day on the trust dial and pricing seal.
+    The dial's count-up target lives in home-sections.css (--hp-n) and must match. */
+const GUARANTEE_DAYS = 14;
+
+/** When each of the guarantee dial's ticks lights: in step with its 1.5s ease-out
     (cubic) fill that starts at 0.3s, so the ticks keep pace with the arc and the count. */
-const TICK_DELAYS = Array.from({ length: 30 }, (_, k) => `${(0.3 + 1.5 * (1 - Math.cbrt(1 - (k + 1) / 30))).toFixed(3)}s`);
+const TICK_DELAYS = Array.from({ length: GUARANTEE_DAYS }, (_, k) => `${(0.3 + 1.5 * (1 - Math.cbrt(1 - (k + 1) / GUARANTEE_DAYS))).toFixed(3)}s`);
 
 const THREADS = {
   m: "M300 300 C 400 300 440 175 516 175",
@@ -970,7 +974,7 @@ function HomeV2({ t, base, lang, onLang, root }: Props) {
                         </defs>
                         <circle className="trk" cx="100" cy="100" r="96" />
                         <circle className="arc" cx="100" cy="100" r="96" pathLength={1} transform="rotate(-90 100 100)" />
-                        {Array.from({ length: 30 }, (_, k) => (
+                        {Array.from({ length: GUARANTEE_DAYS }, (_, k) => (
                           <line
                             key={k}
                             className="tk"
@@ -978,7 +982,7 @@ function HomeV2({ t, base, lang, onLang, root }: Props) {
                             y1="15"
                             x2="100"
                             y2="24"
-                            transform={`rotate(${k * 12} 100 100)`}
+                            transform={`rotate(${(k * 360) / GUARANTEE_DAYS} 100 100)`}
                             style={vars({ "--d": TICK_DELAYS[k] })}
                           />
                         ))}
@@ -1213,19 +1217,19 @@ function HomeV2({ t, base, lang, onLang, root }: Props) {
               <span className="hp-seal" aria-hidden="true">
                 <svg viewBox="0 0 100 100">
                   <circle className="face" cx="50" cy="50" r="48" />
-                  {Array.from({ length: 30 }, (_, k) => (
+                  {Array.from({ length: GUARANTEE_DAYS }, (_, k) => (
                     <line
                       key={k}
                       x1="50"
                       y1="6"
                       x2="50"
                       y2="11"
-                      transform={`rotate(${k * 12} 50 50)`}
+                      transform={`rotate(${(k * 360) / GUARANTEE_DAYS} 50 50)`}
                       style={vars({ "--k": k })}
                     />
                   ))}
                 </svg>
-                <b>30</b>
+                <b>{GUARANTEE_DAYS}</b>
                 <span>{t.trust.guarantee.days}</span>
               </span>
               <div>

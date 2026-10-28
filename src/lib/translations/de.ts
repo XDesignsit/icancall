@@ -49,9 +49,9 @@ const t: HomepageTranslations = {
   "lead": "iCanCall verbindet Ihre Lieben mit ihrem Pflegekreis — ganz ohne Bildschirme, Apps oder komplizierte Geräte. Ab $14.99/Monat.",
   "getStarted": "Jetzt starten",
   "seeHow": "Wie es funktioniert",
-  "guarantee": "30 Tage Geld-zurück-Garantie",
+  "guarantee": "14 Tage Service-Garantie",
   "secure": "Sichere und private Weiterleitung",
-  "trustLine": "30 Tage Geld-zurück-Garantie · Jederzeit kündbar · Keine Verträge"
+  "trustLine": "14 Tage Service-Garantie · Jederzeit kündbar · Keine Verträge"
 },
 "stats": {
   "routed": "Anrufe weitergeleitet",
@@ -159,9 +159,9 @@ const t: HomepageTranslations = {
   "cFeat3": "Alle Weiterleitungsmodi + Zeitpläne",
   "cFeat4": "150 gemeinsame Sprachminuten",
   "cFeat5": "2 Betreuer-Logins",
-  "guaranteeTitle": "30-tägige Geld-zurück-Garantie",
-  "guaranteeDesc": "Testen Sie ICanCall 30 Tage lang risikofrei. Wenn es nicht das Richtige für Ihre Familie ist, erstatten wir Ihnen den vollen Betrag zurück – ohne Fragen, ohne Wiedereinlagerungsgebühren und ohne Hardware, die zurückgegeben werden muss.",
-  "shortGuarantee": "30 Tage Geld-zurück-Garantie"
+  "guaranteeTitle": "14-tägige Service-Garantie",
+  "guaranteeDesc": "Wenn iCanCall nicht funktioniert und unser Support-Team das Problem nicht beheben kann, erhalten Sie den vollen Betrag zurück. Wenden Sie sich einfach innerhalb von 14 Tagen nach dem Kauf an den Support. Bei bloßer Meinungsänderung gibt es keine Erstattung.",
+  "shortGuarantee": "14 Tage Service-Garantie"
 },
 "testimonials": {
   "stars": "★★★★★",
@@ -186,9 +186,9 @@ const t: HomepageTranslations = {
   "q4": "Gibt es Einrichtungsgebühren oder Laufzeitverträge?",
   "a4": "Nein. Es gibt keinerlei Einrichtungsgebühren, Aktivierungskosten oder Laufzeitverträge. Alle Tarife werden monatlich (oder jährlich) abgerechnet und können jederzeit mit einem Klick gekündigt werden.",
   "q5": "Wie sieht Ihre Rückerstattungsrichtlinie aus?",
-  "a5": "Jeder ICanCall-Tarif beinhaltet eine 30-tägige Geld-zurück-Garantie. Wenn ICanCall in den ersten 30 Tagen Ihres Abonnements nicht das Richtige für Ihre Familie ist, kontaktieren Sie uns unter support@icancall.co und wir erstatten Ihnen den vollen Betrag zurück – ohne Fragen zu stellen. Es gibt keine Wiedereinlagerungsgebühr, keine Hardware, die zurückgegeben werden muss, und kein Kleingedrucktes.\n\nNach Ablauf der 30 Tage können Sie Ihr Abonnement jederzeit über Ihr Dashboard kündigen. Ihr Service läuft bis zum Ende Ihres aktuellen Abrechnungszeitraums weiter und es fallen keine weiteren Gebühren an. Gemäß den üblichen SaaS-Praktiken sind Jahrestarife, die nach Ablauf der 30-Tage-Frist gekündigt werden, für die nicht genutzten Monate nicht erstattungsfähig.",
-  "q6": "Gilt die 30-tägige Garantie auch für Jahrestarife?",
-  "a6": "Ja. Unabhängig davon, ob Sie sich für die monatliche oder jährliche Abrechnung entscheiden, haben Sie ab dem Erstkauf volle 30 Tage Zeit, um eine Rückerstattung zu beantragen. Wenn Sie einen Jahrestarif innerhalb der 30-Tage-Frist kündigen, erhalten Sie eine vollständige Rückerstattung der jährlichen Gebühr."
+  "a5": "Jeder ICanCall-Tarif enthält eine 14-tägige Service-Garantie. Wenn ICanCall nicht wie versprochen funktioniert (zum Beispiel erreichen Anrufe an Ihre Nummer Ihre Kontakte nicht, oder wir können keine Nummer mit der von Ihnen gewählten Vorwahl aktivieren), wenden Sie sich innerhalb von 14 Tagen nach Ihrem ersten Kauf unter support@icancall.co an unser Support-Team. Wir versuchen zuerst, das Problem zu beheben. Gelingt uns das nicht innerhalb von 3 Werktagen, erstatten wir Ihnen den vollen Betrag.\n\nBei bloßer Meinungsänderung oder für einen Service, der wie beschrieben funktioniert, gibt es keine Erstattung. Sie können jederzeit über das Dashboard Ihres Kontos kündigen. Ihr Service läuft bis zum Ende des aktuellen Abrechnungszeitraums weiter, danach wird nichts mehr abgebucht.",
+  "q6": "Gilt die 14-tägige Garantie auch für Jahrestarife?",
+  "a6": "Ja. Monats- und Jahrestarife haben ab Ihrem ersten Kauf dieselbe 14-tägige Service-Garantie. Funktioniert der Service nicht und kann unser Support-Team das Problem nicht beheben, erstatten wir Ihnen den vollen Jahresbetrag. Bei Meinungsänderung oder für ungenutzte Monate werden Jahrestarife nicht erstattet."
 },
 "cta": {
   "title": "Sind Sie bereit, Ihre Familie abzusichern?",
@@ -340,6 +340,7 @@ const t: HomepageTranslations = {
   "dueToday": "Heute fällig",
   "orderSecured": "Geschützt durch starke Bankenverschlüsselung. Die Kasse öffnet sich in einem sicheren Fenster.",
   "btnPay": "Einrichtung abschließen & zahlen",
+  "refundNote": "Rückerstattung: Wenn iCanCall nicht funktioniert und unser Support-Team das Problem nicht beheben kann, erhalten Sie den vollen Betrag zurück. Wenden Sie sich einfach innerhalb von 14 Tagen nach dem Kauf an den Support. Bei bloßer Meinungsänderung gibt es keine Erstattung.",
   "successTitle": "Alles bereit, {name}!",
   "successSubtitle": "Ihr {planName}-Tarif ist aktiv und Ihre Nummer ist freigeschaltet. Letzter Schritt: Richten Sie Ihren Kreis ein, damit Anrufe immer jemanden erreichen.",
   "successSubtitlePlural": "Ihr {planName}-Tarif ist aktiv und Ihre Nummern sind freigeschaltet. Letzter Schritt: Richten Sie Ihren Kreis ein, damit Anrufe immer jemanden erreichen.",

@@ -7,6 +7,9 @@ import { isEndedStatus } from "@/lib/subscriptionEnd";
 // Stripe replaces the placeholder with the session id, so the return page can
 // hand it to the server, which verifies it before crediting anything.
 const SESSION_PLACEHOLDER = "{CHECKOUT_SESSION_ID}";
+// Same wording as the FAQ and Terms: refunds only when the service doesn't work, via support first.
+const REFUND_POLICY_NOTE =
+  "Refund policy: if iCanCall doesn't work, contact support@icancall.co within 14 days of purchase. If we can't fix it, you get a full refund. Refunds aren't given for a change of mind.";
 
 export async function POST(req: NextRequest) {
   try {
@@ -106,6 +109,8 @@ export async function POST(req: NextRequest) {
       metadata,
       ...(oneTime ? {} : { subscription_data: { metadata } }),
       integration_identifier: `icancall_checkout_${addon ? "addon" : "plan"}_wpkmzqtd`,
+      // Shown above the pay button so buyers see the refund terms before paying.
+      custom_text: { submit: { message: REFUND_POLICY_NOTE } },
     });
 
     if (!session.url) {

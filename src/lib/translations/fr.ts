@@ -49,9 +49,9 @@ const t: HomepageTranslations = {
   "lead": "iCanCall connecte vos proches à leur cercle d'accompagnement sans écran, sans applications, ni appareils complexes. À partir de 14,99 $/mois.",
   "getStarted": "Démarrer",
   "seeHow": "Voir le fonctionnement",
-  "guarantee": "Garantie de remboursement de 30 jours",
+  "guarantee": "Garantie de service de 14 jours",
   "secure": "Routage sécurisé et privé",
-  "trustLine": "Garantie satisfait ou remboursé de 30 jours · Annulation à tout moment · Sans engagement"
+  "trustLine": "Garantie de service de 14 jours · Annulation à tout moment · Sans engagement"
 },
 "stats": {
   "routed": "Appels acheminés",
@@ -159,9 +159,9 @@ const t: HomepageTranslations = {
   "cFeat3": "Tous les modes de routage + planification",
   "cFeat4": "150 minutes vocales partagées",
   "cFeat5": "2 accès aidants",
-  "guaranteeTitle": "Garantie Satisfait ou Remboursé de 30 Jours",
-  "guaranteeDesc": "Essayez ICanCall sans risque pendant 30 jours. Si cela ne convient pas à votre famille, nous vous rembourserons intégralement — sans poser de questions, sans frais de restockage et sans matériel à renvoyer.",
-  "shortGuarantee": "Garantie de remboursement de 30 jours"
+  "guaranteeTitle": "Garantie de Service de 14 Jours",
+  "guaranteeDesc": "Si iCanCall ne fonctionne pas et que notre équipe d’assistance ne peut pas résoudre le problème, vous êtes remboursé intégralement. Contactez simplement l’assistance dans les 14 jours suivant votre achat. Aucun remboursement n’est accordé en cas de simple changement d’avis.",
+  "shortGuarantee": "Garantie de service de 14 jours"
 },
 "testimonials": {
   "stars": "★★★★★",
@@ -186,9 +186,9 @@ const t: HomepageTranslations = {
   "q4": "Y a-t-il des frais de mise en service ou un engagement ?",
   "a4": "Non. Aucun frais de mise en service, coût caché ou engagement. Tous les forfaits sont facturés au mois (ou à l'année) et annulables en un clic sur votre page de facturation.",
   "q5": "Quelle est votre politique de remboursement ?",
-  "a5": "Chaque forfait ICanCall est assorti d'une garantie satisfait ou remboursé de 30 jours. Si ICanCall ne convient pas à votre famille au cours des 30 premiers jours de votre abonnement, contactez-nous à support@icancall.co et nous vous rembourserons intégralement, sans poser de questions. Il n'y a pas de frais de restockage, pas de matériel à retourner et pas de petits caractères.\n\nAprès le délai de 30 jours, vous pouvez annuler votre abonnement à tout moment depuis le tableau de bord de votre compte. Votre service se poursuivra jusqu'à la fin de votre période de facturation en cours, et vous ne serez plus facturé. Les forfaits annuels annulés après le délai de 30 jours ne sont pas remboursables pour les mois non utilisés, conformément aux pratiques standard des SaaS.",
-  "q6": "La garantie de 30 jours s'applique-t-elle aux forfaits annuels ?",
-  "a6": "Oui. Que vous choisissiez la facturation mensuelle ou annuelle, vous disposez de 30 jours complets à compter de votre achat initial pour demander un remboursement. Si vous annulez un forfait annuel pendant cette période de 30 jours, vous recevrez un remboursement complet du montant annuel facturé."
+  "a5": "Chaque forfait ICanCall bénéficie d’une garantie de service de 14 jours. Si ICanCall ne fonctionne pas comme promis (par exemple, les appels vers votre numéro n’atteignent pas vos contacts, ou nous ne pouvons pas activer un numéro dans l’indicatif régional choisi), contactez notre équipe d’assistance à support@icancall.co dans les 14 jours suivant votre premier achat. Nous essaierons d’abord de résoudre le problème. Si nous n’y parvenons pas sous 3 jours ouvrés, nous vous rembourserons intégralement.\n\nAucun remboursement n’est accordé en cas de simple changement d’avis ni pour un service qui fonctionne comme décrit. Vous pouvez résilier à tout moment depuis le tableau de bord de votre compte. Votre service reste actif jusqu’à la fin de la période de facturation en cours, et vous ne serez plus débité.",
+  "q6": "La garantie de 14 jours s'applique-t-elle aux forfaits annuels ?",
+  "a6": "Oui. Les forfaits mensuels et annuels bénéficient de la même garantie de service de 14 jours à compter de votre premier achat. Si le service ne fonctionne pas et que notre équipe d’assistance ne peut pas résoudre le problème, vous serez remboursé intégralement du montant annuel. Les forfaits annuels ne sont pas remboursés en cas de changement d’avis ni pour les mois non utilisés."
 },
 "cta": {
   "title": "Prêt à sécuriser votre famille ?",
@@ -340,6 +340,7 @@ const t: HomepageTranslations = {
   "dueToday": "Dû aujourd'hui",
   "orderSecured": "Sécurisé avec un cryptage de niveau bancaire. Le paiement s'ouvrira dans une fenêtre sécurisée.",
   "btnPay": "Finaliser la configuration et payer",
+  "refundNote": "Politique de remboursement : Si iCanCall ne fonctionne pas et que notre équipe d’assistance ne peut pas résoudre le problème, vous êtes remboursé intégralement. Contactez simplement l’assistance dans les 14 jours suivant votre achat. Aucun remboursement n’est accordé en cas de simple changement d’avis.",
   "successTitle": "Tout est prêt, {name} !",
   "successSubtitle": "Votre forfait {planName} est actif et votre numéro est en service. Dernière chose : configurez votre cercle de confiance pour que les appels aboutissent toujours.",
   "successSubtitlePlural": "Votre forfait {planName} est actif et vos numéros sont en service. Dernière chose : configurez votre cercle de confiance pour que les appels aboutissent toujours.",

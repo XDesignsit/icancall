@@ -49,9 +49,9 @@ const t: HomepageTranslations = {
   "lead": "iCanCall collega i tuoi familiari al cerchio dei caregiver senza schermi, app o dispositivi complessi. A partire da $14.99/mese.",
   "getStarted": "Inizia ora",
   "seeHow": "Scopri come funziona",
-  "guarantee": "30 giorni di garanzia soddisfatti o rimborsati",
+  "guarantee": "Garanzia di servizio di 14 giorni",
   "secure": "Inoltro sicuro e privato",
-  "trustLine": "Garanzia di rimborso di 30 giorni · Cancella in qualsiasi momento · Nessun vincolo"
+  "trustLine": "Garanzia di servizio di 14 giorni · Cancella in qualsiasi momento · Nessun vincolo"
 },
 "stats": {
   "routed": "Chiamate inoltrate",
@@ -159,9 +159,9 @@ const t: HomepageTranslations = {
   "cFeat3": "Tutte le modalità di inoltro + pianificazione",
   "cFeat4": "150 Minuti Vocali Condivisi",
   "cFeat5": "2 Accessi Caregiver",
-  "guaranteeTitle": "Garanzia di Rimborso di 30 Giorni",
-  "guaranteeDesc": "Prova ICanCall senza rischi per 30 giorni. Se non fa al caso vostro, vi rimborseremo l'intero importo: senza domande, senza costi di riassortimento e nessun hardware da restituire.",
-  "shortGuarantee": "Garanzia di rimborso di 30 giorni"
+  "guaranteeTitle": "Garanzia di Servizio di 14 Giorni",
+  "guaranteeDesc": "Se iCanCall non funziona e il nostro team di assistenza non riesce a risolvere il problema, ricevi un rimborso completo. Basta contattare l'assistenza entro 14 giorni dall'acquisto. Non sono previsti rimborsi per semplice ripensamento.",
+  "shortGuarantee": "Garanzia di servizio di 14 giorni"
 },
 "testimonials": {
   "stars": "★★★★★",
@@ -186,9 +186,9 @@ const t: HomepageTranslations = {
   "q4": "Ci sono costi di attivazione o vincoli di durata contrattuale?",
   "a4": "No. Nessun costo di setup, spese nascoste o contratti a termine. Tutti i piani vengono fatturati su base mensile (o annuale) e puoi disdire in qualsiasi momento con un clic nel pannello.",
   "q5": "Qual è la vostra politica di rimborso?",
-  "a5": "Ogni piano ICanCall include una garanzia di rimborso di 30 giorni. Se ICanCall non dovesse fare al caso vostro entro i primi 30 giorni dall'inizio dell'abbonamento, contattateci all'indirizzo support@icancall.co e procederemo a un rimborso completo, senza fare domande. Non ci sono spese di riassortimento, nessun hardware da restituire e nessuna clausola nascosta.\n\nDopo il periodo di 30 giorni, potete annullare l'abbonamento in qualsiasi momento dal pannello di controllo dell'account. Il servizio continuerà fino alla fine del periodo di fatturazione in corso e non vi verranno addebitati altri costi. I piani annuali annullati dopo il periodo di 30 giorni non sono rimborsabili per i mesi non utilizzati, in linea con la prassi standard del settore SaaS.",
-  "q6": "La garanzia di 30 giorni si applica ai piani annuali?",
-  "a6": "Sì. Sia che scegliate la fatturazione mensile o annuale, avete a disposizione ben 30 giorni dall'acquisto iniziale per richiedere un rimborso. Se annullate un piano annuale entro il periodo di 30 giorni, riceverete un rimborso completo dell'importo annuale addebitato."
+  "a5": "Ogni piano ICanCall include una garanzia di servizio di 14 giorni. Se ICanCall non funziona come promesso (ad esempio, le chiamate al tuo numero non raggiungono i tuoi contatti, oppure non riusciamo ad attivare un numero con il prefisso che hai scelto), contatta il nostro team di assistenza a support@icancall.co entro 14 giorni dal primo acquisto. Per prima cosa cercheremo di risolvere il problema. Se non ci riusciamo entro 3 giorni lavorativi, ti rimborseremo l'intero importo.\n\nNon sono previsti rimborsi per semplice ripensamento né per un servizio che funziona come descritto. Puoi disdire quando vuoi dalla dashboard del tuo account. Il servizio resta attivo fino alla fine del periodo di fatturazione in corso e non ti verrà addebitato altro.",
+  "q6": "La garanzia di 14 giorni si applica ai piani annuali?",
+  "a6": "Sì. I piani mensili e annuali hanno la stessa garanzia di servizio di 14 giorni dal primo acquisto. Se il servizio non funziona e il nostro team di assistenza non riesce a risolvere il problema, riceverai il rimborso completo dell'importo annuale. I piani annuali non sono rimborsati per ripensamento né per i mesi non utilizzati."
 },
 "cta": {
   "title": "Pronto a proteggere la tua famiglia?",
@@ -340,6 +340,7 @@ const t: HomepageTranslations = {
   "dueToday": "Dovuto oggi",
   "orderSecured": "Protetto con crittografia bancaria. Il pagamento si aprirà in una finestra sicura.",
   "btnPay": "Completa configurazione e paga",
+  "refundNote": "Politica di rimborso: Se iCanCall non funziona e il nostro team di assistenza non riesce a risolvere il problema, ricevi un rimborso completo. Basta contattare l'assistenza entro 14 giorni dall'acquisto. Non sono previsti rimborsi per semplice ripensamento.",
   "successTitle": "È tutto pronto, {name}!",
   "successSubtitle": "Il tuo piano {planName} è attivo e il tuo numero è attivo. Un'ultima cosa: configura la cerchia di fiducia per far sì che le chiamate raggiungano sempre qualcuno.",
   "successSubtitlePlural": "Il tuo piano {planName} è attivo e i tuoi numeri sono attivi. Un'ultima cosa: configura la cerchia di fiducia per far sì que le chiamate raggiungano sempre qualcuno.",

@@ -205,6 +205,7 @@ export interface HomepageTranslations {
     dueToday: string;
     orderSecured: string;
     btnPay: string;
+    refundNote: string;
     successTitle: string;
     successSubtitle: string;
     successSubtitlePlural: string;
@@ -406,9 +407,9 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "lead": "iCanCall connects your loved ones to their circle of care without screen time, apps, or complex devices. Starting at $14.99/mo.",
     "getStarted": "Get Started",
     "seeHow": "See how it works",
-    "guarantee": "30-day money-back guarantee",
+    "guarantee": "14-day service guarantee",
     "secure": "Secure and private routing",
-    "trustLine": "30-day money-back guarantee · Cancel anytime · No contracts"
+    "trustLine": "14-day service guarantee · Cancel anytime · No contracts"
   },
   "stats": {
     "routed": "Calls Routed",
@@ -516,9 +517,9 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "cFeat3": "All Routing Modes + Scheduling",
     "cFeat4": "150 Pooled Voice Minutes",
     "cFeat5": "2 Caregiver Logins",
-    "guaranteeTitle": "30-Day Money-Back Guarantee",
-    "guaranteeDesc": "Try ICanCall risk-free for 30 days. If it's not the right fit for your family, we'll refund you in full — no questions asked, no restocking fees, no hardware to return.",
-    "shortGuarantee": "30-day money-back guarantee"
+    "guaranteeTitle": "14-Day Service Guarantee",
+    "guaranteeDesc": "If ICanCall doesn't work as promised, contact our support team within 14 days of purchase. If we can't fix it, we'll refund you in full. Refunds aren't given for a change of mind.",
+    "shortGuarantee": "14-day service guarantee"
   },
   "testimonials": {
     "stars": "★★★★★",
@@ -543,9 +544,9 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "q4": "Is there a setup fee or contract?",
     "a4": "No. There are absolutely no setup fees, activation costs, or contracts. All plans are billed month-to-month (or annually) and you can cancel at any time with a single click from your billing page.",
     "q5": "What is your refund policy?",
-    "a5": "Every ICanCall plan comes with a 30-day money-back guarantee. If ICanCall isn't the right fit for your family within the first 30 days of your subscription, contact us at support@icancall.co and we'll issue a full refund — no questions asked. There's no restocking fee, no hardware to return, and no fine print.\n\nAfter the 30-day window, you can cancel your subscription anytime from your account dashboard. Your service will continue through the end of your current billing period, and you won't be charged again. Annual plans cancelled after the 30-day window are non-refundable for unused months, consistent with standard SaaS practice.",
-    "q6": "Does the 30-day guarantee apply to annual plans?",
-    "a6": "Yes. Whether you choose monthly or annual billing, you have a full 30 days from your initial purchase to request a refund. If you cancel an annual plan within the 30-day window, you'll receive a full refund of the annual charge."
+    "a5": "Every ICanCall plan comes with a 14-day service guarantee. If ICanCall doesn't work as promised (for example, calls to your number don't reach your contacts, or we can't activate a number in the area code you chose), contact our support team at support@icancall.co within 14 days of your first purchase. We'll try to fix the problem first. If we can't fix it within 3 business days, we'll refund you in full.\n\nRefunds aren't given for a change of mind or for a service that works as described. You can cancel anytime from your account dashboard. Your service continues through the end of your current billing period, and you won't be charged again.",
+    "q6": "Does the 14-day guarantee apply to annual plans?",
+    "a6": "Yes. Monthly and annual plans have the same 14-day service guarantee from your first purchase. If the service doesn't work and our support team can't fix it, you'll receive a full refund of the annual charge. Annual plans aren't refunded for a change of mind or for unused months."
   },
   "cta": {
     "title": "Ready to secure your family?",
@@ -697,6 +698,7 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "dueToday": "Due today",
     "orderSecured": "Secured with bank-level encryption. Checkout will open in a secure window.",
     "btnPay": "Complete setup & pay",
+    "refundNote": "Refund policy: if iCanCall doesn't work, contact support within 14 days of purchase. If we can't fix it, you get a full refund. Refunds aren't given for a change of mind.",
     "successTitle": "You're all set, {name}!",
     "successSubtitle": "Your {planName} plan is active and your number is live. One last thing: build your trusted circle so calls always reach someone.",
     "successSubtitlePlural": "Your {planName} plan is active and your numbers are live. One last thing: build your trusted circle so calls always reach someone.",
@@ -762,9 +764,9 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "lead": "iCanCall conecta a sus seres queridos con su círculo de apoyo sin necesidad de pantallas, aplicaciones o dispositivos complejos. Desde $14.99/mes.",
     "getStarted": "Comenzar",
     "seeHow": "Ver cómo funciona",
-    "guarantee": "Garantía de reembolso de 30 días",
+    "guarantee": "Garantía de servicio de 14 días",
     "secure": "Enrutamiento seguro y privado",
-    "trustLine": "Garantía de devolución de 30 días · Cancele en cualquier momento · Sin contratos"
+    "trustLine": "Garantía de servicio de 14 días · Cancele en cualquier momento · Sin contratos"
   },
   "stats": {
     "routed": "Llamadas Enrutadas",
@@ -872,9 +874,9 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "cFeat3": "Todos los Modos de Enrutamiento + Horarios",
     "cFeat4": "150 Minutos de Voz Compartidos",
     "cFeat5": "2 Accesos de Cuidador",
-    "guaranteeTitle": "Garantía de Devolución de Dinero de 30 Días",
-    "guaranteeDesc": "Pruebe ICanCall sin riesgos durante 30 días. Si no es la opción adecuada para su familia, le devolveremos el importe completo: sin preguntas, sin tarifas de reposición y sin hardware que devolver.",
-    "shortGuarantee": "Garantía de devolución de 30 días"
+    "guaranteeTitle": "Garantía de Servicio de 14 Días",
+    "guaranteeDesc": "Si ICanCall no funciona como prometemos, contacte con nuestro equipo de soporte en los 14 días siguientes a su compra. Si no podemos solucionarlo, le devolveremos el importe completo. No hay reembolsos por cambio de opinión.",
+    "shortGuarantee": "Garantía de servicio de 14 días"
   },
   "testimonials": {
     "stars": "★★★★★",
@@ -899,9 +901,9 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "q4": "¿Hay algún contrato o tarifa de configuración?",
     "a4": "No. No hay tarifas de activación ni contratos de permanencia. Todos los planes son de mes a mes (o anuales) y puede cancelar en cualquier momento con un solo clic desde su panel.",
     "q5": "¿Cuál es su política de reembolso?",
-    "a5": "Cada plan de ICanCall viene con una garantía de devolución de dinero de 30 días. Si ICanCall no es la opción adecuada para su familia dentro de los primeros 30 días de su suscripción, contáctenos en support@icancall.co y le emitiremos un reembolso completo, sin preguntas. No hay tarifa de reposición, ni hardware que devolver, ni letra pequeña.\n\nDespués del período de 30 días, puede cancelar su suscripción en cualquier momento desde el panel de control de su cuenta. Su servicio continuará hasta el final de su período de facturación actual y no se le cobrará nuevamente. Los planes anuales cancelados después del período de 30 días no son reembolsables por los meses no utilizados, de acuerdo con la práctica estándar de SaaS.",
-    "q6": "¿La garantía de 30 días se aplica a los planes anuales?",
-    "a6": "Sí. Ya sea que elija la facturación mensual o anual, tiene un plazo completo de 30 días a partir de su compra inicial para solicitar un reembolso. Si cancela un plan anual dentro del período de 30 días, recibirá un reembolso completo del cargo anual."
+    "a5": "Todos los planes de ICanCall incluyen una garantía de servicio de 14 días. Si ICanCall no funciona como prometemos (por ejemplo, las llamadas a su número no llegan a sus contactos o no podemos activar un número con el código de área que eligió), contacte con nuestro equipo de soporte en support@icancall.co en los 14 días siguientes a su primera compra. Primero intentaremos solucionar el problema. Si no podemos solucionarlo en 3 días hábiles, le devolveremos el importe completo.\n\nNo hay reembolsos por cambio de opinión ni por un servicio que funciona según lo descrito. Puede cancelar en cualquier momento desde el panel de su cuenta. Su servicio continúa hasta el final del periodo de facturación actual y no se le volverá a cobrar.",
+    "q6": "¿La garantía de 14 días se aplica a los planes anuales?",
+    "a6": "Sí. Los planes mensuales y anuales tienen la misma garantía de servicio de 14 días desde su primera compra. Si el servicio no funciona y nuestro equipo de soporte no puede solucionarlo, recibirá el reembolso completo del cargo anual. Los planes anuales no se reembolsan por cambio de opinión ni por los meses no usados."
   },
   "cta": {
     "title": "¿Listo para proteger a su familia?",
@@ -1053,6 +1055,7 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "dueToday": "Total hoy",
     "orderSecured": "Protegido con encriptación de nivel bancario. El pago se abrirá en una ventana segura.",
     "btnPay": "Completar configuración y pagar",
+    "refundNote": "Política de reembolso: si iCanCall no funciona, contacte con soporte en los 14 días siguientes a su compra. Si no podemos solucionarlo, le devolveremos el importe completo. No hay reembolsos por cambio de opinión.",
     "successTitle": "¡Todo listo, {name}!",
     "successSubtitle": "Su plan {planName} está activo y su número está listo. Una última cosa: configure su círculo de confianza para que las llamadas siempre conecten con alguien.",
     "successSubtitlePlural": "Su plan {planName} está activo y sus números están listos. Una última cosa: configure su círculo de confianza para que las llamadas siempre conecten con alguien.",
@@ -1118,9 +1121,9 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "lead": "iCanCall connecte vos proches à leur cercle d'accompagnement sans écran, sans applications, ni appareils complexes. À partir de 14,99 $/mois.",
     "getStarted": "Démarrer",
     "seeHow": "Voir le fonctionnement",
-    "guarantee": "Garantie de remboursement de 30 jours",
+    "guarantee": "Garantie de service de 14 jours",
     "secure": "Routage sécurisé et privé",
-    "trustLine": "Garantie satisfait ou remboursé de 30 jours · Annulation à tout moment · Sans engagement"
+    "trustLine": "Garantie de service de 14 jours · Annulation à tout moment · Sans engagement"
   },
   "stats": {
     "routed": "Appels acheminés",
@@ -1228,9 +1231,9 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "cFeat3": "Tous les modes de routage + planification",
     "cFeat4": "150 minutes vocales partagées",
     "cFeat5": "2 accès aidants",
-    "guaranteeTitle": "Garantie Satisfait ou Remboursé de 30 Jours",
-    "guaranteeDesc": "Essayez ICanCall sans risque pendant 30 jours. Si cela ne convient pas à votre famille, nous vous rembourserons intégralement — sans poser de questions, sans frais de restockage et sans matériel à renvoyer.",
-    "shortGuarantee": "Garantie de remboursement de 30 jours"
+    "guaranteeTitle": "Garantie de Service de 14 Jours",
+    "guaranteeDesc": "Si iCanCall ne fonctionne pas et que notre équipe d’assistance ne peut pas résoudre le problème, vous êtes remboursé intégralement. Contactez simplement l’assistance dans les 14 jours suivant votre achat. Aucun remboursement n’est accordé en cas de simple changement d’avis.",
+    "shortGuarantee": "Garantie de service de 14 jours"
   },
   "testimonials": {
     "stars": "★★★★★",
@@ -1255,9 +1258,9 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "q4": "Y a-t-il des frais de mise en service ou un engagement ?",
     "a4": "Non. Aucun frais de mise en service, coût caché ou engagement. Tous les forfaits sont facturés au mois (ou à l'année) et annulables en un clic sur votre page de facturation.",
     "q5": "Quelle est votre politique de remboursement ?",
-    "a5": "Chaque forfait ICanCall est assorti d'une garantie satisfait ou remboursé de 30 jours. Si ICanCall ne convient pas à votre famille au cours des 30 premiers jours de votre abonnement, contactez-nous à support@icancall.co et nous vous rembourserons intégralement, sans poser de questions. Il n'y a pas de frais de restockage, pas de matériel à retourner et pas de petits caractères.\n\nAprès le délai de 30 jours, vous pouvez annuler votre abonnement à tout moment depuis le tableau de bord de votre compte. Votre service se poursuivra jusqu'à la fin de votre période de facturation en cours, et vous ne serez plus facturé. Les forfaits annuels annulés après le délai de 30 jours ne sont pas remboursables pour les mois non utilisés, conformément aux pratiques standard des SaaS.",
-    "q6": "La garantie de 30 jours s'applique-t-elle aux forfaits annuels ?",
-    "a6": "Oui. Que vous choisissiez la facturation mensuelle ou annuelle, vous disposez de 30 jours complets à compter de votre achat initial pour demander un remboursement. Si vous annulez un forfait annuel pendant cette période de 30 jours, vous recevrez un remboursement complet du montant annuel facturé."
+    "a5": "Chaque forfait ICanCall bénéficie d’une garantie de service de 14 jours. Si ICanCall ne fonctionne pas comme promis (par exemple, les appels vers votre numéro n’atteignent pas vos contacts, ou nous ne pouvons pas activer un numéro dans l’indicatif régional choisi), contactez notre équipe d’assistance à support@icancall.co dans les 14 jours suivant votre premier achat. Nous essaierons d’abord de résoudre le problème. Si nous n’y parvenons pas sous 3 jours ouvrés, nous vous rembourserons intégralement.\n\nAucun remboursement n’est accordé en cas de simple changement d’avis ni pour un service qui fonctionne comme décrit. Vous pouvez résilier à tout moment depuis le tableau de bord de votre compte. Votre service reste actif jusqu’à la fin de la période de facturation en cours, et vous ne serez plus débité.",
+    "q6": "La garantie de 14 jours s'applique-t-elle aux forfaits annuels ?",
+    "a6": "Oui. Les forfaits mensuels et annuels bénéficient de la même garantie de service de 14 jours à compter de votre premier achat. Si le service ne fonctionne pas et que notre équipe d’assistance ne peut pas résoudre le problème, vous serez remboursé intégralement du montant annuel. Les forfaits annuels ne sont pas remboursés en cas de changement d’avis ni pour les mois non utilisés."
   },
   "cta": {
     "title": "Prêt à sécuriser votre famille ?",
@@ -1409,6 +1412,7 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "dueToday": "Dû aujourd'hui",
     "orderSecured": "Sécurisé avec un cryptage de niveau bancaire. Le paiement s'ouvrira dans une fenêtre sécurisée.",
     "btnPay": "Finaliser la configuration et payer",
+    "refundNote": "Politique de remboursement : Si iCanCall ne fonctionne pas et que notre équipe d’assistance ne peut pas résoudre le problème, vous êtes remboursé intégralement. Contactez simplement l’assistance dans les 14 jours suivant votre achat. Aucun remboursement n’est accordé en cas de simple changement d’avis.",
     "successTitle": "Tout est prêt, {name} !",
     "successSubtitle": "Votre forfait {planName} est actif et votre numéro est en service. Dernière chose : configurez votre cercle de confiance pour que les appels aboutissent toujours.",
     "successSubtitlePlural": "Votre forfait {planName} est actif et vos numéros sont en service. Dernière chose : configurez votre cercle de confiance pour que les appels aboutissent toujours.",
@@ -1474,9 +1478,9 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "lead": "iCanCallは、アプリやスマートフォンを使わずに、大切なご家族と介護・ケアの輪を繋ぎます。月額わずか $14.99 からご利用可能。",
     "getStarted": "今すぐ始める",
     "seeHow": "仕組みを見る",
-    "guarantee": "30日間返金保証付き",
+    "guarantee": "14日間サービス保証",
     "secure": "プライバシーに配慮した安全な接続",
-    "trustLine": "30日間返金保証 · いつでもキャンセル可能 · 契約期間の縛りなし"
+    "trustLine": "14日間サービス保証 · いつでもキャンセル可能 · 契約期間の縛りなし"
   },
   "stats": {
     "routed": "転送された通話",
@@ -1584,9 +1588,9 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "cFeat3": "全転送モード＋スケジュール対応",
     "cFeat4": "共有通話時間 150分",
     "cFeat5": "介護者ログイン 2名分",
-    "guaranteeTitle": "30日間返金保証",
-    "guaranteeDesc": "ICanCallを30日間リスクフリーでお試しください。ご家族に合わない場合は全額返金いたします。理由の確認、手数料の発生、機器の返却などは一切ありません。",
-    "shortGuarantee": "30日間の返金保証"
+    "guaranteeTitle": "14日間サービス保証",
+    "guaranteeDesc": "iCanCallが正常に動作せず、サポートチームでも解決できない場合は全額返金いたします。ご購入から14日以内にサポートへご連絡ください。お客様のご都合による返金はお受けしておりません。",
+    "shortGuarantee": "14日間サービス保証"
   },
   "testimonials": {
     "stars": "★★★★★",
@@ -1611,9 +1615,9 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "q4": "初期費用や契約期間の縛りはありますか？",
     "a4": "いいえ、契約事務手数料や解約金などの初期・追加費用は一切ございません。月払い・年払いともに、マイページのボタン1つでいつでも解約いただけます。",
     "q5": "返金ポリシーについて教えてください。",
-    "a5": "ICanCallのすべてのプランには、30日間の返金保証が付いています。ご契約から30日以内であれば、弊社サービスがご家族に合わないと判断された場合、support@icancall.co までご連絡いただければ、理由を問わず全額返金いたします。手数料の発生や機器の返却などは一切ありません。\n\n30日を過ぎた後は、アカウントダッシュボードからいつでもサブスクリプションをキャンセルできます。現在の請求期間の終了までサービスは継続され、その後の請求は発生しません。30日の保証期間経過後にキャンセルされた年額プランの未使用分については、一般的なSaaSの規定に準じ、返金されませんのでご了承ください。",
-    "q6": "30日間の返金保証は年額プランにも適用されますか？",
-    "a6": "はい。月額・年額のどちらをお選びいただいても、初回購入から丸30日間は返金をリクエストできます。30日間の保証期間内に年額プランをキャンセルされた場合は、年額料金の全額が返金されます。"
+    "a5": "ICanCallのすべてのプランに14日間のサービス保証が付いています。ICanCallが約束どおりに動作しない場合（例：あなたの番号への着信が連絡先につながらない、選んだ市外局番で番号を有効化できない など）は、初回購入から14日以内に support@icancall.co までサポートチームへご連絡ください。まずは問題の解決に努めます。3営業日以内に解決できない場合は、全額返金いたします。\n\nお客様のご都合による返金や、説明どおりに動作しているサービスの返金はお受けしておりません。解約はアカウントのダッシュボードからいつでも可能です。サービスは現在の請求期間の終了まで継続し、それ以降の請求は発生しません。",
+    "q6": "14日間のサービス保証は年額プランにも適用されますか？",
+    "a6": "はい。月額プランと年間プランのどちらにも、初回購入から同じ14日間のサービス保証が適用されます。サービスが動作せず、サポートチームでも解決できない場合は、年間料金を全額返金いたします。お客様のご都合や未使用月分による年間プランの返金はございません。"
   },
   "cta": {
     "title": "ご家族の安心な生活のために",
@@ -1765,6 +1769,7 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "dueToday": "本日のお支払い額",
     "orderSecured": "銀行レベルの強力な暗号化で保護されています。決済は安全なウィンドウで開きます。",
     "btnPay": "セットアップを完了して支払う",
+    "refundNote": "返金ポリシー：iCanCallが正常に動作せず、サポートチームでも解決できない場合は全額返金いたします。ご購入から14日以内にサポートへご連絡ください。お客様のご都合による返金はお受けしておりません。",
     "successTitle": "{name} 様、準備が整いました！",
     "successSubtitle": "{planName}プランが有効になり、選択された電話番号をご利用いただけます。最後に、ご家族からの電話がいつでも誰かにつながるよう、連絡先リストを作成しましょう。",
     "successSubtitlePlural": "{planName}プランが有効になり、選択された複数の電話番号をご利用いただけます。最後に、ご家族からの電話がいつでも誰かにつながるよう、連絡先リストを作成しましょう。",
@@ -1830,9 +1835,9 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "lead": "iCanCall 让您的家人在无需操作屏幕、下载应用程序或配置复杂硬件的前提下，时刻连接他们专属的看护成员。每月仅需 $14.99 起。",
     "getStarted": "立即体验",
     "seeHow": "了解工作原理",
-    "guarantee": "30天无忧退款保证",
+    "guarantee": "14天服务保障",
     "secure": "隐私安全的私密路由",
-    "trustLine": "30天退款保证 · 随时取消 · 免签合同"
+    "trustLine": "14天服务保障 · 随时取消 · 免签合同"
   },
   "stats": {
     "routed": "累计转接呼叫",
@@ -1940,9 +1945,9 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "cFeat3": "支持全部转接模式及排班功能",
     "cFeat4": "150 分钟共享通话时长",
     "cFeat5": "2 个看护人登录账号",
-    "guaranteeTitle": "30天无忧退款保证",
-    "guaranteeDesc": "无风险试用 ICanCall 30 天。如果它不适合您的家庭，我们将全额退款 —— 无需任何理由，无重新上架费，无需退回硬件。",
-    "shortGuarantee": "30天退款保证"
+    "guaranteeTitle": "14天服务保障",
+    "guaranteeDesc": "如果 iCanCall 无法正常使用且我们的支持团队无法解决，您将获得全额退款。只需在购买后 14 天内联系支持团队。因改变主意而申请的退款不予受理。",
+    "shortGuarantee": "14天服务保障"
   },
   "testimonials": {
     "stars": "★★★★★",
@@ -1967,9 +1972,9 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "q4": "有没有任何初装费或长期合约限制？",
     "a4": "完全没有。我们不收取任何安装、激活费，也不需要签署任何合约。所有方案均支持月结或年结，您可以在账户管理页面随时一键取消订阅。",
     "q5": "你们的退款政策是什么？",
-    "a5": "每个 ICanCall 计划都附带 30 天退款保证。如果在订阅的前 30 天内，您觉得 ICanCall 不适合您的家庭，请通过 support@icancall.co 联系我们，我们将为您办理全额退款 —— 无需任何理由。没有任何重新上架费、无需退回任何硬件，也没有隐藏条款。\n\n在 30 天窗口期过后，您可以随时通过账户控制面板取消订阅。您的服务将持续到当前计费周期结束，之后不会再产生费用。在 30 天窗口期后取消的年付计划中未使用的月份不可退款，这符合标准的 SaaS 行业惯例。",
-    "q6": "30 天退款保证适用于年付计划吗？",
-    "a6": "是的。无论您选择按月计费还是按年计费，自首次购买之日起都有完整的 30 天时间申请退款。如果您在 30 天窗口期内取消年付计划，您将获得年付费用的全额退款。"
+    "a5": "每个 ICanCall 套餐都享有 14 天服务保障。如果 ICanCall 未能按承诺正常工作（例如，拨打您号码的来电无法接通您的联系人，或我们无法在您选择的区号下开通号码），请在首次购买后 14 天内发送邮件至 support@icancall.co 联系我们的支持团队。我们会先尽力解决问题。如果 3 个工作日内仍无法解决，我们将全额退款。\n\n因改变主意，或服务已按描述正常工作而申请的退款不予受理。您可以随时在账户控制面板中取消订阅。服务将持续到当前计费周期结束，之后不会再扣费。",
+    "q6": "14 天服务保障适用于年付计划吗？",
+    "a6": "是的。月付和年付套餐自首次购买起均享有同样的 14 天服务保障。如果服务无法正常使用且我们的支持团队无法解决，您将获得年费的全额退款。年付套餐不因改变主意或未使用的月份而退款。"
   },
   "cta": {
     "title": "立刻为您的家庭构筑沟通防护网",
@@ -2121,6 +2126,7 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "dueToday": "今日应付",
     "orderSecured": "使用银行级高强度加密保护。结算窗口将在安全新页面中打开。",
     "btnPay": "完成设置并支付",
+    "refundNote": "退款政策：如果 iCanCall 无法正常使用且我们的支持团队无法解决，您将获得全额退款。只需在购买后 14 天内联系支持团队。因改变主意而申请的退款不予受理。",
     "successTitle": "全部设置完毕，{name}！",
     "successSubtitle": "您的 {planName} 计划已激活，您的号码已启用。最后一件事：构建您的信任圈，以便家人呼叫时总能有人接听。",
     "successSubtitlePlural": "您的 {planName} 计划已激活，您的号码已启用。最后一件事：构建您的信任圈，以便家人呼叫时总能有人接听。",
@@ -2186,9 +2192,9 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "lead": "يربط iCanCall أحباءك بدائرة الرعاية الخاصة بهم دون الحاجة لشاشات أو تطبيقات أو أجهزة معقدة. يبدأ من 14.99 دولاراً شهرياً.",
     "getStarted": "ابدأ الآن",
     "seeHow": "اكتشف كيف يعمل",
-    "guarantee": "ضمان استرداد الأموال لمدة 30 يوماً",
+    "guarantee": "ضمان الخدمة لمدة 14 يومًا",
     "secure": "توجيه آمن وخاص للمكالمات",
-    "trustLine": "ضمان استرداد الأموال لمدة 30 يومًا · إلغاء في أي وقت · بدون عقود"
+    "trustLine": "ضمان الخدمة لمدة 14 يومًا · إلغاء في أي وقت · بدون عقود"
   },
   "stats": {
     "routed": "مكالمات موجهة",
@@ -2296,9 +2302,9 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "cFeat3": "جميع أوضاع التوجيه مع الجدولة",
     "cFeat4": "150 دقيقة صوتية مشتركة",
     "cFeat5": "حسابا دخول لمقدمَي رعاية",
-    "guaranteeTitle": "ضمان استرداد الأموال لمدة 30 يومًا",
-    "guaranteeDesc": "جرب ICanCall الخالي من المخاطر لمدة 30 يومًا. إذا لم يكن مناسبًا لعائلتك، فسنقوم برد المبلغ بالكامل — دون طرح أسئلة، ودون رسوم إعادة تخزين، ودون أجهزة لإعادتها.",
-    "shortGuarantee": "ضمان استرداد الأموال لمدة 30 يومًا"
+    "guaranteeTitle": "ضمان الخدمة لمدة 14 يومًا",
+    "guaranteeDesc": "إذا لم يعمل iCanCall ولم يتمكن فريق الدعم لدينا من حل المشكلة، فستحصل على استرداد كامل. ما عليك سوى التواصل مع الدعم خلال 14 يومًا من الشراء. لا نقدّم استردادًا لمجرد تغيير الرأي.",
+    "shortGuarantee": "ضمان الخدمة لمدة 14 يومًا"
   },
   "testimonials": {
     "stars": "★★★★★",
@@ -2323,9 +2329,9 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "q4": "هل توجد رسوم إعداد أو عقود التزام؟",
     "a4": "لا توجد أي رسوم خفية أو عقود سنوية للالتزام. تُدفع جميع الخطط بشكل شهري أو سنوي ويمكنك إلغاء الاشتراك في أي وقت بنقرة واحدة من لوحة الفواتير الخاصة بك.",
     "q5": "ما هي سياسة الاسترداد الخاصة بكم؟",
-    "a5": "تأتي كل باقة من باقات ICanCall مع ضمان استرداد الأموال لمدة 30 يومًا. إذا لم تكن باقة ICanCall مناسبة لعائلتك خلال أول 30 يومًا من اشتراكك، فاتصل بنا على support@icancall.co وسنقوم برد المبلغ بالكامل — دون طرح أي أسئلة. لا توجد رسوم لإعادة التخزين، ولا أجهزة لإعادتها، ولا شروط خفية.\n\nبعد مرور فترة الـ 30 يومًا، يمكنك إلغاء اشتراكك في أي وقت من لوحة التحكم الخاصة بحسابك. ستستمر خدمتك حتى نهاية فترة الفوترة الحالية، ولن يتم تحصيل أي رسوم منك مرة أخرى. الباقات السنوية التي يتم إلغاؤها بعد فترة الـ 30 يومًا غير قابلة للاسترداد عن الأشهر غير المستخدمة، تماشياً مع الممارسات المعمول بها في مجال البرمجيات كخدمة (SaaS).",
-    "q6": "هل ينطبق ضمان الـ 30 يومًا على الباقات السنوية؟",
-    "a6": "نعم. سواء اخترت الفوترة الشهرية أو السنوية، فلديك 30 يومًا كاملة من تاريخ الشراء الأولي لطلب استرداد الأموال. إذا قمت بإلغاء باقة سنوية خلال فترة الـ 30 يومًا، فستسترد كامل المبلغ السنوي المدفوع."
+    "a5": "تأتي كل خطط ICanCall مع ضمان خدمة لمدة 14 يومًا. إذا لم يعمل ICanCall كما وعدنا (على سبيل المثال، لا تصل المكالمات الواردة إلى رقمك إلى جهات اتصالك، أو لا نستطيع تفعيل رقم برمز المنطقة الذي اخترته)، فتواصل مع فريق الدعم على support@icancall.co خلال 14 يومًا من أول عملية شراء. سنحاول أولًا حل المشكلة. وإذا لم نتمكن من حلها خلال 3 أيام عمل، فسنردّ لك المبلغ كاملًا.\n\nلا نقدّم استردادًا لمجرد تغيير الرأي أو لخدمة تعمل كما هو موضّح. يمكنك الإلغاء في أي وقت من لوحة تحكم حسابك. وتستمر خدمتك حتى نهاية فترة الفوترة الحالية، ولن يتم تحصيل أي رسوم أخرى منك.",
+    "q6": "هل ينطبق ضمان الـ 14 يومًا على الباقات السنوية؟",
+    "a6": "نعم. تتمتع الخطط الشهرية والسنوية بضمان الخدمة نفسه لمدة 14 يومًا من أول عملية شراء. إذا لم تعمل الخدمة ولم يتمكن فريق الدعم من حل المشكلة، فستحصل على استرداد كامل للرسوم السنوية. ولا يُستردّ مبلغ الخطط السنوية بسبب تغيير الرأي أو عن الأشهر غير المستخدمة."
   },
   "cta": {
     "title": "هل أنت مستعد لتأمين اتصال عائلتك؟",
@@ -2477,6 +2483,7 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "dueToday": "المستحق اليوم",
     "orderSecured": "مؤمن بتشفير قوي بمستوى البنوك. سيفتح الدفع في نافذة آمنة جديدة.",
     "btnPay": "إكمال الإعداد والدفع",
+    "refundNote": "سياسة الاسترداد: إذا لم يعمل iCanCall ولم يتمكن فريق الدعم لدينا من حل المشكلة، فستحصل على استرداد كامل. ما عليك سوى التواصل مع الدعم خلال 14 يومًا من الشراء. لا نقدّم استردادًا لمجرد تغيير الرأي.",
     "successTitle": "لقد أصبحت جاهزًا تمامًا، {name}!",
     "successSubtitle": "باقة {planName} نشطة الآن ورقمك جاهز للعمل. شيء أخير: قم ببناء دائرة الثقة الخاصة بك لضمان وصول المكالمات دائمًا لأحد الأشخاص.",
     "successSubtitlePlural": "باقة {planName} نشطة الآن وأرقامك جاهزة للعمل. شيء أخير: قم ببناء دائرة الثقة الخاصة بك لضمان وصول المكالمات دائمًا لأحد الأشخاص.",
@@ -2542,9 +2549,9 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "lead": "iCanCall बिना किसी स्क्रीन टाइम, ऐप या जटिल डिवाइस के आपके प्रियजनों को उनके केयरटेकर सर्कल से जोड़ता है। शुरुआत सिर्फ $14.99/माह से।",
     "getStarted": "शुरू करें",
     "seeHow": "देखें यह कैसे काम करता है",
-    "guarantee": "30-दिन की मनी-बैक गारंटी",
+    "guarantee": "14-दिन की सेवा गारंटी",
     "secure": "सुरक्षित और निजी कॉल रूटिंग",
-    "trustLine": "30-दिनों की मनी-बैक गारंटी · किसी भी समय रद्द करें · कोई अनुबंध नहीं"
+    "trustLine": "14-दिन की सेवा गारंटी · किसी भी समय रद्द करें · कोई अनुबंध नहीं"
   },
   "stats": {
     "routed": "रूट की गई कॉल",
@@ -2652,9 +2659,9 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "cFeat3": "सभी रूटिंग मोड + शेड्यूलिंग",
     "cFeat4": "150 साझा वॉयस मिनट",
     "cFeat5": "2 केयरगिवर लॉगिन",
-    "guaranteeTitle": "30-दिनों की मनी-बैक गारंटी",
-    "guaranteeDesc": "30 दिनों तक जोखिम-मुक्त ICanCall आज़माएं। यदि यह आपके परिवार के लिए सही नहीं है, तो हम आपको पूरा रिफंड कर देंगे — बिना किसी सवाल के, कोई रीस्टॉकिंग शुल्क नहीं, कोई हार्डवेयर वापस नहीं करना है।",
-    "shortGuarantee": "30-दिनों की मनी-बैक गारंटी"
+    "guaranteeTitle": "14-दिन की सेवा गारंटी",
+    "guaranteeDesc": "अगर iCanCall काम नहीं करता और हमारी सपोर्ट टीम उसे ठीक नहीं कर पाती, तो आपको पूरा रिफंड मिलेगा। बस ख़रीद के 14 दिनों के भीतर सपोर्ट से संपर्क करें। सिर्फ़ मन बदलने पर रिफंड नहीं दिया जाता।",
+    "shortGuarantee": "14-दिन की सेवा गारंटी"
   },
   "testimonials": {
     "stars": "★★★★★",
@@ -2679,9 +2686,9 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "q4": "क्या कोई सेटअप शुल्क या अनुबंध है?",
     "a4": "नहीं। कोई भी सेटअप शुल्क, एक्टिवेशन लागत या अनुबंध नहीं है। सभी प्लान मासिक या वार्षिक बिल किए जाते हैं और आप अपनी बिलिंग फ़ाइल से एक क्लिक में किसी भी समय रद्द कर सकते हैं।",
     "q5": "आपकी रिफंड पॉलिसी क्या है?",
-    "a5": "प्रत्येक ICanCall प्लान 30-दिनों की मनी-बैक गारंटी के साथ आता है। यदि आपकी सदस्यता के पहले 30 दिनों के भीतर ICanCall आपके परिवार के लिए सही नहीं लगता है, तो support@icancall.co पर हमसे संपर्क करें और हम बिना कोई सवाल पूछे पूरा रिफंड जारी कर देंगे। कोई रीस्टॉकिंग शुल्क नहीं है, कोई हार्डवेयर वापस नहीं करना है, और कोई छिपी हुई शर्तें नहीं हैं।\n\n30 दिनों के बाद, आप अपने अकाउंट डैशबोर्ड से कभी भी आपकी सदस्यता रद्द कर सकते हैं। आपकी सेवा आपकी वर्तमान बिलिंग अवधि के अंत तक जारी रहेगी, और आपसे दोबारा शुल्क नहीं लिया जाएगा। मानक SaaS प्रथा के अनुसार, 30 दिनों के बाद रद्द किए गए वार्षिक प्लान अप्रयुक्त महीनों के लिए गैर-वापसी योग्य हैं।",
-    "q6": "क्या 30 दिनों की गारंटी वार्षिक प्लान पर भी लागू होती है?",
-    "a6": "हाँ। चाहे आप मासिक बिलिंग चुनें या वार्षिक बिलिंग, रिफंड का अनुरोध करने के लिए आपके पास अपनी प्रारंभिक खरीद से पूरे 30 दिनों का समय होता है। यदि आप 30-दिनों की अवधि के भीतर वार्षिक प्लान रद्द करते हैं, तो आपको वार्षिक शुल्क का पूरा रिफंड मिलेगा।"
+    "a5": "हर ICanCall प्लान के साथ 14-दिन की सेवा गारंटी मिलती है। अगर ICanCall वादे के मुताबिक काम नहीं करता (जैसे, आपके नंबर पर आने वाली कॉल आपके संपर्कों तक नहीं पहुंचतीं, या हम आपके चुने हुए एरिया कोड में नंबर चालू नहीं कर पाते), तो अपनी पहली ख़रीद के 14 दिनों के भीतर support@icancall.co पर हमारी सपोर्ट टीम से संपर्क करें। हम पहले समस्या ठीक करने की कोशिश करेंगे। अगर हम 3 कार्य-दिवसों में इसे ठीक नहीं कर पाते, तो आपको पूरा रिफंड मिलेगा।\n\nसिर्फ़ मन बदलने पर, या बताए अनुसार काम कर रही सेवा के लिए रिफंड नहीं दिया जाता। आप अपने अकाउंट डैशबोर्ड से कभी भी रद्द कर सकते हैं। आपकी सेवा मौजूदा बिलिंग अवधि के अंत तक चलती रहेगी, और आपसे दोबारा शुल्क नहीं लिया जाएगा।",
+    "q6": "क्या 14 दिनों की गारंटी वार्षिक प्लान पर भी लागू होती है?",
+    "a6": "हां। मासिक और वार्षिक, दोनों प्लान पर पहली ख़रीद से यही 14-दिन की सेवा गारंटी लागू होती है। अगर सेवा काम नहीं करती और हमारी सपोर्ट टीम उसे ठीक नहीं कर पाती, तो आपको वार्षिक शुल्क का पूरा रिफंड मिलेगा। मन बदलने पर या बचे हुए महीनों के लिए वार्षिक प्लान का रिफंड नहीं मिलता।"
   },
   "cta": {
     "title": "अपने परिवार को सुरक्षित रखने के लिए तैयार हैं?",
@@ -2833,6 +2840,7 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "dueToday": "आज देय",
     "orderSecured": "बैंक-स्तरीय मजबूत एन्क्रिप्शन से सुरक्षित। चेकआउट एक सुरक्षित नई विंडो में खुलेगा।",
     "btnPay": "सेटअप पूरा करें और भुगतान करें",
+    "refundNote": "रिफंड नीति: अगर iCanCall काम नहीं करता और हमारी सपोर्ट टीम उसे ठीक नहीं कर पाती, तो आपको पूरा रिफंड मिलेगा। बस ख़रीद के 14 दिनों के भीतर सपोर्ट से संपर्क करें। सिर्फ़ मन बदलने पर रिफंड नहीं दिया जाता।",
     "successTitle": "आप पूरी तरह तैयार हैं, {name}!",
     "successSubtitle": "आपका {planName} प्लान सक्रिय है और आपका नंबर लाइव है। एक आखिरी काम: अपना भरोसेमंद सर्कल बनाएं ताकि कॉल हमेशा किसी न किसी तक पहुंचे।",
     "successSubtitlePlural": "आपका {planName} प्लान सक्रिय है और आपके नंबर लाइव हैं। एक आखिरी काम: अपना भरोसेमंद सर्कल बनाएं ताकि कॉल हमेशा किसी न किसी तक पहुंचे।",
@@ -2898,9 +2906,9 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "lead": "O iCanCall conecta seus familiares ao seu círculo de cuidados sem telas, aplicativos ou aparelhos complicados. A partir de $14.99/mês.",
     "getStarted": "Começar agora",
     "seeHow": "Como funciona",
-    "guarantee": "30 dias de garantia de reembolso",
+    "guarantee": "Garantia de serviço de 14 dias",
     "secure": "Encaminhamento seguro e privado",
-    "trustLine": "Garantia de reembolso de 30 dias · Cancele a qualquer momento · Sem contratos"
+    "trustLine": "Garantia de serviço de 14 dias · Cancele a qualquer momento · Sem contratos"
   },
   "stats": {
     "routed": "Ligações completadas",
@@ -3008,9 +3016,9 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "cFeat3": "Todos os Modos de Encaminhamento + Horários",
     "cFeat4": "150 Minutos de Voz Compartilhados",
     "cFeat5": "2 Logins de Cuidador",
-    "guaranteeTitle": "Garantia de Reembolso de 30 Dias",
-    "guaranteeDesc": "Experimente o ICanCall sem riscos durante 30 dias. Se não for a escolha certa para a sua família, reembolsaremos o valor total — sem perguntas, sem taxas de devolução e sem hardware para devolver.",
-    "shortGuarantee": "Garantia de reembolso de 30 dias"
+    "guaranteeTitle": "Garantia de Serviço de 14 Dias",
+    "guaranteeDesc": "Se o iCanCall não funcionar e nossa equipe de suporte não conseguir resolver, você recebe o reembolso integral. Basta falar com o suporte em até 14 dias após a compra. Não há reembolso por mudança de ideia.",
+    "shortGuarantee": "Garantia de serviço de 14 dias"
   },
   "testimonials": {
     "stars": "★★★★★",
@@ -3035,9 +3043,9 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "q4": "Existe taxa de ativação ou fidelidade contratual?",
     "a4": "Não. Não há taxas ocultas, custos de adesão ou prazos de carência. Os planos são cobrados mensal ou anualmente e você cancela com um clique no painel a qualquer momento.",
     "q5": "Qual é a vossa política de reembolso?",
-    "a5": "Cada plano do ICanCall vem com uma garantia de reembolso de 30 dias. Se o ICanCall não for a escolha certa para a sua família nos primeiros 30 dias da sua subscrição, contacte-nos em support@icancall.co e emitiremos um reembolso total — sem perguntas. Não há taxas de devolução, não há hardware para devolver e não há letras miúdas.\n\nApós o período de 30 dias, pode cancelar a sua subscrição a qualquer momento a partir do painel de controlo da sua conta. O seu serviço continuará até ao fim do período de faturação atual e não será cobrado novamente. Os planos anuais cancelados após o período de 30 dias não são reembolsáveis para os meses não utilizados, de acordo com as práticas padrão de SaaS.",
-    "q6": "A garantia de 30 dias aplica-se aos planos anuais?",
-    "a6": "Sim. Quer opte pela faturação mensal ou anual, dispõe de 30 dias completos a partir da sua compra inicial para solicitar um reembolso. Se cancelar um plano anual dentro do período de 30 dias, receberá um reembolso total do valor anual cobrado."
+    "a5": "Todos os planos ICanCall incluem uma garantia de serviço de 14 dias. Se o ICanCall não funcionar como prometido (por exemplo, as ligações para o seu número não chegam aos seus contatos, ou não conseguimos ativar um número no código de área que você escolheu), fale com nossa equipe de suporte em support@icancall.co em até 14 dias após a sua primeira compra. Primeiro, tentaremos resolver o problema. Se não conseguirmos resolver em 3 dias úteis, faremos o reembolso integral.\n\nNão há reembolso por mudança de ideia nem por um serviço que funciona conforme descrito. Você pode cancelar quando quiser pelo painel da sua conta. O serviço continua até o fim do período de cobrança atual, e você não será cobrado novamente.",
+    "q6": "A garantia de 14 dias aplica-se aos planos anuais?",
+    "a6": "Sim. Os planos mensais e anuais têm a mesma garantia de serviço de 14 dias a partir da sua primeira compra. Se o serviço não funcionar e nossa equipe de suporte não conseguir resolver, você receberá o reembolso integral da cobrança anual. Os planos anuais não são reembolsados por mudança de ideia nem pelos meses não usados."
   },
   "cta": {
     "title": "Pronto para proteger seus familiares?",
@@ -3189,6 +3197,7 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "dueToday": "Total hoje",
     "orderSecured": "Protegido com encriptação bancária. O pagamento abrirá numa janela segura.",
     "btnPay": "Concluir configuração e pagar",
+    "refundNote": "Política de reembolso: Se o iCanCall não funcionar e nossa equipe de suporte não conseguir resolver, você recebe o reembolso integral. Basta falar com o suporte em até 14 dias após a compra. Não há reembolso por mudança de ideia.",
     "successTitle": "Está tudo pronto, {name}!",
     "successSubtitle": "O seu plano {planName} está ativo e o seu número está pronto. Uma última coisa: configure o seu círculo de confiança para que as chamadas sempre cheguem a alguém.",
     "successSubtitlePlural": "O seu plano {planName} está ativo e os seus números estão prontos. Uma última coisa: configure o seu círculo de confiança para que as chamadas sempre cheguem a alguém.",
@@ -3254,9 +3263,9 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "lead": "iCanCall verbindet Ihre Lieben mit ihrem Pflegekreis — ganz ohne Bildschirme, Apps oder komplizierte Geräte. Ab $14.99/Monat.",
     "getStarted": "Jetzt starten",
     "seeHow": "Wie es funktioniert",
-    "guarantee": "30 Tage Geld-zurück-Garantie",
+    "guarantee": "14 Tage Service-Garantie",
     "secure": "Sichere und private Weiterleitung",
-    "trustLine": "30 Tage Geld-zurück-Garantie · Jederzeit kündbar · Keine Verträge"
+    "trustLine": "14 Tage Service-Garantie · Jederzeit kündbar · Keine Verträge"
   },
   "stats": {
     "routed": "Anrufe weitergeleitet",
@@ -3364,9 +3373,9 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "cFeat3": "Alle Weiterleitungsmodi + Zeitpläne",
     "cFeat4": "150 gemeinsame Sprachminuten",
     "cFeat5": "2 Betreuer-Logins",
-    "guaranteeTitle": "30-tägige Geld-zurück-Garantie",
-    "guaranteeDesc": "Testen Sie ICanCall 30 Tage lang risikofrei. Wenn es nicht das Richtige für Ihre Familie ist, erstatten wir Ihnen den vollen Betrag zurück – ohne Fragen, ohne Wiedereinlagerungsgebühren und ohne Hardware, die zurückgegeben werden muss.",
-    "shortGuarantee": "30 Tage Geld-zurück-Garantie"
+    "guaranteeTitle": "14-tägige Service-Garantie",
+    "guaranteeDesc": "Wenn iCanCall nicht funktioniert und unser Support-Team das Problem nicht beheben kann, erhalten Sie den vollen Betrag zurück. Wenden Sie sich einfach innerhalb von 14 Tagen nach dem Kauf an den Support. Bei bloßer Meinungsänderung gibt es keine Erstattung.",
+    "shortGuarantee": "14 Tage Service-Garantie"
   },
   "testimonials": {
     "stars": "★★★★★",
@@ -3391,9 +3400,9 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "q4": "Gibt es Einrichtungsgebühren oder Laufzeitverträge?",
     "a4": "Nein. Es gibt keinerlei Einrichtungsgebühren, Aktivierungskosten oder Laufzeitverträge. Alle Tarife werden monatlich (oder jährlich) abgerechnet und können jederzeit mit einem Klick gekündigt werden.",
     "q5": "Wie sieht Ihre Rückerstattungsrichtlinie aus?",
-    "a5": "Jeder ICanCall-Tarif beinhaltet eine 30-tägige Geld-zurück-Garantie. Wenn ICanCall in den ersten 30 Tagen Ihres Abonnements nicht das Richtige für Ihre Familie ist, kontaktieren Sie uns unter support@icancall.co und wir erstatten Ihnen den vollen Betrag zurück – ohne Fragen zu stellen. Es gibt keine Wiedereinlagerungsgebühr, keine Hardware, die zurückgegeben werden muss, und kein Kleingedrucktes.\n\nNach Ablauf der 30 Tage können Sie Ihr Abonnement jederzeit über Ihr Dashboard kündigen. Ihr Service läuft bis zum Ende Ihres aktuellen Abrechnungszeitraums weiter und es fallen keine weiteren Gebühren an. Gemäß den üblichen SaaS-Praktiken sind Jahrestarife, die nach Ablauf der 30-Tage-Frist gekündigt werden, für die nicht genutzten Monate nicht erstattungsfähig.",
-    "q6": "Gilt die 30-tägige Garantie auch für Jahrestarife?",
-    "a6": "Ja. Unabhängig davon, ob Sie sich für die monatliche oder jährliche Abrechnung entscheiden, haben Sie ab dem Erstkauf volle 30 Tage Zeit, um eine Rückerstattung zu beantragen. Wenn Sie einen Jahrestarif innerhalb der 30-Tage-Frist kündigen, erhalten Sie eine vollständige Rückerstattung der jährlichen Gebühr."
+    "a5": "Jeder ICanCall-Tarif enthält eine 14-tägige Service-Garantie. Wenn ICanCall nicht wie versprochen funktioniert (zum Beispiel erreichen Anrufe an Ihre Nummer Ihre Kontakte nicht, oder wir können keine Nummer mit der von Ihnen gewählten Vorwahl aktivieren), wenden Sie sich innerhalb von 14 Tagen nach Ihrem ersten Kauf unter support@icancall.co an unser Support-Team. Wir versuchen zuerst, das Problem zu beheben. Gelingt uns das nicht innerhalb von 3 Werktagen, erstatten wir Ihnen den vollen Betrag.\n\nBei bloßer Meinungsänderung oder für einen Service, der wie beschrieben funktioniert, gibt es keine Erstattung. Sie können jederzeit über das Dashboard Ihres Kontos kündigen. Ihr Service läuft bis zum Ende des aktuellen Abrechnungszeitraums weiter, danach wird nichts mehr abgebucht.",
+    "q6": "Gilt die 14-tägige Garantie auch für Jahrestarife?",
+    "a6": "Ja. Monats- und Jahrestarife haben ab Ihrem ersten Kauf dieselbe 14-tägige Service-Garantie. Funktioniert der Service nicht und kann unser Support-Team das Problem nicht beheben, erstatten wir Ihnen den vollen Jahresbetrag. Bei Meinungsänderung oder für ungenutzte Monate werden Jahrestarife nicht erstattet."
   },
   "cta": {
     "title": "Sind Sie bereit, Ihre Familie abzusichern?",
@@ -3545,6 +3554,7 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "dueToday": "Heute fällig",
     "orderSecured": "Geschützt durch starke Bankenverschlüsselung. Die Kasse öffnet sich in einem sicheren Fenster.",
     "btnPay": "Einrichtung abschließen & zahlen",
+    "refundNote": "Rückerstattung: Wenn iCanCall nicht funktioniert und unser Support-Team das Problem nicht beheben kann, erhalten Sie den vollen Betrag zurück. Wenden Sie sich einfach innerhalb von 14 Tagen nach dem Kauf an den Support. Bei bloßer Meinungsänderung gibt es keine Erstattung.",
     "successTitle": "Alles bereit, {name}!",
     "successSubtitle": "Ihr {planName}-Tarif ist aktiv und Ihre Nummer ist freigeschaltet. Letzter Schritt: Richten Sie Ihren Kreis ein, damit Anrufe immer jemanden erreichen.",
     "successSubtitlePlural": "Ihr {planName}-Tarif ist aktiv und Ihre Nummern sind freigeschaltet. Letzter Schritt: Richten Sie Ihren Kreis ein, damit Anrufe immer jemanden erreichen.",
@@ -3610,9 +3620,9 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "lead": "iCanCall collega i tuoi familiari al cerchio dei caregiver senza schermi, app o dispositivi complessi. A partire da $14.99/mese.",
     "getStarted": "Inizia ora",
     "seeHow": "Scopri come funziona",
-    "guarantee": "30 giorni di garanzia soddisfatti o rimborsati",
+    "guarantee": "Garanzia di servizio di 14 giorni",
     "secure": "Inoltro sicuro e privato",
-    "trustLine": "Garanzia di rimborso di 30 giorni · Cancella in qualsiasi momento · Nessun vincolo"
+    "trustLine": "Garanzia di servizio di 14 giorni · Cancella in qualsiasi momento · Nessun vincolo"
   },
   "stats": {
     "routed": "Chiamate inoltrate",
@@ -3720,9 +3730,9 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "cFeat3": "Tutte le modalità di inoltro + pianificazione",
     "cFeat4": "150 Minuti Vocali Condivisi",
     "cFeat5": "2 Accessi Caregiver",
-    "guaranteeTitle": "Garanzia di Rimborso di 30 Giorni",
-    "guaranteeDesc": "Prova ICanCall senza rischi per 30 giorni. Se non fa al caso vostro, vi rimborseremo l'intero importo: senza domande, senza costi di riassortimento e nessun hardware da restituire.",
-    "shortGuarantee": "Garanzia di rimborso di 30 giorni"
+    "guaranteeTitle": "Garanzia di Servizio di 14 Giorni",
+    "guaranteeDesc": "Se iCanCall non funziona e il nostro team di assistenza non riesce a risolvere il problema, ricevi un rimborso completo. Basta contattare l'assistenza entro 14 giorni dall'acquisto. Non sono previsti rimborsi per semplice ripensamento.",
+    "shortGuarantee": "Garanzia di servizio di 14 giorni"
   },
   "testimonials": {
     "stars": "★★★★★",
@@ -3747,9 +3757,9 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "q4": "Ci sono costi di attivazione o vincoli di durata contrattuale?",
     "a4": "No. Nessun costo di setup, spese nascoste o contratti a termine. Tutti i piani vengono fatturati su base mensile (o annuale) e puoi disdire in qualsiasi momento con un clic nel pannello.",
     "q5": "Qual è la vostra politica di rimborso?",
-    "a5": "Ogni piano ICanCall include una garanzia di rimborso di 30 giorni. Se ICanCall non dovesse fare al caso vostro entro i primi 30 giorni dall'inizio dell'abbonamento, contattateci all'indirizzo support@icancall.co e procederemo a un rimborso completo, senza fare domande. Non ci sono spese di riassortimento, nessun hardware da restituire e nessuna clausola nascosta.\n\nDopo il periodo di 30 giorni, potete annullare l'abbonamento in qualsiasi momento dal pannello di controllo dell'account. Il servizio continuerà fino alla fine del periodo di fatturazione in corso e non vi verranno addebitati altri costi. I piani annuali annullati dopo il periodo di 30 giorni non sono rimborsabili per i mesi non utilizzati, in linea con la prassi standard del settore SaaS.",
-    "q6": "La garanzia di 30 giorni si applica ai piani annuali?",
-    "a6": "Sì. Sia che scegliate la fatturazione mensile o annuale, avete a disposizione ben 30 giorni dall'acquisto iniziale per richiedere un rimborso. Se annullate un piano annuale entro il periodo di 30 giorni, riceverete un rimborso completo dell'importo annuale addebitato."
+    "a5": "Ogni piano ICanCall include una garanzia di servizio di 14 giorni. Se ICanCall non funziona come promesso (ad esempio, le chiamate al tuo numero non raggiungono i tuoi contatti, oppure non riusciamo ad attivare un numero con il prefisso che hai scelto), contatta il nostro team di assistenza a support@icancall.co entro 14 giorni dal primo acquisto. Per prima cosa cercheremo di risolvere il problema. Se non ci riusciamo entro 3 giorni lavorativi, ti rimborseremo l'intero importo.\n\nNon sono previsti rimborsi per semplice ripensamento né per un servizio che funziona come descritto. Puoi disdire quando vuoi dalla dashboard del tuo account. Il servizio resta attivo fino alla fine del periodo di fatturazione in corso e non ti verrà addebitato altro.",
+    "q6": "La garanzia di 14 giorni si applica ai piani annuali?",
+    "a6": "Sì. I piani mensili e annuali hanno la stessa garanzia di servizio di 14 giorni dal primo acquisto. Se il servizio non funziona e il nostro team di assistenza non riesce a risolvere il problema, riceverai il rimborso completo dell'importo annuale. I piani annuali non sono rimborsati per ripensamento né per i mesi non utilizzati."
   },
   "cta": {
     "title": "Pronto a proteggere la tua famiglia?",
@@ -3901,6 +3911,7 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "dueToday": "Dovuto oggi",
     "orderSecured": "Protetto con crittografia bancaria. Il pagamento si aprirà in una finestra sicura.",
     "btnPay": "Completa configurazione e paga",
+    "refundNote": "Politica di rimborso: Se iCanCall non funziona e il nostro team di assistenza non riesce a risolvere il problema, ricevi un rimborso completo. Basta contattare l'assistenza entro 14 giorni dall'acquisto. Non sono previsti rimborsi per semplice ripensamento.",
     "successTitle": "È tutto pronto, {name}!",
     "successSubtitle": "Il tuo piano {planName} è attivo e il tuo numero è attivo. Un'ultima cosa: configura la cerchia di fiducia per far sì che le chiamate raggiungano sempre qualcuno.",
     "successSubtitlePlural": "Il tuo piano {planName} è attivo e i tuoi numeri sono attivi. Un'ultima cosa: configura la cerchia di fiducia per far sì que le chiamate raggiungano sempre qualcuno.",
@@ -3966,9 +3977,9 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "lead": "iCanCall은 별도의 화면 조작, 앱 다운로드, 혹은 복잡한 기기 없이 부모님과 아이들을 보호자 그룹에 바로 연결합니다. 월 $14.99부터 시작.",
     "getStarted": "지금 시작하기",
     "seeHow": "이용 방법 보기",
-    "guarantee": "30일 안심 환불 보장",
+    "guarantee": "14일 서비스 보장",
     "secure": "개인정보 보호 및 안전한 통화 라우팅",
-    "trustLine": "30일 환불 보장 · 언제든지 해지 가능 · 위약금/약정 없음"
+    "trustLine": "14일 서비스 보장 · 언제든지 해지 가능 · 위약금/약정 없음"
   },
   "stats": {
     "routed": "연결 완료된 전화",
@@ -4076,9 +4087,9 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "cFeat3": "모든 라우팅 모드 + 스케줄 설정",
     "cFeat4": "공유 음성 통화 150분 제공",
     "cFeat5": "보호자 로그인 계정 2개",
-    "guaranteeTitle": "30일 이내 100% 환불 보장",
-    "guaranteeDesc": "ICanCall을 30일 동안 수수료나 위험 부담 없이 체험해 보세요. 귀하의 가족에게 맞지 않는다면 전액 환불해 드립니다 — 묻지도 따지지도 않고, 어떠한 반품 수수료나 하드웨어 반납 절차도 없습니다.",
-    "shortGuarantee": "30일 이내 환불 보장"
+    "guaranteeTitle": "14일 서비스 보장",
+    "guaranteeDesc": "iCanCall이 작동하지 않고 지원팀이 해결하지 못하면 전액 환불해 드립니다. 구매 후 14일 이내에 지원팀에 연락해 주세요. 단순 변심에 의한 환불은 제공되지 않습니다.",
+    "shortGuarantee": "14일 서비스 보장"
   },
   "testimonials": {
     "stars": "★★★★★",
@@ -4103,9 +4114,9 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "q4": "초기 가입비나 의무 약정 기간이 있나요?",
     "a4": "아니요. 가입비, 번호 활성화 비용, 그리고 위약금이 전혀 없습니다. 모든 플랜은 월별 혹은 연간 단위로 결제되며, 언제든지 대시보드에서 원클릭으로 정기 결제를 중단하실 수 있습니다.",
     "q5": "환불 규정이 어떻게 되나요?",
-    "a5": "ICanCall의 모든 플랜에는 30일 이내 환불 보장 정책이 적용됩니다. 구독 후 첫 30일 이내에 서비스가 귀하의 가족에게 적합하지 않다고 판단되시면 support@icancall.co로 문의해 주세요. 묻지도 따지지도 않고 전액 환불해 드립니다. 반품 수수료나 반납해야 할 하드웨어도 없으며, 어떠한 조건도 없습니다.\n\n30일의 보증 기간이 지난 후에는 계정 대시보드에서 언제든지 구독을 취소하실 수 있습니다. 이 경우 현재 결제 주기가 끝날 때까지 서비스가 유지되며 다음 주기부터는 추가 결제되지 않습니다. 30일 이후 연간 플랜을 해지하시는 경우, 일반적인 SaaS 업계 기준에 따라 미사용 월에 대한 환불은 불가합니다.",
-    "q6": "30일 환불 보장 정책이 연간 플랜에도 적용되나요?",
-    "a6": "네, 적용됩니다. 월간 또는 연간 결제 방식에 관계없이 처음 구매한 날로부터 30일 이내에 환불을 요청하실 수 있습니다. 30일 이내에 연간 플랜을 취소하시는 경우 결제된 연간 요금 전액을 환불받으실 수 있습니다."
+    "a5": "모든 ICanCall 요금제에는 14일 서비스 보장이 포함됩니다. ICanCall이 약속대로 작동하지 않는 경우(예: 내 번호로 걸려 온 전화가 연락처에 연결되지 않거나, 선택한 지역번호로 번호를 개통할 수 없는 경우) 첫 구매 후 14일 이내에 support@icancall.co로 지원팀에 연락해 주세요. 먼저 문제 해결을 위해 노력하겠습니다. 영업일 기준 3일 이내에 해결하지 못하면 전액 환불해 드립니다.\n\n단순 변심이나 설명대로 정상 작동하는 서비스에 대해서는 환불되지 않습니다. 계정 대시보드에서 언제든 해지할 수 있습니다. 서비스는 현재 청구 기간이 끝날 때까지 유지되며, 이후에는 더 이상 요금이 청구되지 않습니다.",
+    "q6": "14일 서비스 보장이 연간 플랜에도 적용되나요?",
+    "a6": "네. 월간 및 연간 요금제 모두 첫 구매일로부터 동일한 14일 서비스 보장이 적용됩니다. 서비스가 작동하지 않고 지원팀이 해결하지 못하면 연간 요금 전액을 환불해 드립니다. 연간 요금제는 단순 변심이나 사용하지 않은 개월에 대해 환불되지 않습니다."
   },
   "cta": {
     "title": "오늘 바로 우리 가족 안심망을 연결해 보세요",
@@ -4257,6 +4268,7 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
     "dueToday": "오늘 결제 금액",
     "orderSecured": "금융권 표준 암호화 기술로 보호됩니다. 결제 창은 안전한 새 창에서 열립니다.",
     "btnPay": "세팅 완료 및 결제하기",
+    "refundNote": "환불 정책: iCanCall이 작동하지 않고 지원팀이 해결하지 못하면 전액 환불해 드립니다. 구매 후 14일 이내에 지원팀에 연락해 주세요. 단순 변심에 의한 환불은 제공되지 않습니다.",
     "successTitle": "모든 설정이 끝났습니다, {name} 님!",
     "successSubtitle": "{planName} 플랜이 성공적으로 활성화되었으며 번호가 즉시 개통되었습니다. 마지막 단계: 언제든 가족의 전화를 받을 수 있도록 비상 연락망(서클)을 등록해 주세요.",
     "successSubtitlePlural": "{planName} 플랜이 성공적으로 활성화되었으며 번호들이 즉시 개통되었습니다. 마지막 단계: 언제든 가족의 전화를 받을 수 있도록 비상 연락망(서클)을 등록해 주세요.",
