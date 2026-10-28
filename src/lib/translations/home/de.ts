@@ -397,11 +397,11 @@ const t: HomeTranslations = {
       },
       {
         q: "Wie sieht es mit Erstattungen aus?",
-        a: "Jeder Tarif hat eine 14-tägige Service-Garantie. Wenn iCanCall nicht funktioniert, wenden Sie sich innerhalb von 14 Tagen nach dem Kauf an den Support. Können wir das Problem nicht beheben, erhalten Sie den vollen Betrag zurück. Bei bloßer Meinungsänderung gibt es keine Erstattung. Sie können jederzeit über Ihr Dashboard kündigen, und der Service läuft bis zum Ende Ihres Abrechnungszeitraums weiter.",
+        a: "Jeder Tarif hat eine 14-tägige Service-Garantie. Wenn iCanCall nicht funktioniert, wenden Sie sich innerhalb von 14 Tagen nach dem Kauf an den Support. Können wir das Problem nicht beheben, erhalten Sie den vollen Betrag zurück. Wenn Sie es sich bei einem Monatstarif anders überlegen, wenden Sie sich innerhalb von 14 Tagen an den Support, und wir erstatten Ihnen die Hälfte Ihres ersten Monats. Sie können jederzeit über Ihr Dashboard kündigen, und der Service läuft bis zum Ende Ihres Abrechnungszeitraums weiter.",
       },
       {
         q: "Gilt die Garantie auch für Jahrestarife?",
-        a: "Ja. Jahrestarife haben dieselbe 14-tägige Service-Garantie. Bei Meinungsänderung oder für ungenutzte Monate gibt es keine Erstattung.",
+        a: "Ja. Jahrestarife haben dieselbe 14-tägige Service-Garantie. Zusätzlich können Sie einen Jahrestarif innerhalb von 14 Tagen nach dem Kauf aus beliebigem Grund kündigen. Wir erstatten dann den Jahresbetrag abzüglich des Preises für einen Monat Ihres Tarifs. Nach 14 Tagen werden ungenutzte Monate nicht erstattet.",
       },
       {
         q: "Sind die Daten meiner Familie geschützt?",

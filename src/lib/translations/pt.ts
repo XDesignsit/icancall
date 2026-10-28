@@ -160,7 +160,7 @@ const t: HomepageTranslations = {
   "cFeat4": "150 Minutos de Voz Compartilhados",
   "cFeat5": "2 Logins de Cuidador",
   "guaranteeTitle": "Garantia de Serviço de 14 Dias",
-  "guaranteeDesc": "Se o iCanCall não funcionar e nossa equipe de suporte não conseguir resolver, você recebe o reembolso integral. Basta falar com o suporte em até 14 dias após a compra. Não há reembolso por mudança de ideia.",
+  "guaranteeDesc": "Se o iCanCall não funcionar e nossa equipe de suporte não conseguir resolver, você recebe o reembolso integral. Basta falar com o suporte em até 14 dias após a compra. Se você mudar de ideia em até 14 dias, reembolsamos metade do seu primeiro mês em um plano mensal, ou a cobrança anual menos um mês em um plano anual.",
   "shortGuarantee": "Garantia de serviço de 14 dias"
 },
 "testimonials": {
@@ -186,9 +186,9 @@ const t: HomepageTranslations = {
   "q4": "Existe taxa de ativação ou fidelidade contratual?",
   "a4": "Não. Não há taxas ocultas, custos de adesão ou prazos de carência. Os planos são cobrados mensal ou anualmente e você cancela com um clique no painel a qualquer momento.",
   "q5": "Qual é a vossa política de reembolso?",
-  "a5": "Todos os planos ICanCall incluem uma garantia de serviço de 14 dias. Se o ICanCall não funcionar como prometido (por exemplo, as ligações para o seu número não chegam aos seus contatos, ou não conseguimos ativar um número no código de área que você escolheu), fale com nossa equipe de suporte em support@icancall.co em até 14 dias após a sua primeira compra. Primeiro, tentaremos resolver o problema. Se não conseguirmos resolver em 3 dias úteis, faremos o reembolso integral.\n\nNão há reembolso por mudança de ideia nem por um serviço que funciona conforme descrito. Você pode cancelar quando quiser pelo painel da sua conta. O serviço continua até o fim do período de cobrança atual, e você não será cobrado novamente.",
+  "a5": "Todos os planos ICanCall incluem uma garantia de serviço de 14 dias. Se o ICanCall não funcionar como prometido (por exemplo, as ligações para o seu número não chegam aos seus contatos), fale com nossa equipe de suporte em support@icancall.co em até 14 dias após a sua primeira compra. Primeiro, tentaremos resolver o problema. Se não conseguirmos resolver em 3 dias úteis, faremos o reembolso integral.\n\nSe você simplesmente mudar de ideia, fale com support@icancall.co em até 14 dias após a sua primeira compra e reembolsaremos metade do seu primeiro mês em um plano mensal (os planos anuais estão explicados abaixo). Depois de 14 dias, os pagamentos não são reembolsados. Você pode cancelar quando quiser pelo painel da sua conta. O serviço continua até o fim do período de cobrança atual, e você não será cobrado novamente.",
   "q6": "A garantia de 14 dias aplica-se aos planos anuais?",
-  "a6": "Sim. Os planos mensais e anuais têm a mesma garantia de serviço de 14 dias a partir da sua primeira compra. Se o serviço não funcionar e nossa equipe de suporte não conseguir resolver, você receberá o reembolso integral da cobrança anual. Os planos anuais não são reembolsados por mudança de ideia nem pelos meses não usados."
+  "a6": "Sim, e os planos anuais têm uma opção extra. Se o serviço não funcionar e nossa equipe de suporte não conseguir resolver, você receberá o reembolso integral da cobrança anual. Se você simplesmente mudar de ideia, fale com support@icancall.co em até 14 dias após a sua primeira compra e reembolsaremos a cobrança anual, menos o preço de um mês do seu plano, que cobre o seu número e os minutos já usados. Depois de 14 dias, os planos anuais não são reembolsados pelos meses não usados."
 },
 "cta": {
   "title": "Pronto para proteger seus familiares?",
@@ -340,7 +340,7 @@ const t: HomepageTranslations = {
   "dueToday": "Total hoje",
   "orderSecured": "Protegido com encriptação bancária. O pagamento abrirá numa janela segura.",
   "btnPay": "Concluir configuração e pagar",
-  "refundNote": "Política de reembolso: Se o iCanCall não funcionar e nossa equipe de suporte não conseguir resolver, você recebe o reembolso integral. Basta falar com o suporte em até 14 dias após a compra. Não há reembolso por mudança de ideia.",
+  "refundNote": "Política de reembolso: Se o iCanCall não funcionar e nossa equipe de suporte não conseguir resolver, você recebe o reembolso integral. Basta falar com o suporte em até 14 dias após a compra. Se você mudar de ideia em até 14 dias, reembolsamos metade do seu primeiro mês em um plano mensal, ou a cobrança anual menos um mês em um plano anual.",
   "successTitle": "Está tudo pronto, {name}!",
   "successSubtitle": "O seu plano {planName} está ativo e o seu número está pronto. Uma última coisa: configure o seu círculo de confiança para que as chamadas sempre cheguem a alguém.",
   "successSubtitlePlural": "O seu plano {planName} está ativo e os seus números estão prontos. Uma última coisa: configure o seu círculo de confiança para que as chamadas sempre cheguem a alguém.",

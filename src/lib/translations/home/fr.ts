@@ -396,11 +396,11 @@ const t: HomeTranslations = {
       },
       {
         q: "Quelle est votre politique de remboursement ?",
-        a: "Chaque forfait bénéficie d’une garantie de service de 14 jours. Si iCanCall ne fonctionne pas, contactez l’assistance dans les 14 jours suivant votre achat. Si nous ne pouvons pas résoudre le problème, vous êtes remboursé intégralement. Aucun remboursement n’est accordé en cas de simple changement d’avis. Vous pouvez résilier à tout moment depuis votre tableau de bord, et le service reste actif jusqu’à la fin de votre période de facturation.",
+        a: "Chaque forfait bénéficie d’une garantie de service de 14 jours. Si iCanCall ne fonctionne pas, contactez l’assistance dans les 14 jours suivant votre achat. Si nous ne pouvons pas résoudre le problème, vous êtes remboursé intégralement. Si vous changez d’avis sur un forfait mensuel, contactez l’assistance dans les 14 jours et nous vous remboursons la moitié de votre premier mois. Vous pouvez résilier à tout moment depuis votre tableau de bord, et le service reste actif jusqu’à la fin de votre période de facturation.",
       },
       {
         q: "La garantie couvre-t-elle les forfaits annuels ?",
-        a: "Oui. Les forfaits annuels bénéficient de la même garantie de service de 14 jours. Ils ne sont pas remboursés en cas de changement d’avis ni pour les mois non utilisés.",
+        a: "Oui. Les forfaits annuels bénéficient de la même garantie de service de 14 jours. Vous pouvez aussi résilier un forfait annuel pour n’importe quelle raison dans les 14 jours suivant votre achat : nous vous remboursons le montant annuel, moins le prix d’un mois de votre forfait. Après 14 jours, les mois non utilisés ne sont pas remboursés.",
       },
       {
         q: "Les informations de ma famille restent-elles privées ?",
