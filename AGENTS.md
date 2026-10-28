@@ -12,7 +12,7 @@ Next.js app (Vercel, Supabase, Stripe billing, Twilio/Telnyx voice) plus standal
 `npm run dev` · `npm run lint` · `npx tsc --noEmit` · `npm run build` (CI runs lint, tsc and build).
 
 ## Standalone HTML Pages & Syncing
-- This project serves standalone HTML copies of its main marketing landing pages (Seniors, Parents, Caregivers, Main Landing) and signup wizard. They are mirrored in three sync directories (repo root, pCloud, Google Drive).
+- This project serves standalone HTML copies of its main marketing landing pages (Seniors, Parents, Caregivers, Pets, Main Landing) and signup wizard. They are mirrored in three sync directories (repo root, pCloud, Google Drive).
 - When renaming routes, editing links, or altering page copywriting: update the Next.js source (`src/app/`, `src/lib/translations.ts`) **and** the standalone HTML in all three locations, and repack any compiled React flows.
 - The Main Landing standalone is generated, not hand-edited: after any homepage change run `npm run build && node scripts/build-standalone-home.mjs`, then copy the file to the pCloud and Google Drive directories.
 - Directory paths, link-patching and repack steps: [docs/guides/standalone-html-sync.md](docs/guides/standalone-html-sync.md).
