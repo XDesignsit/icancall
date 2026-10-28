@@ -28,6 +28,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.8,
     },
     {
+      url: `${BASE}/pets`,
+      changeFrequency: "monthly",
+      priority: 0.8,
+    },
+    {
       url: `${BASE}/comparison-chart`,
       changeFrequency: "monthly",
       priority: 0.6,
