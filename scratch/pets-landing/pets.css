@@ -19,20 +19,3 @@
 .successor li svg { width: 19px; height: 19px; flex: none; margin-top: 2px; color: var(--teal-deep); }
 @media (max-width: 760px) { .successor { grid-template-columns: 1fr; padding: 28px 22px; } }
 
-.join {
-  max-width: 640px; margin: 48px auto 0; padding: 34px 30px; text-align: center;
-  border-radius: var(--r-lg); background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow-sm);
-}
-.join h3 { font-size: 1.35rem; margin-bottom: 6px; }
-.join p { color: var(--ink-soft); }
-.join-form { display: flex; gap: 10px; margin-top: 22px; }
-.join-form input {
-  flex: 1; min-width: 0; font: inherit; font-size: 1rem; padding: 14px 20px;
-  border-radius: 999px; border: 1px solid var(--line); background: var(--bg); color: var(--ink);
-}
-.join-form input:focus { outline: 2px solid var(--blue); outline-offset: 2px; }
-.join-form .btn:disabled { opacity: 0.6; cursor: wait; }
-.join .join-msg { margin-top: 12px; min-height: 1.4em; font-size: 0.92rem; }
-.join .join-msg.ok { color: oklch(0.42 0.13 158); }
-.join .join-msg.err { color: oklch(0.50 0.18 25); }
-@media (max-width: 520px) { .join-form { flex-direction: column; } }

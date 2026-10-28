@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { isMock, supabase } from "@/lib/supabase";
 import { isEndedStatus } from "@/lib/subscriptionEnd";
-import { currentMinutesCycleStart, resetMinutesPool } from "@/lib/minutesCycle";
+import { currentMinutesCycleStart, minutesCycleMonths, resetMinutesPool } from "@/lib/minutesCycle";
 
 type Settings = Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
 
@@ -47,7 +47,8 @@ export async function GET(req: NextRequest) {
       continue;
     }
 
-    const cycleStart = currentMinutesCycleStart(periodStart, now);
+    // Pet plans reset yearly (one-time terms rely on this job; Annual also gets its renewal invoice).
+    const cycleStart = currentMinutesCycleStart(periodStart, now, minutesCycleMonths(s));
     const handled = new Date(s.minutes_cycle_start || s.stripe_period_start).getTime();
     if (cycleStart.getTime() <= handled) continue;
 
@@ -60,7 +61,7 @@ export async function GET(req: NextRequest) {
       summary.skipped++;
       continue;
     }
-    console.log(`Monthly minutes reset for annual plan ${profile.id} (cycle from ${cycleStart.toISOString()})`);
+    console.log(`Minutes reset for ${profile.id} (cycle from ${cycleStart.toISOString()})`);
     summary.reset++;
   }
 

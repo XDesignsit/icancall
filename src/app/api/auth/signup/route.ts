@@ -11,6 +11,7 @@ import { dashboardLink } from "@/lib/linkKinds";
 import { provisionNumber } from "@/lib/numbers";
 import { planConfig } from "@/lib/planConfig";
 import { activePlanForSubscription, isSimulatedBilling, verifyPlanCheckout, type VerifiedPlanPurchase } from "@/lib/stripe";
+import { isPetTerm, petCoverEndsAt, type PetTerm } from "@/lib/pets";
 
 const signupSchema = z.object({
   email: z.string().email(),
@@ -21,7 +22,9 @@ const signupSchema = z.object({
   numbers: z.array(z.union([z.string(), z.looseObject({ number: z.string() })])).optional(),
   captchaToken: z.string().optional(),
   smsConsent: z.boolean().optional(),
-  plan: z.enum(["essential", "pro", "careteam"]).optional(),
+  plan: z.enum(["essential", "pro", "careteam", "pets"]).optional(),
+  // Pet plans: which term (lib/pets). Only trusted where billing is simulated; otherwise the payment decides.
+  term: z.string().max(40).optional(),
   billing: z.enum(["monthly", "yearly"]).optional(),
   // The Stripe checkout this signup paid for (from /api/billing/checkout).
   checkoutId: z.string().max(200).optional(),
@@ -32,6 +35,7 @@ const PLAN_DETAILS = {
   essential: { name: "Essential Plan", lines: "1 Virtual Line", monthly: "$14.99", yearly: "$149" },
   pro: { name: "Pro Plan", lines: "2 Virtual Lines", monthly: "$24.99", yearly: "$249" },
   careteam: { name: "Care Team Plan", lines: "5 Virtual Lines", monthly: "$49.99", yearly: "$499" },
+  pets: { name: "Pets Plan", lines: "1 Lost-Pet Line", monthly: "", yearly: "$29" },
 } as const;
 
 export async function POST(request: Request) {
@@ -47,7 +51,7 @@ export async function POST(request: Request) {
     // Only retain the phone number when the user actually opted in to SMS
     const rawNormalized = smsPhone.length === 10 ? `+1${smsPhone}` : smsPhone.length === 11 ? `+${smsPhone}` : "";
     const normalizedSmsPhone = smsConsent ? rawNormalized : "";
-    let plan = parsed.data.plan || (numbers && numbers.length > 0 ? "pro" : "essential");
+    let plan: keyof typeof PLAN_DETAILS = parsed.data.plan || (numbers && numbers.length > 0 ? "pro" : "essential");
     let billingCycle = billing || "monthly";
 
     // 1. Check if user already has an active session cookie (e.g. logged in via Google)
@@ -87,7 +91,14 @@ export async function POST(request: Request) {
         // Resuming an account whose checkout the Stripe webhook already recorded.
         const { data: paidProfile } = await supabase.from("profiles").select("settings").eq("id", userId).maybeSingle();
         const knownSub = paidProfile?.settings?.stripe_subscription_id;
-        purchase = typeof knownSub === "string" && knownSub ? await activePlanForSubscription(knownSub) : null;
+        const knownPetCheckout = paidProfile?.settings?.petCheckoutId;
+        if (typeof knownSub === "string" && knownSub) {
+          purchase = await activePlanForSubscription(knownSub);
+        } else if (typeof knownPetCheckout === "string" && knownPetCheckout) {
+          // A one-time pet term has no subscription: re-check the checkout it was paid with.
+          const check = await verifyPlanCheckout(knownPetCheckout, { userId, email: ownerEmail });
+          purchase = check.ok ? check.purchase : null;
+        }
       }
       if (!purchase) {
         return NextResponse.json({ error: "We couldn't find a completed payment for this signup. Please complete checkout to continue." }, { status: 402 });
@@ -107,6 +118,20 @@ export async function POST(request: Request) {
         }
       }
 
+      // One-time pet terms have no subscription: the checkout itself opens one account.
+      if (purchase.checkoutId) {
+        const { data: holders } = await supabase
+          .from("profiles")
+          .select("id, email")
+          .eq("settings->>petCheckoutId", purchase.checkoutId);
+        const taken = (holders || []).some((h: { id: string; email: string | null }) =>
+          userId ? h.id !== userId : (h.email || "").toLowerCase() !== email.toLowerCase());
+        if (taken) {
+          console.error(`Signup for ${ownerEmail} refused: checkout ${purchase.checkoutId} already belongs to another account`);
+          return NextResponse.json({ error: "This payment has already been used to open an account." }, { status: 409 });
+        }
+      }
+
       plan = purchase.plan;
       billingCycle = purchase.billingCycle;
     }
@@ -122,6 +147,22 @@ export async function POST(request: Request) {
     // recorded here. Without it the first renewal looks like a first payment
     // and the minute pool would not reset.
     const periodIds = purchase?.periodStart ? { stripe_period_start: purchase.periodStart } : {};
+
+    // Pet plans: the term and its dates (lib/pets). Every pet term counts its
+    // 30 minutes per year from the purchase, so the period start is always set.
+    let petIds: Record<string, unknown> = {};
+    if (plan === "pets") {
+      const term: PetTerm = purchase?.petTerm ?? (isPetTerm(parsed.data.term) ? parsed.data.term : "annual");
+      const purchasedAt = purchase?.periodStart || new Date().toISOString();
+      petIds = {
+        stripe_period_start: purchasedAt,
+        petTerm: term,
+        petPurchasedAt: purchasedAt,
+        petCoverEndsAt: petCoverEndsAt(term, new Date(purchasedAt)),
+        ...(purchase?.checkoutId ? { petCheckoutId: purchase.checkoutId } : {}),
+      };
+      billingCycle = "yearly";
+    }
 
     if (userId) {
       // Already authenticated (Google, or a PIN login that landed on an
@@ -154,6 +195,7 @@ export async function POST(request: Request) {
             plan,
             billingCycle,
             ...stripeIds,
+            ...petIds,
             addons: existingSettings.addons || { extraNumbers: 0, minuteBlocks: 0, usedMin: 0, rolloverMin: 0 },
           }
         });
@@ -228,6 +270,7 @@ export async function POST(request: Request) {
             plan,
             billingCycle,
             ...stripeIds,
+            ...petIds,
             addons: { extraNumbers: 0, minuteBlocks: 0, usedMin: 0, rolloverMin: 0 },
           }
         });
@@ -257,18 +300,19 @@ export async function POST(request: Request) {
         phoneLinesRows.push({
           user_id: userId,
           number: e164,
-          name: "My Priority Line",
+          name: plan === "pets" ? "Lost-Pet Line" : "My Priority Line",
           type: "Trusted Contact",
           contacts: [
             {
               id: 1,
               name,
               phone: rawNormalized, // the caregiver's own phone, regardless of SMS consent
-              rel: "Primary Caregiver",
+              rel: plan === "pets" ? "Owner" : "Primary Caregiver",
               available: true,
             }
           ],
-          settings: { telephony: outcome.record },
+          // Pet lines only ever use the caller menu.
+          settings: { telephony: outcome.record, ...(plan === "pets" ? { mode: "menu" } : {}) },
         });
       }
 

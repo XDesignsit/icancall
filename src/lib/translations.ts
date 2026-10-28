@@ -355,10 +355,67 @@ export interface HomepageTranslations {
     specialAbilitiesParent: string;
     everythingYouMightAsk: string;
   };
+  /** The signup wizard's pet plan step (lib/pets). */
+  pets?: {
+    title: string;
+    annualName: string;
+    lifetimeName: string;
+    smallBirdName: string;
+    parrot10Name: string;
+    parrot20Name: string;
+    annualDesc: string;
+    lifetimeDesc: string;
+    smallBirdDesc: string;
+    parrot10Desc: string;
+    parrot20Desc: string;
+    perYear: string;
+    oneTime: string;
+    annualNote: string;
+    lifetimeNote: string;
+    smallBirdNote: string;
+    parrot10Note: string;
+    parrot20Note: string;
+    feat1: string;
+    feat2: string;
+    feat3: string;
+    feat4: string;
+    feat5: string;
+    payOnceTag: string;
+    largeParrotsTag: string;
+    subtitle: string;
+  };
 }
 
 export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi" | "pt" | "de" | "it" | "ko", HomepageTranslations> = {
   en: {
+  "pets": {
+    "title": "Choose your pet plan.",
+    "annualName": "Annual",
+    "lifetimeName": "Lifetime",
+    "smallBirdName": "Small Bird Lifetime",
+    "parrot10Name": "Parrot 10-Year",
+    "parrot20Name": "Parrot 20-Year",
+    "annualDesc": "One lost-pet number for every pet in your home.",
+    "lifetimeDesc": "One payment for one pet's whole life.",
+    "smallBirdDesc": "Budgies, lovebirds, parrotlets and cockatiels.",
+    "parrot10Desc": "African greys, Amazons, cockatoos and macaws.",
+    "parrot20Desc": "The longest cover for long-lived parrots.",
+    "perYear": "/ year",
+    "oneTime": "one time",
+    "annualNote": "Billed once a year",
+    "lifetimeNote": "For your pet's life, up to 20 years",
+    "smallBirdNote": "For your bird's life, up to 20 years",
+    "parrot10Note": "10 years of service, then renew",
+    "parrot20Note": "20 years of service, then renew",
+    "feat1": "Caller menu with up to 6 contacts",
+    "feat2": "Lost-pet greeting on every call",
+    "feat3": "Voicemail with text and email alerts",
+    "feat4": "30 minutes of calls per year",
+    "feat5": "Works with any microchip registry",
+    "payOnceTag": "Pay once",
+    "largeParrotsTag": "Large parrots",
+    "subtitle": "Pay once a year, or once for your pet's whole life. There are no monthly plans and no setup fees."
+  },
   "waitlist": {
     "launchingSoon": "Launching soon · Private early access",
     "beFirstInLine": "Be first",
@@ -716,6 +773,34 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
   }
 },
   es: {
+  "pets": {
+    "title": "Elija su plan para mascotas.",
+    "annualName": "Anual",
+    "lifetimeName": "Vitalicio",
+    "smallBirdName": "Vitalicio Aves Pequeñas",
+    "parrot10Name": "Loro 10 Años",
+    "parrot20Name": "Loro 20 Años",
+    "annualDesc": "Un número para mascotas perdidas para todas las mascotas de su hogar.",
+    "lifetimeDesc": "Un solo pago por toda la vida de una mascota.",
+    "smallBirdDesc": "Periquitos, inseparables, cotorritas y cacatúas ninfa.",
+    "parrot10Desc": "Loros grises africanos, amazonas, cacatúas y guacamayos.",
+    "parrot20Desc": "La cobertura más larga para loros longevos.",
+    "perYear": "/ año",
+    "oneTime": "pago único",
+    "annualNote": "Facturado una vez al año",
+    "lifetimeNote": "Durante la vida de su mascota, hasta 20 años",
+    "smallBirdNote": "Durante la vida de su ave, hasta 20 años",
+    "parrot10Note": "10 años de servicio, luego se renueva",
+    "parrot20Note": "20 años de servicio, luego se renueva",
+    "feat1": "Menú de llamadas con hasta 6 contactos",
+    "feat2": "Saludo de mascota perdida en cada llamada",
+    "feat3": "Buzón de voz con alertas por mensaje de texto y correo",
+    "feat4": "30 minutos de llamadas al año",
+    "feat5": "Funciona con cualquier registro de microchips",
+    "payOnceTag": "Pago único",
+    "largeParrotsTag": "Loros grandes",
+    "subtitle": "Pague una vez al año, o una sola vez por toda la vida de su mascota. No hay planes mensuales ni tarifas de configuración."
+  },
   "waitlist": {
     "launchingSoon": "Próximo lanzamiento · Acceso anticipado privado",
     "beFirstInLine": "Sé el primero",
@@ -1073,6 +1158,34 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
   }
 },
   fr: {
+  "pets": {
+    "title": "Choisissez votre forfait pour animal.",
+    "annualName": "Annuel",
+    "lifetimeName": "À vie",
+    "smallBirdName": "À vie Petits oiseaux",
+    "parrot10Name": "Perroquet 10 ans",
+    "parrot20Name": "Perroquet 20 ans",
+    "annualDesc": "Un seul numéro pour animal perdu pour tous les animaux de votre foyer.",
+    "lifetimeDesc": "Un seul paiement pour toute la vie d'un animal.",
+    "smallBirdDesc": "Perruches ondulées, inséparables, touis et calopsittes.",
+    "parrot10Desc": "Gris du Gabon, amazones, cacatoès et aras.",
+    "parrot20Desc": "La couverture la plus longue pour les perroquets qui vivent longtemps.",
+    "perYear": "/ an",
+    "oneTime": "une fois",
+    "annualNote": "Facturé une fois par an",
+    "lifetimeNote": "Pour la vie de votre animal, jusqu'à 20 ans",
+    "smallBirdNote": "Pour la vie de votre oiseau, jusqu'à 20 ans",
+    "parrot10Note": "10 ans de service, puis renouvellement",
+    "parrot20Note": "20 ans de service, puis renouvellement",
+    "feat1": "Menu vocal avec jusqu'à 6 contacts",
+    "feat2": "Message d'accueil pour animal perdu à chaque appel",
+    "feat3": "Messagerie vocale avec alertes SMS et e-mail",
+    "feat4": "30 minutes d'appel par an",
+    "feat5": "Fonctionne avec tous les registres de puces",
+    "payOnceTag": "Paiement unique",
+    "largeParrotsTag": "Grands perroquets",
+    "subtitle": "Payez une fois par an, ou une seule fois pour toute la vie de votre animal. Aucun forfait mensuel et aucun frais d'activation."
+  },
   "waitlist": {
     "launchingSoon": "Lancement imminent · Accès anticipé privé",
     "beFirstInLine": "Soyez le premier",
@@ -1430,6 +1543,34 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
   }
 },
   ja: {
+  "pets": {
+    "title": "ペット用プランを選択してください。",
+    "annualName": "年払いプラン",
+    "lifetimeName": "生涯プラン",
+    "smallBirdName": "小型鳥 生涯プラン",
+    "parrot10Name": "インコ・オウム10年プラン",
+    "parrot20Name": "インコ・オウム20年プラン",
+    "annualDesc": "ご家庭のすべてのペットに、迷子用の番号を1つ。",
+    "lifetimeDesc": "1回のお支払いで、1匹のペットの生涯をカバー。",
+    "smallBirdDesc": "セキセイインコ、ボタンインコ、マメルリハ、オカメインコ。",
+    "parrot10Desc": "ヨウム、ボウシインコ、オウム、コンゴウインコ。",
+    "parrot20Desc": "長生きするインコ・オウムのための最長プラン。",
+    "perYear": "/ 年",
+    "oneTime": "1回のみ",
+    "annualNote": "年1回のお支払い",
+    "lifetimeNote": "ペットの生涯、最長20年",
+    "smallBirdNote": "鳥の生涯、最長20年",
+    "parrot10Note": "10年間のサービス、その後は更新",
+    "parrot20Note": "20年間のサービス、その後は更新",
+    "feat1": "最大6名の連絡先に対応する音声ダイヤルメニュー",
+    "feat2": "すべての通話で迷子ペット用の音声ガイダンス",
+    "feat3": "留守番電話（SMS・メール通知付き）",
+    "feat4": "年間30分の通話",
+    "feat5": "どのマイクロチップ登録機関にも対応",
+    "payOnceTag": "1回払い",
+    "largeParrotsTag": "大型インコ・オウム",
+    "subtitle": "お支払いは年に1回、またはペットの生涯分を1回だけ。月額プランも初期費用もありません。"
+  },
   "waitlist": {
     "launchingSoon": "まもなく開始 · 先行プライベートアクセス",
     "beFirstInLine": "一番乗りで",
@@ -1787,6 +1928,34 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
   }
 },
   zh: {
+  "pets": {
+    "title": "选择您的宠物套餐。",
+    "annualName": "按年付款套餐",
+    "lifetimeName": "终身套餐",
+    "smallBirdName": "小型鸟终身套餐",
+    "parrot10Name": "鹦鹉 10 年套餐",
+    "parrot20Name": "鹦鹉 20 年套餐",
+    "annualDesc": "一个走失宠物号码，覆盖家中所有宠物。",
+    "lifetimeDesc": "一次付款，覆盖一只宠物的一生。",
+    "smallBirdDesc": "虎皮鹦鹉、牡丹鹦鹉、太平洋鹦鹉和玄凤鹦鹉。",
+    "parrot10Desc": "非洲灰鹦鹉、亚马逊鹦鹉、凤头鹦鹉和金刚鹦鹉。",
+    "parrot20Desc": "为长寿鹦鹉提供最长保障。",
+    "perYear": "/ 年",
+    "oneTime": "一次性",
+    "annualNote": "每年结算一次",
+    "lifetimeNote": "适用于宠物一生，最长 20 年",
+    "smallBirdNote": "适用于鸟儿一生，最长 20 年",
+    "parrot10Note": "10 年服务，到期续费",
+    "parrot20Note": "20 年服务，到期续费",
+    "feat1": "交互语音菜单，最多 6 位联系人",
+    "feat2": "每通来电播放走失宠物语音引导",
+    "feat3": "语音信箱，附短信和邮件提醒",
+    "feat4": "每年 30 分钟通话时长",
+    "feat5": "适用于任何芯片登记机构",
+    "payOnceTag": "一次付清",
+    "largeParrotsTag": "大型鹦鹉",
+    "subtitle": "每年付款一次，或为宠物一生一次付清。没有月付套餐，也没有初装费。"
+  },
   "waitlist": {
     "launchingSoon": "即将推出 · 私人早期访问",
     "beFirstInLine": "抢先",
@@ -2144,6 +2313,34 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
   }
 },
   ar: {
+  "pets": {
+    "title": "اختر خطة حيوانك الأليف.",
+    "annualName": "الخطة السنوية",
+    "lifetimeName": "خطة مدى الحياة",
+    "smallBirdName": "خطة مدى الحياة للطيور الصغيرة",
+    "parrot10Name": "خطة الببغاء 10 سنوات",
+    "parrot20Name": "خطة الببغاء 20 سنة",
+    "annualDesc": "رقم واحد للحيوانات المفقودة لجميع الحيوانات الأليفة في منزلك.",
+    "lifetimeDesc": "دفعة واحدة طوال حياة حيوان أليف واحد.",
+    "smallBirdDesc": "البادجي وطيور الحب والببغاوات القزمة والكوكتيل.",
+    "parrot10Desc": "الببغاوات الرمادية الأفريقية وببغاوات الأمازون والكوكاتو والمكاو.",
+    "parrot20Desc": "أطول تغطية للببغاوات المعمّرة.",
+    "perYear": "/ سنوياً",
+    "oneTime": "مرة واحدة",
+    "annualNote": "تُدفع مرة واحدة في السنة",
+    "lifetimeNote": "طوال حياة حيوانك الأليف، حتى 20 عاماً",
+    "smallBirdNote": "طوال حياة طائرك، حتى 20 عاماً",
+    "parrot10Note": "10 سنوات من الخدمة، ثم التجديد",
+    "parrot20Note": "20 عاماً من الخدمة، ثم التجديد",
+    "feat1": "قائمة المتصل مع ما يصل إلى 6 جهات اتصال",
+    "feat2": "تحية الحيوان المفقود في كل مكالمة",
+    "feat3": "بريد صوتي مع تنبيهات بالرسائل النصية والبريد الإلكتروني",
+    "feat4": "30 دقيقة من المكالمات سنوياً",
+    "feat5": "يعمل مع أي سجل للشرائح الإلكترونية",
+    "payOnceTag": "ادفع مرة واحدة",
+    "largeParrotsTag": "الببغاوات الكبيرة",
+    "subtitle": "ادفع مرة واحدة في السنة، أو مرة واحدة طوال حياة حيوانك الأليف. لا توجد خطط شهرية ولا رسوم إعداد."
+  },
   "waitlist": {
     "launchingSoon": "قريبًا · وصول مبكر خاص",
     "beFirstInLine": "كن الأول",
@@ -2501,6 +2698,34 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
   }
 },
   hi: {
+  "pets": {
+    "title": "अपने पालतू जानवर का प्लान चुनें।",
+    "annualName": "वार्षिक प्लान",
+    "lifetimeName": "आजीवन",
+    "smallBirdName": "छोटे पक्षी आजीवन",
+    "parrot10Name": "तोता 10-वर्षीय",
+    "parrot20Name": "तोता 20-वर्षीय",
+    "annualDesc": "आपके घर के सभी पालतुओं के लिए खोए पालतू का एक नंबर।",
+    "lifetimeDesc": "एक पालतू की पूरी ज़िंदगी के लिए एक भुगतान।",
+    "smallBirdDesc": "बजरीगर, लवबर्ड, पैरटलेट और कॉकटील।",
+    "parrot10Desc": "अफ़्रीकी ग्रे, अमेज़न, काकातुआ और मैकॉ।",
+    "parrot20Desc": "लंबी उम्र वाले तोतों के लिए सबसे लंबा कवर।",
+    "perYear": "/ वर्ष",
+    "oneTime": "एक बार",
+    "annualNote": "साल में एक बार बिलिंग",
+    "lifetimeNote": "आपके पालतू के जीवनभर, अधिकतम 20 वर्ष तक",
+    "smallBirdNote": "आपके पक्षी के जीवनभर, अधिकतम 20 वर्ष तक",
+    "parrot10Note": "10 वर्ष की सेवा, फिर रिन्यू करें",
+    "parrot20Note": "20 वर्ष की सेवा, फिर रिन्यू करें",
+    "feat1": "अधिकतम 6 संपर्कों वाला कॉलर मेनू",
+    "feat2": "हर कॉल पर खोए पालतू का अभिवादन संदेश",
+    "feat3": "मैसेज और ईमेल अलर्ट के साथ वॉइसमेल",
+    "feat4": "प्रति वर्ष 30 मिनट की कॉल",
+    "feat5": "किसी भी माइक्रोचिप रजिस्ट्री के साथ काम करता है",
+    "payOnceTag": "एक बार भुगतान",
+    "largeParrotsTag": "बड़े तोते",
+    "subtitle": "साल में एक बार भुगतान करें, या अपने पालतू की पूरी ज़िंदगी के लिए एक बार। कोई मासिक प्लान नहीं और कोई सेटअप शुल्क नहीं।"
+  },
   "waitlist": {
     "launchingSoon": "जल्द आ रहा है · निजी शुरुआती एक्सेस",
     "beFirstInLine": "कतार में सबसे",
@@ -2858,6 +3083,34 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
   }
 },
   pt: {
+  "pets": {
+    "title": "Escolha o plano do seu pet.",
+    "annualName": "Anual",
+    "lifetimeName": "Vitalício",
+    "smallBirdName": "Vitalício Aves Pequenas",
+    "parrot10Name": "Papagaio 10 Anos",
+    "parrot20Name": "Papagaio 20 Anos",
+    "annualDesc": "Um número para pet perdido para todos os pets da sua casa.",
+    "lifetimeDesc": "Um pagamento para a vida toda de um pet.",
+    "smallBirdDesc": "Periquitos-australianos, agapórnis, forpus e calopsitas.",
+    "parrot10Desc": "Papagaios-cinzentos, amazonas, cacatuas e araras.",
+    "parrot20Desc": "A cobertura mais longa para papagaios que vivem muito.",
+    "perYear": "/ ano",
+    "oneTime": "pagamento único",
+    "annualNote": "Cobrança uma vez por ano",
+    "lifetimeNote": "Pela vida do seu pet, até 20 anos",
+    "smallBirdNote": "Pela vida da sua ave, até 20 anos",
+    "parrot10Note": "10 anos de serviço, depois renove",
+    "parrot20Note": "20 anos de serviço, depois renove",
+    "feat1": "Menu vocal com até 6 contatos",
+    "feat2": "Mensagem de pet perdido em toda ligação",
+    "feat3": "Caixa postal com alertas por SMS e e-mail",
+    "feat4": "30 minutos de ligações por ano",
+    "feat5": "Funciona com qualquer cadastro de microchip",
+    "payOnceTag": "Pague uma vez",
+    "largeParrotsTag": "Papagaios grandes",
+    "subtitle": "Pague uma vez por ano, ou uma única vez para a vida toda do seu pet. Não há planos mensais nem taxa de adesão."
+  },
   "waitlist": {
     "launchingSoon": "Lançamento em breve · Acesso antecipado privado",
     "beFirstInLine": "Seja o primeiro",
@@ -3215,6 +3468,34 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
   }
 },
   de: {
+  "pets": {
+    "title": "Wählen Sie Ihren Haustier-Tarif.",
+    "annualName": "Jahrestarif",
+    "lifetimeName": "Lebenszeit-Tarif",
+    "smallBirdName": "Kleinvogel-Lebenszeit-Tarif",
+    "parrot10Name": "Papageien-Tarif 10 Jahre",
+    "parrot20Name": "Papageien-Tarif 20 Jahre",
+    "annualDesc": "Eine Nummer für vermisste Tiere für alle Tiere in Ihrem Haushalt.",
+    "lifetimeDesc": "Eine Zahlung für das ganze Leben eines Tieres.",
+    "smallBirdDesc": "Wellensittiche, Unzertrennliche, Sperlingspapageien und Nymphensittiche.",
+    "parrot10Desc": "Graupapageien, Amazonen, Kakadus und Aras.",
+    "parrot20Desc": "Der längste Schutz für langlebige Papageien.",
+    "perYear": "/ Jahr",
+    "oneTime": "einmalig",
+    "annualNote": "Einmal jährlich abgerechnet",
+    "lifetimeNote": "Für das Leben Ihres Tieres, bis zu 20 Jahre",
+    "smallBirdNote": "Für das Leben Ihres Vogels, bis zu 20 Jahre",
+    "parrot10Note": "10 Jahre Service, dann verlängern",
+    "parrot20Note": "20 Jahre Service, dann verlängern",
+    "feat1": "Sprachmenü mit bis zu 6 Kontakten",
+    "feat2": "Ansage für vermisste Tiere bei jedem Anruf",
+    "feat3": "Mailbox mit SMS- und E-Mail-Benachrichtigung",
+    "feat4": "30 Anrufminuten pro Jahr",
+    "feat5": "Funktioniert mit jedem Mikrochip-Register",
+    "payOnceTag": "Einmal zahlen",
+    "largeParrotsTag": "Große Papageien",
+    "subtitle": "Zahlen Sie einmal im Jahr oder einmal für das ganze Leben Ihres Tieres. Es gibt keine Monatstarife und keine Einrichtungsgebühren."
+  },
   "waitlist": {
     "launchingSoon": "Startet bald · Privater Vorabzugang",
     "beFirstInLine": "Seien Sie der",
@@ -3572,6 +3853,34 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
   }
 },
   it: {
+  "pets": {
+    "title": "Scegli il piano per il tuo animale.",
+    "annualName": "Annuale",
+    "lifetimeName": "A vita",
+    "smallBirdName": "A vita Uccelli piccoli",
+    "parrot10Name": "Pappagallo 10 anni",
+    "parrot20Name": "Pappagallo 20 anni",
+    "annualDesc": "Un solo numero per animali smarriti per tutti gli animali di casa.",
+    "lifetimeDesc": "Un solo pagamento per tutta la vita di un animale.",
+    "smallBirdDesc": "Pappagallini ondulati, inseparabili, forpus e calopsiti.",
+    "parrot10Desc": "Cenerini, amazzoni, cacatua e ara.",
+    "parrot20Desc": "La copertura più lunga per pappagalli longevi.",
+    "perYear": "/ anno",
+    "oneTime": "una tantum",
+    "annualNote": "Fatturato una volta all'anno",
+    "lifetimeNote": "Per la vita del tuo animale, fino a 20 anni",
+    "smallBirdNote": "Per la vita del tuo uccello, fino a 20 anni",
+    "parrot10Note": "10 anni di servizio, poi rinnovi",
+    "parrot20Note": "20 anni di servizio, poi rinnovi",
+    "feat1": "Menu vocale con fino a 6 contatti",
+    "feat2": "Messaggio per animale smarrito a ogni chiamata",
+    "feat3": "Segreteria con avvisi via SMS ed e-mail",
+    "feat4": "30 minuti di chiamate all'anno",
+    "feat5": "Funziona con qualsiasi registro di microchip",
+    "payOnceTag": "Paghi una volta",
+    "largeParrotsTag": "Grandi pappagalli",
+    "subtitle": "Paghi una volta all'anno, oppure una sola volta per tutta la vita del tuo animale. Nessun piano mensile e nessun costo di attivazione."
+  },
   "waitlist": {
     "launchingSoon": "In arrivo · Accesso anticipato privato",
     "beFirstInLine": "Sii il primo",
@@ -3929,6 +4238,34 @@ export const translations: Record<"en" | "es" | "fr" | "ja" | "zh" | "ar" | "hi"
   }
 },
   ko: {
+  "pets": {
+    "title": "반려동물 요금제를 선택하세요.",
+    "annualName": "연간 요금제",
+    "lifetimeName": "평생",
+    "smallBirdName": "소형 조류 평생",
+    "parrot10Name": "앵무새 10년",
+    "parrot20Name": "앵무새 20년",
+    "annualDesc": "집에 있는 모든 반려동물을 위한 실종 대비 번호 하나.",
+    "lifetimeDesc": "반려동물 한 마리의 평생을 위한 한 번의 결제.",
+    "smallBirdDesc": "사랑앵무, 모란앵무, 패럿렛, 왕관앵무.",
+    "parrot10Desc": "회색앵무, 아마존앵무, 코카투, 금강앵무.",
+    "parrot20Desc": "오래 사는 앵무새를 위한 가장 긴 보장.",
+    "perYear": "/ 년",
+    "oneTime": "1회",
+    "annualNote": "1년에 한 번 청구",
+    "lifetimeNote": "반려동물의 평생, 최대 20년",
+    "smallBirdNote": "새의 평생, 최대 20년",
+    "parrot10Note": "10년 서비스 후 갱신",
+    "parrot20Note": "20년 서비스 후 갱신",
+    "feat1": "연락처 최대 6명 선택 다이얼 메뉴",
+    "feat2": "모든 통화에 실종 안내 멘트",
+    "feat3": "문자 및 이메일 알림이 포함된 음성사서함",
+    "feat4": "연간 통화 30분",
+    "feat5": "어떤 마이크로칩 등록 기관과도 호환",
+    "payOnceTag": "한 번 결제",
+    "largeParrotsTag": "대형 앵무새",
+    "subtitle": "1년에 한 번, 또는 반려동물의 평생에 한 번만 결제하세요. 월간 요금제와 가입비는 없습니다."
+  },
   "waitlist": {
     "launchingSoon": "곧 출시 · 프라이빗 사전 예약",
     "beFirstInLine": "가장 먼저",

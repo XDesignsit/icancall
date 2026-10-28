@@ -33,8 +33,7 @@ tpl = swap(tpl, nav_old, '''<nav class="nav">
       <a href="#parrots">Parrots</a>
       <a href="#faq">Questions</a>
     </nav>''')
-tpl = swap(tpl, '<a class="btn btn-primary" href="#pricing">Get started</a>',
-           '<a class="btn btn-primary" href="#join">Join the launch list</a>')
+
 tpl = swap(tpl, 'One memorable number that always connects your child to a grown-up who loves them — from any phone, anywhere.',
            "One lost-pet number on your pet's microchip that always reaches you, even after you move or change phones.")
 tpl = swap(tpl, '<li><a href="#lesson">One number</a></li>',
@@ -70,7 +69,6 @@ js = swap(js, 'Thanks for calling. Choose who to reach:', 'Thanks for calling ab
 js = swap(js, 'Add up to six trusted contacts to build your circle.', 'Add up to six contacts for the caller menu.')
 run_old = js[js.index('  async function run() {'):js.index('  // honor reduced motion')]
 js = swap(js, run_old, (here / 'demo_run.js').read_text(encoding='utf8'))
-js += '\n' + (here / 'join.js').read_text(encoding='utf8')
 
 new_id = str(uuid.uuid5(uuid.NAMESPACE_URL, 'icancall/pets'))  # stable, so rebuilds don't churn
 tpl = swap(tpl, f'<script src="{old_id}"></script>', f'<script src="{new_id}"></script>')
@@ -109,6 +107,7 @@ std_links = {
 stpl = tpl
 for k, v in std_links.items():
     stpl = stpl.replace(k, v)
+stpl = stpl.replace('href="/signup?', 'href="iCanCall Signup (standalone).html?')
 std = re.sub(r'(<script type="__bundler/template">).*?(</script>)', lambda x: x.group(1) + enc(stpl) + x.group(2), out, count=1, flags=re.S)
 (repo / 'iCanCall Pets Landing (standalone).html').write_text(std, encoding='utf8')
 print('ok', len(out), len(std))

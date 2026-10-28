@@ -2,6 +2,7 @@ import { supabase } from "@/lib/supabase";
 import { EMAIL_FONT, sendEmail } from "@/lib/mail";
 import { releaseProvisionedNumber, type TelephonyRecord } from "@/lib/numbers";
 import { removeOwnerVoiceClone } from "@/lib/voiceClone";
+import { PETS_GRACE_DAYS, isPetsPlan } from "@/lib/pets";
 
 // What happens when a subscription really ends (Stripe: canceled / incomplete_expired).
 //
@@ -19,6 +20,7 @@ import { removeOwnerVoiceClone } from "@/lib/voiceClone";
 //   releaseReminderSentAt
 
 export const GRACE_DAYS = 30;
+// Pet plans keep their number for PETS_GRACE_DAYS (about 6 months): it is printed on microchips.
 export const REMINDER_DAYS_BEFORE = 7;
 
 export type Settings = Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -32,7 +34,7 @@ export function endedPatch(settings: Settings, status: string, now = new Date())
   return {
     subscriptionStatus: status,
     subscriptionEndedAt: endedAt,
-    numbersReleaseAt: settings.numbersReleaseAt || new Date(new Date(endedAt).getTime() + GRACE_DAYS * 24 * 60 * 60 * 1000).toISOString(),
+    numbersReleaseAt: settings.numbersReleaseAt || new Date(new Date(endedAt).getTime() + (isPetsPlan(settings.plan) ? PETS_GRACE_DAYS : GRACE_DAYS) * 24 * 60 * 60 * 1000).toISOString(),
   };
 }
 

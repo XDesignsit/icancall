@@ -6,6 +6,7 @@ import { REACTIVATED_PATCH, isEndedStatus } from "@/lib/subscriptionEnd";
 import { isPlanChangeChargedNow, isScheduledPlanChange, planConfig, readPendingPlanChange, type PlanId } from "@/lib/planConfig";
 import { releaseSchedule, scheduleSwitchAtPeriodEnd } from "@/lib/planSchedule";
 import { paidExtraNumbers } from "@/lib/addons";
+import { isPetsPlan } from "@/lib/pets";
 import {
   PLAN_PRICE_IDS,
   isBillingCycle,
@@ -90,6 +91,10 @@ export async function POST(req: NextRequest) {
 
     const settings = await loadSettings(userId);
     const simulated = isSimulatedBilling(owner.email);
+    // Pet plans cannot switch to or from the other plans (lib/pets).
+    if (isPetsPlan(settings.plan)) {
+      return NextResponse.json({ error: "Pet plans can't be switched to another plan. Please contact support." }, { status: 409 });
+    }
 
     // ── Take back a change scheduled for the end of the period ──
     if (body.cancelScheduled === true) {
@@ -166,6 +171,9 @@ export async function POST(req: NextRequest) {
     const { plan, billing } = body as { plan?: unknown; billing?: unknown };
     if (!isPlanId(plan) || !isBillingCycle(billing)) {
       return NextResponse.json({ error: "Invalid plan or billing cycle" }, { status: 400 });
+    }
+    if (isPetsPlan(plan)) {
+      return NextResponse.json({ error: "Pet plans are bought on the pets page." }, { status: 400 });
     }
     const target = { plan, billingCycle: billing };
 
