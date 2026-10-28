@@ -397,11 +397,11 @@ const t: HomeTranslations = {
       },
       {
         q: "¿Cuál es la política de reembolso?",
-        a: "Todos los planes tienen una garantía de servicio de 14 días. Si iCanCall no funciona, contacta con soporte en los 14 días siguientes a tu compra. Si no podemos solucionarlo, te devolvemos el importe completo. No hay reembolsos por cambio de opinión. Puedes cancelar cuando quieras desde tu panel y el servicio sigue activo hasta el final de tu periodo de facturación.",
+        a: "Todos los planes tienen una garantía de servicio de 14 días. Si iCanCall no funciona, contacta con soporte en los 14 días siguientes a tu compra. Si no podemos solucionarlo, te devolvemos el importe completo. Si cambias de opinión con un plan mensual, contacta con soporte en los 14 días siguientes y te devolvemos la mitad de tu primer mes. Puedes cancelar cuando quieras desde tu panel y el servicio sigue activo hasta el final de tu periodo de facturación.",
       },
       {
         q: "¿La garantía cubre los planes anuales?",
-        a: "Sí. Los planes anuales tienen la misma garantía de servicio de 14 días. No se reembolsan por cambio de opinión ni por los meses no usados.",
+        a: "Sí. Los planes anuales tienen la misma garantía de servicio de 14 días. Además, puedes cancelar un plan anual por cualquier motivo en los 14 días siguientes a tu compra y te devolvemos el cargo anual menos el precio de un mes de tu plan. Pasados 14 días, los meses no usados no se reembolsan.",
       },
       {
         q: "¿La información de mi familia es privada?",

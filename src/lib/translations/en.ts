@@ -160,7 +160,7 @@ const t: HomepageTranslations = {
   "cFeat4": "150 Pooled Voice Minutes",
   "cFeat5": "2 Caregiver Logins",
   "guaranteeTitle": "14-Day Service Guarantee",
-  "guaranteeDesc": "If ICanCall doesn't work as promised, contact our support team within 14 days of purchase. If we can't fix it, we'll refund you in full. Refunds aren't given for a change of mind.",
+  "guaranteeDesc": "If ICanCall doesn't work as promised, contact our support team within 14 days of purchase. If we can't fix it, we'll refund you in full. If you change your mind within 14 days, you get half of your first month back on a monthly plan, or the annual charge minus one month on an annual plan.",
   "shortGuarantee": "14-day service guarantee"
 },
 "testimonials": {
@@ -186,9 +186,9 @@ const t: HomepageTranslations = {
   "q4": "Is there a setup fee or contract?",
   "a4": "No. There are absolutely no setup fees, activation costs, or contracts. All plans are billed month-to-month (or annually) and you can cancel at any time with a single click from your billing page.",
   "q5": "What is your refund policy?",
-  "a5": "Every ICanCall plan comes with a 14-day service guarantee. If ICanCall doesn't work as promised (for example, calls to your number don't reach your contacts, or we can't activate a number in the area code you chose), contact our support team at support@icancall.co within 14 days of your first purchase. We'll try to fix the problem first. If we can't fix it within 3 business days, we'll refund you in full.\n\nRefunds aren't given for a change of mind or for a service that works as described. You can cancel anytime from your account dashboard. Your service continues through the end of your current billing period, and you won't be charged again.",
+  "a5": "Every ICanCall plan comes with a 14-day service guarantee. If ICanCall doesn't work as promised (for example, calls to your number don't reach your contacts), contact our support team at support@icancall.co within 14 days of your first purchase. We'll try to fix the problem first. If we can't fix it within 3 business days, we'll refund you in full.\n\nIf you simply change your mind, contact support@icancall.co within 14 days of your first purchase and we'll refund half of your first month on a monthly plan (annual plans are covered below). After 14 days, payments aren't refunded. You can cancel anytime from your account dashboard. Your service continues through the end of your current billing period, and you won't be charged again.",
   "q6": "Does the 14-day guarantee apply to annual plans?",
-  "a6": "Yes. Monthly and annual plans have the same 14-day service guarantee from your first purchase. If the service doesn't work and our support team can't fix it, you'll receive a full refund of the annual charge. Annual plans aren't refunded for a change of mind or for unused months."
+  "a6": "Yes, and annual plans have one extra option. If the service doesn't work and our support team can't fix it, you'll receive a full refund of the annual charge. If you simply change your mind, contact support@icancall.co within 14 days of your first purchase and we'll refund the annual charge minus one month's price of your plan, which covers your number and the minutes already used. After 14 days, annual plans aren't refunded for unused months."
 },
 "cta": {
   "title": "Ready to secure your family?",
@@ -340,7 +340,7 @@ const t: HomepageTranslations = {
   "dueToday": "Due today",
   "orderSecured": "Secured with bank-level encryption. Checkout will open in a secure window.",
   "btnPay": "Complete setup & pay",
-  "refundNote": "Refund policy: if iCanCall doesn't work, contact support within 14 days of purchase. If we can't fix it, you get a full refund. Refunds aren't given for a change of mind.",
+  "refundNote": "Refund policy: if iCanCall doesn't work, contact support within 14 days of purchase. If we can't fix it, you get a full refund. If you change your mind within 14 days, you get half of your first month back on a monthly plan, or the annual charge minus one month on an annual plan.",
   "successTitle": "You're all set, {name}!",
   "successSubtitle": "Your {planName} plan is active and your number is live. One last thing: build your trusted circle so calls always reach someone.",
   "successSubtitlePlural": "Your {planName} plan is active and your numbers are live. One last thing: build your trusted circle so calls always reach someone.",

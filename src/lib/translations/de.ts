@@ -160,7 +160,7 @@ const t: HomepageTranslations = {
   "cFeat4": "150 gemeinsame Sprachminuten",
   "cFeat5": "2 Betreuer-Logins",
   "guaranteeTitle": "14-tägige Service-Garantie",
-  "guaranteeDesc": "Wenn iCanCall nicht funktioniert und unser Support-Team das Problem nicht beheben kann, erhalten Sie den vollen Betrag zurück. Wenden Sie sich einfach innerhalb von 14 Tagen nach dem Kauf an den Support. Bei bloßer Meinungsänderung gibt es keine Erstattung.",
+  "guaranteeDesc": "Wenn iCanCall nicht funktioniert und unser Support-Team das Problem nicht beheben kann, erhalten Sie den vollen Betrag zurück. Wenden Sie sich einfach innerhalb von 14 Tagen nach dem Kauf an den Support. Wenn Sie es sich innerhalb von 14 Tagen anders überlegen, erstatten wir bei einem Monatstarif die Hälfte Ihres ersten Monats oder bei einem Jahrestarif den Jahresbetrag abzüglich eines Monats.",
   "shortGuarantee": "14 Tage Service-Garantie"
 },
 "testimonials": {
@@ -186,9 +186,9 @@ const t: HomepageTranslations = {
   "q4": "Gibt es Einrichtungsgebühren oder Laufzeitverträge?",
   "a4": "Nein. Es gibt keinerlei Einrichtungsgebühren, Aktivierungskosten oder Laufzeitverträge. Alle Tarife werden monatlich (oder jährlich) abgerechnet und können jederzeit mit einem Klick gekündigt werden.",
   "q5": "Wie sieht Ihre Rückerstattungsrichtlinie aus?",
-  "a5": "Jeder ICanCall-Tarif enthält eine 14-tägige Service-Garantie. Wenn ICanCall nicht wie versprochen funktioniert (zum Beispiel erreichen Anrufe an Ihre Nummer Ihre Kontakte nicht, oder wir können keine Nummer mit der von Ihnen gewählten Vorwahl aktivieren), wenden Sie sich innerhalb von 14 Tagen nach Ihrem ersten Kauf unter support@icancall.co an unser Support-Team. Wir versuchen zuerst, das Problem zu beheben. Gelingt uns das nicht innerhalb von 3 Werktagen, erstatten wir Ihnen den vollen Betrag.\n\nBei bloßer Meinungsänderung oder für einen Service, der wie beschrieben funktioniert, gibt es keine Erstattung. Sie können jederzeit über das Dashboard Ihres Kontos kündigen. Ihr Service läuft bis zum Ende des aktuellen Abrechnungszeitraums weiter, danach wird nichts mehr abgebucht.",
+  "a5": "Jeder ICanCall-Tarif enthält eine 14-tägige Service-Garantie. Wenn ICanCall nicht wie versprochen funktioniert (zum Beispiel erreichen Anrufe an Ihre Nummer Ihre Kontakte nicht), wenden Sie sich innerhalb von 14 Tagen nach Ihrem ersten Kauf unter support@icancall.co an unser Support-Team. Wir versuchen zuerst, das Problem zu beheben. Gelingt uns das nicht innerhalb von 3 Werktagen, erstatten wir Ihnen den vollen Betrag.\n\nWenn Sie es sich einfach anders überlegen, wenden Sie sich innerhalb von 14 Tagen nach Ihrem ersten Kauf an support@icancall.co. Bei einem Monatstarif erstatten wir Ihnen dann die Hälfte Ihres ersten Monats (Jahrestarife siehe unten). Nach 14 Tagen werden Zahlungen nicht erstattet. Sie können jederzeit über das Dashboard Ihres Kontos kündigen. Ihr Service läuft bis zum Ende des aktuellen Abrechnungszeitraums weiter, danach wird nichts mehr abgebucht.",
   "q6": "Gilt die 14-tägige Garantie auch für Jahrestarife?",
-  "a6": "Ja. Monats- und Jahrestarife haben ab Ihrem ersten Kauf dieselbe 14-tägige Service-Garantie. Funktioniert der Service nicht und kann unser Support-Team das Problem nicht beheben, erstatten wir Ihnen den vollen Jahresbetrag. Bei Meinungsänderung oder für ungenutzte Monate werden Jahrestarife nicht erstattet."
+  "a6": "Ja, und Jahrestarife bieten eine zusätzliche Option. Funktioniert der Service nicht und kann unser Support-Team das Problem nicht beheben, erstatten wir Ihnen den vollen Jahresbetrag. Wenn Sie es sich einfach anders überlegen, wenden Sie sich innerhalb von 14 Tagen nach Ihrem ersten Kauf an support@icancall.co. Wir erstatten dann den Jahresbetrag abzüglich des Preises für einen Monat Ihres Tarifs, der Ihre Nummer und die bereits genutzten Minuten abdeckt. Nach 14 Tagen werden Jahrestarife für ungenutzte Monate nicht erstattet."
 },
 "cta": {
   "title": "Sind Sie bereit, Ihre Familie abzusichern?",
@@ -340,7 +340,7 @@ const t: HomepageTranslations = {
   "dueToday": "Heute fällig",
   "orderSecured": "Geschützt durch starke Bankenverschlüsselung. Die Kasse öffnet sich in einem sicheren Fenster.",
   "btnPay": "Einrichtung abschließen & zahlen",
-  "refundNote": "Rückerstattung: Wenn iCanCall nicht funktioniert und unser Support-Team das Problem nicht beheben kann, erhalten Sie den vollen Betrag zurück. Wenden Sie sich einfach innerhalb von 14 Tagen nach dem Kauf an den Support. Bei bloßer Meinungsänderung gibt es keine Erstattung.",
+  "refundNote": "Rückerstattung: Wenn iCanCall nicht funktioniert und unser Support-Team das Problem nicht beheben kann, erhalten Sie den vollen Betrag zurück. Wenden Sie sich einfach innerhalb von 14 Tagen nach dem Kauf an den Support. Wenn Sie es sich innerhalb von 14 Tagen anders überlegen, erstatten wir bei einem Monatstarif die Hälfte Ihres ersten Monats oder bei einem Jahrestarif den Jahresbetrag abzüglich eines Monats.",
   "successTitle": "Alles bereit, {name}!",
   "successSubtitle": "Ihr {planName}-Tarif ist aktiv und Ihre Nummer ist freigeschaltet. Letzter Schritt: Richten Sie Ihren Kreis ein, damit Anrufe immer jemanden erreichen.",
   "successSubtitlePlural": "Ihr {planName}-Tarif ist aktiv und Ihre Nummern sind freigeschaltet. Letzter Schritt: Richten Sie Ihren Kreis ein, damit Anrufe immer jemanden erreichen.",

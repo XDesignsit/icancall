@@ -386,11 +386,11 @@ const t: HomeTranslations = {
       },
       {
         q: "What's your refund policy?",
-        a: "Every plan has a 14-day service guarantee. If iCanCall doesn't work, contact support within 14 days of purchase. If we can't fix it, you get a full refund. Refunds aren't given for a change of mind. You can cancel anytime from your dashboard, and service runs to the end of your billing period.",
+        a: "Every plan has a 14-day service guarantee. If iCanCall doesn't work, contact support within 14 days of purchase. If we can't fix it, you get a full refund. If you change your mind on a monthly plan, contact support within 14 days and we'll refund half of your first month. You can cancel anytime from your dashboard, and service runs to the end of your billing period.",
       },
       {
         q: "Does the guarantee cover annual plans?",
-        a: "Yes. Annual plans have the same 14-day service guarantee. They aren't refunded for a change of mind or for unused months.",
+        a: "Yes. Annual plans have the same 14-day service guarantee. You can also cancel an annual plan within 14 days of purchase for any reason and get the annual charge back, minus one month's price of your plan. After 14 days, unused months aren't refunded.",
       },
       {
         q: "Is my family's information private?",
