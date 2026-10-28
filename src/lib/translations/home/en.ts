@@ -386,7 +386,7 @@ const t: HomeTranslations = {
       },
       {
         q: "What's your refund policy?",
-        a: "Every plan has a 14-day service guarantee. If iCanCall doesn't work, contact support within 14 days of purchase. If we can't fix it, you get a full refund. If you change your mind on a monthly plan, contact support within 14 days and we'll refund half of your first month. You can cancel anytime from your dashboard, and service runs to the end of your billing period.",
+        a: "Every plan has a 14-day service guarantee. If iCanCall doesn't work, contact support within 14 days of purchase. If we can't fix it, you get a full refund. If you change your mind on a monthly plan, contact support within 14 days and we'll refund half of your first month. The half we keep covers costs we pay from day one: your dedicated phone number, your calls and payment processing. You can cancel anytime from your dashboard, and service runs to the end of your billing period.",
       },
       {
         q: "Does the guarantee cover annual plans?",
