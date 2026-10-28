@@ -746,13 +746,13 @@ function HomeV2({ t, base, lang, onLang, root }: Props) {
                     </div>
                     <div className="hp-dev" style={vars({ "--i": 2 })}>
                       <svg viewBox="0 0 120 170">
-                        <ellipse className="glow" cx="60" cy="84" rx="34" ry="58" />
-                        <rect x="30" y="4" width="60" height="162" rx="14" />
-                        <rect className="lit" x="36" y="14" width="48" height="136" rx="8" />
-                        <rect x="36" y="14" width="48" height="136" rx="8" />
-                        <path d="M52 9h16M52 158h16" />
-                        <circle cx="60" cy="120" r="9" />
-                        <path d="M56.6 117.4h1.9l.9 2.4-1.2.9a6.8 6.8 0 0 0 3.8 3.8l.9-1.2 2.4.9v1.9" />
+                        <ellipse className="glow" cx="60" cy="88" rx="30" ry="48" />
+                        <rect x="28" y="22" width="64" height="134" rx="14" />
+                        <rect className="lit" x="33" y="27" width="54" height="124" rx="10" />
+                        <rect x="33" y="27" width="54" height="124" rx="10" />
+                        <path d="M55 33h10M53 145h14M93.5 50v14" />
+                        <circle cx="60" cy="118" r="9" />
+                        <path d="M56.6 115.4h1.9l.9 2.4-1.2.9a6.8 6.8 0 0 0 3.8 3.8l.9-1.2 2.4.9v1.9" />
                       </svg>
                       <span>{t.features.phones.smart}</span>
                     </div>
