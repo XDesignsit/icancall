@@ -1512,6 +1512,13 @@ function PaymentStep({ data, onNext, onBack, t, lang }: { data: OnboardingData; 
         {t.onboarding.orderSecured}
       </div>
 
+      <p className="mt-3 text-sm leading-relaxed text-slate-600">
+        {t.onboarding.refundNote}{" "}
+        <Link href={`/terms-of-service?lang=${lang}`} className="underline" style={{ color: "var(--blue)" }} target="_blank">
+          {t.footer.terms}
+        </Link>
+      </p>
+
       {signupError && (
         <div role="alert" className="mt-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium leading-relaxed text-red-800">
           {signupError}

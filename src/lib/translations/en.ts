@@ -49,9 +49,9 @@ const t: HomepageTranslations = {
   "lead": "iCanCall connects your loved ones to their circle of care without screen time, apps, or complex devices. Starting at $14.99/mo.",
   "getStarted": "Get Started",
   "seeHow": "See how it works",
-  "guarantee": "30-day money-back guarantee",
+  "guarantee": "14-day service guarantee",
   "secure": "Secure and private routing",
-  "trustLine": "30-day money-back guarantee · Cancel anytime · No contracts"
+  "trustLine": "14-day service guarantee · Cancel anytime · No contracts"
 },
 "stats": {
   "routed": "Calls Routed",
@@ -159,9 +159,9 @@ const t: HomepageTranslations = {
   "cFeat3": "All Routing Modes + Scheduling",
   "cFeat4": "150 Pooled Voice Minutes",
   "cFeat5": "2 Caregiver Logins",
-  "guaranteeTitle": "30-Day Money-Back Guarantee",
-  "guaranteeDesc": "Try ICanCall risk-free for 30 days. If it's not the right fit for your family, we'll refund you in full — no questions asked, no restocking fees, no hardware to return.",
-  "shortGuarantee": "30-day money-back guarantee"
+  "guaranteeTitle": "14-Day Service Guarantee",
+  "guaranteeDesc": "If ICanCall doesn't work as promised, contact our support team within 14 days of purchase. If we can't fix it, we'll refund you in full. Refunds aren't given for a change of mind.",
+  "shortGuarantee": "14-day service guarantee"
 },
 "testimonials": {
   "stars": "★★★★★",
@@ -186,9 +186,9 @@ const t: HomepageTranslations = {
   "q4": "Is there a setup fee or contract?",
   "a4": "No. There are absolutely no setup fees, activation costs, or contracts. All plans are billed month-to-month (or annually) and you can cancel at any time with a single click from your billing page.",
   "q5": "What is your refund policy?",
-  "a5": "Every ICanCall plan comes with a 30-day money-back guarantee. If ICanCall isn't the right fit for your family within the first 30 days of your subscription, contact us at support@icancall.co and we'll issue a full refund — no questions asked. There's no restocking fee, no hardware to return, and no fine print.\n\nAfter the 30-day window, you can cancel your subscription anytime from your account dashboard. Your service will continue through the end of your current billing period, and you won't be charged again. Annual plans cancelled after the 30-day window are non-refundable for unused months, consistent with standard SaaS practice.",
-  "q6": "Does the 30-day guarantee apply to annual plans?",
-  "a6": "Yes. Whether you choose monthly or annual billing, you have a full 30 days from your initial purchase to request a refund. If you cancel an annual plan within the 30-day window, you'll receive a full refund of the annual charge."
+  "a5": "Every ICanCall plan comes with a 14-day service guarantee. If ICanCall doesn't work as promised (for example, calls to your number don't reach your contacts, or we can't activate a number in the area code you chose), contact our support team at support@icancall.co within 14 days of your first purchase. We'll try to fix the problem first. If we can't fix it within 3 business days, we'll refund you in full.\n\nRefunds aren't given for a change of mind or for a service that works as described. You can cancel anytime from your account dashboard. Your service continues through the end of your current billing period, and you won't be charged again.",
+  "q6": "Does the 14-day guarantee apply to annual plans?",
+  "a6": "Yes. Monthly and annual plans have the same 14-day service guarantee from your first purchase. If the service doesn't work and our support team can't fix it, you'll receive a full refund of the annual charge. Annual plans aren't refunded for a change of mind or for unused months."
 },
 "cta": {
   "title": "Ready to secure your family?",
@@ -340,6 +340,7 @@ const t: HomepageTranslations = {
   "dueToday": "Due today",
   "orderSecured": "Secured with bank-level encryption. Checkout will open in a secure window.",
   "btnPay": "Complete setup & pay",
+  "refundNote": "Refund policy: if iCanCall doesn't work, contact support within 14 days of purchase. If we can't fix it, you get a full refund. Refunds aren't given for a change of mind.",
   "successTitle": "You're all set, {name}!",
   "successSubtitle": "Your {planName} plan is active and your number is live. One last thing: build your trusted circle so calls always reach someone.",
   "successSubtitlePlural": "Your {planName} plan is active and your numbers are live. One last thing: build your trusted circle so calls always reach someone.",

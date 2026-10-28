@@ -205,6 +205,7 @@ export interface HomepageTranslations {
     dueToday: string;
     orderSecured: string;
     btnPay: string;
+    refundNote: string;
     successTitle: string;
     successSubtitle: string;
     successSubtitlePlural: string;
