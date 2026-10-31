@@ -4,9 +4,9 @@
     "title": "iCanCall Public API",
     "version": "1.0.0",
     "description": "The public, unauthenticated endpoints of iCanCall. Account, billing, voice webhook and admin endpoints are internal and not covered here.",
-    "contact": { "name": "iCanCall Support", "email": "support@icancall.co", "url": "https://icancall.co" }
+    "contact": { "name": "iCanCall Support", "email": "support@icancall.co", "url": "https://www.icancall.co" }
   },
-  "servers": [{ "url": "https://icancall.co" }],
+  "servers": [{ "url": "https://www.icancall.co" }],
   "security": [],
   "paths": {
     "/api/twilio/numbers": {
