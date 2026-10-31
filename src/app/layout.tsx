@@ -16,6 +16,7 @@ const atkinson = localFont({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://www.icancall.co"),
   title: "iCanCall - Smart Family Voice Routing",
   description: "Give your family a dedicated phone number that intelligently cascades calls to trusted contacts until someone answers.",
   alternates: {
@@ -23,6 +24,7 @@ export const metadata: Metadata = {
       "text/markdown": "/index.md",
     },
   },
+  openGraph: { type: "website", siteName: "iCanCall" },
 };
 
 export default function RootLayout({

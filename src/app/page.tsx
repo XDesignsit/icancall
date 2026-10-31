@@ -8,6 +8,7 @@ import { fill } from "@/lib/translations/home/format";
 export const metadata: Metadata = {
   title: enHome.meta.title,
   description: enHome.meta.description,
+  openGraph: { type: "website", siteName: "iCanCall", url: "/" },
 };
 
 export const viewport: Viewport = {

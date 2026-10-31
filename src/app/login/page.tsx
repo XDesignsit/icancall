@@ -16,7 +16,7 @@ export async function generateMetadata({
   const { title, tagline } = LINK_PREVIEWS[n];
   const images = [{ url: `/api/og/${n}`, ...OG_SIZE, type: "image/png", alt: `iCanCall: ${title}` }];
   return {
-    openGraph: { title: `${title} · iCanCall`, description: tagline, images },
+    openGraph: { type: "website", siteName: "iCanCall", title: `${title} · iCanCall`, description: tagline, images },
     twitter: { card: "summary_large_image", title: `${title} · iCanCall`, description: tagline, images },
   };
 }
