@@ -1,5 +1,5 @@
 // RFC 9727 API catalog: points API clients at the OpenAPI document in public/openapi.json.
-const ORIGIN = "https://icancall.co";
+const ORIGIN = "https://www.icancall.co";
 const CATALOG = `${ORIGIN}/.well-known/api-catalog`;
 
 const linkset = {
