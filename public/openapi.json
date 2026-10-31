@@ -1,0 +1,129 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "iCanCall Public API",
+    "version": "1.0.0",
+    "description": "The public, unauthenticated endpoints of iCanCall. Account, billing, voice webhook and admin endpoints are internal and not covered here.",
+    "contact": { "name": "iCanCall Support", "email": "support@icancall.co", "url": "https://icancall.co" }
+  },
+  "servers": [{ "url": "https://icancall.co" }],
+  "security": [],
+  "paths": {
+    "/api/twilio/numbers": {
+      "get": {
+        "operationId": "searchAvailableNumbers",
+        "summary": "Search phone numbers available to buy",
+        "description": "Lists up to 10 local phone numbers available in a North American area code. Caribbean area codes 868, 246, 876 and 658 are searched with Telnyx; everything else with Twilio.",
+        "tags": ["Numbers"],
+        "parameters": [
+          {
+            "name": "areaCode",
+            "in": "query",
+            "required": false,
+            "description": "Three-digit North American area code.",
+            "schema": { "type": "string", "pattern": "^\\d{3}$", "default": "415" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Available numbers. An empty list means none are in stock, or the provider is not configured.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["success", "configured", "provider", "areaCode", "results"],
+                  "properties": {
+                    "success": { "type": "boolean", "const": true },
+                    "configured": { "type": "boolean", "description": "Whether the provider that was searched is set up on this server." },
+                    "provider": { "type": "string", "enum": ["twilio", "telnyx"] },
+                    "areaCode": { "type": "string" },
+                    "results": { "type": "array", "items": { "$ref": "#/components/schemas/AvailableNumber" } }
+                  }
+                }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/Error" },
+          "500": { "$ref": "#/components/responses/Error" }
+        }
+      }
+    },
+    "/api/contact": {
+      "post": {
+        "operationId": "sendContactMessage",
+        "summary": "Send a message to iCanCall support",
+        "description": "Emails the message to the support team. Limited to 5 submissions per 10 minutes per IP address.",
+        "tags": ["Support"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["name", "email", "message"],
+                "properties": {
+                  "name": { "type": "string", "minLength": 1, "maxLength": 120 },
+                  "email": { "type": "string", "format": "email" },
+                  "message": { "type": "string", "minLength": 1, "maxLength": 5000 }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Message sent.",
+            "headers": {
+              "X-RateLimit-Limit": { "$ref": "#/components/headers/X-RateLimit-Limit" },
+              "X-RateLimit-Remaining": { "$ref": "#/components/headers/X-RateLimit-Remaining" },
+              "X-RateLimit-Reset": { "$ref": "#/components/headers/X-RateLimit-Reset" }
+            },
+            "content": {
+              "application/json": {
+                "schema": { "type": "object", "required": ["success"], "properties": { "success": { "type": "boolean", "const": true } } }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/Error" },
+          "429": { "$ref": "#/components/responses/Error" },
+          "500": { "$ref": "#/components/responses/Error" },
+          "502": { "$ref": "#/components/responses/Error" }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AvailableNumber": {
+        "type": "object",
+        "required": ["phoneNumber", "friendlyName"],
+        "properties": {
+          "phoneNumber": { "type": "string", "description": "E.164 format, e.g. +14155550123." },
+          "friendlyName": { "type": "string" },
+          "locality": { "type": ["string", "null"] },
+          "region": { "type": ["string", "null"] }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "required": ["error"],
+        "properties": { "error": { "type": "string" } }
+      }
+    },
+    "responses": {
+      "Error": {
+        "description": "The request failed. The body explains why.",
+        "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } }
+      }
+    },
+    "headers": {
+      "X-RateLimit-Limit": { "description": "Requests allowed per window.", "schema": { "type": "string" } },
+      "X-RateLimit-Remaining": { "description": "Requests left in this window.", "schema": { "type": "string" } },
+      "X-RateLimit-Reset": { "description": "When the window resets.", "schema": { "type": "string" } }
+    }
+  },
+  "tags": [
+    { "name": "Numbers", "description": "Phone number availability." },
+    { "name": "Support", "description": "Contact the iCanCall team." }
+  ]
+}
