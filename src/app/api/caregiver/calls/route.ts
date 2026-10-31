@@ -6,6 +6,7 @@ import { resolveAccount } from "@/lib/account";
 import { isSessionLive } from "@/lib/userSessions";
 import { listCalls, type CallRow } from "@/lib/callRecords";
 import { toDisplay, toE164 } from "@/lib/phone";
+import { isVoicemailLocked } from "@/lib/pets";
 
 // The dashboard's call log: the calls every line on the account received
 // (public.calls), newest first, grouped by line. Care Team members see the
@@ -46,7 +47,7 @@ function playable(recordingUrl: string | null): string | null {
   return sid ? `/api/caregiver/recordings/${sid}` : null;
 }
 
-function toEntry(call: CallRow, line: LineRow | undefined) {
+function toEntry(call: CallRow, line: LineRow | undefined, settings: Record<string, unknown>) {
   const ringing = call.status === "ringing";
   if (ringing && Date.now() - new Date(call.started_at).getTime() < STALE_RINGING_MS) return null;
   const status = ringing ? "missed" : call.status;
@@ -54,6 +55,8 @@ function toEntry(call: CallRow, line: LineRow | undefined) {
   const from = toE164(call.from_number);
   const known = from ? (line?.contacts || []).find((c) => c.phone && toE164(c.phone) === from) : undefined;
   const caller = known?.name?.trim() || (from ? toDisplay(from) : "Unknown");
+  // A pet line's voicemail left while out of minutes stays closed until the minutes reset (lib/pets).
+  const locked = status === "voicemail" && isVoicemailLocked(call.locked_at, settings);
 
   return {
     id: call.call_sid,
@@ -63,8 +66,9 @@ function toEntry(call: CallRow, line: LineRow | undefined) {
     rel: status === "connected" ? call.answered_rel || "" : status === "voicemail" ? "Voicemail left" : "No message left",
     dur: status === "connected" ? clock(call.talk_seconds) : status === "voicemail" ? clock(call.recording_seconds) : "—",
     at: call.started_at,
-    transcript: status === "voicemail" ? call.transcript : null,
-    recordingUrl: status === "voicemail" ? playable(call.recording_url) : null,
+    transcript: status === "voicemail" && !locked ? call.transcript : null,
+    recordingUrl: status === "voicemail" && !locked ? playable(call.recording_url) : null,
+    locked,
   };
 }
 
@@ -76,11 +80,13 @@ export async function GET() {
     const { data: lines, error } = await supabase.from("phone_lines").select("id, contacts").eq("user_id", accountId);
     if (error) throw error;
     const byId = new Map(((lines || []) as LineRow[]).map((l) => [l.id, l]));
+    const { data: profile } = await supabase.from("profiles").select("settings").eq("id", accountId).maybeSingle();
+    const settings = (profile?.settings || {}) as Record<string, unknown>;
 
     const calls: Record<string, NonNullable<ReturnType<typeof toEntry>>[]> = {};
     for (const line of byId.keys()) calls[line] = [];
     for (const row of await listCalls([...byId.keys()])) {
-      const entry = toEntry(row, byId.get(row.line_id));
+      const entry = toEntry(row, byId.get(row.line_id), settings);
       if (entry) calls[row.line_id]?.push(entry);
     }
     return NextResponse.json({ success: true, calls });

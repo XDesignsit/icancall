@@ -10,6 +10,7 @@ import { getLocalizedLineLabel, getLocalizedPersonName, getLocalizedRelationship
 import { Icon, ICONS } from "../_icons";
 import { Badge, Toggle, initials } from "../_primitives";
 import { type Contact, type CoverageSlot, type Line } from "../_types";
+import { petsCopy } from "./petsStrings";
 
 
 /* Sample timeline shown for a line that has never had a schedule. */
@@ -655,6 +656,11 @@ export function RoutingView({
 
   const setMode = (mode: "cascade" | "menu" | "simultaneous" | "schedule") => {
     if (mode === line.mode) return;
+    // Pet lines only use the caller menu (lib/pets); the server enforces it too.
+    if (plan === "pets" && mode !== "menu") {
+      showToast(petsCopy(lang).menuOnly);
+      return;
+    }
     if (plan === "essential" && mode !== "cascade") {
       const upgradeMsg = lang === "es" ? "¡Mejora a Pro para desbloquear este modo!"
         : lang === "fr" ? "Passez à la version Pro pour débloquer ce mode !"

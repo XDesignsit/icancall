@@ -13,6 +13,8 @@ import { callPrompt, langParam, langParamXml, languageOffer, parseCallLang, prom
 import { isOwnRecording } from '@/lib/voices';
 import { greetingText as promptGreetingText } from '@/lib/promptRecordings';
 import { alertIfMinutesLow } from '@/lib/minuteAlerts';
+import { isPetsPlan } from '@/lib/pets';
+import { planConfig } from '@/lib/planConfig';
 
 export const preferredRegion = 'iad1';
 
@@ -76,11 +78,32 @@ export async function POST(request: Request) {
       return recorded(text) || getTtsPlayTag(text);
     };
 
+    // Pet lines (lib/pets): caller menu only, the fixed lost-pet greeting, and a
+    // finder is never hung up on.
+    const isPet = isPetsPlan(account?.plan);
+
     if (account) {
       availableMinutes = getAvailableMinutes(account);
       if (availableMinutes <= 0) {
         // Tell the owner, once a cycle, after the caller has their answer.
         after(() => alertIfMinutesLow(account));
+        if (isPet) {
+          // Out of minutes for the year: the finder still leaves a message. It is
+          // kept locked (no transcript) until the owner renews or the minutes
+          // reset, and shown to iCanCall admins (api/twilio/transcription).
+          if (callSid && account.line) {
+            await recordCallStarted(callSid, account.line.id, fromNumber);
+            await recordVoicemailOffered(callSid);
+          }
+          return new NextResponse(
+            `<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+  ${say('petOutOfMinutes')}
+  <Record action="/api/twilio/transcription?kind=recording&amp;locked=1&amp;To=${encodeURIComponent(activeNumber)}${langParamXml(lang)}" maxLength="120" playBeep="true" />
+</Response>`,
+            { headers: { 'Content-Type': 'application/xml' } }
+          );
+        }
         return new NextResponse(
           `<?xml version="1.0" encoding="UTF-8"?>
 <Response>
@@ -102,8 +125,10 @@ export async function POST(request: Request) {
     if (account?.plan === 'essential') {
       lineMode = 'cascade';
     }
+    if (isPet) lineMode = 'menu';
     const settings = account?.line?.settings;
-    const contacts = account?.line?.contacts || [];
+    // A pet line's menu has room for its plan's contacts only, whatever was saved.
+    const contacts = (account?.line?.contacts || []).slice(0, isPet ? planConfig('pets').contactsPerLine : undefined);
     // Callers skip the "Press 1" prompt and hear who is being rung (lib/cascadeAnnounce).
     const directConnect = directConnectOn(settings, lineMode);
 
@@ -121,10 +146,11 @@ export async function POST(request: Request) {
 
     // The second language has its own custom greeting (greeting2), or the
     // standard one translated; the generated English greeting audio is English only.
-    const customGreeting = lang === 'en' ? settings?.greeting : settings?.greeting2;
-    const greetingText = customGreeting || callPrompt(lang, 'greeting');
+    // Pet lines always play the fixed lost-pet greeting.
+    const customGreeting = isPet ? undefined : lang === 'en' ? settings?.greeting : settings?.greeting2;
+    const greetingText = customGreeting || callPrompt(lang, isPet ? 'petGreeting' : 'greeting');
     // Only a recorded greeting is played; a generated one is spoken live in the line's voice (lib/voices).
-    const greetingAudioPath = lang === 'en' && isOwnRecording(settings?.greetingAudioPath) ? settings?.greetingAudioPath : undefined;
+    const greetingAudioPath = !isPet && lang === 'en' && isOwnRecording(settings?.greetingAudioPath) ? settings?.greetingAudioPath : undefined;
     const offerTag = offer && lang === 'en' ? getTtsPlayTag(callPrompt(offer.lang, 'languageOffer', { digit: offer.digit })) : '';
 
     if (!digits) {
@@ -134,6 +160,18 @@ export async function POST(request: Request) {
           recordCallStarted(callSid, account.line.id, fromNumber),
           ensureCallStatusWebhook(account.line, activeNumber),
         ]);
+      }
+
+      // A lapsed pet plan (number held, lib/pets) goes straight to the main contact.
+      const mainContact = contacts[0];
+      if (isPet && account?.subscriptionEnded && mainContact?.phone) {
+        twiml += `
+  ${say('petLapsed')}
+  <Dial timeout="20" action="/api/twilio/voice?Digits=menu-completed&amp;contact=0&amp;To=${encodeURIComponent(activeNumber)}${lq}" method="POST" timeLimit="${Math.floor(availableMinutes * 60)}">
+    <Number>${mainContact.phone}</Number>
+  </Dial>
+</Response>`;
+        return new NextResponse(twiml, { headers: { 'Content-Type': 'application/xml' } });
       }
 
       // 2. Initial Call Greeting & Interactive IVR Menu
@@ -149,7 +187,7 @@ export async function POST(request: Request) {
         }
       }
 
-      const greetingRecording = recorded(lang === 'en' ? promptGreetingText(settings) : '');
+      const greetingRecording = recorded(lang === 'en' && !isPet ? promptGreetingText(settings) : '');
       if (greetingRecording) {
         twiml += `\n  ${greetingRecording}`;
       } else if (greetingVoiceUrl) {

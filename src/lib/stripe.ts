@@ -8,6 +8,7 @@ import { cookies } from "next/headers";
 import { verifySession } from "@/lib/session";
 import { isDemoEmail } from "@/lib/demoAccounts";
 import type { PlanId } from "@/lib/planConfig";
+import { PET_PRICE_IDS, oneTimePetTermForPriceId, type PetTerm } from "@/lib/pets";
 
 export type BillingCycle = "monthly" | "yearly";
 
@@ -35,6 +36,11 @@ export const PLAN_PRICE_IDS: Record<PlanId, Record<BillingCycle, string | undefi
   careteam: {
     monthly: process.env.STRIPE_PRICE_ID_CARETEAM_MONTHLY,
     yearly:  process.env.STRIPE_PRICE_ID_CARETEAM_YEARLY,
+  },
+  // Pets Annual. The one-time pet terms are not subscriptions (lib/pets).
+  pets: {
+    monthly: undefined,
+    yearly:  PET_PRICE_IDS.annual,
   },
 };
 
@@ -130,6 +136,10 @@ export interface VerifiedPlanPurchase {
   subscriptionId?: string;
   /** Start of the paid period the purchase is in, ISO. Seeds settings.stripe_period_start. */
   periodStart?: string;
+  /** Pet plans: the term bought. One-time terms have no subscriptionId. */
+  petTerm?: PetTerm;
+  /** One-time pet terms: the paid Checkout Session, so one payment opens one account. */
+  checkoutId?: string;
 }
 
 export type PurchaseCheck =
@@ -186,9 +196,12 @@ export async function verifyPlanCheckout(
   const found = await retrieveCheckoutSession(sessionId);
   if (!found) return { ok: false, reason: "lookup_failed" };
   const { session, subscription, paid } = found;
-  if (!paid || !subscription) return { ok: false, reason: "not_paid" };
+  if (!paid) return { ok: false, reason: "not_paid" };
+  // One-time pet terms are paid in "payment" mode: no subscription, the line item says what was bought.
+  const petTerm = subscription ? null : oneTimePetTermForPriceId(found.item.priceId);
+  if (!subscription && !petTerm) return { ok: false, reason: "not_paid" };
 
-  const bought = planForPriceId(subscriptionItem(subscription).priceId);
+  const bought = subscription ? planForPriceId(subscriptionItem(subscription).priceId) : { plan: "pets" as const, billingCycle: "yearly" as const };
   if (!bought) return { ok: false, reason: "not_a_plan" };
 
   const email = owner.email.trim().toLowerCase();
@@ -199,10 +212,23 @@ export async function verifyPlanCheckout(
     same(session.customer_details?.email);
   if (!owns) return { ok: false, reason: "not_yours" };
 
+  if (!subscription) {
+    return {
+      ok: true,
+      purchase: {
+        ...bought,
+        petTerm: petTerm!,
+        customerId: entityId(session.customer),
+        checkoutId: session.id,
+        periodStart: new Date(session.created * 1000).toISOString(),
+      },
+    };
+  }
   return {
     ok: true,
     purchase: {
       ...bought,
+      ...(bought.plan === "pets" ? { petTerm: "annual" as const } : {}),
       customerId: entityId(session.customer),
       subscriptionId: subscription.id,
       periodStart: subscriptionPeriod(subscription).start,

@@ -10,6 +10,7 @@ import { isSimulatedBilling } from "@/lib/stripe";
 import { isEndedStatus } from "@/lib/subscriptionEnd";
 import { lineAllowance, paidExtraNumbers, reduceExtraNumbers, saveSettingsPatch } from "@/lib/addons";
 import { planConfig } from "@/lib/planConfig";
+import { PET_LOCKED_LINE_SETTINGS, isPetsPlan } from "@/lib/pets";
 
 // Resolve the account whose lines this request acts on. A Care Team member
 // resolves to the owner's account so both caregivers manage the same lines.
@@ -140,20 +141,25 @@ export async function POST(request: Request) {
     //    identical keys on every row, and new lines from the UI carry
     //    client-generated non-UUID ids anyway — the unique `number` column is
     //    the conflict target, so existing rows keep their ids.
+    // Pet lines (lib/pets): caller menu only, the plan's contact limit, and the
+    // fixed lost-pet greeting, whatever the browser sent.
+    const petLine = isPetsPlan(accountSettings.plan);
     const rows = lines.map((l) => {
       const e164 = toE164(l.number);
+      const extra = { ...(l.settings || {}) };
+      if (petLine) for (const key of PET_LOCKED_LINE_SETTINGS) delete extra[key];
       return {
         user_id: userId,
         number: e164,
         name: l.label, // label on frontend
         type: l.person, // person/role on frontend
-        contacts: l.contacts || [],
+        contacts: petLine ? (l.contacts || []).slice(0, planConfig("pets").contactsPerLine) : l.contacts || [],
         settings: {
           color: l.color,
-          mode: l.mode,
+          mode: petLine ? "menu" : l.mode,
           minutesUsed: l.minutesUsed,
           schedule: l.schedule || [],
-          extraSettings: l.settings || {},
+          extraSettings: extra,
           telephony: telephonyByNumber.get(e164),
         }
       };
