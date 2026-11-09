@@ -4,7 +4,7 @@ const t: HomeTranslations = {
   meta: {
     title: "iCanCall · One number your loved one will never forget",
     description:
-      "iCanCall gives your family one easy phone number that rings your circle of trusted contacts, one after another, until someone picks up. It works on any phone, with no app and no new device.",
+      "iCanCall gives your family one phone number that rings trusted contacts in order until someone answers. Works on any phone, no app needed.",
   },
   skip: "Skip to content",
   nav: {

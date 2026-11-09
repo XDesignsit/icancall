@@ -9,6 +9,8 @@ export const metadata: Metadata = {
   title: enHome.meta.title,
   description: enHome.meta.description,
   openGraph: { type: "website", siteName: "iCanCall", url: "/" },
+  // Page alternates replace the layout's, so the markdown alternate is repeated here.
+  alternates: { canonical: "/", types: { "text/markdown": "/index.md" } },
 };
 
 export const viewport: Viewport = {
