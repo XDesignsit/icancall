@@ -300,6 +300,16 @@ interface AdminAccount {
   [key: string]: unknown;
 }
 
+interface LockedVoicemail {
+  id: string;
+  caller: string;
+  at: string;
+  seconds: number | null;
+  line: string;
+  owner: string;
+  audioUrl: string | null;
+}
+
 export default function SuperAdminApp() {
   const [view, setView] = useState("accounts");
 
@@ -319,6 +329,8 @@ export default function SuperAdminApp() {
     numbersError?: string;
   }
   const [twilio, setTwilio] = useState<TwilioState | null>(null);
+  // Pet-line voicemails left while out of minutes (api/admin/locked-voicemails).
+  const [lockedVms, setLockedVms] = useState<LockedVoicemail[] | null>(null);
   const [twilioLoading, setTwilioLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [, setToast] = useState<string | null>(null);
@@ -351,6 +363,14 @@ export default function SuperAdminApp() {
       }
     }
   }, []);
+
+  useEffect(() => {
+    if (view !== "petVoicemails" || lockedVms) return;
+    fetch("/api/admin/locked-voicemails")
+      .then((r) => r.json())
+      .then((d) => setLockedVms(Array.isArray(d.voicemails) ? d.voicemails : []))
+      .catch(() => setLockedVms([]));
+  }, [view, lockedVms]);
 
   useEffect(() => {
     if (view !== "twilio" || twilio || twilioLoading) return;
@@ -483,6 +503,7 @@ export default function SuperAdminApp() {
           {[
             { id: "accounts", label: "Subscriber Base", icon: "users" },
             { id: "twilio", label: "Twilio Account", icon: "cloud" },
+            { id: "petVoicemails", label: "Locked Pet Voicemails", icon: "cloud" },
           ].map((item) => (
             <button
               key={item.id}
@@ -605,10 +626,12 @@ export default function SuperAdminApp() {
             <h1 style={{ fontSize: "1.35rem", fontWeight: 700, color: "var(--ink)" }}>
               {view === "accounts" && "Subscriber Directory"}
               {view === "twilio" && "Twilio Account"}
+              {view === "petVoicemails" && "Locked Pet Voicemails"}
             </h1>
             <p style={{ fontSize: "0.85rem", color: "var(--ink-soft)" }}>
               {view === "accounts" && "Active family numbers configuration registers"}
               {view === "twilio" && "Live balance, month-to-date spend and provisioned numbers"}
+              {view === "petVoicemails" && "Messages finders left on pet lines that were out of minutes"}
             </p>
           </div>
 
@@ -717,6 +740,29 @@ export default function SuperAdminApp() {
                       ))}
                     </tbody>
                   </table>
+                </div>
+              </div>
+            )}
+
+            {/* VIEW: LOCKED PET VOICEMAILS */}
+            {view === "petVoicemails" && (
+              <div className="card">
+                <div style={{ padding: "8px 20px 18px" }}>
+                  {lockedVms === null && <div style={{ fontSize: "0.88rem", color: "var(--ink-soft)", padding: "12px 0" }}>Loading…</div>}
+                  {lockedVms?.length === 0 && (
+                    <div style={{ fontSize: "0.88rem", color: "var(--ink-soft)", padding: "12px 0" }}>No locked pet voicemails.</div>
+                  )}
+                  {lockedVms?.map((v) => (
+                    <div key={v.id} style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 16, padding: "12px 0", borderBottom: "1px solid var(--line-soft)", fontSize: "0.9rem" }}>
+                      <div style={{ minWidth: 200, flex: 1 }}>
+                        <div style={{ fontWeight: 600, color: "var(--ink)" }}>Caller {v.caller}</div>
+                        <div style={{ color: "var(--ink-soft)", fontSize: "0.82rem" }}>
+                          {new Date(v.at).toLocaleString()} · {v.seconds ?? 0}s · line {v.line} · {v.owner}
+                        </div>
+                      </div>
+                      {v.audioUrl ? <audio controls preload="none" src={v.audioUrl} style={{ height: 34 }} /> : <span style={{ color: "var(--ink-faint)" }}>No audio</span>}
+                    </div>
+                  ))}
                 </div>
               </div>
             )}

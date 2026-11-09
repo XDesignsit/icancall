@@ -1,8 +1,8 @@
 import { after, NextResponse } from 'next/server';
 import { recordedPromptTag, ttsPlayTag, verifyTelephonyWebhook } from '@/lib/twilioWebhook';
 import { findAccountByTwilioNumber } from '@/lib/db';
-import { claimCallAlert, getCall, recordTranscript, recordVoicemail, type CallRow } from '@/lib/callRecords';
-import { sendCallAlert } from '@/lib/callAlerts';
+import { claimCallAlert, getCall, lockVoicemail, recordTranscript, recordVoicemail, type CallRow } from '@/lib/callRecords';
+import { sendCallAlert, sendLockedVoicemailAlert } from '@/lib/callAlerts';
 import { callPrompt, parseCallLang } from '@/lib/callPrompts';
 
 export const preferredRegion = 'iad1';
@@ -48,7 +48,11 @@ export async function POST(request: Request) {
       // the call stays a missed call.
       if (callSid && recordingUrl && seconds > 0) {
         await recordVoicemail(callSid, recordingUrl, seconds);
-        if (account) {
+        if (url.searchParams.get('locked') === '1') {
+          // A pet line out of minutes (voice webhook): no transcript, a locked alert now.
+          const row = await lockVoicemail(callSid);
+          if (account && row && (await claimCallAlert(callSid))) after(() => sendLockedVoicemailAlert(account, row));
+        } else if (account) {
           after(async () => {
             await new Promise((resolve) => setTimeout(resolve, TRANSCRIPT_WAIT_MS));
             try {

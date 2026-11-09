@@ -6,7 +6,7 @@
 // advertise Essential and Pro for now. Care Team is app-only until it
 // graduates to the marketing pages.
 
-export type PlanId = "essential" | "pro" | "careteam";
+export type PlanId = "essential" | "pro" | "careteam" | "pets";
 
 export interface PlanConfig {
   id: PlanId;
@@ -67,6 +67,20 @@ export const PLAN_CONFIG: Record<PlanId, PlanConfig> = {
     seats: 2,
     voiceClone: true,
   },
+  // Sold on /pets on one of five terms (lib/pets). Minutes are per year, not per month.
+  pets: {
+    id: "pets",
+    name: "Pets",
+    monthlyAmount: 0,
+    annualAmount: 29,
+    monthlyLabel: "",
+    annualLabel: "$29",
+    includedLines: 1,
+    contactsPerLine: 6,
+    voiceMinutes: 30,
+    seats: 1,
+    voiceClone: false,
+  },
 };
 
 /** Resolve a stored plan id (possibly missing/unknown) to its config. */
@@ -74,7 +88,8 @@ export function planConfig(plan: string | undefined | null): PlanConfig {
   return PLAN_CONFIG[(plan as PlanId) || "pro"] || PLAN_CONFIG.pro;
 }
 
-const PLAN_RANK: Record<PlanId, number> = { essential: 0, pro: 1, careteam: 2 };
+// Pets sits outside the ladder: a pet account cannot switch to or from the other plans.
+const PLAN_RANK: Record<PlanId, number> = { essential: 0, pro: 1, careteam: 2, pets: -1 };
 
 /**
  * Whether switching subscriptions bills the customer right away. Moving up a

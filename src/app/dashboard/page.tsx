@@ -15,6 +15,7 @@ import {
   getLineDefaultLabel,
   getLocalizedLineLabel,
   getLocalizedPersonName,
+  planDisplayName,
 } from "./_data";
 import { ICONS, Icon } from "./_icons";
 import { AreaFlag, fetchNumbersLive } from "./_numbers";
@@ -93,6 +94,8 @@ interface ProfileSettings {
   card?: Account["card"];
   plan?: Account["plan"];
   billingCycle?: Account["billingCycle"];
+  petTerm?: string;
+  petCoverEndsAt?: string | null;
   subscriptionStatus?: string;
   subscriptionEndsAt?: string | null;
   pendingPlanChange?: Account["pendingPlanChange"];
@@ -298,6 +301,8 @@ export default function DashboardApp() {
       billingAddr: settings.billingAddr || "",
       plan: settings.plan || "essential",
       billingCycle: settings.billingCycle || "monthly",
+      petTerm: settings.petTerm || undefined,
+      petCoverEndsAt: settings.petCoverEndsAt || null,
       subscriptionStatus: settings.subscriptionStatus || undefined,
       subscriptionEndsAt: settings.subscriptionEndsAt || null,
       pendingPlanChange: settings.pendingPlanChange || null,
@@ -909,7 +914,9 @@ export default function DashboardApp() {
           <div className="plan-card">
             <div className="row">
               <span className="pill">
-                {account.plan === "careteam"
+                {account.plan === "pets"
+                  ? planDisplayName("pets", lang).toUpperCase()
+                  : account.plan === "careteam"
                   ? (lang === "ja" ? "ケアチームプラン"
                    : lang === "zh" ? "护理团队方案"
                    : lang === "ar" ? "باقة فريق الرعاية"
@@ -1077,7 +1084,8 @@ export default function DashboardApp() {
                   className="add-num"
                   onClick={() => {
                     setSwitchOpen(false);
-                    if (account.plan !== "essential") {
+                    // Pet plans have one number and no add-ons (lib/pets).
+                    if (account.plan !== "essential" && account.plan !== "pets") {
                       loadHeaderNumbers(headerAreaCode);
                       setHeaderSelectedNumber(null);
                       setHeaderAddonModalOpen(true);

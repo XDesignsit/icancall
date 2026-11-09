@@ -49,6 +49,39 @@ export function alertText(account: Account, call: CallRow): string {
   return `iCanCall: Missed call from ${caller} on ${line}. Nobody answered and no message was left. ${dashboardLink('missed')}`;
 }
 
+/**
+ * A pet line's voicemail left while it was out of minutes: the owner hears a
+ * message came in, without the recording or a transcript, and is asked to
+ * unlock it from the dashboard (renew, or wait for the yearly reset).
+ */
+export async function sendLockedVoicemailAlert(account: Account, call: CallRow): Promise<void> {
+  const caller = callerLabel(account, call.from_number);
+  const line = account.line?.name?.trim() || 'your lost-pet line';
+  const link = dashboardLink('voicemail');
+  const to = account.notifyEmail || account.email;
+  if (to) {
+    try {
+      const { sendEmail } = await import('@/lib/mail');
+      await sendEmail({
+        to,
+        subject: 'New voicemail about your pet (locked)',
+        text: `${caller} left a voicemail on ${line}, but the line is out of minutes for the year, so the message is locked. Open your dashboard to unlock it: ${link}`,
+        html: `<p>${caller} left a voicemail on ${line}.</p><p>Your line is out of minutes for the year, so the message is locked. Open your dashboard to unlock it.</p><p><a href="${link}">Open my dashboard</a></p>`,
+      });
+    } catch (err) {
+      console.error(`Locked voicemail email for ${call.call_sid} failed:`, err);
+    }
+  }
+  if (account.smsPhone) {
+    try {
+      const { sendSms } = await import('@/lib/twilio');
+      await sendSms(account.smsPhone, `iCanCall: ${caller} left a voicemail about your pet on ${line}. Your line is out of minutes, so it is locked. Unlock it in your dashboard: ${link}`);
+    } catch (err) {
+      console.error(`Locked voicemail text for ${call.call_sid} failed:`, err);
+    }
+  }
+}
+
 export async function sendCallAlert(account: Account, call: CallRow): Promise<void> {
   const settings = account.line?.settings || {};
   const notifSMS = settings.notifSMS ?? true;

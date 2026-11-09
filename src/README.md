@@ -6,18 +6,18 @@ Runs on Vercel (App Router). Server code talks to Supabase, Stripe, Twilio and T
 |---|---|---|
 | `proxy.ts` | Request proxy: prelaunch redirect and Markdown edition for `Accept: text/markdown` | `lib/prelaunch.ts` |
 | `app/page.tsx`, `app/_home/` | Homepage v2 (`HomePage`, `HomeV2`, `controller.ts`, `sim.ts`, section CSS) | standalone sync guide |
-| `app/{parents,seniors,caregivers}/route.ts` | Serve the standalone landing pages | standalone sync guide |
+| `app/{parents,seniors,caregivers,pets}/route.ts` | Serve the standalone landing pages (Pets source: `scratch/pets-landing/`) | standalone sync guide |
 | `app/signup/`, `app/login/`, `app/accept-invite/` | Signup wizard, login, caregiver invite acceptance | `lib/onboarding.ts`, `lib/session.ts` |
 | `app/dashboard/` | Dashboard shell, `views/*View.tsx` (plus `views/VoiceCloneCard.tsx`, `views/PromptRecorder.tsx`), `_primitives.tsx`, `_data.ts` (demo data and i18n helpers) | AGENTS.md no-emoji and quota rules |
 | `app/super-admin/` | Admin console (Twilio balance, accounts) | `lib/roles.ts` |
 | `app/coming-soon/`, `contact/`, `privacy-policy/`, `terms-of-service/` | Prelaunch, contact and legal pages | AGENTS.md waiting-page rule |
 | `app/api/auth/` | OTP, login, signup, Google OAuth, sessions | `lib/otpStore.ts`, `lib/oauth.ts`, `lib/userSessions.ts` |
-| `app/api/billing/` | Checkout, add-on confirm, change-plan, cancel, portal, Stripe webhook | `lib/stripe.ts`, `lib/planSchedule.ts`, `lib/billingOwner.ts` |
+| `app/api/billing/` | Checkout, add-on confirm, change-plan, cancel, portal, Pets Annual early renewal (`renew-pets`), Stripe webhook | `lib/stripe.ts`, `lib/planSchedule.ts`, `lib/billingOwner.ts` |
 | `app/api/twilio/` | Voice, agent join/transfer, cascade (and its direct-connect hold loop), call/SMS status, transcription, numbers | `lib/twilioWebhook.ts` (signature check), `lib/conferenceBridge.ts`, `lib/cascadeAnnounce.ts`, `lib/callPrompts.ts` (caller-facing sentences per language, Bilingual Support), `lib/promptRecordings.ts` (owner-recorded prompts, played via `prompt-audio`) |
 | `app/api/caregiver/` | Lines, profile, seats, recordings, receipts, SMS alerts, voice generation, the owner's cloned voice | `lib/account.ts`, `lib/voices.ts` (which voice a line may use), `lib/voiceClone.ts`, `lib/promptRecordings.ts` |
 | `app/api/cron/` | Number release and annual-minute reset (scheduled in `vercel.json`) | `lib/subscriptionEnd.ts`, `lib/minutesCycle.ts` |
 | `app/api/{admin,contact,waitlist,send-*}/` | Admin, contact form, waitlist, system and voicemail alerts | `lib/mail.ts`, `lib/rateLimit.ts` |
 | `app/opengraph-image.tsx`, `app/api/og/` | Link preview cards: the site-wide default and one per kind of link sent by text (`/dashboard?n=<kind>`) | `lib/linkPreviews.tsx`, `lib/linkKinds.ts` |
-| `lib/` | Server and shared logic: plans (`planConfig.ts`), display prices (`pricing.ts`), DB (`db.ts`, `supabase.ts`), phone, mail, carriers | file header comments |
+| `lib/` | Server and shared logic: plans (`planConfig.ts`; pet plan terms and rules in `pets.ts`), display prices (`pricing.ts`), DB (`db.ts`, `supabase.ts`), phone, mail, carriers | file header comments |
 | `lib/translations/` | Per-language dictionaries (`home/` for the homepage); English is `en.ts` | AGENTS.md sync rule |
 | `components/ui/`, `components/domain/` | Design-system primitives and domain components; `index.ts` re-exports both | design-system sync |

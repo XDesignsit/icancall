@@ -67,6 +67,8 @@ export interface CallLogEntry {
   transcript?: string | null;
   /** The voicemail's audio, for voicemail calls from the call log API. */
   recordingUrl?: string | null;
+  /** A pet line's voicemail left while out of minutes: closed until the minutes reset (lib/pets). */
+  locked?: boolean;
 }
 
 export interface Account {
@@ -86,6 +88,9 @@ export interface Account {
   billingAddr: string;
   plan: PlanId;
   billingCycle: "monthly" | "yearly";
+  /** Pet plans (lib/pets): the term bought, and when a one-time term's cover ends. */
+  petTerm?: string;
+  petCoverEndsAt?: string | null;
   /** Stripe subscription state, written server-side only. "scheduled_cancel" = cancelled but active until subscriptionEndsAt. */
   subscriptionStatus?: string;
   subscriptionEndsAt?: string | null;

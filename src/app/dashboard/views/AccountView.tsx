@@ -50,6 +50,8 @@ import { AREA_SUGGESTIONS, AreaFlag, fetchNumbersLive } from "../_numbers";
 import { Badge, initials, Modal, Toggle } from "../_primitives";
 import type { Account, Line, PickerNumber } from "../_types";
 import { SmsAlertsCard } from "./SmsAlertsCard";
+import { PetBillingCard } from "./PetBillingCard";
+import { PET_TERMS, isOneTimePets, isPetTerm } from "@/lib/pets";
 
 interface SeatMemberView { email: string; status: "invited" | "active"; invitedAt: string; acceptedAt?: string }
 
@@ -211,8 +213,12 @@ export function AccountView({
   // hold the subscription or you occupy a caregiver seat on someone else's.
   // Billing copy always names the plan this account is actually on.
   const planName = planDisplayName(a.plan, lang);
-  const planInvoiceDesc = `${planName} · ${a.billingCycle === "yearly" ? ext.cycleAnnual : ext.cycleMonthly}`;
-  const planInvoiceAmount = a.billingCycle === "yearly" ? planConfig(a.plan).annualLabel : planConfig(a.plan).monthlyLabel;
+  // Pet plans (lib/pets) have their own billing card, no add-ons and no plan switching.
+  const isPet = a.plan === "pets";
+  const isOneTimePet = isOneTimePets({ plan: a.plan, petTerm: a.petTerm });
+  const petTerm = isPetTerm(a.petTerm) ? a.petTerm : null;
+  const planInvoiceDesc = petTerm ? PET_TERMS[petTerm].name : `${planName} · ${a.billingCycle === "yearly" ? ext.cycleAnnual : ext.cycleMonthly}`;
+  const planInvoiceAmount = petTerm ? `$${PET_TERMS[petTerm].amount}` : a.billingCycle === "yearly" ? planConfig(a.plan).annualLabel : planConfig(a.plan).monthlyLabel;
   const roleLabel = viewerRole === "owner" ? ext.accessOwner : ext.careCoordinator;
   const roleDesc = viewerRole === "owner" ? ext.accessOwnerDesc : ext.accessMemberDesc;
   const currentExtraLines = Math.max(0, lines.length - baseLinesCount);
@@ -708,7 +714,7 @@ export function AccountView({
     
     // Tier order: essential < pro < careteam. Compare ranks to label the
     // action as an upgrade or downgrade, and name the destination plan.
-    const rank: Record<PlanId, number> = { essential: 0, pro: 1, careteam: 2 };
+    const rank: Record<PlanId, number> = { essential: 0, pro: 1, careteam: 2, pets: -1 };
     const targetName = planDisplayName(tempPlan, lang);
 
     if (rank[tempPlan] > rank[account.plan]) {
@@ -2359,6 +2365,7 @@ export function AccountView({
             </Modal>
           )}
 
+          {isPet ? <PetBillingCard account={account} lang={lang} title={d.account.billing} showToast={showToast} /> : (
           <div className="card section-gap">
             <div className="card-head">
               <div>
@@ -2636,8 +2643,9 @@ export function AccountView({
               )}
             </div>
           </div>
+          )}
 
-          {(() => {
+          {!isPet && (() => {
             const planMaxIncluded = planConfig(a.plan).includedLines;
             const unusedPlanLines = Math.max(0, planMaxIncluded + (a.addons?.extraNumbers || 0) - lines.length);
             const chargeableNewNumbers = tempExtraNumbers > 0 ? Math.max(0, tempExtraNumbers - unusedPlanLines) : tempExtraNumbers;
@@ -2801,7 +2809,8 @@ export function AccountView({
           );
         })()}
 
-          {(() => {
+          {/* Pet plans show their yearly minutes on the pet billing card; they have no add-on minutes. */}
+          {!isPet && (() => {
             const ad = a.addons || {};
             const planBaseMinutes = planConfig(a.plan).voiceMinutes;
             const addonMinutes = (ad.minuteBlocks || 0) * 30;
@@ -3114,6 +3123,8 @@ export function AccountView({
             </div>
           </div>
 
+          {/* A one-time pet term has no subscription to cancel. */}
+          {!isOneTimePet && (
           <div className="card danger-zone">
             <div className="card-head">
               <div>
@@ -3142,9 +3153,12 @@ export function AccountView({
                   {cancelPending ? cs.working : cs.resume}
                 </button>
               ) : subscriptionEnded ? (
+                // The plan modal sells the family plans; an ended pet plan is renewed with support (lib/pets).
+                !isPet && (
                 <button className="btn btn-primary" onClick={() => setPlanModalOpen(true)}>
                   {cs.resubscribe}
                 </button>
+                )
               ) : (
                 <button
                   className="btn btn-danger-ghost"
@@ -3155,6 +3169,7 @@ export function AccountView({
               )}
             </div>
           </div>
+          )}
 
           {cancelConfirmOpen && (
             <Modal

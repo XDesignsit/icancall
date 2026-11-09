@@ -1,10 +1,12 @@
-// The voice-minute pool runs on a monthly cycle for every plan. Monthly
+// The voice-minute pool runs on a monthly cycle for every plan except pets,
+// whose 30 minutes are per year (minutesCycleMonths). Monthly
 // subscriptions reset when Stripe reports the renewal invoice paid
 // (api/billing/webhook). Annual subscriptions are only charged once a year, so
 // the daily job api/cron/reset-annual-minutes gives them the same monthly
 // reset, counted from the day their billing period started.
 
 import { planConfig } from "@/lib/planConfig";
+import { isOneTimePets, isPetsPlan } from "@/lib/pets";
 
 type Settings = Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
 
@@ -78,15 +80,20 @@ export function addMonths(from: Date, months: number): Date {
   return d;
 }
 
+/** Length of an account's minutes cycle in months: a year for pet plans, a month for everyone else. */
+export function minutesCycleMonths(settings: Settings): number {
+  return isPetsPlan(settings?.plan) ? 12 : 1;
+}
+
 /**
- * The start of the monthly minutes cycle that `now` falls in, for a billing
- * period that began at `periodStart`. Always counted from the period start
- * itself, so month lengths never make it drift.
+ * The start of the minutes cycle (`months` long, monthly by default) that
+ * `now` falls in, for a billing period that began at `periodStart`. Always
+ * counted from the period start itself, so month lengths never make it drift.
  */
-export function currentMinutesCycleStart(periodStart: Date, now: Date): Date {
-  let n = Math.max(0, (now.getUTCFullYear() - periodStart.getUTCFullYear()) * 12 + now.getUTCMonth() - periodStart.getUTCMonth());
-  while (n > 0 && addMonths(periodStart, n).getTime() > now.getTime()) n--;
-  return addMonths(periodStart, n);
+export function currentMinutesCycleStart(periodStart: Date, now: Date, months = 1): Date {
+  let n = Math.max(0, Math.floor(((now.getUTCFullYear() - periodStart.getUTCFullYear()) * 12 + now.getUTCMonth() - periodStart.getUTCMonth()) / months));
+  while (n > 0 && addMonths(periodStart, n * months).getTime() > now.getTime()) n--;
+  return addMonths(periodStart, n * months);
 }
 
 /**
@@ -119,11 +126,13 @@ export function renewalDates(settings: Settings, now: Date = new Date()): { bill
   while (addMonths(start, n * stepMonths).getTime() <= now.getTime() && n < 1000) n++;
   const renews = addMonths(start, n * stepMonths);
 
-  const minutesReset = addMonths(currentMinutesCycleStart(start, now), 1);
+  const cycleMonths = minutesCycleMonths(settings);
+  const minutesReset = addMonths(currentMinutesCycleStart(start, now, cycleMonths), cycleMonths);
   const beforeEnd = (d: Date) => !endsAt || d.getTime() < endsAt.getTime();
   return {
     // A plan that is set to end does not renew, it ends: the cancel section says when.
-    billingRenewsAt: endsAt ? null : renews.toISOString(),
+    // A one-time pet term never renews.
+    billingRenewsAt: endsAt || isOneTimePets(settings) ? null : renews.toISOString(),
     minutesResetsAt: beforeEnd(minutesReset) ? minutesReset.toISOString() : null,
   };
 }

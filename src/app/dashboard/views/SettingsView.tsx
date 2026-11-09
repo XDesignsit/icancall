@@ -12,6 +12,7 @@ import { Icon } from "../_icons";
 import { Toggle } from "../_primitives";
 import { type Line } from "../_types";
 import { VoiceCloneCard } from "./VoiceCloneCard";
+import { petsCopy } from "./petsStrings";
 
 
 /* Greetings & alerts */
@@ -112,6 +113,10 @@ export function SettingsView({
           </div>
         </div>
         <div className="card-pad">
+          {/* Pet lines play the fixed lost-pet greeting (lib/pets); the server ignores a custom one. */}
+          {plan === "pets" ? (
+            <p style={{ fontSize: "0.92rem", color: "var(--ink-soft)", margin: "0 0 12px" }}>{petsCopy(lang).greetingLocked}</p>
+          ) : (
           <div className="field">
             <label>{d.settings.ttsGreeting}</label>
             <textarea
@@ -144,6 +149,7 @@ export function SettingsView({
               )}
             </div>
           </div>
+          )}
           <div className="set-row" style={{ borderBottom: '1px solid var(--line-faint)' }}>
             <div className="txt">
               <b>{ext.elevenLabsTitle}</b>
@@ -162,7 +168,7 @@ export function SettingsView({
                 color: 'var(--ink)'
               }}
             >
-              {customVoice && plan !== "essential" && (
+              {customVoice && plan !== "essential" && plan !== "pets" && (
                 <optgroup label={vt.myVoiceGroup}>
                   <option value={customVoice.id}>{vt.myVoice}</option>
                 </optgroup>
@@ -217,7 +223,7 @@ export function SettingsView({
               <p style={{ fontSize: '0.82rem', color: 'var(--ink-faint)', marginTop: 6 }}>{d.settings.secondLangSub}</p>
             </div>
           )}
-          {bilingual && (
+          {bilingual && plan !== "pets" && (
             <div className="field" style={{ marginTop: 16, marginBottom: 0 }}>
               <label>{ext.greeting2Label}</label>
               <textarea
@@ -232,7 +238,7 @@ export function SettingsView({
         </div>
       </div>
 
-      <VoiceCloneCard
+      {plan !== "pets" && <VoiceCloneCard
         line={line}
         setLine={setLine}
         lang={lang}
@@ -242,7 +248,7 @@ export function SettingsView({
         isOwner={isOwner}
         showToast={showToast}
         onUpgrade={onUpgrade}
-      />
+      />}
 
       <div className="card">
         <div className="card-head">

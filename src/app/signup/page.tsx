@@ -5,9 +5,10 @@ import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { translations, type HomepageTranslations } from "@/lib/translations";
 import Turnstile from "@/components/Turnstile";
+import { PET_TERMS, isPetTerm, type PetTerm } from "@/lib/pets";
 
 /* ============ TYPES ============ */
-type Plan = "essential" | "pro" | "careteam";
+type Plan = "essential" | "pro" | "careteam" | "pets";
 type BillingCycle = "monthly" | "yearly";
 
 interface AccountData {
@@ -38,6 +39,8 @@ interface PaymentData {
 interface OnboardingData {
   plan: Plan;
   billing: BillingCycle;
+  /** Pet plans only (lib/pets): which term is being bought. */
+  term: PetTerm;
   account: AccountData;
   numbers: NumberData[];
   payment: PaymentData;
@@ -75,12 +78,47 @@ const PLANS = [
     annual:  { amt: 499,   label: "$499",   per: "/yr", note: "$41.58/mo, billed yearly" },
     feats: ["5 phone numbers", "15 trusted contacts per number", "All routing modes + scheduling", "150 pooled minutes", "2 caregiver logins"],
   },
+  // Sold on /pets; the price depends on the term (PetPlanStep, lib/pets).
+  {
+    id: "pets" as Plan,
+    name: "Pets",
+    tag: null,
+    desc: "A lost-pet number for your pet's microchip.",
+    numbers: 1,
+    monthly: { amt: 29, label: "$29", per: "/yr", note: "Billed yearly" },
+    annual:  { amt: 29, label: "$29", per: "/yr", note: "Billed yearly" },
+    feats: [],
+  },
 ];
+
+const PET_TERM_ORDER: PetTerm[] = ["annual", "lifetime", "small_bird_lifetime", "parrot_10yr", "parrot_20yr"];
+
+/** A pet term's card text, from the wizard translations (t.pets). */
+function petTermCopy(t: HomepageTranslations, term: PetTerm) {
+  const p = t.pets;
+  const byTerm: Record<PetTerm, { name?: string; desc?: string; note?: string; tag?: string }> = {
+    annual: { name: p?.annualName, desc: p?.annualDesc, note: p?.annualNote },
+    lifetime: { name: p?.lifetimeName, desc: p?.lifetimeDesc, note: p?.lifetimeNote, tag: p?.payOnceTag },
+    small_bird_lifetime: { name: p?.smallBirdName, desc: p?.smallBirdDesc, note: p?.smallBirdNote },
+    parrot_10yr: { name: p?.parrot10Name, desc: p?.parrot10Desc, note: p?.parrot10Note, tag: p?.largeParrotsTag },
+    parrot_20yr: { name: p?.parrot20Name, desc: p?.parrot20Desc, note: p?.parrot20Note },
+  };
+  const c = byTerm[term];
+  const cfg = PET_TERMS[term];
+  return {
+    name: c.name || cfg.name,
+    desc: c.desc || "",
+    note: c.note || "",
+    tag: c.tag || null,
+    label: `$${cfg.amount}`,
+    per: cfg.oneTime ? ` ${p?.oneTime || "one time"}` : ` ${p?.perYear || "/ year"}`,
+  };
+}
 
 const planById = (id: Plan) => PLANS.find((p) => p.id === id) || PLANS[0];
 // Sentence templates read "Your {planName} plan ..." so they take the bare name;
 // the pricing titles ("Pro Plan") would double the word.
-const planShortName = (id: Plan) => (id === "careteam" ? "Care Team" : id === "pro" ? "Pro" : "Essential");
+const planShortName = (id: Plan) => (id === "pets" ? "Pets" : id === "careteam" ? "Care Team" : id === "pro" ? "Pro" : "Essential");
 
 const AREA_SUGGESTIONS = [
   { code: "470", city: "Atlanta" },
@@ -575,8 +613,50 @@ function StepNav({ onBack, onNext, nextLabel, nextDisabled, backLabel, t }: { on
 }
 
 /* ============ STEP 1 — Plan ============ */
+/* Pet plans (from /pets): one card per term, no monthly option. */
+function PetPlanStep({ data, set, onNext, onBack, t }: { data: OnboardingData; set: (patch: Partial<OnboardingData>) => void; onNext: () => void; onBack?: () => void; t: HomepageTranslations }) {
+  const feats = [t.pets?.feat1, t.pets?.feat2, t.pets?.feat3, t.pets?.feat4, t.pets?.feat5].filter(Boolean);
+  return (
+    <div className="panel">
+      <span className="step-eyebrow">{t.onboarding.step2Eyebrow}</span>
+      <h1>{t.pets?.title || "Choose your pet plan."}</h1>
+      <p className="sub">{t.pets?.subtitle}</p>
+
+      <div className="plan-cards">
+        {PET_TERM_ORDER.map((term) => {
+          const c = petTermCopy(t, term);
+          return (
+            <button key={term} className={"plan-card" + (data.term === term ? " sel" : "")} onClick={() => set({ term })}>
+              <span className="radio" />
+              <span className="pname">{c.name}{c.tag && <span className="ptag">{c.tag}</span>}</span>
+              <span className="pprice">
+                <b>{c.label}</b>
+                <span>{c.per}</span>
+                <span className="yearly">{c.note}</span>
+              </span>
+              <span className="pdesc">{c.desc}</span>
+            </button>
+          );
+        })}
+      </div>
+
+      <ul className="plan-feats mt-6">
+        {feats.map((f, i) => (
+          <li key={i}>
+            <Ico.check className="w-[15px] h-[15px] text-green-500" /> {f}
+          </li>
+        ))}
+      </ul>
+
+      <div className="trust-row"><Ico.shield className="w-[17px] h-[17px]" /> {t.onboarding.trustRow}</div>
+      <StepNav onBack={onBack} onNext={onNext} t={t} />
+    </div>
+  );
+}
+
 function PlanStep({ data, set, onNext, onBack, t }: { data: OnboardingData; set: (patch: Partial<OnboardingData>) => void; onNext: () => void; onBack?: () => void; t: HomepageTranslations; lang: string }) {
   const { plan, billing } = data;
+  if (plan === "pets") return <PetPlanStep data={data} set={set} onNext={onNext} onBack={onBack} t={t} />;
 
   const essentialFeats = [
     t.pricing.eFeat1,
@@ -1352,7 +1432,8 @@ function CheckoutModal({ checkoutUrl, popupBlocked, onPopupOpened, onClose, t }:
 /* ============ STEP 4 — Payment ============ */
 function PaymentStep({ data, onNext, onBack, t, lang }: { data: OnboardingData; set: (patch: Partial<OnboardingData>) => void; onNext: () => void; onBack: () => void; t: HomepageTranslations; lang: string }) {
   const plan = planById(data.plan);
-  const price = data.billing === "yearly" ? plan.annual : plan.monthly;
+  const pet = data.plan === "pets" ? petTermCopy(t, data.term) : null;
+  const price = pet ? { label: pet.label } : data.billing === "yearly" ? plan.annual : plan.monthly;
   const [modalOpen, setModalOpen] = useState(false);
   const [checkoutUrl, setCheckoutUrl] = useState("");
   const [checkoutLoading, setCheckoutLoading] = useState(false);
@@ -1375,7 +1456,7 @@ function PaymentStep({ data, onNext, onBack, t, lang }: { data: OnboardingData; 
       const res = await fetch("/api/billing/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ plan: data.plan, billing: data.billing, email: data.account.email }),
+        body: JSON.stringify({ plan: data.plan, billing: data.billing, email: data.account.email, ...(data.plan === "pets" ? { term: data.term } : {}) }),
       });
       if (!res.ok) throw new Error("checkout_failed");
       const { checkoutUrl: url, checkoutId } = await res.json();
@@ -1430,6 +1511,7 @@ function PaymentStep({ data, onNext, onBack, t, lang }: { data: OnboardingData; 
             captchaToken: data.account.captchaToken,
             smsConsent: !!data.account.smsConsent,
             smsPhone: data.account.smsPhone,
+            ...(data.plan === "pets" ? { term: data.term } : {}),
             plan: data.plan,
             billing: data.billing,
             // Stripe appends session_id to the return URL; prefer what it reports.
@@ -1466,7 +1548,7 @@ function PaymentStep({ data, onNext, onBack, t, lang }: { data: OnboardingData; 
 
   const translatedPlanName = planShortName(data.plan);
   const billingName = data.billing === "yearly" ? t.onboarding.annual : t.onboarding.monthly;
-  const orderPlanStr = t.onboarding.orderPlan
+  const orderPlanStr = pet ? pet.name : t.onboarding.orderPlan
     .replace("{planName}", translatedPlanName)
     .replace("{billingName}", billingName);
 
@@ -1474,7 +1556,7 @@ function PaymentStep({ data, onNext, onBack, t, lang }: { data: OnboardingData; 
     ? t.onboarding.orderNumberPlural.replace("{count}", String(plan.numbers))
     : t.onboarding.orderNumberSingle;
 
-  const perSuffix = data.billing === "yearly" ? t.ui.perYear : t.ui.perMonth;
+  const perSuffix = pet ? pet.per : data.billing === "yearly" ? t.ui.perYear : t.ui.perMonth;
   const billedPeriodTrans = data.billing === "yearly" ? t.onboarding.billedYearly : t.onboarding.billedMonthly;
   const bannerSubStr = PAYMENT_BANNER_SUB[lang] || PAYMENT_BANNER_SUB.en;
 
@@ -1487,7 +1569,7 @@ function PaymentStep({ data, onNext, onBack, t, lang }: { data: OnboardingData; 
       <div className="trial-banner">
         <span className="ti"><Ico.check className="w-[19px] h-[19px] text-white" /></span>
         <div>
-          <b>{price.label}{perSuffix}, billed {billedPeriodTrans}</b>
+          <b>{pet ? `${price.label}${perSuffix}` : `${price.label}${perSuffix}, billed ${billedPeriodTrans}`}</b>
           <p>{bannerSubStr}</p>
         </div>
       </div>
@@ -1552,7 +1634,7 @@ function PaymentStep({ data, onNext, onBack, t, lang }: { data: OnboardingData; 
 /* ============ STEP 5 — Success ============ */
 function SuccessStep({ data, t, lang }: { data: OnboardingData; t: HomepageTranslations; lang: string }) {
   const plan = planById(data.plan);
-  const contactCap = plan.id === "careteam" ? 15 : plan.id === "pro" ? 6 : 3;
+  const contactCap = plan.id === "careteam" ? 15 : plan.id === "pro" || plan.id === "pets" ? 6 : 3;
   const shown = Math.min(contactCap, 4);
   const ownerFirst = (data.account.name || "You").trim().split(/\s+/)[0];
 
@@ -1652,6 +1734,7 @@ function OnboardingContent() {
   const [data, setData] = useState<OnboardingData>({
     plan: "essential",
     billing: "monthly",
+    term: "annual",
     account: { name: "", email: "", password: "", smsConsent: false, smsPhone: "", phoneVerified: false, emailVerified: false },
     numbers: [],
     payment: { name: "", card: "", exp: "", cvc: "" },
@@ -1664,11 +1747,15 @@ function OnboardingContent() {
     const planParam = searchParams.get("plan");
     const billingParam = searchParams.get("billing");
     
-    const plans: Plan[] = ["essential", "pro", "careteam"];
+    const plans: Plan[] = ["essential", "pro", "careteam", "pets"];
+    const plan = plans.includes(planParam as Plan) ? (planParam as Plan) : "essential";
+    const termParam = searchParams.get("term");
 
     set({
-      plan: plans.includes(planParam as Plan) ? (planParam as Plan) : "essential",
-      billing: billingParam === "annual" ? "yearly" : "monthly"
+      plan,
+      // Pet plans are never monthly: Annual renews yearly, the rest are paid once.
+      billing: plan === "pets" || billingParam === "annual" || billingParam === "yearly" ? "yearly" : "monthly",
+      ...(plan === "pets" ? { term: isPetTerm(termParam) ? termParam : "annual" } : {}),
     });
   }, [searchParams]);
 

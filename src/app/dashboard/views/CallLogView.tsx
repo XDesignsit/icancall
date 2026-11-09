@@ -7,6 +7,7 @@ import { STATUS_META, getLocalizedRelationship, localizeCaller, localizeWhen } f
 import { Icon } from "../_icons";
 import { Badge } from "../_primitives";
 import { type CallLogEntry, type Line } from "../_types";
+import { petsCopy } from "./petsStrings";
 
 
 const LISTEN: Record<string, [listen: string, hide: string, noTranscript: string]> = {
@@ -90,6 +91,7 @@ export function CallLogView({ line, log, d, lang }: { line: Line; log: Record<st
                     <b>{localizeCaller(c.caller, lang)}</b>
                     <span>
                       {c.status === "voicemail" ? d.sim.voicemail : c.status === "missed" ? d.sim.noAnswer : d.sim.connected}
+                      {c.locked && ` · ${petsCopy(lang).locked}`}
                       {playable && (
                         <>
                           {" · "}

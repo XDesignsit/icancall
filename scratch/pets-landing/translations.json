@@ -4,7 +4,6 @@
    "Why chips fail": "Por qué fallan los chips",
    "Parrots": "Loros",
    "Questions": "Preguntas",
-   "Join the launch list": "Únase a la lista de lanzamiento",
    "One number on the chip.": "Un número en el chip.",
    "It never goes out of date.": "Nunca queda desactualizado.",
    "Put your iCanCall number on your pet's microchip once. When you move or change phones, update your contacts in the dashboard. The chip keeps reaching you, and you never have to update the registry again.": "Ponga su número iCanCall en el microchip de su mascota una sola vez. Cuando se mude o cambie de teléfono, actualice sus contactos en el panel de control. El chip sigue comunicándose con usted, y nunca más tendrá que actualizar el registro.",
@@ -98,8 +97,6 @@
    "No yearly renewals": "Sin renovaciones anuales",
    "A yearly check-in email keeps the line active": "Un correo de verificación anual mantiene la línea activa",
    "Lifetime, Small Bird Lifetime and Parrot plans cover one enrolled pet. Lifetime plans last for the life of the enrolled pet or 20 years from purchase, whichever comes first. Each year we email you to confirm the line is still needed. If two years pass with no reply and no calls, we send a final notice and then close the line. Prices are in US dollars.": "Los planes Vitalicio, Vitalicio Aves Pequeñas y Loro cubren una mascota inscrita. Los planes vitalicios duran la vida de la mascota inscrita o 20 años desde la compra, lo que ocurra primero. Cada año le enviamos un correo para confirmar que la línea todavía se necesita. Si pasan dos años sin respuesta y sin llamadas, enviamos un aviso final y luego cerramos la línea. Los precios están en dólares estadounidenses.",
-   "Pet plans open soon.": "Los planes para mascotas abren pronto.",
-   "Join the launch list and we'll email you the day sign-up opens.": "Únase a la lista de lanzamiento y le enviaremos un correo el día en que abran las inscripciones.",
    "Parrots and other birds": "Loros y otras aves",
    "Built for birds that live for decades.": "Creado para aves que viven décadas.",
    "A budgie might live ten years. A macaw can live eighty. iCanCall Pets has plans for every size of bird, and a way to pass the line on when a parrot changes homes.": "Un periquito puede vivir diez años. Un guacamayo puede vivir ochenta. iCanCall Pets tiene planes para aves de todos los tamaños, y una forma de traspasar la línea cuando un loro cambia de hogar.",
@@ -154,21 +151,17 @@
    "What happens if my parrot outlives me?": "¿Qué pasa si mi loro me sobrevive?",
    "Name a successor, like a family member or a bird rescue. If you can no longer care for your bird, the line moves to them for free, along with any prepaid time. The number on the chip and paperwork stays the same.": "Designe un sucesor, como un familiar o un refugio de aves. Si usted ya no puede cuidar de su ave, la línea pasa a esa persona sin costo, junto con cualquier tiempo prepagado. El número del chip y de los documentos sigue siendo el mismo.",
    "Put a number on the chip that keeps up with you.": "Ponga en el chip un número que se mantenga al día con usted.",
-   "Pet plans open soon. Join the launch list and we'll email you the day sign-up opens.": "Los planes para mascotas abren pronto. Únase a la lista de lanzamiento y le enviaremos un correo el día en que abran las inscripciones.",
    "Annual or lifetime · Works with any microchip registry · 14-day service guarantee": "Anual o vitalicio · Funciona con cualquier registro de microchips · Garantía de servicio de 14 días",
    "One lost-pet number on your pet's microchip that always reaches you, even after you move or change phones.": "Un número para mascotas perdidas en el microchip de su mascota que siempre lo encuentra a usted, incluso después de mudarse o cambiar de teléfono.",
    "Annual": "Anual"
   },
-  "attrs": {
-   "Your email address": "Su correo electrónico"
-  }
+  "attrs": {}
  },
  "fr": {
   "text": {
    "Why chips fail": "Pourquoi les puces échouent",
    "Parrots": "Perroquets",
    "Questions": "Questions",
-   "Join the launch list": "Rejoindre la liste de lancement",
    "One number on the chip.": "Un seul numéro sur la puce.",
    "It never goes out of date.": "Il ne devient jamais obsolète.",
    "Put your iCanCall number on your pet's microchip once. When you move or change phones, update your contacts in the dashboard. The chip keeps reaching you, and you never have to update the registry again.": "Inscrivez une seule fois votre numéro iCanCall sur la puce électronique de votre animal. Quand vous déménagez ou changez de téléphone, mettez à jour vos contacts dans le tableau de bord. La puce continue de vous joindre, et vous n'avez plus jamais à mettre à jour le registre.",
@@ -262,8 +255,6 @@
    "No yearly renewals": "Aucun renouvellement annuel",
    "A yearly check-in email keeps the line active": "Un e-mail de vérification annuel maintient la ligne active",
    "Lifetime, Small Bird Lifetime and Parrot plans cover one enrolled pet. Lifetime plans last for the life of the enrolled pet or 20 years from purchase, whichever comes first. Each year we email you to confirm the line is still needed. If two years pass with no reply and no calls, we send a final notice and then close the line. Prices are in US dollars.": "Les forfaits À vie, À vie Petits oiseaux et Perroquet couvrent un animal inscrit. Les forfaits à vie durent toute la vie de l'animal inscrit ou 20 ans à compter de l'achat, selon la première échéance. Chaque année, nous vous envoyons un e-mail pour confirmer que la ligne est toujours nécessaire. Si deux ans passent sans réponse ni appel, nous envoyons un dernier avis, puis nous fermons la ligne. Les prix sont en dollars américains.",
-   "Pet plans open soon.": "Les forfaits pour animaux ouvrent bientôt.",
-   "Join the launch list and we'll email you the day sign-up opens.": "Inscrivez-vous à la liste de lancement et nous vous enverrons un e-mail le jour de l'ouverture des inscriptions.",
    "Parrots and other birds": "Perroquets et autres oiseaux",
    "Built for birds that live for decades.": "Conçu pour des oiseaux qui vivent des décennies.",
    "A budgie might live ten years. A macaw can live eighty. iCanCall Pets has plans for every size of bird, and a way to pass the line on when a parrot changes homes.": "Une perruche ondulée peut vivre dix ans. Un ara peut vivre quatre-vingts ans. iCanCall Pets propose des forfaits pour les oiseaux de toutes tailles, et un moyen de transmettre la ligne quand un perroquet change de foyer.",
@@ -318,21 +309,17 @@
    "What happens if my parrot outlives me?": "Que se passe-t-il si mon perroquet me survit ?",
    "Name a successor, like a family member or a bird rescue. If you can no longer care for your bird, the line moves to them for free, along with any prepaid time. The number on the chip and paperwork stays the same.": "Désignez un successeur, comme un membre de la famille ou un refuge pour oiseaux. Si vous ne pouvez plus vous occuper de votre oiseau, la ligne lui est transférée gratuitement, avec tout temps prépayé. Le numéro sur la puce et les documents reste le même.",
    "Put a number on the chip that keeps up with you.": "Inscrivez sur la puce un numéro qui vous suit.",
-   "Pet plans open soon. Join the launch list and we'll email you the day sign-up opens.": "Les forfaits pour animaux ouvrent bientôt. Inscrivez-vous à la liste de lancement et nous vous enverrons un e-mail le jour de l'ouverture des inscriptions.",
    "Annual or lifetime · Works with any microchip registry · 14-day service guarantee": "Annuel ou à vie · Fonctionne avec tous les registres de puces · Garantie de service de 14 jours",
    "One lost-pet number on your pet's microchip that always reaches you, even after you move or change phones.": "Un seul numéro pour animal perdu sur la puce de votre animal, qui vous joint toujours, même après un déménagement ou un changement de téléphone.",
    "Annual": "Annuel"
   },
-  "attrs": {
-   "Your email address": "Votre adresse e-mail"
-  }
+  "attrs": {}
  },
  "ja": {
   "text": {
    "Why chips fail": "マイクロチップが役立たない理由",
    "Parrots": "インコ・オウム",
    "Questions": "よくある質問",
-   "Join the launch list": "リリース通知に登録",
    "One number on the chip.": "チップには、番号を1つだけ。",
    "It never goes out of date.": "その番号は、ずっと古くなりません。",
    "Put your iCanCall number on your pet's microchip once. When you move or change phones, update your contacts in the dashboard. The chip keeps reaching you, and you never have to update the registry again.": "ペットのマイクロチップにiCanCallの番号を一度登録するだけ。引っ越しや電話の買い替えのときは、ダッシュボードで連絡先を更新しましょう。チップはいつでもあなたにつながり、登録機関の情報を更新し直す必要は二度とありません。",
@@ -426,8 +413,6 @@
    "No yearly renewals": "毎年の更新は不要",
    "A yearly check-in email keeps the line active": "年1回の確認メールで回線を継続",
    "Lifetime, Small Bird Lifetime and Parrot plans cover one enrolled pet. Lifetime plans last for the life of the enrolled pet or 20 years from purchase, whichever comes first. Each year we email you to confirm the line is still needed. If two years pass with no reply and no calls, we send a final notice and then close the line. Prices are in US dollars.": "生涯プラン、小型鳥 生涯プラン、インコ・オウムプランは、登録したペット1匹が対象です。生涯プラン各種の期間は、登録したペットの生涯または購入から20年のいずれか早いほうまでです。毎年、回線がまだ必要かどうかを確認するメールをお送りします。返信も着信もないまま2年が経過した場合は、最終通知をお送りしたうえで回線を終了します。価格は米ドル表示です。",
-   "Pet plans open soon.": "ペット向けプランはまもなく受付開始。",
-   "Join the launch list and we'll email you the day sign-up opens.": "リリース通知に登録いただくと、お申し込み受付開始日にメールでお知らせします。",
    "Parrots and other birds": "インコ・オウムなどの鳥",
    "Built for birds that live for decades.": "何十年も生きる鳥のために。",
    "A budgie might live ten years. A macaw can live eighty. iCanCall Pets has plans for every size of bird, and a way to pass the line on when a parrot changes homes.": "セキセイインコの寿命は10年ほど。コンゴウインコは80年生きることもあります。iCanCall Petsには、あらゆるサイズの鳥に合わせたプランがあり、インコやオウムが新しい家に移るときには回線を引き継ぐこともできます。",
@@ -482,21 +467,17 @@
    "What happens if my parrot outlives me?": "インコやオウムが私より長生きしたら、どうなりますか？",
    "Name a successor, like a family member or a bird rescue. If you can no longer care for your bird, the line moves to them for free, along with any prepaid time. The number on the chip and paperwork stays the same.": "ご家族や鳥の保護団体など、引き継ぎ先を指定しておきましょう。あなたが鳥の世話をできなくなった場合、回線は前払い済みの期間とともに無料でその方に移ります。チップや書類の番号は変わりません。",
    "Put a number on the chip that keeps up with you.": "あなたについていく番号を、チップに。",
-   "Pet plans open soon. Join the launch list and we'll email you the day sign-up opens.": "ペット向けプランはまもなく受付開始。リリース通知に登録いただくと、お申し込み受付開始日にメールでお知らせします。",
    "Annual or lifetime · Works with any microchip registry · 14-day service guarantee": "年払いまたは生涯プラン · どのマイクロチップ登録機関にも対応 · 14日間サービス保証",
    "One lost-pet number on your pet's microchip that always reaches you, even after you move or change phones.": "ペットのマイクロチップに、迷子用の番号を1つ。引っ越しても電話を変えても、いつでもあなたにつながります。",
    "Annual": "年払いプラン"
   },
-  "attrs": {
-   "Your email address": "メールアドレス"
-  }
+  "attrs": {}
  },
  "zh": {
   "text": {
    "Why chips fail": "芯片为何失灵",
    "Parrots": "鹦鹉",
    "Questions": "常见问题",
-   "Join the launch list": "加入上线通知名单",
    "One number on the chip.": "芯片上只需一个号码。",
    "It never goes out of date.": "永远不会过时。",
    "Put your iCanCall number on your pet's microchip once. When you move or change phones, update your contacts in the dashboard. The chip keeps reaching you, and you never have to update the registry again.": "只需一次，把您的 iCanCall 号码登记到宠物芯片上。搬家或换手机时，在管理后台更新联系人即可。芯片始终能联系到您，您再也不必更新登记机构的信息。",
@@ -590,8 +571,6 @@
    "No yearly renewals": "无需每年续费",
    "A yearly check-in email keeps the line active": "每年一封确认邮件，保持线路有效",
    "Lifetime, Small Bird Lifetime and Parrot plans cover one enrolled pet. Lifetime plans last for the life of the enrolled pet or 20 years from purchase, whichever comes first. Each year we email you to confirm the line is still needed. If two years pass with no reply and no calls, we send a final notice and then close the line. Prices are in US dollars.": "终身套餐、小型鸟终身套餐和鹦鹉套餐均适用于一只登记宠物。终身类套餐的有效期为登记宠物的一生或自购买起 20 年，以先到者为准。我们每年会发邮件请您确认是否仍需要该线路。如果连续两年既无回复也无来电，我们会发送最终通知，然后关闭该线路。价格以美元计。",
-   "Pet plans open soon.": "宠物套餐即将开放。",
-   "Join the launch list and we'll email you the day sign-up opens.": "加入上线通知名单，开放注册当天我们会发邮件通知您。",
    "Parrots and other birds": "鹦鹉及其他鸟类",
    "Built for birds that live for decades.": "专为能活几十年的鸟儿打造。",
    "A budgie might live ten years. A macaw can live eighty. iCanCall Pets has plans for every size of bird, and a way to pass the line on when a parrot changes homes.": "虎皮鹦鹉大约能活十年，金刚鹦鹉可以活到八十岁。iCanCall Pets 为各种体型的鸟儿都准备了套餐，鹦鹉换新家时还能把线路转交出去。",
@@ -646,21 +625,17 @@
    "What happens if my parrot outlives me?": "如果我的鹦鹉比我活得更久怎么办？",
    "Name a successor, like a family member or a bird rescue. If you can no longer care for your bird, the line moves to them for free, along with any prepaid time. The number on the chip and paperwork stays the same.": "指定一位继任者，比如家人或鸟类救助组织。如果您无法再照顾鸟儿，线路将免费转给他们，已预付的时长也一并转移。芯片和文件上的号码保持不变。",
    "Put a number on the chip that keeps up with you.": "在芯片上登记一个随您更新的号码。",
-   "Pet plans open soon. Join the launch list and we'll email you the day sign-up opens.": "宠物套餐即将开放。加入上线通知名单，开放注册当天我们会发邮件通知您。",
    "Annual or lifetime · Works with any microchip registry · 14-day service guarantee": "按年付款或终身 · 适用于任何芯片登记机构 · 14天服务保障",
    "One lost-pet number on your pet's microchip that always reaches you, even after you move or change phones.": "宠物芯片上的一个走失宠物号码，即使您搬家或换手机，也总能联系到您。",
    "Annual": "按年付款套餐"
   },
-  "attrs": {
-   "Your email address": "您的电子邮箱地址"
-  }
+  "attrs": {}
  },
  "ar": {
   "text": {
    "Why chips fail": "لماذا تفشل الشرائح",
    "Parrots": "الببغاوات",
    "Questions": "الأسئلة",
-   "Join the launch list": "انضم إلى قائمة الإطلاق",
    "One number on the chip.": "رقم واحد على الشريحة.",
    "It never goes out of date.": "لا يصبح قديماً أبداً.",
    "Put your iCanCall number on your pet's microchip once. When you move or change phones, update your contacts in the dashboard. The chip keeps reaching you, and you never have to update the registry again.": "ضع رقم iCanCall الخاص بك على الشريحة الإلكترونية لحيوانك الأليف مرة واحدة. وعندما تنتقل أو تغيّر هاتفك، حدّث جهات اتصالك في لوحة التحكم. تظل الشريحة تصل إليك، ولن تحتاج إلى تحديث السجل مرة أخرى أبداً.",
@@ -754,8 +729,6 @@
    "No yearly renewals": "بلا تجديدات سنوية",
    "A yearly check-in email keeps the line active": "رسالة بريد إلكتروني سنوية للتأكيد تُبقي الخط نشطاً",
    "Lifetime, Small Bird Lifetime and Parrot plans cover one enrolled pet. Lifetime plans last for the life of the enrolled pet or 20 years from purchase, whichever comes first. Each year we email you to confirm the line is still needed. If two years pass with no reply and no calls, we send a final notice and then close the line. Prices are in US dollars.": "تغطي خطة مدى الحياة وخطة مدى الحياة للطيور الصغيرة وخطط الببغاء حيواناً أليفاً واحداً مسجّلاً. تستمر خطط مدى الحياة طوال حياة الحيوان المسجّل أو 20 عاماً من تاريخ الشراء، أيهما أقرب. نراسلك كل عام عبر البريد الإلكتروني لتأكيد أن الخط لا يزال مطلوباً. وإذا مرّ عامان دون رد ودون مكالمات، نرسل إشعاراً نهائياً ثم نغلق الخط. الأسعار بالدولار الأمريكي.",
-   "Pet plans open soon.": "خطط الحيوانات الأليفة تُفتح قريباً.",
-   "Join the launch list and we'll email you the day sign-up opens.": "انضم إلى قائمة الإطلاق وسنراسلك عبر البريد الإلكتروني في يوم فتح التسجيل.",
    "Parrots and other birds": "الببغاوات والطيور الأخرى",
    "Built for birds that live for decades.": "صُمّم لطيور تعيش عقوداً.",
    "A budgie might live ten years. A macaw can live eighty. iCanCall Pets has plans for every size of bird, and a way to pass the line on when a parrot changes homes.": "قد يعيش طائر البادجي عشر سنوات. ويمكن أن يعيش المكاو ثمانين عاماً. لدى iCanCall Pets خطط للطيور بجميع أحجامها، وطريقة لنقل الخط عندما ينتقل الببغاء إلى منزل جديد.",
@@ -810,21 +783,17 @@
    "What happens if my parrot outlives me?": "ماذا يحدث إذا عاش ببغائي بعدي؟",
    "Name a successor, like a family member or a bird rescue. If you can no longer care for your bird, the line moves to them for free, along with any prepaid time. The number on the chip and paperwork stays the same.": "عيّن خليفة، مثل أحد أفراد العائلة أو جمعية لإنقاذ الطيور. إذا لم تعد قادراً على رعاية طائرك، ينتقل الخط إليه مجاناً، مع أي وقت مدفوع مسبقاً. ويبقى الرقم على الشريحة والأوراق كما هو.",
    "Put a number on the chip that keeps up with you.": "ضع على الشريحة رقماً يواكبك أينما ذهبت.",
-   "Pet plans open soon. Join the launch list and we'll email you the day sign-up opens.": "خطط الحيوانات الأليفة تُفتح قريباً. انضم إلى قائمة الإطلاق وسنراسلك عبر البريد الإلكتروني في يوم فتح التسجيل.",
    "Annual or lifetime · Works with any microchip registry · 14-day service guarantee": "سنوياً أو مدى الحياة · يعمل مع أي سجل للشرائح الإلكترونية · ضمان الخدمة لمدة 14 يومًا",
    "One lost-pet number on your pet's microchip that always reaches you, even after you move or change phones.": "رقم واحد للحيوانات المفقودة على الشريحة الإلكترونية لحيوانك الأليف يصل إليك دائماً، حتى بعد الانتقال أو تغيير الهاتف.",
    "Annual": "الخطة السنوية"
   },
-  "attrs": {
-   "Your email address": "عنوان بريدك الإلكتروني"
-  }
+  "attrs": {}
  },
  "hi": {
   "text": {
    "Why chips fail": "चिप क्यों नाकाम होती हैं",
    "Parrots": "तोते",
    "Questions": "सवाल",
-   "Join the launch list": "लॉन्च लिस्ट में शामिल हों",
    "One number on the chip.": "चिप पर एक नंबर।",
    "It never goes out of date.": "जो कभी पुराना नहीं होता।",
    "Put your iCanCall number on your pet's microchip once. When you move or change phones, update your contacts in the dashboard. The chip keeps reaching you, and you never have to update the registry again.": "अपने पालतू की माइक्रोचिप पर एक बार अपना iCanCall नंबर दर्ज करें। जब आप घर बदलें या फोन बदलें, तो डैशबोर्ड में अपने संपर्क अपडेट कर दें। चिप आप तक पहुंचती रहती है, और आपको रजिस्ट्री फिर कभी अपडेट नहीं करनी पड़ती।",
@@ -918,8 +887,6 @@
    "No yearly renewals": "हर साल रिन्यू करने की ज़रूरत नहीं",
    "A yearly check-in email keeps the line active": "साल में एक बार आने वाला चेक-इन ईमेल लाइन को सक्रिय रखता है",
    "Lifetime, Small Bird Lifetime and Parrot plans cover one enrolled pet. Lifetime plans last for the life of the enrolled pet or 20 years from purchase, whichever comes first. Each year we email you to confirm the line is still needed. If two years pass with no reply and no calls, we send a final notice and then close the line. Prices are in US dollars.": "आजीवन, छोटे पक्षी आजीवन और तोता प्लान एक नामांकित पालतू को कवर करते हैं। आजीवन प्लान नामांकित पालतू के जीवनकाल तक या खरीद से 20 वर्ष तक चलते हैं, जो भी पहले हो। हर साल हम आपको ईमेल करके पुष्टि करते हैं कि लाइन की अब भी ज़रूरत है। अगर दो साल तक न कोई जवाब आए और न कोई कॉल, तो हम एक अंतिम सूचना भेजते हैं और फिर लाइन बंद कर देते हैं। कीमतें अमेरिकी डॉलर में हैं।",
-   "Pet plans open soon.": "पेट प्लान जल्द शुरू हो रहे हैं।",
-   "Join the launch list and we'll email you the day sign-up opens.": "लॉन्च लिस्ट में शामिल हों, और जिस दिन साइन-अप शुरू होगा, हम आपको ईमेल करेंगे।",
    "Parrots and other birds": "तोते और दूसरे पक्षी",
    "Built for birds that live for decades.": "उन पक्षियों के लिए बना जो दशकों तक जीते हैं।",
    "A budgie might live ten years. A macaw can live eighty. iCanCall Pets has plans for every size of bird, and a way to pass the line on when a parrot changes homes.": "एक बजरीगर शायद दस साल जिए। एक मैकॉ अस्सी साल तक जी सकता है। iCanCall Pets में हर आकार के पक्षी के लिए प्लान हैं, और जब तोता नए घर जाए तो लाइन आगे सौंपने का तरीका भी।",
@@ -974,21 +941,17 @@
    "What happens if my parrot outlives me?": "अगर मेरा तोता मुझसे ज़्यादा जिए तो क्या होगा?",
    "Name a successor, like a family member or a bird rescue. If you can no longer care for your bird, the line moves to them for free, along with any prepaid time. The number on the chip and paperwork stays the same.": "कोई उत्तराधिकारी चुनें, जैसे परिवार का कोई सदस्य या कोई बर्ड रेस्क्यू संस्था। अगर आप अपने पक्षी की देखभाल न कर सकें, तो लाइन पहले से भुगतान किए गए समय के साथ मुफ़्त में उन्हें ट्रांसफ़र हो जाती है। चिप और कागज़ात पर नंबर वही रहता है।",
    "Put a number on the chip that keeps up with you.": "चिप पर ऐसा नंबर डालें जो आपके साथ चलता रहे।",
-   "Pet plans open soon. Join the launch list and we'll email you the day sign-up opens.": "पेट प्लान जल्द शुरू हो रहे हैं। लॉन्च लिस्ट में शामिल हों, और जिस दिन साइन-अप शुरू होगा, हम आपको ईमेल करेंगे।",
    "Annual or lifetime · Works with any microchip registry · 14-day service guarantee": "वार्षिक या आजीवन · किसी भी माइक्रोचिप रजिस्ट्री के साथ काम करता है · 14-दिन की सेवा गारंटी",
    "One lost-pet number on your pet's microchip that always reaches you, even after you move or change phones.": "आपके पालतू की माइक्रोचिप पर खोए पालतू का एक नंबर, जो हमेशा आप तक पहुंचता है, चाहे आप घर बदलें या फोन।",
    "Annual": "वार्षिक प्लान"
   },
-  "attrs": {
-   "Your email address": "आपका ईमेल पता"
-  }
+  "attrs": {}
  },
  "pt": {
   "text": {
    "Why chips fail": "Por que os chips falham",
    "Parrots": "Papagaios",
    "Questions": "Perguntas",
-   "Join the launch list": "Entre na lista de lançamento",
    "One number on the chip.": "Um número no chip.",
    "It never goes out of date.": "Ele nunca fica desatualizado.",
    "Put your iCanCall number on your pet's microchip once. When you move or change phones, update your contacts in the dashboard. The chip keeps reaching you, and you never have to update the registry again.": "Coloque seu número iCanCall no microchip do seu pet uma única vez. Quando você se mudar ou trocar de celular, atualize seus contatos no painel. O chip continua chegando até você, e você nunca mais precisa atualizar o cadastro.",
@@ -1082,8 +1045,6 @@
    "No yearly renewals": "Sem renovações anuais",
    "A yearly check-in email keeps the line active": "Um e-mail anual de confirmação mantém a linha ativa",
    "Lifetime, Small Bird Lifetime and Parrot plans cover one enrolled pet. Lifetime plans last for the life of the enrolled pet or 20 years from purchase, whichever comes first. Each year we email you to confirm the line is still needed. If two years pass with no reply and no calls, we send a final notice and then close the line. Prices are in US dollars.": "Os planos Vitalício, Vitalício Aves Pequenas e Papagaio cobrem um pet inscrito. Os planos vitalícios duram pela vida do pet inscrito ou por 20 anos a partir da compra, o que ocorrer primeiro. Todo ano enviamos um e-mail para confirmar que a linha ainda é necessária. Se passarem dois anos sem resposta e sem ligações, enviamos um aviso final e então encerramos a linha. Os preços estão em dólares americanos.",
-   "Pet plans open soon.": "Os planos para pets abrem em breve.",
-   "Join the launch list and we'll email you the day sign-up opens.": "Entre na lista de lançamento e enviaremos um e-mail no dia em que as inscrições abrirem.",
    "Parrots and other birds": "Papagaios e outras aves",
    "Built for birds that live for decades.": "Feito para aves que vivem por décadas.",
    "A budgie might live ten years. A macaw can live eighty. iCanCall Pets has plans for every size of bird, and a way to pass the line on when a parrot changes homes.": "Um periquito-australiano pode viver dez anos. Uma arara pode viver oitenta. O iCanCall Pets tem planos para aves de todos os tamanhos e uma forma de transferir a linha quando um papagaio muda de lar.",
@@ -1138,21 +1099,17 @@
    "What happens if my parrot outlives me?": "O que acontece se meu papagaio viver mais do que eu?",
    "Name a successor, like a family member or a bird rescue. If you can no longer care for your bird, the line moves to them for free, along with any prepaid time. The number on the chip and paperwork stays the same.": "Indique um sucessor, como um familiar ou um abrigo de aves. Se você não puder mais cuidar da sua ave, a linha passa para essa pessoa sem custo, junto com todo o tempo pré-pago. O número no chip e nos documentos continua o mesmo.",
    "Put a number on the chip that keeps up with you.": "Coloque no chip um número que acompanha você.",
-   "Pet plans open soon. Join the launch list and we'll email you the day sign-up opens.": "Os planos para pets abrem em breve. Entre na lista de lançamento e enviaremos um e-mail no dia em que as inscrições abrirem.",
    "Annual or lifetime · Works with any microchip registry · 14-day service guarantee": "Anual ou vitalício · Funciona com qualquer cadastro de microchip · Garantia de serviço de 14 dias",
    "One lost-pet number on your pet's microchip that always reaches you, even after you move or change phones.": "Um número para pet perdido no microchip do seu pet que sempre chega até você, mesmo depois de uma mudança ou troca de celular.",
    "Annual": "Anual"
   },
-  "attrs": {
-   "Your email address": "Seu endereço de e-mail"
-  }
+  "attrs": {}
  },
  "de": {
   "text": {
    "Why chips fail": "Warum Chips versagen",
    "Parrots": "Papageien",
    "Questions": "Fragen",
-   "Join the launch list": "Auf die Startliste",
    "One number on the chip.": "Eine Nummer auf dem Chip.",
    "It never goes out of date.": "Sie veraltet nie.",
    "Put your iCanCall number on your pet's microchip once. When you move or change phones, update your contacts in the dashboard. The chip keeps reaching you, and you never have to update the registry again.": "Hinterlegen Sie Ihre iCanCall-Nummer einmal auf dem Mikrochip Ihres Tieres. Wenn Sie umziehen oder das Handy wechseln, aktualisieren Sie Ihre Kontakte im Dashboard. Der Chip erreicht Sie weiterhin, und Sie müssen das Register nie wieder aktualisieren.",
@@ -1246,8 +1203,6 @@
    "No yearly renewals": "Keine jährlichen Verlängerungen",
    "A yearly check-in email keeps the line active": "Eine jährliche Bestätigungs-E-Mail hält die Nummer aktiv",
    "Lifetime, Small Bird Lifetime and Parrot plans cover one enrolled pet. Lifetime plans last for the life of the enrolled pet or 20 years from purchase, whichever comes first. Each year we email you to confirm the line is still needed. If two years pass with no reply and no calls, we send a final notice and then close the line. Prices are in US dollars.": "Der Lebenszeit-Tarif, der Kleinvogel-Lebenszeit-Tarif und die Papageien-Tarife gelten jeweils für ein angemeldetes Tier. Lebenszeit-Tarife gelten für die Lebensdauer des angemeldeten Tieres oder 20 Jahre ab Kauf, je nachdem, was zuerst eintritt. Wir senden Ihnen jedes Jahr eine E-Mail, um zu bestätigen, dass die Nummer noch benötigt wird. Vergehen zwei Jahre ohne Antwort und ohne Anrufe, senden wir eine letzte Benachrichtigung und schließen die Nummer dann. Die Preise verstehen sich in US-Dollar.",
-   "Pet plans open soon.": "Haustiertarife starten bald.",
-   "Join the launch list and we'll email you the day sign-up opens.": "Tragen Sie sich in die Startliste ein, und wir schicken Ihnen eine E-Mail, sobald die Anmeldung öffnet.",
    "Parrots and other birds": "Papageien und andere Vögel",
    "Built for birds that live for decades.": "Gemacht für Vögel, die Jahrzehnte leben.",
    "A budgie might live ten years. A macaw can live eighty. iCanCall Pets has plans for every size of bird, and a way to pass the line on when a parrot changes homes.": "Ein Wellensittich lebt vielleicht zehn Jahre. Ein Ara kann achtzig werden. iCanCall Pets hat Tarife für Vögel jeder Größe und eine Möglichkeit, die Nummer weiterzugeben, wenn ein Papagei ein neues Zuhause bekommt.",
@@ -1302,21 +1257,17 @@
    "What happens if my parrot outlives me?": "Was passiert, wenn mein Papagei mich überlebt?",
    "Name a successor, like a family member or a bird rescue. If you can no longer care for your bird, the line moves to them for free, along with any prepaid time. The number on the chip and paperwork stays the same.": "Benennen Sie einen Nachfolger, etwa ein Familienmitglied oder eine Vogelauffangstation. Wenn Sie sich nicht mehr um Ihren Vogel kümmern können, geht die Nummer kostenlos auf diese Person über, zusammen mit bereits bezahlter Zeit. Die Nummer auf dem Chip und in den Unterlagen bleibt gleich.",
    "Put a number on the chip that keeps up with you.": "Hinterlegen Sie eine Nummer auf dem Chip, die mit Ihnen Schritt hält.",
-   "Pet plans open soon. Join the launch list and we'll email you the day sign-up opens.": "Haustiertarife starten bald. Tragen Sie sich in die Startliste ein, und wir schicken Ihnen eine E-Mail, sobald die Anmeldung öffnet.",
    "Annual or lifetime · Works with any microchip registry · 14-day service guarantee": "Jährlich oder lebenslang · Funktioniert mit jedem Mikrochip-Register · 14 Tage Service-Garantie",
    "One lost-pet number on your pet's microchip that always reaches you, even after you move or change phones.": "Eine Nummer für vermisste Tiere auf dem Mikrochip Ihres Tieres, die Sie immer erreicht, auch nach einem Umzug oder Handywechsel.",
    "Annual": "Jahrestarif"
   },
-  "attrs": {
-   "Your email address": "Ihre E-Mail-Adresse"
-  }
+  "attrs": {}
  },
  "it": {
   "text": {
    "Why chips fail": "Perché i chip falliscono",
    "Parrots": "Pappagalli",
    "Questions": "Domande",
-   "Join the launch list": "Iscriviti alla lista di lancio",
    "One number on the chip.": "Un solo numero sul chip.",
    "It never goes out of date.": "Non diventa mai obsoleto.",
    "Put your iCanCall number on your pet's microchip once. When you move or change phones, update your contacts in the dashboard. The chip keeps reaching you, and you never have to update the registry again.": "Associa il tuo numero iCanCall al microchip del tuo animale una volta sola. Quando traslochi o cambi telefono, aggiorna i tuoi contatti nella dashboard. Il chip continua a raggiungerti e non dovrai mai più aggiornare il registro.",
@@ -1410,8 +1361,6 @@
    "No yearly renewals": "Nessun rinnovo annuale",
    "A yearly check-in email keeps the line active": "Un'e-mail di verifica annuale mantiene attiva la linea",
    "Lifetime, Small Bird Lifetime and Parrot plans cover one enrolled pet. Lifetime plans last for the life of the enrolled pet or 20 years from purchase, whichever comes first. Each year we email you to confirm the line is still needed. If two years pass with no reply and no calls, we send a final notice and then close the line. Prices are in US dollars.": "I piani A vita, A vita Uccelli piccoli e Pappagallo coprono un animale iscritto. I piani a vita durano per tutta la vita dell'animale iscritto o per 20 anni dall'acquisto, a seconda di quale termine scada per primo. Ogni anno ti inviamo un'e-mail per confermare che la linea serve ancora. Se passano due anni senza risposta e senza chiamate, inviamo un ultimo avviso e poi chiudiamo la linea. I prezzi sono in dollari USA.",
-   "Pet plans open soon.": "I piani per animali apriranno presto.",
-   "Join the launch list and we'll email you the day sign-up opens.": "Iscriviti alla lista di lancio e ti invieremo un'e-mail il giorno in cui si apriranno le iscrizioni.",
    "Parrots and other birds": "Pappagalli e altri uccelli",
    "Built for birds that live for decades.": "Pensato per uccelli che vivono per decenni.",
    "A budgie might live ten years. A macaw can live eighty. iCanCall Pets has plans for every size of bird, and a way to pass the line on when a parrot changes homes.": "Un pappagallino ondulato può vivere dieci anni. Un ara può viverne ottanta. iCanCall Pets ha piani per uccelli di ogni taglia e un modo per trasferire la linea quando un pappagallo cambia casa.",
@@ -1466,21 +1415,17 @@
    "What happens if my parrot outlives me?": "Cosa succede se il mio pappagallo mi sopravvive?",
    "Name a successor, like a family member or a bird rescue. If you can no longer care for your bird, the line moves to them for free, along with any prepaid time. The number on the chip and paperwork stays the same.": "Indica un successore, come un familiare o un centro di recupero per uccelli. Se non potrai più prenderti cura del tuo uccello, la linea passa gratuitamente a lui, insieme all'eventuale tempo prepagato. Il numero sul chip e sui documenti resta lo stesso.",
    "Put a number on the chip that keeps up with you.": "Metti sul chip un numero che ti segue sempre.",
-   "Pet plans open soon. Join the launch list and we'll email you the day sign-up opens.": "I piani per animali apriranno presto. Iscriviti alla lista di lancio e ti invieremo un'e-mail il giorno in cui si apriranno le iscrizioni.",
    "Annual or lifetime · Works with any microchip registry · 14-day service guarantee": "Annuale o a vita · Funziona con qualsiasi registro di microchip · Garanzia di servizio di 14 giorni",
    "One lost-pet number on your pet's microchip that always reaches you, even after you move or change phones.": "Un solo numero per animali smarriti sul microchip del tuo animale, che ti raggiunge sempre, anche dopo un trasloco o un cambio di telefono.",
    "Annual": "Annuale"
   },
-  "attrs": {
-   "Your email address": "Il tuo indirizzo e-mail"
-  }
+  "attrs": {}
  },
  "ko": {
   "text": {
    "Why chips fail": "칩이 제 역할을 못 하는 이유",
    "Parrots": "앵무새",
    "Questions": "자주 묻는 질문",
-   "Join the launch list": "출시 알림 신청하기",
    "One number on the chip.": "칩에 등록하는 번호 하나.",
    "It never goes out of date.": "언제나 최신 상태로 유지됩니다.",
    "Put your iCanCall number on your pet's microchip once. When you move or change phones, update your contacts in the dashboard. The chip keeps reaching you, and you never have to update the registry again.": "반려동물의 마이크로칩에 iCanCall 번호를 한 번만 등록하세요. 이사하거나 휴대폰을 바꾸면 대시보드에서 연락처만 업데이트하면 됩니다. 칩은 계속 여러분에게 연결되고, 등록 기관 정보를 다시 수정할 필요가 없습니다.",
@@ -1574,8 +1519,6 @@
    "No yearly renewals": "매년 갱신할 필요 없음",
    "A yearly check-in email keeps the line active": "연 1회 확인 이메일로 회선 유지",
    "Lifetime, Small Bird Lifetime and Parrot plans cover one enrolled pet. Lifetime plans last for the life of the enrolled pet or 20 years from purchase, whichever comes first. Each year we email you to confirm the line is still needed. If two years pass with no reply and no calls, we send a final notice and then close the line. Prices are in US dollars.": "평생, 소형 조류 평생, 앵무새 요금제는 등록된 반려동물 한 마리에게 적용됩니다. 평생 요금제는 등록된 반려동물의 평생 또는 구매일로부터 20년 중 먼저 도래하는 시점까지 유지됩니다. 매년 회선이 계속 필요한지 확인하는 이메일을 보내 드립니다. 응답과 통화가 모두 없는 상태로 2년이 지나면 최종 안내를 보낸 후 회선을 해지합니다. 가격은 미국 달러 기준입니다.",
-   "Pet plans open soon.": "반려동물 요금제가 곧 출시됩니다.",
-   "Join the launch list and we'll email you the day sign-up opens.": "출시 알림을 신청하시면 가입이 시작되는 날 이메일로 알려 드립니다.",
    "Parrots and other birds": "앵무새와 다른 새들",
    "Built for birds that live for decades.": "수십 년을 사는 새들을 위해 만들었습니다.",
    "A budgie might live ten years. A macaw can live eighty. iCanCall Pets has plans for every size of bird, and a way to pass the line on when a parrot changes homes.": "사랑앵무는 10년 정도 살지만, 금강앵무는 80년까지 살 수 있습니다. iCanCall Pets에는 모든 크기의 새를 위한 요금제와, 앵무새가 새 가정으로 갈 때 회선을 넘겨줄 방법이 있습니다.",
@@ -1630,13 +1573,10 @@
    "What happens if my parrot outlives me?": "앵무새가 저보다 오래 살면 어떻게 되나요?",
    "Name a successor, like a family member or a bird rescue. If you can no longer care for your bird, the line moves to them for free, along with any prepaid time. The number on the chip and paperwork stays the same.": "가족이나 조류 구조 단체 같은 승계인을 지정하세요. 더 이상 새를 돌볼 수 없게 되면 회선은 선결제한 기간과 함께 무료로 승계인에게 이전됩니다. 칩과 서류의 번호는 그대로 유지됩니다.",
    "Put a number on the chip that keeps up with you.": "여러분의 변화에 맞춰 늘 최신으로 유지되는 번호를 칩에 등록하세요.",
-   "Pet plans open soon. Join the launch list and we'll email you the day sign-up opens.": "반려동물 요금제가 곧 출시됩니다. 출시 알림을 신청하시면 가입이 시작되는 날 이메일로 알려 드립니다.",
    "Annual or lifetime · Works with any microchip registry · 14-day service guarantee": "연간 또는 평생 · 어떤 마이크로칩 등록 기관과도 호환 · 14일 서비스 보장",
    "One lost-pet number on your pet's microchip that always reaches you, even after you move or change phones.": "이사하거나 휴대폰을 바꿔도 언제나 여러분에게 연결되는, 반려동물 마이크로칩에 등록하는 실종 대비 번호 하나.",
    "Annual": "연간 요금제"
   },
-  "attrs": {
-   "Your email address": "이메일 주소"
-  }
+  "attrs": {}
  }
 }

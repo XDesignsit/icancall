@@ -47,6 +47,8 @@ export interface Account {
    */
   smsPhone?: string;
   plan: string;
+  /** The plan has ended (lib/subscriptionEnd) and the number is in its grace period. */
+  subscriptionEnded?: boolean;
   /** The owner's language by name ("English", "Spanish"; Account → Contact info), for owner alerts. */
   language: string;
   used_minutes: number;
@@ -157,6 +159,7 @@ export async function findAccountByTwilioNumber(phoneNumber: string): Promise<Ac
       notifyEmail: settings.notifyEmail || profile.email,
       smsPhone: settings.smsConsent === true ? toE164(settings.smsPhone) : '',
       plan,
+      subscriptionEnded: settings.subscriptionStatus === 'canceled' || settings.subscriptionStatus === 'expired',
       language: settings.language || 'English',
       used_minutes: used,
       allotted_minutes: allotted,

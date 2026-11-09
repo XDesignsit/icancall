@@ -932,9 +932,10 @@ const PLAN_NAMES: Record<string, Record<string, string>> = {
   essential: { es: "Esencial", fr: "Essentiel", ja: "エッセンシャル", zh: "基础版", ar: "أساسي", hi: "एसेनशियल", pt: "Essencial", de: "Essential", it: "Essenziale", ko: "에센셜" },
   pro: { zh: "专业版", ar: "برو", hi: "प्रो", ko: "프로" },
   careteam: { ja: "ケアチーム", zh: "护理团队", ar: "فريق الرعاية", hi: "केयर टीम", ko: "케어 팀" },
+  pets: {"es": "Mascotas", "fr": "Animaux", "ja": "ペット", "zh": "宠物", "ar": "الحيوانات الأليفة", "hi": "पालतू", "pt": "Pets", "de": "Haustiere", "it": "Animali", "ko": "반려동물"},
 };
 
-const PLAN_NAME_EN: Record<string, string> = { essential: "Essential", pro: "Pro", careteam: "Care Team" };
+const PLAN_NAME_EN: Record<string, string> = { essential: "Essential", pro: "Pro", careteam: "Care Team", pets: "Pets" };
 
 export const planDisplayName = (plan: string | undefined | null, lang: string): string => {
   const id = plan && PLAN_NAME_EN[plan] ? plan : "pro";

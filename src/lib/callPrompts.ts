@@ -46,6 +46,10 @@ const EN = {
   didntAnswer: "{name} didn't answer.",
   noAnswer: "No answer.",
   messageSent: "Thank you. Your message has been sent. Goodbye.",
+  /** Pet lines (lib/pets): the fixed greeting, the out-of-minutes message before the voicemail tone, and a lapsed plan. */
+  petGreeting: "Thank you for calling about a lost pet. Your call helps bring them home.",
+  petOutOfMinutes: "Thank you for calling about a lost pet. The owner can't take calls on this line right now. After the tone, please leave your name, your phone number, and where you found the pet.",
+  petLapsed: "Thank you for calling about a lost pet. This line's plan has lapsed, so we are connecting you to the owner directly. Please stand by.",
 };
 
 export type CallPromptKey = keyof typeof EN;
@@ -73,6 +77,9 @@ const PROMPTS: Record<CallLang, Record<CallPromptKey, string>> = {
     didntAnswer: "{name} no contestó.",
     noAnswer: "No hubo respuesta.",
     messageSent: "Gracias. Su mensaje ha sido enviado. Adiós.",
+    petGreeting: "Gracias por llamar por una mascota perdida. Su llamada ayuda a que vuelva a casa.",
+    petOutOfMinutes: "Gracias por llamar por una mascota perdida. El dueño no puede recibir llamadas en esta línea ahora. Después del tono, deje su nombre, su número de teléfono y dónde encontró a la mascota.",
+    petLapsed: "Gracias por llamar por una mascota perdida. El plan de esta línea ha vencido, así que le comunicamos directamente con el dueño. Por favor, espere.",
   },
   fr: {
     greeting: "Merci d'avoir appelé la ligne prioritaire iCanCall.",
@@ -95,6 +102,9 @@ const PROMPTS: Record<CallLang, Record<CallPromptKey, string>> = {
     didntAnswer: "{name} n'a pas répondu.",
     noAnswer: "Pas de réponse.",
     messageSent: "Merci. Votre message a été envoyé. Au revoir.",
+    petGreeting: "Merci d'appeler au sujet d'un animal perdu. Votre appel l'aide à rentrer chez lui.",
+    petOutOfMinutes: "Merci d'appeler au sujet d'un animal perdu. Le propriétaire ne peut pas prendre d'appels sur cette ligne pour le moment. Après le bip, laissez votre nom, votre numéro de téléphone et l'endroit où vous avez trouvé l'animal.",
+    petLapsed: "Merci d'appeler au sujet d'un animal perdu. L'abonnement de cette ligne a expiré, nous vous mettons donc directement en relation avec le propriétaire. Veuillez patienter.",
   },
   ja: {
     greeting: "iCanCall優先回線にお電話いただきありがとうございます。",
@@ -117,6 +127,9 @@ const PROMPTS: Record<CallLang, Record<CallPromptKey, string>> = {
     didntAnswer: "{name}は応答しませんでした。",
     noAnswer: "応答がありませんでした。",
     messageSent: "ありがとうございます。メッセージを送信しました。失礼いたします。",
+    petGreeting: "迷子のペットについてお電話いただき、ありがとうございます。あなたのお電話が、ペットが家に帰る助けになります。",
+    petOutOfMinutes: "迷子のペットについてお電話いただき、ありがとうございます。飼い主は現在この回線でお電話に出られません。発信音の後に、お名前、お電話番号、ペットを見つけた場所をお話しください。",
+    petLapsed: "迷子のペットについてお電話いただき、ありがとうございます。この回線のプランは期限切れのため、飼い主に直接おつなぎします。少々お待ちください。",
   },
   zh: {
     greeting: "感谢您致电 iCanCall 优先专线。",
@@ -139,6 +152,9 @@ const PROMPTS: Record<CallLang, Record<CallPromptKey, string>> = {
     didntAnswer: "{name}未接听。",
     noAnswer: "无人接听。",
     messageSent: "谢谢。您的留言已发送。再见。",
+    petGreeting: "感谢您来电告知走失的宠物。您的来电能帮助它回家。",
+    petOutOfMinutes: "感谢您来电告知走失的宠物。主人目前无法接听这条线路的电话。请在提示音后留下您的姓名、电话号码以及发现宠物的地点。",
+    petLapsed: "感谢您来电告知走失的宠物。这条线路的套餐已过期，我们将为您直接接通主人。请稍候。",
   },
   ar: {
     greeting: "شكرًا لاتصالك بخط iCanCall ذي الأولوية.",
@@ -161,6 +177,9 @@ const PROMPTS: Record<CallLang, Record<CallPromptKey, string>> = {
     didntAnswer: "لم يتم الرد من {name}.",
     noAnswer: "لا يوجد رد.",
     messageSent: "شكرًا لك. تم إرسال رسالتك. مع السلامة.",
+    petGreeting: "شكرًا لاتصالك بشأن حيوان أليف مفقود. اتصالك يساعد على إعادته إلى منزله.",
+    petOutOfMinutes: "شكرًا لاتصالك بشأن حيوان أليف مفقود. لا يستطيع المالك تلقي المكالمات على هذا الخط الآن. بعد سماع النغمة، يرجى ترك اسمك ورقم هاتفك والمكان الذي وجدت فيه الحيوان.",
+    petLapsed: "شكرًا لاتصالك بشأن حيوان أليف مفقود. انتهت خطة هذا الخط، لذلك سنوصلك بالمالك مباشرة. يرجى الانتظار.",
   },
   hi: {
     greeting: "iCanCall प्राथमिकता लाइन पर कॉल करने के लिए धन्यवाद।",
@@ -183,6 +202,9 @@ const PROMPTS: Record<CallLang, Record<CallPromptKey, string>> = {
     didntAnswer: "{name} ने जवाब नहीं दिया।",
     noAnswer: "कोई जवाब नहीं मिला।",
     messageSent: "धन्यवाद। आपका संदेश भेज दिया गया है। नमस्ते।",
+    petGreeting: "खोए हुए पालतू जानवर के बारे में कॉल करने के लिए धन्यवाद। आपकी कॉल उसे घर लौटाने में मदद करती है।",
+    petOutOfMinutes: "खोए हुए पालतू जानवर के बारे में कॉल करने के लिए धन्यवाद। मालिक अभी इस लाइन पर कॉल नहीं ले सकते। टोन के बाद कृपया अपना नाम, फ़ोन नंबर और पालतू जानवर कहाँ मिला, यह बताएं।",
+    petLapsed: "खोए हुए पालतू जानवर के बारे में कॉल करने के लिए धन्यवाद। इस लाइन का प्लान समाप्त हो गया है, इसलिए हम आपको सीधे मालिक से जोड़ रहे हैं। कृपया प्रतीक्षा करें।",
   },
   pt: {
     greeting: "Obrigado por ligar para a linha prioritária iCanCall.",
@@ -205,6 +227,9 @@ const PROMPTS: Record<CallLang, Record<CallPromptKey, string>> = {
     didntAnswer: "{name} não atendeu.",
     noAnswer: "Sem resposta.",
     messageSent: "Obrigado. Sua mensagem foi enviada. Até logo.",
+    petGreeting: "Obrigado por ligar sobre um pet perdido. Sua ligação ajuda ele a voltar para casa.",
+    petOutOfMinutes: "Obrigado por ligar sobre um pet perdido. O tutor não pode atender ligações nesta linha agora. Depois do sinal, deixe seu nome, seu telefone e onde você encontrou o pet.",
+    petLapsed: "Obrigado por ligar sobre um pet perdido. O plano desta linha expirou, então vamos conectar você diretamente ao tutor. Aguarde, por favor.",
   },
   de: {
     greeting: "Vielen Dank für Ihren Anruf bei der iCanCall-Prioritätsleitung.",
@@ -227,6 +252,9 @@ const PROMPTS: Record<CallLang, Record<CallPromptKey, string>> = {
     didntAnswer: "{name} hat nicht abgenommen.",
     noAnswer: "Keine Antwort.",
     messageSent: "Vielen Dank. Ihre Nachricht wurde gesendet. Auf Wiederhören.",
+    petGreeting: "Vielen Dank für Ihren Anruf wegen eines entlaufenen Haustiers. Ihr Anruf hilft, es nach Hause zu bringen.",
+    petOutOfMinutes: "Vielen Dank für Ihren Anruf wegen eines entlaufenen Haustiers. Der Besitzer kann auf dieser Leitung gerade keine Anrufe annehmen. Bitte hinterlassen Sie nach dem Signalton Ihren Namen, Ihre Telefonnummer und wo Sie das Tier gefunden haben.",
+    petLapsed: "Vielen Dank für Ihren Anruf wegen eines entlaufenen Haustiers. Der Tarif dieser Leitung ist abgelaufen, daher verbinden wir Sie direkt mit dem Besitzer. Bitte warten Sie.",
   },
   it: {
     greeting: "Grazie per aver chiamato la linea prioritaria iCanCall.",
@@ -249,6 +277,9 @@ const PROMPTS: Record<CallLang, Record<CallPromptKey, string>> = {
     didntAnswer: "{name} non ha risposto.",
     noAnswer: "Nessuna risposta.",
     messageSent: "Grazie. Il suo messaggio è stato inviato. Arrivederci.",
+    petGreeting: "Grazie per aver chiamato per un animale smarrito. La sua chiamata lo aiuta a tornare a casa.",
+    petOutOfMinutes: "Grazie per aver chiamato per un animale smarrito. Il proprietario non può rispondere su questa linea in questo momento. Dopo il segnale acustico, lasci il suo nome, il suo numero di telefono e dove ha trovato l'animale.",
+    petLapsed: "Grazie per aver chiamato per un animale smarrito. Il piano di questa linea è scaduto, quindi la mettiamo in contatto direttamente con il proprietario. Attenda, per favore.",
   },
   ko: {
     greeting: "iCanCall 우선 회선에 전화해 주셔서 감사합니다.",
@@ -271,6 +302,9 @@ const PROMPTS: Record<CallLang, Record<CallPromptKey, string>> = {
     didntAnswer: "{name} 님이 받지 않았습니다.",
     noAnswer: "응답이 없습니다.",
     messageSent: "감사합니다. 메시지가 전송되었습니다. 안녕히 계세요.",
+    petGreeting: "잃어버린 반려동물 때문에 전화 주셔서 감사합니다. 전화 한 통이 반려동물이 집에 돌아가는 데 도움이 됩니다.",
+    petOutOfMinutes: "잃어버린 반려동물 때문에 전화 주셔서 감사합니다. 지금은 보호자가 이 번호로 전화를 받을 수 없습니다. 신호음이 울리면 성함, 전화번호, 반려동물을 발견한 장소를 남겨 주세요.",
+    petLapsed: "잃어버린 반려동물 때문에 전화 주셔서 감사합니다. 이 번호의 요금제가 만료되어 보호자에게 바로 연결해 드리겠습니다. 잠시만 기다려 주세요.",
   },
   tl: {
     greeting: "Salamat sa pagtawag sa iCanCall priority line.",
@@ -293,6 +327,9 @@ const PROMPTS: Record<CallLang, Record<CallPromptKey, string>> = {
     didntAnswer: "Hindi sumagot si {name}.",
     noAnswer: "Walang sumagot.",
     messageSent: "Salamat. Naipadala na ang iyong mensahe. Paalam.",
+    petGreeting: "Salamat sa pagtawag tungkol sa nawawalang alagang hayop. Nakakatulong ang tawag mo para makauwi siya.",
+    petOutOfMinutes: "Salamat sa pagtawag tungkol sa nawawalang alagang hayop. Hindi makakasagot ang may-ari sa linyang ito ngayon. Pagkatapos ng tono, iwan ang iyong pangalan, numero ng telepono, at kung saan mo nakita ang alaga.",
+    petLapsed: "Salamat sa pagtawag tungkol sa nawawalang alagang hayop. Nag-expire na ang plan ng linyang ito, kaya direkta ka naming ikokonekta sa may-ari. Mangyaring maghintay.",
   },
 };
 

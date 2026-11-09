@@ -32,6 +32,8 @@ export interface CallRow {
   ended_at: string | null;
   alerted_at: string | null;
   metered_minutes: number | null;
+  /** A pet line's voicemail left while it was out of minutes (lib/pets): locked until the owner has minutes again. */
+  locked_at?: string | null;
 }
 
 function logFailure(what: string, callSid: string, error: unknown) {
@@ -102,6 +104,23 @@ export async function recordVoicemail(callSid: string, recordingUrl: string, rec
     logFailure('record the voicemail', callSid, error);
   } catch (err) {
     logFailure('record the voicemail', callSid, err);
+  }
+}
+
+/** A pet line's voicemail left while out of minutes: kept locked, returned for its alert. */
+export async function lockVoicemail(callSid: string): Promise<CallRow | null> {
+  try {
+    const { data, error } = await supabase
+      .from(TABLE)
+      .update({ locked_at: new Date().toISOString() })
+      .eq('call_sid', callSid)
+      .select()
+      .maybeSingle();
+    logFailure('lock the voicemail', callSid, error);
+    return (data as CallRow | null) ?? null;
+  } catch (err) {
+    logFailure('lock the voicemail', callSid, err);
+    return null;
   }
 }
 

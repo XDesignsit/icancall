@@ -156,6 +156,11 @@ export async function POST(request: Request) {
       delete newSettings.numbersReleaseAt;
       delete newSettings.numbersReleasedAt;
       delete newSettings.releaseReminderSentAt;
+      // Pet plan terms and dates are written at signup only (lib/pets).
+      delete newSettings.petTerm;
+      delete newSettings.petPurchasedAt;
+      delete newSettings.petCoverEndsAt;
+      delete newSettings.petCheckoutId;
       delete newSettings.archivedLines;
       // Paid add-ons are credited by api/billing/confirm-addon and lowered by the
       // lines route; minute usage is written by the call webhooks. A browser

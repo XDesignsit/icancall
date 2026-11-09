@@ -3,6 +3,7 @@ import { PLAN_PRICE_IDS, isBillingCycle, isPlanId, isSimulatedBilling, sessionId
 import { ADDON_PRICE_IDS, MAX_ADDON_UNITS, isAddonId } from "@/lib/addons";
 import { authorizeOwner, loadSettings } from "@/lib/billingOwner";
 import { isEndedStatus } from "@/lib/subscriptionEnd";
+import { PETS_REFUND_POLICY_NOTE, PET_PRICE_IDS, PET_TERMS, isPetTerm, isPetsPlan } from "@/lib/pets";
 
 // Stripe replaces the placeholder with the session id, so the return page can
 // hand it to the server, which verifies it before crediting anything.
@@ -13,7 +14,7 @@ const REFUND_POLICY_NOTE =
 
 export async function POST(req: NextRequest) {
   try {
-    const { plan, billing, addon, quantity, email } = await req.json();
+    const { plan, billing, addon, quantity, email, term } = await req.json();
     const units = Math.floor(Number(quantity) || 1);
 
     const host = req.headers.get("host") || "localhost:3000";
@@ -24,6 +25,8 @@ export async function POST(req: NextRequest) {
     let successUrl: string;
     let cancelUrl: string;
     let existingCustomerId: string | undefined;
+    // One-time pet terms are paid once ("payment" mode); Pets Annual is a yearly subscription.
+    let oneTimePlan = false;
 
     if (addon) {
       if (!isAddonId(addon) || units < 1 || units > MAX_ADDON_UNITS) {
@@ -35,6 +38,10 @@ export async function POST(req: NextRequest) {
       const owner = await authorizeOwner();
       if (owner instanceof NextResponse) return owner;
       const settings = await loadSettings(owner.userId);
+      // Pet plans include no add-ons (lib/pets).
+      if (isPetsPlan(settings.plan)) {
+        return NextResponse.json({ error: "Add-ons are not available on pet plans." }, { status: 409 });
+      }
       if (!isSimulatedBilling(owner.email) && isEndedStatus(settings.subscriptionStatus)) {
         return NextResponse.json({ error: "Your subscription has ended. Choose a plan before buying add-ons." }, { status: 409 });
       }
@@ -51,17 +58,23 @@ export async function POST(req: NextRequest) {
       if (!isPlanId(plan) || !isBillingCycle(billing)) {
         return NextResponse.json({ error: "Invalid plan or billing cycle" }, { status: 400 });
       }
+      if (isPetsPlan(plan) && !isPetTerm(term)) {
+        return NextResponse.json({ error: "Invalid pet plan" }, { status: 400 });
+      }
       if (signupsPaused()) {
         return NextResponse.json({ error: "Signups open soon. Please check back shortly." }, { status: 503 });
       }
-      priceId = PLAN_PRICE_IDS[plan][billing];
+      oneTimePlan = isPetsPlan(plan) && PET_TERMS[term as keyof typeof PET_TERMS].oneTime;
+      priceId = isPetsPlan(plan) ? PET_PRICE_IDS[term as keyof typeof PET_PRICE_IDS] : PLAN_PRICE_IDS[plan][billing];
       successUrl = `${appUrl}/signup/checkout-complete?status=success&session_id=${SESSION_PLACEHOLDER}`;
       cancelUrl = `${appUrl}/signup/checkout-complete?status=cancel`;
 
       // A configured environment with a missing price id must never fall
       // through to the simulated (free) checkout — fail loudly instead.
       if (process.env.STRIPE_SECRET_KEY && !priceId) {
-        console.error(`Stripe price id missing for plan=${plan}/${billing} — set STRIPE_PRICE_ID_${String(plan).toUpperCase()}_${String(billing).toUpperCase()}`);
+        console.error(isPetsPlan(plan)
+          ? `Stripe price id missing for pets/${term} — set STRIPE_PRICE_ID_PETS_${String(term).toUpperCase()}`
+          : `Stripe price id missing for plan=${plan}/${billing} — set STRIPE_PRICE_ID_${String(plan).toUpperCase()}_${String(billing).toUpperCase()}`);
         return NextResponse.json({ error: "This plan is not yet available for purchase" }, { status: 503 });
       }
     }
@@ -90,9 +103,10 @@ export async function POST(req: NextRequest) {
     if (identity?.userId) metadata.user_id = identity.userId;
     if (buyerEmail) metadata.signup_email = buyerEmail;
     if (addon) metadata.addon = addon;
+    if (isPetsPlan(plan) && !addon) metadata.pet_term = String(term);
 
-    // Voice-minute blocks are a one-time purchase; everything else recurs.
-    const oneTime = addon === "voice_minutes";
+    // Voice-minute blocks and one-time pet terms are paid once; everything else recurs.
+    const oneTime = addon === "voice_minutes" || oneTimePlan;
     const session = await stripe().checkout.sessions.create({
       mode: oneTime ? "payment" : "subscription",
       // Opt out of Managed Payments (Stripe as merchant of record, digital goods
@@ -110,7 +124,7 @@ export async function POST(req: NextRequest) {
       ...(oneTime ? {} : { subscription_data: { metadata } }),
       integration_identifier: `icancall_checkout_${addon ? "addon" : "plan"}_wpkmzqtd`,
       // Shown above the pay button so buyers see the refund terms before paying.
-      ...(addon ? {} : { custom_text: { submit: { message: REFUND_POLICY_NOTE } } }),
+      ...(addon ? {} : { custom_text: { submit: { message: isPetsPlan(plan) ? PETS_REFUND_POLICY_NOTE : REFUND_POLICY_NOTE } } }),
     });
 
     if (!session.url) {
