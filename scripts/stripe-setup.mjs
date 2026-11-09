@@ -4,7 +4,8 @@
 //
 //   STRIPE_SECRET_KEY=sk_test_... node scripts/stripe-setup.mjs [--webhook-url https://app.icancall.co/api/billing/webhook]
 //
-// Prices mirror src/lib/pricing.ts (PLAN_PRICING, ADDON_PRICING). If those
+// Prices mirror src/lib/pricing.ts (PLAN_PRICING, ADDON_PRICING) and the /pets
+// page (scratch/pets-landing/main.html). If those
 // change, change them here too — and create new prices rather than editing
 // old ones, because Stripe prices are immutable.
 
@@ -26,6 +27,14 @@ const PLANS = [
 const ADDONS = [
   { id: "phone_number", env: "PHONE_NUMBER", name: "iCanCall extra phone number", amount: 699, recurring: { interval: "month" } },
   { id: "voice_minutes", env: "VOICE_MINUTES", name: "iCanCall 30 extra voice minutes", amount: 499, recurring: null },
+];
+// Pet plans (sold on /pets): Annual renews yearly, the rest are one-time payments.
+const PETS = [
+  { id: "annual", env: "ANNUAL", name: "iCanCall Pets Annual", amount: 2900, recurring: { interval: "year" } },
+  { id: "lifetime", env: "LIFETIME", name: "iCanCall Pets Lifetime", amount: 24900, recurring: null },
+  { id: "small_bird_lifetime", env: "SMALL_BIRD_LIFETIME", name: "iCanCall Pets Small Bird Lifetime", amount: 24900, recurring: null },
+  { id: "parrot_10yr", env: "PARROT_10YR", name: "iCanCall Pets Parrot 10-Year", amount: 17900, recurring: null },
+  { id: "parrot_20yr", env: "PARROT_20YR", name: "iCanCall Pets Parrot 20-Year", amount: 34900, recurring: null },
 ];
 
 const products = new Map();
@@ -64,6 +73,10 @@ for (const plan of PLANS) {
 for (const addon of ADDONS) {
   const price = await priceFor(`icancall_addon_${addon.id}`, addon.name, addon.amount, addon.recurring);
   env.push(`STRIPE_PRICE_ID_ADDON_${addon.env}=${price.id}`);
+}
+for (const pet of PETS) {
+  const price = await priceFor(`icancall_pets_${pet.id}`, pet.name, pet.amount, pet.recurring);
+  env.push(`STRIPE_PRICE_ID_PETS_${pet.env}=${price.id}`);
 }
 
 // Customer portal: card updates, invoices and cancel-at-period-end. Plan
